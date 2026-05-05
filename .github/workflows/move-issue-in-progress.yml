@@ -1,0 +1,38 @@
+name: Move Issue to In Progress
+on:
+    create:
+
+jobs:
+    move-to-in-progress:
+        if: github.event.ref_type == 'branch'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Extract Issue Node ID
+              id: get_node_id
+              env:
+                GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+              run: |
+                # TODO adjust to branch naming rules
+                ISSUE_NUM=$(echo "${{ github.event.ref }}" | grep -oE '[0-9]+' | head -1)
+                
+                # Gets the issue's global ID (does not work without this)
+                NODE_ID=$(gh api graphql -F org="${{ github.repository_owner }}" -F repo="${{ github.event.repository.name }}" -F num=$ISSUE_NUM -f query='
+                    query($org: String!, $repo: String!, $num: Int!) {
+                    repository(owner: $org, name: $repo) {
+                        issue(number: $num) {
+                        id
+                        }
+                    }
+                    }' --jq '.data.repository.issue.id')
+                
+                echo "node_id=$NODE_ID" >> $GITHUB_OUTPUT
+                
+            - name: Move Issue in Project
+              if: steps.get_node_id.outputs.node_id != ''
+              uses: leonsteinhaeuser/project-beta-automations@v2.2.1
+              with: 
+                gh_token: ${{ secrets.PROJECT_TOKEN }}
+                user: "${{ github.repository_owner }}"
+                project_id: 3
+                resource_node_id: ${{ steps.get_node_id.outputs.node_id }}
+                status_value: "In progress"
