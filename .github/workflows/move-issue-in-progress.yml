@@ -11,9 +11,10 @@ jobs:
               id: get_node_id
               env:
                 GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+                BRANCH_REF: ${{ github.event.ref }}
               run: |
                 # Will extract the issue number following the structure [type]/[issue]-[descriptive name]
-                ISSUE_NUM=$(echo "${{ github.event.ref }}" | grep -oP '^[^/]+/\K[0-9]+(?=-)')
+                ISSUE_NUM=$(echo "$BRANCH_REF" | grep -oP '^[^/]+/\K[0-9]+(?=-)' || true)
                 
                 if [ -z "$ISSUE_NUM" ]; then
                   echo "No matching issue number found in branch name."
