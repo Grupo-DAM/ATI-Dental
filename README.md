@@ -88,16 +88,16 @@ Abre tu consola y ejecuta:
 ```bash
 node -v
 ```
-**Requisito:** Debemos usar la versión **`v20.12.2`** (Node LTS).
+**Requisito:** Debemos usar la versión **`v20.19.4`** (Node LTS).
 
 Si tu consola muestra una versión diferente (por ejemplo, v18 o v22), debes cambiarla antes de continuar:
 
 *   **Si estás en Windows (5 desarrolladores):**
-    *   **Opción A (Instalador rápido):** Descarga e instala la versión exacta v20.12.2 directamente desde el [sitio oficial de Node.js (v20.12.2)](https://nodejs.org/dist/v20.12.2/).
+    *   **Opción A (Instalador rápido):** Descarga e instala la versión exacta v20.19.4 directamente desde el [sitio oficial de Node.js (v20.19.4)](https://nodejs.org/dist/v20.19.4/).
     *   **Opción B (Si usas NVM para Windows):** Ejecuta en tu terminal:
         ```powershell
-        nvm install 20.12.2
-        nvm use 20.12.2
+        nvm install 20.19.4
+        nvm use 20.19.4
         ```
 *   **Si estás en Ubuntu / WSL (1 desarrollador):**
     *   Usa NVM en la raíz del proyecto para que lea nuestro archivo `.nvmrc` automáticamente:
