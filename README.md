@@ -79,7 +79,7 @@ Medical Records management software developed in React Native, DAM capstone proj
 
 ---
 
-## 🛠️ Configuración Unificada del Entorno (Obligatorio)
+## Configuración Unificada del Entorno (Obligatorio)
 
 Para asegurar que los 6 desarrolladores usemos exactamente el mismo entorno de desarrollo (Node, NPM y dependencias) y evitar problemas al compilar en Android, sigue estos pasos:
 
@@ -126,8 +126,6 @@ Una vez que tengas la versión de Node correcta y el entorno validado, ejecuta e
 npm install
 ```
 
-> ⚠️ **Nota Importante:** Si intentas instalar dependencias usando una versión de Node incorrecta, la instalación fallará inmediatamente gracias a las políticas del proyecto en `.npmrc`.
-
 ---
 
 ### 4. Iniciar la Aplicación
@@ -143,7 +141,7 @@ npx expo start
 
 ---
 
-## 📚 Estructura y Comandos Adicionales
+## Estructura y Comandos Adicionales
 
 ### Limpieza de caché
 Si en algún momento el compilador o Metro Bundler se quedan pegados o no detectan un cambio, ejecuta:
