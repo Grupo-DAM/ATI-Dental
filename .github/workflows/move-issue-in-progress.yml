@@ -12,8 +12,13 @@ jobs:
               env:
                 GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
               run: |
-                # TODO adjust to branch naming rules
-                ISSUE_NUM=$(echo "${{ github.event.ref }}" | grep -oE '[0-9]+' | head -1)
+                # Will extract the issue number following the structure [type]/[issue]-[descriptive name]
+                ISSUE_NUM=$(echo "${{ github.event.ref }}" | grep -oP '^[^/]+/\K[0-9]+(?=-)')
+                
+                if [ -z "$ISSUE_NUM" ]; then
+                  echo "No matching issue number found in branch name."
+                  exit 0
+                fi
                 
                 # Gets the issue's global ID (does not work without this)
                 NODE_ID=$(gh api graphql -F org="${{ github.repository_owner }}" -F repo="${{ github.event.repository.name }}" -F num=$ISSUE_NUM -f query='
