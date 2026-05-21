@@ -11,9 +11,11 @@ jobs:
         id: update_pr
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PR_BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+          PR_DESC: ${{ github.event.pull_request.body }}
         run: |
           #Get the source branch name of the Pull Request
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          BRANCH_NAME="$PR_BRANCH_NAME"
           
           #Extract the issue number
           ISSUE_NUM=$(echo "$BRANCH_NAME" | grep -oP '^[^/]+/\K[0-9]+(?=-)' || true)
@@ -26,7 +28,7 @@ jobs:
           echo "Found Issue Number: $ISSUE_NUM"
 
           CURRENT_BODY=$(cat << 'EOF'
-          ${{ github.event.pull_request.body }}
+          $PR_DESC
           EOF
           )
           
