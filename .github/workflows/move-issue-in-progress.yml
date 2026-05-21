@@ -37,7 +37,7 @@ jobs:
               uses: leonsteinhaeuser/project-beta-automations@v2.2.1
               with: 
                 gh_token: ${{ secrets.PROJECT_TOKEN }}
-                user: "${{ github.repository_owner }}"
+                organization: "${{ github.repository_owner }}"
                 project_id: 3
                 resource_node_id: ${{ steps.get_node_id.outputs.node_id }}
                 status_value: "In progress"
