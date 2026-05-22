@@ -1,0 +1,54 @@
+name: Link PR to Issue
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  link-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract Details and Update PR Body
+        id: update_pr
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PR_BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+          PR_DESC: ${{ github.event.pull_request.body }}
+        run: |
+          #Get the source branch name of the Pull Request
+          BRANCH_NAME="$PR_BRANCH_NAME"
+          
+          #Extract the issue number
+          ISSUE_NUM=$(echo "$BRANCH_NAME" | grep -oP '^[^/]+/\K[0-9]+(?=-)' || true)
+          
+          if [ -z "$ISSUE_NUM" ]; then
+            echo "Branch name '$BRANCH_NAME' does not follow pattern. Skipping link."
+            exit 0
+          fi
+          
+          echo "Found Issue Number: $ISSUE_NUM"
+
+          CURRENT_BODY=$(cat << 'EOF'
+          $PR_DESC
+          EOF
+          )
+          
+          # Append 'Closes #123' to the bottom of the description
+          UPDATED_BODY=$(printf "%s\n\nCloses #%s" "$CURRENT_BODY" "$ISSUE_NUM")
+
+          # Uses the GraphQL mutation to update the PR description
+          # This forces GitHub to automatically link the PR and Issue in the UI
+          MUTATION='
+            mutation($prId: ID!, $body: String!) {
+              updatePullRequest(input: {pullRequestId: $prId, body: $body}) {
+                pullRequest {
+                  id
+                }
+              }
+            }'
+          
+          gh api graphql \
+            -F prId="${{ github.event.pull_request.node_id }}" \
+            -F body="$UPDATED_BODY" \
+            -f query="$MUTATION"
+          
+          echo "Successfully appended Closes #$ISSUE_NUM to PR description!"
