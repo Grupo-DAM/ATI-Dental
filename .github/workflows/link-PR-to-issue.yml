@@ -26,14 +26,9 @@ jobs:
           fi
           
           echo "Found Issue Number: $ISSUE_NUM"
-
-          CURRENT_BODY=$(cat << 'EOF'
-          $PR_DESC
-          EOF
-          )
           
           # Append 'Closes #123' to the bottom of the description
-          UPDATED_BODY=$(printf "%s\n\nCloses #%s" "$CURRENT_BODY" "$ISSUE_NUM")
+          UPDATED_BODY=$(printf "%s\n\nCloses #%s" "$PR_DESC" "$ISSUE_NUM")
 
           # Uses the GraphQL mutation to update the PR description
           # This forces GitHub to automatically link the PR and Issue in the UI
