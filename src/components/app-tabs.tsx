@@ -28,6 +28,15 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+
+      {/* REGISTRO DE LA RUTA PARA LA POC DE VOZ */}
+      <NativeTabs.Trigger name="speech">
+        <NativeTabs.Trigger.Label>Dictado</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          src={require('@/assets/images/tabIcons/explore.png')} // Cambia esto por tu icono de micrófono después
+          renderingMode="template"
+        />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
