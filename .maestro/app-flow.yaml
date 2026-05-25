@@ -1,4 +1,4 @@
-appId: com.anonymous.atidental
+appId: com.anonymous.ATIDental
 ---
 - launchApp
 - assertVisible: ".*" # Verifica que cualquier elemento de texto sea visible (ej. la pantalla principal)

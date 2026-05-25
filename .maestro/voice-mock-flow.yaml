@@ -1,0 +1,79 @@
+# ──────────────────────────────────────────────────────────────────
+# PoC Maestro — Simulación de Voz E2E con Panel de Inyección
+# ──────────────────────────────────────────────────────────────────
+# Este flujo demuestra cómo Maestro puede validar el flujo completo
+# del odontograma usando datos simulados de voz, sin necesitar audio
+# real del micrófono.
+#
+# Estrategia: En lugar de inyectar audio al hardware (imposible con
+# Maestro), la app expone un panel de desarrollo (__DEV__) con un
+# TextInput donde se puede escribir el comando de voz manualmente.
+# Maestro interactúa con ese panel usando sus comandos nativos de UI.
+# ──────────────────────────────────────────────────────────────────
+
+appId: com.anonymous.ATIDental
+---
+
+# 1. Lanzar la app con permisos de micrófono concedidos automáticamente.
+- launchApp:
+    appId: com.anonymous.ATIDental
+    permissions:
+      microphone: allow
+
+# 2. Esperar a que la pantalla cargue
+- waitForAnimationToEnd
+
+# 3. Verificar que la pantalla del componente de demostración se ha cargado
+- assertVisible:
+    id: "demo-title"
+
+# 4. Verificar que el panel de desarrollo (inyección) está visible
+- assertVisible:
+    id: "dev-panel-title"
+
+# 5. Escribir el comando de voz simulado en el TextInput de inyección
+- tapOn:
+    id: "dev-voice-input"
+- inputText: "Diente 46 fractura"
+
+# 6. Ocultar el teclado antes de tocar el boton
+- hideKeyboard
+
+# 7. Presionar el botón "Inyectar"
+- tapOn:
+    id: "dev-inject-button"
+
+# 8. Esperar a que el estado se actualice
+- waitForAnimationToEnd
+
+# 9. Verificar que la interfaz gráfica reaccionó correctamente
+- assertVisible:
+    id: "result-tooth"
+- assertVisible:
+    id: "result-diagnosis"
+
+# ──────────────────────────────────────────────────────────────────
+# Segundo escenario: Reiniciar y probar otro comando
+# ──────────────────────────────────────────────────────────────────
+
+# 10. Reiniciar el estado
+- tapOn:
+    id: "dev-reset-button"
+
+- waitForAnimationToEnd
+
+# 11. Inyectar un nuevo comando
+- tapOn:
+    id: "dev-voice-input"
+- inputText: "Diente 14 caries"
+- hideKeyboard
+- tapOn:
+    id: "dev-inject-button"
+
+- waitForAnimationToEnd
+
+# 12. Verificar el nuevo resultado
+- assertVisible:
+    id: "result-tooth"
+- assertVisible:
+    id: "result-diagnosis"
