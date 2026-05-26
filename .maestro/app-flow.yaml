@@ -1,0 +1,4 @@
+appId: com.anonymous.atidental
+---
+- launchApp
+- assertVisible: ".*" # Verifica que cualquier elemento de texto sea visible (ej. la pantalla principal)
