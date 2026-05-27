@@ -28,6 +28,14 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="calendar">
+          <NativeTabs.Trigger.Label>Calendar</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon
+            src={require('@/assets/images/tabIcons/calendar.png')}
+            renderingMode="template"
+          />
+        </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
