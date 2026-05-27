@@ -1,5 +1,7 @@
 import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { SymbolView } from 'expo-symbols';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -8,6 +10,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import LinkingTestScreen from './linking-test';
 
 function getDevMenuHint() {
   if (Platform.OS === 'web') {
@@ -29,6 +32,12 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const [showSpike, setShowSpike] = useState(false);
+
+  if (showSpike) {
+    return <LinkingTestScreen onBack={() => setShowSpike(false)} />;
+  }
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -54,6 +63,27 @@ export default function HomeScreen() {
             hint={<ThemedText type="code">npm run reset-project</ThemedText>}
           />
         </ThemedView>
+
+        <Pressable
+          onPress={() => setShowSpike(true)}
+          style={({ pressed }) => [styles.spikeCard, pressed && styles.spikeCardPressed]}
+        >
+          <ThemedView type="backgroundElement" style={styles.spikeCardContent}>
+            <View style={styles.spikeCardTitleRow}>
+              <SymbolView
+                name={{ ios: 'bolt.fill', android: 'bolt', web: 'offline_bolt' }}
+                tintColor="#25d366"
+                size={16}
+              />
+              <ThemedText type="smallBold" style={{ marginLeft: Spacing.two }}>
+                Prueba del Spike: Deep Linking
+              </ThemedText>
+            </View>
+            <ThemedText type="small" themeColor="textSecondary" style={{ marginTop: Spacing.one }}>
+              Abrir marcador nativo y WhatsApp con Auto-Fallback. Ver diagnósticos.
+            </ThemedText>
+          </ThemedView>
+        </Pressable>
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
@@ -94,5 +124,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.four,
     borderRadius: Spacing.four,
+  },
+  spikeCard: {
+    alignSelf: 'stretch',
+  },
+  spikeCardPressed: {
+    opacity: 0.8,
+  },
+  spikeCardContent: {
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.three,
+  },
+  spikeCardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
