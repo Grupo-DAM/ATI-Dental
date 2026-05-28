@@ -34,6 +34,13 @@
             "imageWidth": 76
           }
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ATI-Dental necesita acceder a tu galería para seleccionar radiografías o estudios previos.",
+          "cameraPermission": "ATI-Dental necesita acceso a tu cámara para capturar fotografías intraorales durante la consulta."
+        }
       ]
     ],
     "experiments": {
