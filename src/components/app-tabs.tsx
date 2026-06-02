@@ -28,6 +28,14 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="patients">
+          <NativeTabs.Trigger.Label>Pacientes</NativeTabs.Trigger.Label>
+          <NativeTabs.Trigger.Icon
+            src={require('@/assets/images/tabIcons/explore.png')} // Puedes reutilizar este icono de forma temporal
+            renderingMode="template"
+          />
+        </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
