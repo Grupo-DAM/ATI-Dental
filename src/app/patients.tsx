@@ -6,7 +6,6 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 
-// Interfaz para los datos del paciente
 interface Patient {
   id: string;
   name: string;
@@ -27,7 +26,6 @@ const MOCK_PATIENTS: Patient[] = Array.from({ length: 30 }).map((_, index) => ({
 export default function PatientsScreen() {
   const safeAreaInsets = useSafeAreaInsets();
 
-  // Margen inferior ajustado para que los últimos elementos no queden tapados por la barra de pestañas (tabs)
   const contentContainerStyle = {
     paddingTop: safeAreaInsets.top + Spacing.three,
     paddingLeft: safeAreaInsets.left + Spacing.three,
@@ -38,7 +36,6 @@ export default function PatientsScreen() {
     width: '100%' as const,
   };
 
-  // Renderiza cada tarjeta de paciente
   const renderPatientItem = ({ item }: { item: Patient }) => (
     <ThemedView type="backgroundElement" style={styles.card}>
       <ThemedText type="default" style={styles.patientName}>
@@ -90,7 +87,7 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
     padding: Spacing.three,
     marginBottom: Spacing.three,
-    elevation: 2, // Sombra para Android
+    elevation: 2,
   },
   patientName: {
     fontWeight: 'bold',

@@ -32,7 +32,7 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="patients">
           <NativeTabs.Trigger.Label>Pacientes</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon
-            src={require('@/assets/images/tabIcons/explore.png')} // Puedes reutilizar este icono de forma temporal
+            src={require('@/assets/images/tabIcons/explore.png')}
             renderingMode="template"
           />
         </NativeTabs.Trigger>
