@@ -1,5 +1,6 @@
 import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { useCameraPermissions } from 'expo-camera';
+import { Button, Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -29,6 +30,8 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const [permission, requestPermission] = useCameraPermissions();
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -42,6 +45,13 @@ export default function HomeScreen() {
         <ThemedText type="code" style={styles.code}>
           get started
         </ThemedText>
+
+        <ThemedView type="backgroundElement" style={styles.stepContainer}>
+          <ThemedText style={{ textAlign: 'center' }}>
+            Estado del Permiso: {permission ? (permission.granted ? 'Concedido' : 'Denegado') : 'Cargando...'}
+          </ThemedText>
+          <Button title="Pedir Permiso de Cámara" onPress={requestPermission} />
+        </ThemedView>
 
         <ThemedView type="backgroundElement" style={styles.stepContainer}>
           <HintRow
