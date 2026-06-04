@@ -149,6 +149,10 @@ Si en algún momento el compilador o Metro Bundler se quedan pegados o no detect
 npm run reset-project
 ```
 
+### Versionamiento (SemVer)
+
+Reglas del equipo para incrementar **PATCH / MINOR / MAJOR**, sincronizar `package.json` y `app.json`, y publicar tags: ver **[CONTRIBUTING.md](./CONTRIBUTING.md)**. Historial de releases: **[CHANGELOG.md](./CHANGELOG.md)**.
+
 ### Documentación de Apoyo
 * [Documentación oficial de Expo](https://docs.expo.dev/)
 * [Guía de emuladores Android en Expo](https://docs.expo.dev/workflow/android-studio-emulator/)
