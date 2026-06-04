@@ -11,6 +11,7 @@ import { Collapsible } from '@/components/ui/collapsible';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { saveSecureToken, getSecureToken } from '@/test-secure';
 
 export default function TabTwoScreen() {
   const safeAreaInsets = useSafeAreaInsets();
@@ -119,6 +120,45 @@ export default function TabTwoScreen() {
               animate opening this hint.
             </ThemedText>
           </Collapsible>
+
+          <Collapsible title="Secure Store Validation (Spike 88)">
+            <ThemedText type="small">
+              This section validates the integration of <ThemedText type="code">expo-secure-store</ThemedText> for encrypting and persisting sensitive data.
+            </ThemedText>
+            <ThemedView type="backgroundElement" style={styles.secureStoreContainer}>
+              <Pressable
+                style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
+                onPress={async () => {
+                  const success = await saveSecureToken();
+                  if (success) {
+                    alert('Token guardado con éxito!');
+                  } else {
+                    alert('Error al guardar el token.');
+                  }
+                }}
+              >
+                <ThemedText type="smallBold" style={styles.actionButtonText}>
+                  Guardar Token Seguro
+                </ThemedText>
+              </Pressable>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.actionButton,
+                  pressed && styles.actionButtonPressed,
+                  { backgroundColor: '#3C9FFE' },
+                ]}
+                onPress={async () => {
+                  const token = await getSecureToken();
+                  alert(`Token recuperado: ${token}`);
+                }}
+              >
+                <ThemedText type="smallBold" style={styles.actionButtonText}>
+                  Recuperar Token Seguro
+                </ThemedText>
+              </Pressable>
+            </ThemedView>
+          </Collapsible>
         </ThemedView>
         {Platform.OS === 'web' && <WebBadge />}
       </ThemedView>
@@ -178,4 +218,27 @@ const styles = StyleSheet.create({
     height: 100,
     alignSelf: 'center',
   },
+  secureStoreContainer: {
+    gap: Spacing.two,
+    padding: Spacing.three,
+    borderRadius: Spacing.three,
+    width: '100%',
+    marginTop: Spacing.two,
+  },
+  actionButton: {
+    backgroundColor: '#0274DF',
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    borderRadius: Spacing.two,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: Spacing.one,
+  },
+  actionButtonPressed: {
+    opacity: 0.85,
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+  },
 });
+
