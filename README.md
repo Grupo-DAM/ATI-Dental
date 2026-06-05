@@ -144,7 +144,7 @@ npx expo start
 ## Estructura y Comandos Adicionales
 
 ### Limpieza de caché
-Si en algún momento el compilador o Metro Bundler se quedan pegados o no detectan un cambio, ejecuta:
+Si en algún momento el compilador o Metro Bundler se quedan pegados o no detectan un cambio, ejecuta: 
 ```bash
 npm run reset-project
 ```
