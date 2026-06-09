@@ -8,6 +8,20 @@ Medical Records management software developed in React Native, DAM capstone proj
 - Valeria Ciccolella
 - Jesús Cova
 - Sofía Marcano
+- 
+---
+
+# Documentation
+
+## Style Guide and Wireframes
+View the [style guide](https://www.figma.com/design/JHdfTfo1i2xOQC3G7feWTl/Proyecto-DAM?node-id=2144-631) 
+and [wireframes](https://www.figma.com/design/JHdfTfo1i2xOQC3G7feWTl/Proyecto-DAM?node-id=163-2) 
+in the Figma project or view the [archived copy of the style guide](/docs/StyleGuide.pdf).
+
+## Definitions of Done and Ready
+Read the [DoD](/docs/DoD.md) and [DoR](/docs/DoR.md) established by the dev team.
+
+---
 
 # Welcome to your Expo app 👋
 
