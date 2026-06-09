@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "bundleIdentifier": "com.proyect1.ATIDental"
     },
     "android": {
       "adaptiveIcon": {
