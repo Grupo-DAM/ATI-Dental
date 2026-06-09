@@ -20,7 +20,11 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.proyect1.ATIDental",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "gradleProperties": {
+        "org.gradle.java.installations.auto-detect": "false",
+        "org.gradle.java.installations.auto-download": "false"
+      }
     },
     "web": {
       "output": "static",
