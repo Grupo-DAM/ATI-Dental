@@ -32,8 +32,8 @@ describe('Smoke Test: Style Logic', () => {
 describe('TabTwoScreen (Explore)', () => {
   it('renders the explore screen without raising exceptions', () => {
     const { getByText, toJSON } = render(<TabTwoScreen />);
-    expect(getByText('Explore')).toBeTruthy();
-    expect(getByText(/This starter app includes example/i)).toBeTruthy();
+    expect(getByText('Firebase Spike PoC')).toBeTruthy();
+    expect(getByText(/Validando Firestore Offline y Cloud Storage/i)).toBeTruthy();
 
     expect(toJSON()).toBeTruthy();
   });

@@ -46,3 +46,8 @@ app-example
 coverage/
 .reassure/
 
+# Firebase configuration files
+google-services.json
+GoogleService-Info.plist
+
+
