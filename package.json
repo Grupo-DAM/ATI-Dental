@@ -12,7 +12,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:e2e": "maestro test .maestro/",
-    "test:perf": "reassure"
+    "test:perf": "reassure",
+    "postinstall": "npx patch-package"
   },
   "dependencies": {
     "@react-native-firebase/app": "^24.1.0",
