@@ -8,7 +8,8 @@
     "scheme": "atidental",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.proyect1.ATIDental"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +19,12 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.proyect1.ATIDental"
+      "package": "com.proyect1.ATIDental",
+      "googleServicesFile": "./google-services.json",
+      "gradleProperties": {
+        "org.gradle.java.installations.auto-detect": "false",
+        "org.gradle.java.installations.auto-download": "false"
+      }
     },
     "web": {
       "output": "static",
@@ -35,7 +41,10 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

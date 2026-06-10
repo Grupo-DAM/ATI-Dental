@@ -46,3 +46,9 @@ app-example
 coverage/
 .reassure/
 
+# Firebase configuration files
+google-services.json
+GoogleService-Info.plist
+# Local helper scripts
+fix-and-build.sh
+start-metro.sh
