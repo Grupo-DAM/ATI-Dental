@@ -26,6 +26,9 @@ jest.mock('@react-native-firebase/firestore', () => {
   };
   
   const mockFirestore = jest.fn(() => mockFirestoreInstance);
+  mockFirestore.FieldValue = {
+    serverTimestamp: jest.fn(() => 'mock-server-timestamp'),
+  };
   return mockFirestore;
 });
 
@@ -47,3 +50,51 @@ jest.mock('@react-native-firebase/storage', () => {
   
   return jest.fn(() => mockStorageInstance);
 });
+
+// Mocks de expo-secure-store
+jest.mock('expo-secure-store', () => {
+  const store = {};
+  return {
+    WHEN_UNLOCKED: 'WHEN_UNLOCKED',
+    setItemAsync: jest.fn((key, value) => {
+      store[key] = value;
+      return Promise.resolve();
+    }),
+    getItemAsync: jest.fn((key) => {
+      return Promise.resolve(store[key] || null);
+    }),
+    deleteItemAsync: jest.fn((key) => {
+      delete store[key];
+      return Promise.resolve();
+    }),
+  };
+});
+
+// Mocks de @react-native-firebase/auth
+jest.mock('@react-native-firebase/auth', () => {
+  const mockAuthInstance = {
+    onAuthStateChanged: jest.fn((callback) => {
+      // Llamamos al callback con null inicialmente
+      callback(null);
+      return jest.fn(); // unsubscribe
+    }),
+    signInWithEmailAndPassword: jest.fn(() => Promise.resolve({
+      user: {
+        uid: 'mock-uid',
+        email: 'test@example.com',
+        getIdToken: jest.fn(() => Promise.resolve('mock-jwt-token')),
+      },
+    })),
+    signOut: jest.fn(() => Promise.resolve()),
+    createUserWithEmailAndPassword: jest.fn(() => Promise.resolve({
+      user: {
+        uid: 'mock-uid-new',
+        email: 'new@example.com',
+        getIdToken: jest.fn(() => Promise.resolve('mock-jwt-token-new')),
+      },
+    })),
+  };
+  const mockAuth = jest.fn(() => mockAuthInstance);
+  return mockAuth;
+});
+
