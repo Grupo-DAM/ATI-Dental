@@ -25,20 +25,41 @@ Dado que utilizamos librerías de Firebase nativas (`@react-native-firebase/*`),
 
 ### Comandos de ejecución rápida:
 
-Hemos creado dos scripts de automatización locales en la raíz del proyecto para facilitar tu flujo de trabajo:
+#### 🐧 Para usuarios de Linux / macOS:
+Hemos creado dos scripts de automatización en la raíz del proyecto para facilitar tu flujo de trabajo local (diseñados para resolver incompatibilidades de entorno específicas de Linux):
 
-#### A. Compilar e Instalar el APK en tu dispositivo (`fix-and-build.sh`)
-Este script detiene daemons previos de Gradle incompatibles, limpia la caché, y compila e instala la app en tu celular/emulador conectado por USB:
+##### A. Compilar e Instalar el APK en tu dispositivo (`fix-and-build.sh`)
 ```bash
 ./fix-and-build.sh
 ```
-*Si falla la instalación, desbloquea la pantalla de tu celular y asegúrate de tener activa la opción **"Instalar vía USB"** en los Ajustes de Desarrollador.*
 
-#### B. Iniciar Metro con Redirección de Puertos (`start-metro.sh`)
-Para que tu celular físico conectado por USB pueda comunicarse con tu servidor Metro local, se requiere redirigir el puerto `8081`. Este script realiza la redirección vía `adb reverse` e inicia el servidor Metro en el entorno de Node correcto (`v20.19.4`):
+##### B. Iniciar Metro con Redirección de Puertos (`start-metro.sh`)
 ```bash
 ./start-metro.sh
 ```
+
+#### 🪟 Para usuarios de Windows (PowerShell / CMD):
+Dado que los archivos `.sh` no corren nativamente en Windows, y asumiendo que ya tienes instalada la versión compatible de Node (`v20.x`), Java 21 y Android SDK configurados globalmente en tus variables de entorno, debes ejecutar:
+
+##### A. Limpiar caché y Compilar/Instalar APK:
+```powershell
+# En la raíz del proyecto, limpia compilaciones viejas e instala
+cd android
+./gradlew clean
+cd ..
+npx expo run:android
+```
+*(Asegúrate de tener el celular conectado por USB con Depuración USB e Instalar vía USB activos).*
+
+##### B. Redirigir puertos e Iniciar Metro:
+```powershell
+# Redirige el puerto de depuración
+adb reverse tcp:8081 tcp:8081
+
+# Inicia el servidor Metro en modo dev-client
+npx expo start --dev-client
+```
+
 
 ---
 
