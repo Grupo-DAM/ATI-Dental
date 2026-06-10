@@ -60,6 +60,25 @@ adb reverse tcp:8081 tcp:8081
 npx expo start --dev-client
 ```
 
+### 📲 2.3. Instalación manual del APK (mediante ADB)
+Si compilas la aplicación utilizando Gradle directamente (`./gradlew app:assembleDebug`) o si necesitas reinstalar el APK ya compilado, ejecuta el siguiente comando con tu dispositivo conectado por USB:
+
+*   **Linux / macOS:**
+    ```bash
+    $ANDROID_HOME/platform-tools/adb install android/app/build/outputs/apk/debug/app-debug.apk
+    ```
+*   **Windows (PowerShell / CMD):**
+    ```powershell
+    # Si tienes ANDROID_HOME configurada en tu entorno de Windows:
+    & "$env:ANDROID_HOME\platform-tools\adb.exe" install android\app\build\outputs\apk\debug\app-debug.apk
+    
+    # O si adb ya está agregado en tu PATH global de Windows:
+    adb install android\app\build\outputs\apk\debug\app-debug.apk
+    ```
+
+> 💡 **Nota Importante:** Recuerda desbloquear la pantalla de tu celular y presionar **"Permitir"** o **"Instalar"** en la ventana emergente de confirmación de Android al enviar el comando.
+
+
 
 ---
 
@@ -103,31 +122,3 @@ if (token) {
   // Redirigir a Home...
 }
 ```
-
----
-
-## 🛠️ 5. Resolución de Problemas y Optimización de Compilación
-
-### A. Crashes o Bloqueos del Sistema por Consumo de RAM/CPU
-La compilación nativa de C++ (Hermes, Reanimated, Worklets) es sumamente pesada y puede congelar el sistema en computadoras con recursos de hardware limitados.
-*   **Solución:** Limita los hilos que usa el compilador (Ninja/Gradle) agregando la propiedad `android.overrideNumberOfProcessors` en la ejecución:
-    ```bash
-    ./gradlew clean app:assembleDebug -Pandroid.overrideNumberOfProcessors=2
-    ```
-    *Nota: Los scripts de ejecución locales `./fix-and-build.sh` ya incluyen esta optimización por defecto.*
-
-### B. Error en `externalNativeBuildCleanDebug` (CMake / JNI)
-Si al cambiar de rama o vaciar `node_modules` el comando de limpieza (`clean`) falla debido a directorios inexistentes de `codegen/jni`:
-*   **Causa:** CMake intenta validar cachés de dependencias nativas que ya no están.
-*   **Solución:** Elimina manualmente los directorios de compilación nativa y Gradle volverá a crearlos de forma fresca:
-    ```bash
-    rm -rf android/app/.cxx android/app/build android/build android/.gradle
-    ```
-
-### C. Instalación Manual del APK Compilado
-Para instalar de forma directa el binario compilado en un dispositivo Android por depuración USB sin iniciar una nueva compilación:
-```bash
-/home/miguel-ciavato/Android/Sdk/platform-tools/adb install android/app/build/outputs/apk/debug/app-debug.apk
-```
-*(Mantén desbloqueada la pantalla de tu celular para autorizar el prompt de instalación nativo).*
-
