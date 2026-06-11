@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import HomeScreen from '../index';
+import HomeScreen from '../app/(tabs)/home';
 
 // Una utilidad matemática simple para verificar que Jest ejecuta lógica pura sin problemas.
 const sumValues = (a: number, b: number) => a + b;
