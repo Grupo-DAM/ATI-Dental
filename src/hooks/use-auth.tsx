@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { auth, firestore } from '../config/firebase';
 import { saveSessionToken, removeSessionToken } from '../utils/secure-storage';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
@@ -11,9 +11,9 @@ export interface UserProfile {
   email: string | null;
   nombre?: string;
   alias?: string;
-  rol?: 'odontologo' | 'asistente' | 'administrador' | 'medico' | 'usuario_externo' | string;
-  estado?: 'pendiente' | 'activo' | 'inactivo' | string;
-  idiomaPreferencia?: 'es' | 'en' | string;
+  rol?: 'odontologo' | 'asistente' | 'administrador' | 'medico' | 'usuario_externo' | (string & {});
+  estado?: 'pendiente' | 'activo' | 'inactivo' | (string & {});
+  idiomaPreferencia?: 'es' | 'en' | (string & {});
 }
 
 interface AuthContextType {
@@ -33,7 +33,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     setError(null);
     try {
       const credential = await auth().signInWithEmailAndPassword(email, password);
@@ -114,9 +114,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(err.message);
       throw err;
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     setError(null);
     try {
       await auth().signOut();
@@ -126,9 +126,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(err.message);
       throw err;
     }
-  };
+  }, []);
 
-  const register = async (email: string, password: string) => {
+  const register = useCallback(async (email: string, password: string) => {
     setError(null);
     try {
       // 1. Crear usuario en Firebase Auth
@@ -153,10 +153,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(err.message);
       throw err;
     }
-  };
+  }, []);
+
+  const authValue = useMemo(() => ({
+    user,
+    loading,
+    error,
+    login,
+    logout,
+    register
+  }), [user, loading, error, login, logout, register]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout, register }}>
+    <AuthContext.Provider value={authValue}>
       {children}
     </AuthContext.Provider>
   );

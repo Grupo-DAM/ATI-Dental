@@ -10,11 +10,12 @@ echo "NPM:  $(npm --version)"
 echo ""
 
 # Redirigir el puerto 8081 del celular a la PC (para conexión USB)
-if [ -f "$ANDROID_HOME/platform-tools/adb" ]; then
+if [[ -f "$ANDROID_HOME/platform-tools/adb" ]]; then
   echo "Redirigiendo puerto 8081 al celular vía ADB..."
   $ANDROID_HOME/platform-tools/adb reverse tcp:8081 tcp:8081
 fi
 
 echo ""
 echo "Iniciando Metro Bundler para dev-client..."
-npx expo start --dev-client
+npx --ignore-scripts expo start --dev-client
+
