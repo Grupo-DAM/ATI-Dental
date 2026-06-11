@@ -9,16 +9,16 @@ jest.mock('@react-native-firebase/app', () => ({
   initializeApp: jest.fn(),
 }));
 
-global.registeredFirestoreOnNext = null;
-global.registeredFirestoreOnError = null;
-global.triggerFirestoreSnapshot = (docSnapshot) => {
-  if (global.registeredFirestoreOnNext) {
-    global.registeredFirestoreOnNext(docSnapshot);
+globalThis.registeredFirestoreOnNext = null;
+globalThis.registeredFirestoreOnError = null;
+globalThis.triggerFirestoreSnapshot = (docSnapshot) => {
+  if (globalThis.registeredFirestoreOnNext) {
+    globalThis.registeredFirestoreOnNext(docSnapshot);
   }
 };
-global.triggerFirestoreError = (error) => {
-  if (global.registeredFirestoreOnError) {
-    global.registeredFirestoreOnError(error);
+globalThis.triggerFirestoreError = (error) => {
+  if (globalThis.registeredFirestoreOnError) {
+    globalThis.registeredFirestoreOnError(error);
   }
 };
 
@@ -29,8 +29,8 @@ jest.mock('@react-native-firebase/firestore', () => {
     orderBy: jest.fn(() => mockFirestoreInstance),
     limit: jest.fn(() => mockFirestoreInstance),
     onSnapshot: jest.fn((onNext, onError) => {
-      global.registeredFirestoreOnNext = onNext;
-      global.registeredFirestoreOnError = onError;
+      globalThis.registeredFirestoreOnNext = onNext;
+      globalThis.registeredFirestoreOnError = onError;
       return jest.fn(); // unsubscribe
     }),
     add: jest.fn(() => Promise.resolve({ id: 'mock-id' })),
@@ -82,17 +82,17 @@ jest.mock('expo-secure-store', () => {
 });
 
 // Mocks de @react-native-firebase/auth
-global.registeredAuthStateCallback = null;
-global.triggerAuthStateChange = (user) => {
-  if (global.registeredAuthStateCallback) {
-    return global.registeredAuthStateCallback(user);
+globalThis.registeredAuthStateCallback = null;
+globalThis.triggerAuthStateChange = (user) => {
+  if (globalThis.registeredAuthStateCallback) {
+    return globalThis.registeredAuthStateCallback(user);
   }
 };
 
 jest.mock('@react-native-firebase/auth', () => {
   const mockAuthInstance = {
     onAuthStateChanged: jest.fn((callback) => {
-      global.registeredAuthStateCallback = callback;
+      globalThis.registeredAuthStateCallback = callback;
       // Llamamos al callback con null inicialmente
       callback(null);
       return jest.fn(); // unsubscribe

@@ -5,7 +5,7 @@ import { auth, firestore } from '../../config/firebase';
 import * as secureStorage from '../../utils/secure-storage';
 
 // Cast global helpers for TypeScript
-const globalAny = global as any;
+const globalAny = globalThis as any;
 
 describe('useAuth Hook', () => {
   let consoleErrorSpy: jest.SpyInstance;
