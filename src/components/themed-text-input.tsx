@@ -15,6 +15,7 @@ export type ThemedTextInputProps = TextInputProps & {
     themeColor?: ThemeColor;
     isSecure?: boolean;
     icon?: ImageSourcePropType;
+    error?: boolean;
 };
 
 export function ThemedTextInput({
@@ -24,6 +25,7 @@ export function ThemedTextInput({
   isSecure = false,
   icon,
   fieldName,
+  error = false,
   ...rest
 }: ThemedTextInputProps) {
   const theme = useTheme();
@@ -32,7 +34,6 @@ export function ThemedTextInput({
 
   const activeTextColor = themeColor ? theme[themeColor] : theme.text;
   const iconColor = '#9E8BAC' || '#888';
-  const main = theme.main;
 
   return (
       <ThemedView>
@@ -48,7 +49,8 @@ export function ThemedTextInput({
                 </ThemedText>
             )}
         </ThemedView>
-        <ThemedView type="backgroundElement" style={[styles.container, style]}>
+        <ThemedView type="backgroundElement" style={[styles.container, style,
+            error && styles.errorContainer]}>
           <TextInput
             placeholder={placeholder}
             placeholderTextColor="#9E8BAC"
@@ -63,7 +65,7 @@ export function ThemedTextInput({
           {icon && (
               <Image
                 source={icon}
-                style={[styles.icon, { tintColor: iconColor }]}
+                style={[styles.icon, { tintColor: error? theme.error: iconColor }]}
               />
           )}
 
@@ -76,7 +78,7 @@ export function ThemedTextInput({
                   source={passwordVisible ? EyeIcon : EyeSlashedIcon}
                   style={[
                     {
-                      tintColor: iconColor,
+                      tintColor: error? theme.error: iconColor,
                     }
                   ]}
               />
@@ -100,6 +102,10 @@ const createStyles = (theme: any) => StyleSheet.create({
         marginBottom: Spacing.four || 16,
         height: 50,
     },
+    errorContainer: {
+        borderColor: theme.error,
+        borderWidth: 2,
+    },
     input: {
         flex: 1,
         height: '100%',
@@ -122,6 +128,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: 500,
+        color: theme.text,
     },
     labelContainer: {
         flexDirection: 'row',

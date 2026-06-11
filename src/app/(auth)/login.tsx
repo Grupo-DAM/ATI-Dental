@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedTextInput } from '@/components/themed-text-input';
+import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
 import { Platform, StyleSheet } from 'react-native';
 import { TextInput, Button, Alert } from 'react-native';
@@ -10,18 +11,19 @@ import { router } from 'expo-router';
 const EmailIcon = require('@/assets/icons/email.png');
 
 export default function LoginScreen() {
+    const theme = useTheme();
+    const styles = createStyles(theme);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login } = useAuth();
+    const [hasError, setHasError] = useState(false);
 
     const handleLogin = async () => {
         try {
-            // Llama al método del hook (este ya se encarga de Firebase y SecureStore por detrás)
             await login(email, password);
-            // Si no falla, redirige
-            router.replace('/home');
+            router.replace('/(tabs)/home');
         } catch (error: any) {
-            Alert.alert('Error', error.message || 'Credenciales incorrectas');
+            setHasError(true);
         }
     };
     return (
@@ -34,7 +36,7 @@ export default function LoginScreen() {
                 Ingresa tus credenciales para acceder a tu panel
             </ThemedText>
 
-             <ThemedTextInput
+            <ThemedTextInput
                  testID="email-input"
                  placeholder="ejemplo@correo.com"
                  value={email}
@@ -44,6 +46,7 @@ export default function LoginScreen() {
                  autoCorrect={false}
                  icon={EmailIcon}
                  fieldName="Correo electrónico"
+                 error = {hasError}
               />
              <ThemedTextInput
                 testID="password-input"
@@ -52,12 +55,18 @@ export default function LoginScreen() {
                 fieldName="Contraseña"
                 value={password}
                 onChangeText={setPassword}
+                error = {hasError}
              />
-             <Button
+            {hasError && (
+                <ThemedText style={styles.errorText}>
+                    El correo o la contraseña son incorrectos.
+                </ThemedText>
+            )}
+            <Button
                 testID = "login-button"
                 title = "Iniciar sesión"
                 onPress = {handleLogin}
-             />
+            />
 
             <ThemedText>
                 ¿No tienes una cuenta? Registrarse
@@ -75,7 +84,7 @@ export default function LoginScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
@@ -96,5 +105,11 @@ const styles = StyleSheet.create({
     socialMediaBtns: {
         flexDirection: 'row',
 
+    },
+    errorText: {
+        color: theme.error,
+        fontSize: 12,
+        textAlign: 'center',
+        marginBottom: 16,
     }
 });

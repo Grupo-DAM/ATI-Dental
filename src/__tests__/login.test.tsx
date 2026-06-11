@@ -42,9 +42,37 @@ describe('Login Flow (TDD)', () => {
         });
 
         await waitFor(() => {
-            expect(mockReplace).toHaveBeenCalledWith('/home');
+            expect(mockReplace).toHaveBeenCalledWith('/(tabs)/home');
         });
     });
 
+    it('should show clear error message and not redirect if credentials are invalid', async() => {
+        mockLoginFn.mockRejectedValueOnce({
+            code: 'auth/invalid-credential',
+            message: 'The provided征 credentials are not valid.'
+        });
 
+        const { getByTestId, findByText, queryByText } = render(<LoginScreen />);
+
+        const emailInput = getByTestId('email-input');
+        const passwordInput = getByTestId('password-input');
+        const loginButton = getByTestId('login-button');
+
+        fireEvent.changeText(emailInput, 'attacker@example.com');
+        fireEvent.changeText(passwordInput, 'WrongPassword123!');
+        fireEvent.press(loginButton);
+
+        await waitFor(() => {
+            expect(mockLoginFn).toHaveBeenCalledWith('attacker@example.com', 'WrongPassword123!');
+        });
+
+        expect(mockReplace).not.toHaveBeenCalled();
+        expect(mockReplace).not.toHaveBeenCalledWith('/(tabs)/home');
+
+        const secureErrorMessage = await findByText('El correo o la contraseña son incorrectos.');
+        expect(secureErrorMessage).toBeTruthy();
+
+        const rawBackendError = queryByText('auth/invalid-credential');
+        expect(rawBackendError).toBeNull();
+    });
 });
