@@ -9,17 +9,28 @@ jest.mock('@react-native-firebase/app', () => ({
   initializeApp: jest.fn(),
 }));
 
+global.registeredFirestoreOnNext = null;
+global.registeredFirestoreOnError = null;
+global.triggerFirestoreSnapshot = (docSnapshot) => {
+  if (global.registeredFirestoreOnNext) {
+    global.registeredFirestoreOnNext(docSnapshot);
+  }
+};
+global.triggerFirestoreError = (error) => {
+  if (global.registeredFirestoreOnError) {
+    global.registeredFirestoreOnError(error);
+  }
+};
+
 jest.mock('@react-native-firebase/firestore', () => {
   const mockFirestoreInstance = {
     collection: jest.fn(() => mockFirestoreInstance),
     doc: jest.fn(() => mockFirestoreInstance),
     orderBy: jest.fn(() => mockFirestoreInstance),
     limit: jest.fn(() => mockFirestoreInstance),
-    onSnapshot: jest.fn((callback) => {
-      callback({
-        metadata: { fromCache: false },
-        forEach: jest.fn(),
-      });
+    onSnapshot: jest.fn((onNext, onError) => {
+      global.registeredFirestoreOnNext = onNext;
+      global.registeredFirestoreOnError = onError;
       return jest.fn(); // unsubscribe
     }),
     add: jest.fn(() => Promise.resolve({ id: 'mock-id' })),
@@ -71,9 +82,17 @@ jest.mock('expo-secure-store', () => {
 });
 
 // Mocks de @react-native-firebase/auth
+global.registeredAuthStateCallback = null;
+global.triggerAuthStateChange = (user) => {
+  if (global.registeredAuthStateCallback) {
+    return global.registeredAuthStateCallback(user);
+  }
+};
+
 jest.mock('@react-native-firebase/auth', () => {
   const mockAuthInstance = {
     onAuthStateChanged: jest.fn((callback) => {
+      global.registeredAuthStateCallback = callback;
       // Llamamos al callback con null inicialmente
       callback(null);
       return jest.fn(); // unsubscribe
