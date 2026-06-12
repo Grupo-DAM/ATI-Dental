@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserGreeting Component matches the snapshot to prevent visual regressions 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#f0f0f0",
+      "borderRadius": 8,
+      "justifyContent": "center",
+      "padding": 16,
+    }
+  }
+>
+  <Text
+    style={
+      {
+        "color": "#333",
+        "fontSize": 18,
+        "fontWeight": "bold",
+      }
+    }
+  >
+    Hola, 
+    Carlos
+    !
+  </Text>
+</View>
+`;

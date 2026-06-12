@@ -12,4 +12,16 @@ describe('UserGreeting Component', () => {
     // Assert
     expect(screen.getByText('Hola, Carlos!')).toBeTruthy();
   });
+
+  it('matches the snapshot to prevent visual regressions', () => {
+    // Arrange
+    const userName = 'Carlos';
+
+    // Act
+    const { toJSON } = render(<UserGreeting name={userName} />);
+
+    // Assert
+    expect(toJSON()).toMatchSnapshot();
+  });
 });
+
