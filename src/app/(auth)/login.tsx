@@ -20,15 +20,26 @@ export default function LoginScreen() {
     const [errorMessage, setErrorMessage] = useState('');
     const emptyErrorMessage = 'Por favor, rellena todos los campos.';
     const wrongCredentialsMessage = 'El correo o la contraseña son incorrectos.';
+    const [emailError, setEmailError] = useState(false);
+    const emailErrorMessage = 'El formato del correo no es válido.';
 
     const handleLogin = async () => {
         setHasError(false);
+        setEmailError(false);
 
-        if (email === "" || password === "") {
+        let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+
+        if (email.trim().length === 0 || password.trim().length === 0) {
             setHasError(true)
             setErrorMessage(emptyErrorMessage);
             return
         }
+
+        if (reg.test(email) === false) {
+            setEmailError(true)
+            return
+        }
+
         try {
             await login(email, password);
             router.replace('/(tabs)/home');
@@ -57,7 +68,8 @@ export default function LoginScreen() {
                  autoCorrect={false}
                  icon={EmailIcon}
                  fieldName="Correo electrónico"
-                 error = {hasError}
+                 error = {hasError || emailError}
+                 errorMessage = {emailError? emailErrorMessage: ''}
               />
              <ThemedTextInput
                 testID="password-input"

@@ -88,4 +88,23 @@ describe('Login Flow (TDD)', () => {
         const validationMessage = await findByText('Por favor, rellena todos los campos.');
         expect(validationMessage).toBeTruthy();
     });
+
+    it('should block API request and show format error if email structure is invalid', async () => {
+        const { getByTestId, findByText } = render(<LoginScreen />);
+
+        const emailInput = getByTestId('email-input');
+        const passwordInput = getByTestId('password-input');
+        const loginButton = getByTestId('login-button');
+
+
+        fireEvent.changeText(emailInput, 'invalidemail.com');
+        fireEvent.changeText(passwordInput, 'Password123!');
+        fireEvent.press(loginButton);
+
+        expect(mockLoginFn).not.toHaveBeenCalled();
+        expect(mockReplace).not.toHaveBeenCalled();
+
+        const validationMessage = await findByText('El formato del correo no es válido.');
+        expect(validationMessage).toBeTruthy();
+    });
 });

@@ -16,6 +16,7 @@ export type ThemedTextInputProps = TextInputProps & {
     isSecure?: boolean;
     icon?: ImageSourcePropType;
     error?: boolean;
+    errorMessage?: String;
 };
 
 export function ThemedTextInput({
@@ -26,6 +27,7 @@ export function ThemedTextInput({
   icon,
   fieldName,
   error = false,
+  errorMessage = '',
   ...rest
 }: ThemedTextInputProps) {
   const theme = useTheme();
@@ -34,6 +36,7 @@ export function ThemedTextInput({
 
   const activeTextColor = themeColor ? theme[themeColor] : theme.text;
   const iconColor = '#9E8BAC' || '#888';
+  const showErrorMessage = errorMessage !== "";
 
   return (
       <ThemedView>
@@ -85,6 +88,11 @@ export function ThemedTextInput({
             </Pressable>
           )}
         </ThemedView>
+        { showErrorMessage && (
+            <ThemedText style={styles.errorText}>
+                {errorMessage}
+            </ThemedText>
+        )}
     </ThemedView>
   );
 }
@@ -95,7 +103,7 @@ const createStyles = (theme: any) => StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: theme.border,
-        backgroundColor: '#fff',
+        backgroundColor: theme.backgroundColor,
         borderRadius: 8,
         paddingLeft: Spacing.three || 12,
         paddingRight: 4,
@@ -138,5 +146,10 @@ const createStyles = (theme: any) => StyleSheet.create({
         fontWeight: '700',
         color: theme.main,
         fontSize: 12
+    },
+    errorText: {
+        color: theme.error,
+        fontSize: 12,
+        marginBottom: 16,
     }
 });
