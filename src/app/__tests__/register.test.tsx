@@ -41,9 +41,9 @@ describe('RegisterScreen', () => {
   it('shows error if email is invalid', async () => {
     const { getByPlaceholderText, getByText, findByText } = render(<RegisterScreen />);
     
-    fireEvent.changeText(getByPlaceholderText('Correo electrónico'), 'invalid-email');
-    fireEvent.changeText(getByPlaceholderText('Contraseña'), '123456');
-    fireEvent.changeText(getByPlaceholderText('Confirmar contraseña'), '123456');
+    fireEvent.changeText(getByPlaceholderText('ejemplo@correo.com'), 'invalid-email');
+    fireEvent.changeText(getByPlaceholderText('Mínimo 6 caracteres'), '123456');
+    fireEvent.changeText(getByPlaceholderText('Vuelve a escribir la contraseña'), '123456');
     
     fireEvent.press(getByText('Registrarse'));
     
@@ -54,9 +54,9 @@ describe('RegisterScreen', () => {
   it('shows error if passwords do not match', async () => {
     const { getByPlaceholderText, getByText, findByText } = render(<RegisterScreen />);
     
-    fireEvent.changeText(getByPlaceholderText('Correo electrónico'), 'test@example.com');
-    fireEvent.changeText(getByPlaceholderText('Contraseña'), '123456');
-    fireEvent.changeText(getByPlaceholderText('Confirmar contraseña'), '654321');
+    fireEvent.changeText(getByPlaceholderText('ejemplo@correo.com'), 'test@example.com');
+    fireEvent.changeText(getByPlaceholderText('Mínimo 6 caracteres'), '123456');
+    fireEvent.changeText(getByPlaceholderText('Vuelve a escribir la contraseña'), '654321');
     
     fireEvent.press(getByText('Registrarse'));
     
@@ -69,9 +69,9 @@ describe('RegisterScreen', () => {
 
     const { getByPlaceholderText, getByText, findByText } = render(<RegisterScreen />);
     
-    fireEvent.changeText(getByPlaceholderText('Correo electrónico'), 'test@example.com');
-    fireEvent.changeText(getByPlaceholderText('Contraseña'), '123456');
-    fireEvent.changeText(getByPlaceholderText('Confirmar contraseña'), '123456');
+    fireEvent.changeText(getByPlaceholderText('ejemplo@correo.com'), 'test@example.com');
+    fireEvent.changeText(getByPlaceholderText('Mínimo 6 caracteres'), '123456');
+    fireEvent.changeText(getByPlaceholderText('Vuelve a escribir la contraseña'), '123456');
     
     fireEvent.press(getByText('Registrarse'));
     
@@ -82,9 +82,9 @@ describe('RegisterScreen', () => {
   it('calls register and redirects to verify-code on success', async () => {
     const { getByPlaceholderText, getByText } = render(<RegisterScreen />);
     
-    fireEvent.changeText(getByPlaceholderText('Correo electrónico'), 'test@example.com');
-    fireEvent.changeText(getByPlaceholderText('Contraseña'), '123456');
-    fireEvent.changeText(getByPlaceholderText('Confirmar contraseña'), '123456');
+    fireEvent.changeText(getByPlaceholderText('ejemplo@correo.com'), 'test@example.com');
+    fireEvent.changeText(getByPlaceholderText('Mínimo 6 caracteres'), '123456');
+    fireEvent.changeText(getByPlaceholderText('Vuelve a escribir la contraseña'), '123456');
     
     fireEvent.press(getByText('Registrarse'));
     
@@ -99,9 +99,9 @@ describe('RegisterScreen', () => {
     
     const { getByPlaceholderText, getByText, findByText } = render(<RegisterScreen />);
     
-    fireEvent.changeText(getByPlaceholderText('Correo electrónico'), 'test@example.com');
-    fireEvent.changeText(getByPlaceholderText('Contraseña'), '123456');
-    fireEvent.changeText(getByPlaceholderText('Confirmar contraseña'), '123456');
+    fireEvent.changeText(getByPlaceholderText('ejemplo@correo.com'), 'test@example.com');
+    fireEvent.changeText(getByPlaceholderText('Mínimo 6 caracteres'), '123456');
+    fireEvent.changeText(getByPlaceholderText('Vuelve a escribir la contraseña'), '123456');
     
     fireEvent.press(getByText('Registrarse'));
     

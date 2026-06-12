@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import VerifyCodeScreen from '../verify-code';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'expo-router';
@@ -38,48 +38,44 @@ describe('VerifyCodeScreen', () => {
     expect(tree).toMatchSnapshot();
   });
 
-  it('shows error if code length is not 6', async () => {
-    const { getByPlaceholderText, getByText, findByText } = render(<VerifyCodeScreen />);
-    
-    fireEvent.changeText(getByPlaceholderText('Ingresa el código OTP (ej. 123456)'), '123');
-    fireEvent.press(getByText('Activar cuenta'));
-    
-    expect(await findByText('El código debe tener 6 dígitos.')).toBeTruthy();
-    expect(mockVerifyCode).not.toHaveBeenCalled();
-  });
-
   it('shows error on network instability', async () => {
     (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: false });
 
-    const { getByPlaceholderText, getByText, findByText } = render(<VerifyCodeScreen />);
+    const { getByText, findByText } = render(<VerifyCodeScreen />);
     
-    fireEvent.changeText(getByPlaceholderText('Ingresa el código OTP (ej. 123456)'), '123456');
-    fireEvent.press(getByText('Activar cuenta'));
+    fireEvent.press(getByText('Ya verifiqué mi correo'));
     
     expect(await findByText('No hay conexión a internet. Por favor, revisa tu red e intenta de nuevo.')).toBeTruthy();
     expect(mockVerifyCode).not.toHaveBeenCalled();
   });
 
   it('calls verifyCode and redirects to home on success', async () => {
-    const { getByPlaceholderText, getByText } = render(<VerifyCodeScreen />);
+    jest.useFakeTimers();
+    const { getByText, findByText } = render(<VerifyCodeScreen />);
     
-    fireEvent.changeText(getByPlaceholderText('Ingresa el código OTP (ej. 123456)'), '123456');
-    fireEvent.press(getByText('Activar cuenta'));
+    fireEvent.press(getByText('Ya verifiqué mi correo'));
     
     await waitFor(() => {
-      expect(mockVerifyCode).toHaveBeenCalledWith('123456');
-      expect(mockReplace).toHaveBeenCalledWith('/');
+      expect(mockVerifyCode).toHaveBeenCalled();
     });
+
+    expect(await findByText('¡Correo verificado con éxito! Ingresando a la aplicación...')).toBeTruthy();
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(mockReplace).toHaveBeenCalledWith('/');
+    jest.useRealTimers();
   });
 
   it('shows error if verifyCode fails', async () => {
-    mockVerifyCode.mockRejectedValue(new Error('Código incorrecto'));
+    mockVerifyCode.mockRejectedValue(new Error('Error de validación'));
     
-    const { getByPlaceholderText, getByText, findByText } = render(<VerifyCodeScreen />);
+    const { getByText, findByText } = render(<VerifyCodeScreen />);
     
-    fireEvent.changeText(getByPlaceholderText('Ingresa el código OTP (ej. 123456)'), '654321');
-    fireEvent.press(getByText('Activar cuenta'));
+    fireEvent.press(getByText('Ya verifiqué mi correo'));
     
-    expect(await findByText('Código incorrecto')).toBeTruthy();
+    expect(await findByText('Error de validación')).toBeTruthy();
   });
 });
