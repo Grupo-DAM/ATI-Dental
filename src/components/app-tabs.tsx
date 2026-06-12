@@ -13,7 +13,6 @@ export default function AppTabs() {
         }}
         tabBar={(props) => <CustomTabBar {...props} />}
       >
-        {/* Registramos solo tus 3 pantallas reales de src/app */}
         <Tabs.Screen name="index" options={{ title: 'Inicio' }} />
         <Tabs.Screen name="explore" options={{ title: 'Pacientes' }} />
         <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
@@ -21,7 +20,6 @@ export default function AppTabs() {
     );
   }
 
-// Este componente dibuja la barra exactamente igual a la foto y soporta SVGs
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const colors = useTheme();
   const activeRouteName = state.routes[state.index].name;
@@ -30,8 +28,6 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   };
   return (
     <View style={[styles.tabBar, { backgroundColor: colors.background }]}>
-
-      {/* 1. Inicio */}
       <TouchableOpacity
         onPress={() => handleNavigate('index')}
         style={styles.tabItem}
@@ -45,16 +41,13 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           style={[
             styles.label,
             { color: activeRouteName === 'index' ? colors.main : colors.textSecondary },
-          ]}
-        >
+          ]}>
           Inicio
         </Text>
       </TouchableOpacity>
-      {/* 2. Pacientes */}
       <TouchableOpacity
         onPress={() => handleNavigate('explore')}
-        style={styles.tabItem}
-      >
+        style={styles.tabItem}>
         <Image
           source={require('../../assets/expo.icon/Assets/lista.svg')}
           style={styles.icon}
@@ -64,18 +57,14 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           style={[
             styles.label,
             { color: activeRouteName === 'explore' ? colors.main : colors.textSecondary },
-          ]}
-        >
+          ]}>
           Pacientes
         </Text>
       </TouchableOpacity>
-      {/* 3. Espacio en blanco para el botón central flotante de _layout.tsx */}
       <View style={styles.tabItemSpacer} />
-      {/* 4. Agenda (Deshabilitado) */}
       <TouchableOpacity
         disabled
-        style={styles.tabItem}
-      >
+        style={styles.tabItem}>
         <Image
           source={require('../../assets/expo.icon/Assets/agenda-pencil-left.svg')}
           style={styles.icon}
@@ -85,22 +74,18 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           Agenda
         </Text>
       </TouchableOpacity>
-      {/* 5. Perfil */}
       <TouchableOpacity
         onPress={() => handleNavigate('profile')}
-        style={styles.tabItem}
-      >
+        style={styles.tabItem}>
         <Image
           source={require('../../assets/expo.icon/Assets/user.svg')}
           style={styles.icon}
-          tintColor={activeRouteName === 'profile' ? colors.main : colors.textSecondary}
-        />
+          tintColor={activeRouteName === 'profile' ? colors.main : colors.textSecondary}/>
         <Text
           style={[
             styles.label,
             { color: activeRouteName === 'profile' ? colors.main : colors.textSecondary },
-          ]}
-        >
+          ]}>
           Perfil
         </Text>
       </TouchableOpacity>
@@ -124,7 +109,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabItemSpacer: {
-    width: 68, // Espacio reservado para el círculo central
+    width: 68,
   },
   icon: {
     width: 24,

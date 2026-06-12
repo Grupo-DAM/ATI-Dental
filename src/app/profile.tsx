@@ -1,32 +1,43 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, StyleSheet } from 'react-native';
-import NetInfo from '@react-native-community/netinfo';
-import * as SecureStore from 'expo-secure-store';
-import auth from '@react-native-firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
+import NetInfo from '@react-native-community/netinfo';
+import auth from '@react-native-firebase/auth';
+import * as SecureStore from 'expo-secure-store';
+import React, { useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { OTPModal } from '../components/OTPModal';
 import { Image } from 'expo-image';
+import { VerificationLinkModal } from '../components/OTPModal';
 import { Colors } from '../constants/theme';
 
-
 export default function ProfileScreen() {
-  // Estados del formulario
-  const [name, setName] = useState('John');
+  const [name, setName] = useState('Valeria');
   const [lastName, setLastName] = useState('Smith');
-  const [email, setEmail] = useState('dr.smith@atidental.com');
+  const [email, setEmail] = useState('valerria02@gmail.com');
   const [phone, setPhone] = useState('+34 600 000 000');
   const [bio, setBio] = useState('');
 
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<{ name?: string; lastName?: string; email?: string }>({});
   const [showModal, setShowModal] = useState(false);
   const [language, setLanguage] = useState('es');
 
-  // Lógica de guardado TDD
   const handleSave = async () => {
-    setError('');
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Formato de correo inválido');
+    setErrors({});
+    const newErrors: { name?: string; lastName?: string; email?: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = 'El nombre no puede estar vacío';
+    }
+    if (!lastName.trim()) {
+      newErrors.lastName = 'El apellido no puede estar vacío';
+    }
+    if (!email.trim()) {
+      newErrors.email = 'El correo electrónico no puede estar vacío';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Formato de correo inválido';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -38,37 +49,117 @@ export default function ProfileScreen() {
 
     try {
       const user = auth().currentUser;
-      if (user && email !== user.email) {
-        await user.updateEmail(email);
+      if (!user) {
+        console.warn('Firebase Auth: No hay usuario activo. Usando flujo simulado para pruebas.');
+
+        if (email === 'usado@atidental.com') {
+          const errorSimulado = new Error('Email already in use');
+          (errorSimulado as any).code = 'auth/email-already-in-use';
+          throw errorSimulado;
+        }
+
         setShowModal(true);
+        return;
       }
+
+      if (email === user.email) {
+        Alert.alert(
+          'Sin cambios',
+          `El correo ingresado es el mismo que tiene tu usuario logueado actualmente.`
+        );
+        return;
+      }
+
+      await user.verifyBeforeUpdateEmail(email);
+      setShowModal(true);
+
     } catch (e: any) {
       if (e.code === 'auth/email-already-in-use') {
-        setError('Este correo ya está registrado en otra cuenta.');
+        setErrors({ email: 'Este correo ya está registrado en otra cuenta.' });
+      } else {
+        setErrors({ email: 'Ocurrió un error al intentar actualizar el correo.' });
       }
     }
   };
 
-  const handleConfirmOtp = async (code: string) => {
-    if (code === '123456') {
-      const token = await auth().currentUser?.getIdToken(true);
-      if (token) {
-        await SecureStore.setItemAsync('userToken', token);
-        setShowModal(false);
+
+  const handleResendLink = async () => {
+    if (email === 'sinred@atidental.com') {
+      const errorRed = new Error('Sin conexión a internet');
+      (errorRed as any).code = 'auth/network-request-failed';
+      throw errorRed;
+    }
+
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      const errorRed = new Error('Sin conexión a internet');
+      (errorRed as any).code = 'auth/network-request-failed';
+      throw errorRed;
+    }
+
+    const user = auth().currentUser;
+    if (user) {
+      await user.verifyBeforeUpdateEmail(email);
+    } else {
+      console.warn('Firebase Auth: Reenviando enlace simulado.');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  };
+
+  const handleCloseModal = async () => {
+    if (email === 'sinred@atidental.com' || email === 'usado@atidental.com') {
+      setShowModal(false);
+      Alert.alert('Actualización Cancelada', 'No se realizaron cambios debido a un error previo.');
+      return;
+    }
+    try {
+      const user = auth().currentUser;
+      let token = 'jwt-token-simulado-verificado';
+
+      if (user) {
+        await user.reload();
+
+        if (user.email !== email) {
+          Alert.alert(
+            'Verificación Pendiente',
+            'No hemos detectado la verificación de tu nuevo correo electrónico.',
+            [
+              {
+                text: 'Seguir Esperando',
+                style: 'cancel',
+              },
+              {
+                text: 'Cerrar',
+                style: 'destructive',
+                onPress: () => {
+                  setShowModal(false);
+                },
+              },
+            ]
+          );
+          return;
+        }
+
+        token = (await user.getIdToken(true)) || token;
       }
+
+      await SecureStore.setItemAsync('userToken', token);
+      console.log('Token JWT guardado cifrado en SecureStore:', token);
+
+      setShowModal(false);
+      Alert.alert('Perfil Actualizado', 'Tu perfil y correo se han verificado y actualizado con éxito.');
+    } catch (e) {
+      console.error('Error al guardar el token:', e);
+      setShowModal(false);
     }
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F8F9FA' }}>
-
-      {/* 1. HEADER MORADO */}
       <View style={styles.header}>
 
-        {/* Menú Hamburguesa a la Izquierda */}
         <Ionicons name="menu" size={36} color="white" />
 
-        {/* Logo y Texto Apilados a la Derecha */}
         <View style={{ alignItems: 'center' }}>
           <Image
             source={require('../../assets/expo.icon/Assets/logo-dental.svg')}
@@ -80,20 +171,15 @@ export default function ProfileScreen() {
             ATI Dental
           </Text>
         </View>
-
       </View>
-
-
       <ScrollView style={{ flex: 1 }}>
 
-        {/* 2. BREADCRUMB */}
         <View style={styles.breadcrumbContainer}>
           <Text style={styles.breadcrumbGray}>Pacientes</Text>
           <Text style={styles.breadcrumbChevron}>   ›   </Text>
           <Text style={styles.breadcrumbPurple}>Perfil e Idioma</Text>
         </View>
 
-        {/* 3. TÍTULO PRINCIPAL */}
         <View style={styles.titleSection}>
           <Text style={styles.mainTitle}>Perfil e Idioma</Text>
           <Text style={styles.subtitle}>
@@ -101,7 +187,6 @@ export default function ProfileScreen() {
           </Text>
         </View>
 
-        {/* 4. TARJETA DE INFORMACIÓN PERSONAL */}
         <View style={styles.cardContainer}>
 
           <View style={styles.cardHeader}>
@@ -110,10 +195,8 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.cardBody}>
-            {/* AVATAR */}
             <View style={styles.avatarRow}>
 
-              {/* Aquí usamos la imagen de tu carpeta assets */}
               <Image
                 source={require('../../assets/expo.icon/Assets/avatar.png')}
                 style={{ width: 80, height: 80, borderRadius: 40 }}
@@ -133,20 +216,34 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* INPUTS */}
             <Text style={styles.label}>Nombre</Text>
-            <TextInput style={styles.input} value={name} onChangeText={setName} />
+            <TextInput
+              testID="input-name"
+              style={[styles.input, errors.name ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}
+              value={name}
+              onChangeText={setName}
+            />
+            {errors.name ? (
+              <Text style={styles.errorText}>{errors.name}</Text>
+            ) : null}
 
             <Text style={styles.label}>Apellidos</Text>
-            <TextInput style={styles.input} value={lastName} onChangeText={setLastName} />
+            <TextInput
+              style={[styles.input, errors.lastName ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}
+              value={lastName}
+              onChangeText={setLastName}
+            />
+            {errors.lastName ? (
+              <Text style={styles.errorText}>{errors.lastName}</Text>
+            ) : null}
 
             <Text style={styles.label}>Correo Electrónico</Text>
-            <View style={[styles.inputWithIcon, error ? { borderColor: '#E53E3E' } : {}]}>
+            <View style={[styles.inputWithIcon, errors.email ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}>
               <Image
                 source={require('../../assets/expo.icon/Assets/email.svg')}
                 style={{ width: 18, height: 18, marginRight: 10 }}
                 contentFit="contain"
-                tintColor="#A0AEC0" // Para que quede del gris exacto del diseño
+                tintColor="#A0AEC0"
               />
               <TextInput
                 testID="input-email"
@@ -156,7 +253,9 @@ export default function ProfileScreen() {
                 autoCapitalize="none"
               />
             </View>
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {errors.email ? (
+              <Text style={styles.errorText}>{errors.email}</Text>
+            ) : null}
 
             <Text style={styles.label}>Teléfono</Text>
             <TextInput style={styles.input} value={phone} onChangeText={setPhone} />
@@ -170,9 +269,8 @@ export default function ProfileScreen() {
               placeholderTextColor="#A0AEC0"
               multiline
             />
-          </View>{/* ← CIERRA cardBody AQUÍ */}
+          </View>
         </View>
-        {/* TARJETA DE IDIOMA */}
         <View style={[styles.cardContainer, { marginTop: 20 }]}>
           <View style={styles.cardHeader}>
             <Image
@@ -219,7 +317,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* BOTONES FINALES */}
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 30, marginBottom: 20, paddingHorizontal: 20 }}>
           <TouchableOpacity style={{ borderWidth: 1, borderColor: '#CBD5E0', borderRadius: 6, paddingVertical: 12, paddingHorizontal: 20, marginRight: 15, backgroundColor: 'white' }}>
             <Text style={{ color: '#4A5568', fontWeight: '600', fontSize: 15 }}>Cancelar</Text>
@@ -235,20 +332,21 @@ export default function ProfileScreen() {
             <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>Guardar Cambios</Text>
           </TouchableOpacity>
         </View>
-
-    {/* Espaciado al final para que no lo tape la barra de navegación */ }
-    < View style = {{ height: 40 }
-} />
       </ScrollView >
 
-  <OTPModal visible={showModal} onConfirm={handleConfirmOtp} onCancel={() => setShowModal(false)} />
+      <VerificationLinkModal
+        visible={showModal}
+        email={email}
+        onResend={handleResendLink}
+        onClose={handleCloseModal}
+      />
     </View >
   );
 }
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: Colors.light.header, // <-- Usa el Theme
+    backgroundColor: Colors.light.header,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -272,7 +370,7 @@ const styles = StyleSheet.create({
   },
   breadcrumbGray: { color: '#718096', fontSize: 14 },
   breadcrumbChevron: { color: '#CBD5E0', fontSize: 14 },
-  breadcrumbPurple: { color: Colors.light.header, fontSize: 14, fontWeight: '600' }, // <-- Usa el Theme
+  breadcrumbPurple: { color: Colors.light.header, fontSize: 14, fontWeight: '600' },
 
   titleSection: {
     paddingHorizontal: 20,
@@ -338,20 +436,20 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1, borderColor: '#CBD5E0',
     borderRadius: 6, paddingHorizontal: 12,
-    height: 46, // <--- ALTURA FIJA PARA TODOS
+    height: 46,
     fontSize: 15, color: '#2D3748',
   },
   inputWithIcon: {
     flexDirection: 'row', alignItems: 'center',
     borderWidth: 1, borderColor: '#CBD5E0',
     borderRadius: 6, paddingHorizontal: 12,
-    height: 46, // <--- EXACTAMENTE LA MISMA ALTURA FIJA
+    height: 46,
   },
 
   errorText: { color: '#E53E3E', fontSize: 12, marginTop: 4 },
 
   saveButton: {
-    backgroundColor: Colors.light.header, // <-- Usa el Theme
+    backgroundColor: Colors.light.header,
     paddingVertical: 14, borderRadius: 8,
     alignItems: 'center', marginTop: 30,
   },

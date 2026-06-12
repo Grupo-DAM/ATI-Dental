@@ -4,7 +4,7 @@ appId: com.proyect1.ATIDental
 - tapOn: "Perfil"
 - eraseText
 - inputText: "dr.nuevo@atidental.com"
-- tapOn: "Guardar"
-- assertVisible: "Código de Confirmación"
-- inputText: "123456"
-- tapOn: "Confirmar"
+- tapOn: "Guardar Cambios"
+- assertVisible: "Confirmación de Correo"
+- tapOn: "Entendido"
+

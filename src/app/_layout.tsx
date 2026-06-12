@@ -18,40 +18,38 @@ export default function TabLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AnimatedSplashOverlay />
         <AppTabs />
-        {/* --- AGREGA ESTE BLOQUE DESDE AQUÍ --- */}
-                <View style={{
-                  position: 'absolute',
-                  bottom: Platform.OS === 'ios' ? 34 : 12, // Alineación perfecta según plataforma
-                  alignSelf: 'center',
-                  zIndex: 999,
-                }}>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={{
-                      backgroundColor: colors.main,
-                      width: 64,
-                      height: 64,
-                      borderRadius: 32,
-                      borderWidth: 5,
-                      borderColor: colors.background, // Mismo color del menú para simular el recorte
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.15,
-                      shadowRadius: 5,
-                      elevation: 8,
-                    }}
-                  >
-                    <Image
-                      source={require('../../assets/expo.icon/Assets/plus-solid.svg')}
-                      style={{ width: 18, height: 18 }}
-                      contentFit="contain"
-                      tintColor="white"
-                    />
-                  </TouchableOpacity>
-                </View>
-                {/* ------------------------------------ */}
+            <View style={{
+              position: 'absolute',
+              bottom: Platform.OS === 'ios' ? 34 : 12,
+              alignSelf: 'center',
+              zIndex: 999,
+              backgroundColor: colors.main,
+              width: 58,
+              height: 58,
+              borderRadius: 29,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 5,
+              elevation: 8,
+            }}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Image
+                  source={require('../../assets/expo.icon/Assets/plus-solid.svg')}
+                  style={{ width: 18, height: 18 }}
+                  contentFit="contain"
+                  tintColor="white"
+                />
+              </TouchableOpacity>
+            </View>
       </ThemeProvider>
     </AuthProvider>
   );
