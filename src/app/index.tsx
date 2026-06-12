@@ -9,6 +9,9 @@ import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 
+import { router } from 'expo-router';
+import { TouchableOpacity, Text } from 'react-native';
+
 function getDevMenuHint() {
   if (Platform.OS === 'web') {
     return <ThemedText type="small">use browser devtools</ThemedText>;
@@ -37,6 +40,13 @@ export default function HomeScreen() {
           <ThemedText type="title" style={styles.title}>
             Welcome to&nbsp;Expo
           </ThemedText>
+          <TouchableOpacity
+            onPress={() => router.push('/profile')}
+            style={{ marginTop: 20, padding: 15, backgroundColor: '#5D3382', borderRadius: 8, alignItems: 'center' }}
+          >
+            <Text style={{ color: 'white' }}>Ir a mi Perfil</Text>
+          </TouchableOpacity>
+
         </ThemedView>
 
         <ThemedText type="code" style={styles.code}>
