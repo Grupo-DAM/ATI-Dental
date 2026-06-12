@@ -2,9 +2,67 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 - tapOn: "Perfil"
+
+# Validar Nombre Vacío
+- tapOn: "input-name"
+- eraseText
+- tapOn: "btn-save"
+- assertVisible: "El nombre no puede estar vacío"
+
+# Restaurar Nombre
+- tapOn: "input-name"
+- inputText: "Valeria"
+
+# Validar Apellido Vacío
+- tapOn: "input-lastname"
+- eraseText
+- tapOn: "btn-save"
+- assertVisible: "El apellido no puede estar vacío"
+
+# Restaurar Apellido
+- tapOn: "input-lastname"
+- inputText: "Smith"
+
+# Validar Correo Vacío
+- tapOn: "input-email"
+- eraseText
+- tapOn: "btn-save"
+- assertVisible: "El correo electrónico no puede estar vacío"
+
+# Validar formato de correo invalido
+- tapOn: "input-email"
+- inputText: "correo-invalido"
+- tapOn: "btn-save"
+- assertVisible: "Formato de correo inválido"
+
+# Correo ya en uso
+- tapOn: "input-email"
+- eraseText
+- inputText: "usado@atidental.com"
+- tapOn: "btn-save"
+- assertVisible: "Este correo ya está registrado en otra cuenta."
+
+# Caida de red
+- tapOn: "input-email"
+- eraseText
+- inputText: "sinred@atidental.com"
+- tapOn: "btn-save"
+- assertVisible: "Confirmación de Correo"
+- tapOn: "btn-resend-link"
+- assertVisible: "Sin conexión a internet. Intenta de nuevo."
+- tapOn: "OK"
+- tapOn: "btn-close-modal"
+- assertVisible: "No se realizaron cambios debido a un error previo."
+- tapOn: "OK"
+
+# Flujo exitoso
+- tapOn: "input-email"
 - eraseText
 - inputText: "dr.nuevo@atidental.com"
-- tapOn: "Guardar Cambios"
+- tapOn: "btn-save"
 - assertVisible: "Confirmación de Correo"
-- tapOn: "Entendido"
+- tapOn: "btn-close-modal"
+- assertVisible: "Tu perfil y correo se han verificado y actualizado con éxito."
+- tapOn: "OK"
+
 

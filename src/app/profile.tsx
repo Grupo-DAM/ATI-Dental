@@ -229,6 +229,7 @@ export default function ProfileScreen() {
 
             <Text style={styles.label}>Apellidos</Text>
             <TextInput
+              testID="input-lastname"
               style={[styles.input, errors.lastName ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}
               value={lastName}
               onChangeText={setLastName}
