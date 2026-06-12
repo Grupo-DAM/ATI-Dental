@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Login Flow (TDD) should match the baseline visual snapshot of the login screen 1`] = `null`;
