@@ -17,7 +17,8 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
 
   const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    // Expresión regular optimizada contra ataques ReDoS (SonarCloud hotspot)
+    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
   };
 
   const handleRegister = async () => {
