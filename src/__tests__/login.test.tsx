@@ -17,9 +17,22 @@ jest.mock('expo-router', () => ({
     },
 }));
 
+const mockNetInfoFetch = jest.fn(() => Promise.resolve({
+    isConnected: true,
+    isInternetReachable: true,
+}));
+
+jest.mock('@react-native-community/netinfo', () => ({
+    fetch: () => mockNetInfoFetch(),
+}));
+
 describe('Login Flow (TDD)', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockNetInfoFetch.mockResolvedValue({
+            isConnected: true,
+            isInternetReachable: true,
+        });
     });
 
     it('should authenticate, securely save token and redirect to user if credentials are valid', async() => {
@@ -106,5 +119,30 @@ describe('Login Flow (TDD)', () => {
 
         const validationMessage = await findByText('El formato del correo no es válido.');
         expect(validationMessage).toBeTruthy();
+    });
+
+    it('should detect offline status, block API request and show a connection error message', async () => {
+        mockNetInfoFetch.mockResolvedValueOnce({
+            isConnected: false,
+            isInternetReachable: false,
+        });
+
+        const { getByTestId, findByText } = render(<LoginScreen />);
+
+        const emailInput = getByTestId('email-input');
+        const passwordInput = getByTestId('password-input');
+        const loginButton = getByTestId('login-button');
+
+        fireEvent.changeText(emailInput, 'test@example.com');
+        fireEvent.changeText(passwordInput, 'Password123!');
+        fireEvent.press(loginButton);
+
+        await waitFor(() => {
+            expect(mockLoginFn).not.toHaveBeenCalled();
+        });
+        expect(mockReplace).not.toHaveBeenCalled();
+
+        const networkErrorMessage = await findByText('Error de conexión con el servidor. Intente más tarde.');
+        expect(networkErrorMessage).toBeTruthy();
     });
 });
