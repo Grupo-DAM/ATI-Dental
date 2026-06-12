@@ -34,6 +34,9 @@ jest.mock('@react-native-firebase/firestore', () => {
       return jest.fn(); // unsubscribe
     }),
     add: jest.fn(() => Promise.resolve({ id: 'mock-id' })),
+    get: jest.fn(() => Promise.resolve({ exists: false, data: () => ({}) })),
+    set: jest.fn(() => Promise.resolve()),
+    delete: jest.fn(() => Promise.resolve()),
   };
   
   const mockFirestore = jest.fn(() => mockFirestoreInstance);
@@ -90,6 +93,10 @@ globalThis.triggerAuthStateChange = (user) => {
 };
 
 jest.mock('@react-native-firebase/auth', () => {
+  const GoogleAuthProvider = {
+    credential: jest.fn((idToken) => ({ providerId: 'google.com', token: idToken })),
+  };
+
   const mockAuthInstance = {
     onAuthStateChanged: jest.fn((callback) => {
       globalThis.registeredAuthStateCallback = callback;
@@ -104,6 +111,14 @@ jest.mock('@react-native-firebase/auth', () => {
         getIdToken: jest.fn(() => Promise.resolve('mock-jwt-token')),
       },
     })),
+    signInWithCredential: jest.fn(() => Promise.resolve({
+      user: {
+        uid: 'google-mock-uid',
+        email: 'google@example.com',
+        displayName: 'Google User',
+        getIdToken: jest.fn(() => Promise.resolve('mock-google-jwt')),
+      },
+    })),
     signOut: jest.fn(() => Promise.resolve()),
     createUserWithEmailAndPassword: jest.fn(() => Promise.resolve({
       user: {
@@ -114,6 +129,29 @@ jest.mock('@react-native-firebase/auth', () => {
     })),
   };
   const mockAuth = jest.fn(() => mockAuthInstance);
-  return mockAuth;
+  return {
+    __esModule: true,
+    default: mockAuth,
+    GoogleAuthProvider,
+  };
 });
+
+jest.mock('@react-native-google-signin/google-signin', () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    signIn: jest.fn(),
+    signOut: jest.fn(),
+    hasPlayServices: jest.fn(() => Promise.resolve(true)),
+  },
+  isSuccessResponse: jest.fn(() => true),
+  statusCodes: {
+    SIGN_IN_REQUIRED: 'SIGN_IN_REQUIRED',
+  },
+}));
+
+jest.mock('./src/services/google-auth', () => ({
+  configureGoogleSignIn: jest.fn(),
+  signInWithGoogleNative: jest.fn(() => Promise.resolve('mock-google-id-token')),
+  signOutGoogleNative: jest.fn(() => Promise.resolve()),
+}));
 

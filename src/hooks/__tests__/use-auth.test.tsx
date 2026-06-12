@@ -300,4 +300,53 @@ describe('useAuth Hook', () => {
 
     expect(result.current.error).toBe('Email already in use');
   });
+
+  it('performs loginWithGoogle successfully', async () => {
+    const mockGet = jest.fn(() => Promise.resolve({ exists: false }));
+    const mockSet = jest.fn(() => Promise.resolve());
+    (firestore().collection as jest.Mock).mockReturnValue({
+      doc: jest.fn(() => ({
+        get: mockGet,
+        set: mockSet,
+      })),
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AuthProvider>{children}</AuthProvider>
+    );
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    let credential: any;
+    await act(async () => {
+      credential = await result.current.loginWithGoogle();
+    });
+
+    expect(auth().signInWithCredential).toHaveBeenCalled();
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'google@example.com',
+        rol: 'usuario_externo',
+        estado: 'pendiente',
+      }),
+    );
+    expect(credential.user.uid).toBe('google-mock-uid');
+  });
+
+  it('handles loginWithGoogle errors correctly', async () => {
+    const { signInWithGoogleNative } = require('../../services/google-auth');
+    (signInWithGoogleNative as jest.Mock).mockRejectedValueOnce(new Error('Google cancelado'));
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AuthProvider>{children}</AuthProvider>
+    );
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    await act(async () => {
+      await expect(result.current.loginWithGoogle()).rejects.toThrow('Google cancelado');
+    });
+
+    expect(result.current.error).toBe('Google cancelado');
+  });
 });

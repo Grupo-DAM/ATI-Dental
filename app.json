@@ -44,6 +44,12 @@
       ],
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.REEMPLAZAR_POR_CLIENT_ID_IOS"
+        }
+      ],
       "expo-secure-store"
     ],
     "experiments": {
@@ -52,6 +58,7 @@
     },
     "extra": {
       "router": {},
+      "googleWebClientId": "247829730975-lqa9vhcde2kifevn2b0v023iob227kp0.apps.googleusercontent.com",
       "eas": {
         "projectId": "c5743ef2-0fbf-4655-9d16-0329162451ef"
       }

@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { auth, firestore } from '../config/firebase';
 import { saveSessionToken, removeSessionToken } from '../utils/secure-storage';
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { FirebaseAuthTypes, GoogleAuthProvider } from '@react-native-firebase/auth';
+import {
+  signInWithGoogleNative,
+  signOutGoogleNative,
+} from '../services/google-auth';
 
 /**
  * Representa el perfil del usuario autenticado en la aplicación.
@@ -25,6 +29,8 @@ interface AuthContextType {
   error: string | null;
   /** Iniciar sesión con email y contraseña (US-16) */
   login: (email: string, password: string) => Promise<FirebaseAuthTypes.UserCredential>;
+  /** Iniciar sesión con Google (PoC: Google Sign-In → Firebase Auth) */
+  loginWithGoogle: () => Promise<FirebaseAuthTypes.UserCredential>;
   /** Cerrar la sesión del usuario actual */
   logout: () => Promise<void>;
   /** Registrar un nuevo usuario e inicializar su perfil en Firestore (US-19) */
@@ -116,9 +122,38 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     }
   }, []);
 
+  const loginWithGoogle = useCallback(async () => {
+    setError(null);
+    try {
+      const idToken = await signInWithGoogleNative();
+      const credential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await auth().signInWithCredential(credential);
+      const firebaseUser = userCredential.user;
+
+      const userDoc = firestore().collection('usuarios').doc(firebaseUser.uid);
+      const snapshot = await userDoc.get();
+      if (!snapshot.exists) {
+        await userDoc.set({
+          nombre: firebaseUser.displayName ?? '',
+          alias: '',
+          email: firebaseUser.email,
+          rol: 'usuario_externo',
+          estado: 'pendiente',
+          fechaCreacion: firestore.FieldValue.serverTimestamp(),
+        });
+      }
+
+      return userCredential;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     setError(null);
     try {
+      await signOutGoogleNative();
       await auth().signOut();
       await removeSessionToken();
       setUser(null);
@@ -160,9 +195,10 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     loading,
     error,
     login,
+    loginWithGoogle,
     logout,
     register
-  }), [user, loading, error, login, logout, register]);
+  }), [user, loading, error, login, loginWithGoogle, logout, register]);
 
   return (
     <AuthContext.Provider value={authValue}>
