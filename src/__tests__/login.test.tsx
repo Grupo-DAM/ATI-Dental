@@ -49,7 +49,7 @@ describe('Login Flow (TDD)', () => {
     it('should show clear error message and not redirect if credentials are invalid', async() => {
         mockLoginFn.mockRejectedValueOnce({
             code: 'auth/invalid-credential',
-            message: 'The provided征 credentials are not valid.'
+            message: 'The provided credentials are not valid.'
         });
 
         const { getByTestId, findByText, queryByText } = render(<LoginScreen />);
@@ -74,5 +74,18 @@ describe('Login Flow (TDD)', () => {
 
         const rawBackendError = queryByText('auth/invalid-credential');
         expect(rawBackendError).toBeNull();
+    });
+
+    it('should block API request and set visual warning if input fields are empty', async () => {
+        const { getByTestId, findByText } = render(<LoginScreen />);
+
+        const loginButton = getByTestId('login-button');
+
+        fireEvent.press(loginButton);
+        expect(mockLoginFn).not.toHaveBeenCalled();
+        expect(mockReplace).not.toHaveBeenCalled();
+
+        const validationMessage = await findByText('Por favor, rellena todos los campos.');
+        expect(validationMessage).toBeTruthy();
     });
 });

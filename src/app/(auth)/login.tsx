@@ -17,13 +17,24 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const { login } = useAuth();
     const [hasError, setHasError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const emptyErrorMessage = 'Por favor, rellena todos los campos.';
+    const wrongCredentialsMessage = 'El correo o la contraseña son incorrectos.';
 
     const handleLogin = async () => {
+        setHasError(false);
+
+        if (email === "" || password === "") {
+            setHasError(true)
+            setErrorMessage(emptyErrorMessage);
+            return
+        }
         try {
             await login(email, password);
             router.replace('/(tabs)/home');
         } catch (error: any) {
             setHasError(true);
+            setErrorMessage(wrongCredentialsMessage);
         }
     };
     return (
@@ -59,7 +70,7 @@ export default function LoginScreen() {
              />
             {hasError && (
                 <ThemedText style={styles.errorText}>
-                    El correo o la contraseña son incorrectos.
+                    {errorMessage}
                 </ThemedText>
             )}
             <Button
@@ -104,7 +115,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     },
     socialMediaBtns: {
         flexDirection: 'row',
-
+        justifyContent: 'space-between',
     },
     errorText: {
         color: theme.error,
