@@ -1,6 +1,7 @@
 import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 import { AnimatedIcon } from '@/components/animated-icon';
 import { HintRow } from '@/components/hint-row';
@@ -54,6 +55,22 @@ export default function HomeScreen() {
             hint={<ThemedText type="code">npm run reset-project</ThemedText>}
           />
         </ThemedView>
+
+        <View style={{ width: '100%', gap: 10, marginTop: 16 }}>
+          <TouchableOpacity 
+            onPress={() => router.push('/register')} 
+            style={{ padding: 16, backgroundColor: '#0a7ea4', borderRadius: 8, alignItems: 'center' }}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Ir a Registro</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={() => router.push('/verify-code')} 
+            style={{ padding: 16, backgroundColor: '#2e78b7', borderRadius: 8, alignItems: 'center' }}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Ir a Validación de Código (OTP)</Text>
+          </TouchableOpacity>
+        </View>
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
