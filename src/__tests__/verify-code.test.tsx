@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import VerifyCodeScreen from '../verify-code';
+import VerifyCodeScreen from '../app/(tabs)/verify-code';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';

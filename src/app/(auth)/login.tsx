@@ -148,7 +148,7 @@ export default function LoginScreen() {
                     </ThemedText>
                     <ThemedText
                         style={styles.signInLink}
-                        onPress={() => Linking.openURL('https://reactnative.dev')}>
+                        onPress={() => router.replace('/(tabs)/home')}>
                         Registrarse
                     </ThemedText>
                 </ThemedView>
@@ -169,7 +169,7 @@ export default function LoginScreen() {
                             source={GoogleIcon}
                             style={[styles.icon]}
                         />
-                        <ThemedText style={styles.buttonText}>
+                        <ThemedText style={[styles.buttonText, {color: theme.text}]}>
                             Google
                         </ThemedText>
                     </Pressable>
@@ -184,7 +184,7 @@ export default function LoginScreen() {
                             source={MicrosoftIcon}
                             style={[styles.icon]}
                         />
-                        <ThemedText style={styles.buttonText}>
+                        <ThemedText style={[styles.buttonText, {color: theme.text}]}>
                             Microsoft
                         </ThemedText>
                     </Pressable>
@@ -244,10 +244,10 @@ const createStyles = (theme: any) => StyleSheet.create({
         marginBottom: 16,
     },
     buttonPressed: {
-        opacity: 0.8,                // Se atenúa ligeramente al hacer clic
+        opacity: 0.8,
     },
     buttonText: {
-        color: '#ffffff',            // Asegúrate de que contraste con theme.main
+        color: '#ffffff',
         fontSize: 16,
         fontWeight: '600',
     },

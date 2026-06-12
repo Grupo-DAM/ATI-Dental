@@ -1,5 +1,5 @@
 import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -8,6 +8,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useAuth } from '@/hooks/use-auth';
+import { router } from 'expo-router';
 
 function getDevMenuHint() {
   if (Platform.OS === 'web') {
@@ -29,6 +31,20 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const { logout } = useAuth(); // 💡 Extraemos la función de cerrar sesión de tu hook
+
+  const handleLogout = async () => {
+    try {
+      if (logout) {
+        await logout();
+        // Redirigimos al flujo de login (asumiendo tu estructura de carpetas de Expo Router)
+        router.replace('/(auth)/login');
+      }
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -54,6 +70,19 @@ export default function HomeScreen() {
             hint={<ThemedText type="code">npm run reset-project</ThemedText>}
           />
         </ThemedView>
+
+        {/* 💡 BOTÓN DE CERRAR SESIÓN */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.logoutButton,
+            pressed && styles.logoutButtonPressed
+          ]}
+          onPress={handleLogout}
+        >
+          <ThemedText style={styles.logoutText}>
+            Cerrar sesión
+          </ThemedText>
+        </Pressable>
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
@@ -94,5 +123,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.four,
     borderRadius: Spacing.four,
+  },
+  // ESTILOS DEL BOTÓN DE CERRAR SESIÓN PLACEHOLDER
+  logoutButton: {
+    alignSelf: 'stretch',
+    backgroundColor: '#FF3B30',
+    borderRadius: Spacing.four,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: Spacing.two,
+  },
+  logoutButtonPressed: {
+    opacity: 0.8,
+  },
+  logoutText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
