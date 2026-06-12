@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native'
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import renderer, { act } from 'react-test-renderer';
 import LoginScreen from '../app/(auth)/login';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -109,7 +110,6 @@ describe('Login Flow (TDD)', () => {
         const passwordInput = getByTestId('password-input');
         const loginButton = getByTestId('login-button');
 
-
         fireEvent.changeText(emailInput, 'invalidemail.com');
         fireEvent.changeText(passwordInput, 'Password123!');
         fireEvent.press(loginButton);
@@ -144,5 +144,15 @@ describe('Login Flow (TDD)', () => {
 
         const networkErrorMessage = await findByText('Error de conexión con el servidor. Intente más tarde.');
         expect(networkErrorMessage).toBeTruthy();
+    });
+
+    it('should match the baseline visual snapshot of the login screen', async () => {
+        let tree;
+
+        await act(async () => {
+            tree = renderer.create(<LoginScreen />).toJSON();
+        });
+
+        expect(tree).toMatchSnapshot();
     });
 });
