@@ -1,0 +1,61 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+# =======================================================
+# ESCENARIO 1: VALIDACIÓN DE CAMPOS VACÍOS
+# =======================================================
+- tapOn:
+    id: "login-button"
+- assertVisible: "Por favor, rellena todos los campos."
+
+# =======================================================
+# ESCENARIO 2: VALIDACIÓN DE FORMATO DE CORREO
+# =======================================================
+- tapOn:
+    id: "email-input"
+- inputText: "correoInvalido.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+- assertVisible: "El formato del correo no es válido."
+
+# Limpiamos los campos para el siguiente flujo
+- tapOn:
+    id: "email-input"
+- eraseText
+
+- tapOn:
+      id: "password-input"
+- eraseText
+
+# =======================================================
+# ESCENARIO 3: LOGIN EXITOSO CON FIREBASE REAL Y LOGOUT
+# =======================================================
+- tapOn:
+    id: "email-input"
+- inputText: "soamaia03@gmail.com"    # 🔐 Debe ser un usuario real en tu Authentication de Firebase
+- tapOn:
+    id: "password-input"
+- inputText: "Robin123456"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+
+# Esperamos a que la red viaje a Firebase y Expo Router haga la redirección
+- extendedWaitUntil:
+    visible:
+      id: "welcome-header"     # Texto que pusimos en tu HomeScreen
+    timeout: 10000                 # Le damos hasta 10 segundos por si el internet está lento
+
+# =======================================================
+# ESCENARIO 4: CIERRE DE SESIÓN SEGURO
+# =======================================================
+- tapOn: "Cerrar sesión"           # Hace clic en el botón rojo que agregamos en tu HomeScreen
+
+# Comprobamos que regresamos sanos y salvos a la pantalla de Login
+- extendedWaitUntil:
+    visible: "Bienvenido de nuevo"
+    timeout: 5000
