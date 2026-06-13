@@ -29,7 +29,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   return (
     <View style={[styles.tabBar, { backgroundColor: colors.background }]}>
       <TouchableOpacity
-        onPress={() => handleNavigate('index')}
+        onPress={() => handleNavigate('home')}
         style={styles.tabItem}
       >
         <Image

@@ -174,6 +174,8 @@ describe('useAuth Hook', () => {
       globalAny.triggerAuthStateChange(mockFirebaseUser);
     });
 
+    auth().currentUser = mockFirebaseUser as any;
+
     // Simular error de Firestore
     await act(async () => {
       globalAny.triggerFirestoreError(new Error('Permission Denied'));
@@ -267,12 +269,21 @@ describe('useAuth Hook', () => {
 
     const { result } = renderHook(() => useAuth(), { wrapper });
 
+    const mockSendEmailVerification = jest.fn().mockResolvedValue(undefined);
+    (auth().createUserWithEmailAndPassword as jest.Mock).mockResolvedValueOnce({
+      user: {
+        uid: 'new-uid',
+        sendEmailVerification: mockSendEmailVerification
+      }
+    });
+
     let credential: any;
     await act(async () => {
       credential = await result.current.register('new@example.com', 'password123');
     });
 
     expect(auth().createUserWithEmailAndPassword).toHaveBeenCalledWith('new@example.com', 'password123');
+    expect(mockSendEmailVerification).toHaveBeenCalled();
     expect(firestore().collection).toHaveBeenCalledWith('usuarios');
     expect(mockSet).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -299,5 +310,84 @@ describe('useAuth Hook', () => {
     });
 
     expect(result.current.error).toBe('Email already in use');
+  });
+
+  describe('verifyCode', () => {
+    it('throws error if there is no authenticated user', async () => {
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <AuthProvider>{children}</AuthProvider>
+      );
+      const { result } = renderHook(() => useAuth(), { wrapper });
+      
+      // Mock currentUser as null
+      (auth as unknown as jest.Mock).mockReturnValueOnce({
+        currentUser: null,
+      });
+
+      await act(async () => {
+        await expect(result.current.verifyCode()).rejects.toThrow('No hay usuario autenticado');
+      });
+      expect(result.current.error).toBe('No hay usuario autenticado');
+    });
+
+    it('throws error if email is not verified', async () => {
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <AuthProvider>{children}</AuthProvider>
+      );
+      const { result } = renderHook(() => useAuth(), { wrapper });
+      
+      const mockUser = {
+        uid: 'user-123',
+        emailVerified: false,
+        reload: jest.fn().mockResolvedValue(undefined),
+      };
+      (auth as unknown as jest.Mock).mockReturnValueOnce({
+        currentUser: mockUser,
+      });
+
+      await act(async () => {
+        await expect(result.current.verifyCode()).rejects.toThrow('El correo electrónico aún no ha sido verificado');
+      });
+      expect(result.current.error).toContain('El correo electrónico aún no ha sido verificado');
+    });
+
+    it('updates state and saves token if code is valid', async () => {
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <AuthProvider>{children}</AuthProvider>
+      );
+      const { result } = renderHook(() => useAuth(), { wrapper });
+      
+      const mockGetIdToken = jest.fn().mockResolvedValue('fresh-token-123');
+      const mockUser = {
+        uid: 'user-123',
+        emailVerified: true,
+        reload: jest.fn().mockResolvedValue(undefined),
+        getIdToken: mockGetIdToken,
+      };
+      
+      (auth as unknown as jest.Mock).mockReturnValueOnce({
+        currentUser: mockUser,
+      });
+
+      const mockUpdate = jest.fn().mockResolvedValue(undefined);
+      (firestore().collection as jest.Mock).mockReturnValue({
+        doc: jest.fn(() => ({
+          update: mockUpdate,
+        })),
+      });
+
+      const spySave = jest.spyOn(secureStorage, 'saveSessionToken').mockResolvedValue(undefined);
+
+      await act(async () => {
+        await result.current.verifyCode();
+      });
+
+      expect(mockUser.reload).toHaveBeenCalled();
+
+      expect(mockUpdate).toHaveBeenCalledWith({ estado: 'activo' });
+      expect(mockGetIdToken).toHaveBeenCalledWith(true);
+      expect(spySave).toHaveBeenCalledWith('fresh-token-123');
+      expect(result.current.error).toBeNull();
+    });
   });
 });

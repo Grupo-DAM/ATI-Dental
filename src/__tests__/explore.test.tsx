@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import TabTwoScreen from '../explore';
+import TabTwoScreen from '../app/(tabs)/explore';
 
 require('react-native-reanimated').setUpTests();
 

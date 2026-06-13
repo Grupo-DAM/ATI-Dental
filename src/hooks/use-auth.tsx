@@ -29,6 +29,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
   /** Registrar un nuevo usuario e inicializar su perfil en Firestore (US-19) */
   register: (email: string, password: string) => Promise<FirebaseAuthTypes.UserCredential>;
+  /** Verificar que el usuario haya hecho clic en el enlace de correo (US-19) */
+  verifyCode: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,19 +41,23 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Suscribirse a cambios en el estado de autenticación de Firebase
+    let unsubscribeProfile: (() => void) | null = null;
+
     const unsubscribeAuth = auth().onAuthStateChanged(async (firebaseUser) => {
       setError(null);
-      
+
       if (!firebaseUser) {
-        // No hay sesión activa
+        if (unsubscribeProfile) {
+          unsubscribeProfile();
+          unsubscribeProfile = null; // Evitamos ejecuciones duplicadas
+        }
+
         setUser(null);
         await removeSessionToken();
         setLoading(false);
         return;
       }
 
-      // Guardar el token JWT de forma encriptada en SecureStore
       try {
         const token = await firebaseUser.getIdToken();
         await saveSessionToken(token);
@@ -59,9 +65,8 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
         console.error('Error al guardar token JWT tras cambio de sesión:', err);
       }
 
-      // Suscribirse al documento de perfil del usuario en Firestore en tiempo real
-      // para reaccionar a cambios de rol, estado (pendiente -> activo), o idioma
-      const unsubscribeProfile = firestore()
+      if (unsubscribeProfile) unsubscribeProfile();
+      unsubscribeProfile = firestore()
         .collection('usuarios')
         .doc(firebaseUser.uid)
         .onSnapshot(
@@ -78,30 +83,30 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
                 idiomaPreferencia: data.idiomaPreferencia,
               });
             } else {
-              // El documento de Firestore aún no existe (puede estar creándose)
-              // Establecemos datos base del perfil temporalmente
               setUser({
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
-                estado: 'pendiente', // Por defecto para US-19
+                estado: 'pendiente',
               });
             }
             setLoading(false);
           },
           (err) => {
-            console.error('Error al escuchar el perfil del usuario en Firestore:', err);
-            setError(err.message);
+            // Evaluamos de forma defensiva si el error es provocado por el deslogueo reactivo
+            if (auth().currentUser) {
+              console.error('Error al escuchar el perfil del usuario en Firestore:', err);
+              setError(err.message);
+            }
             setLoading(false);
           }
         );
-
-      return () => {
-        unsubscribeProfile();
-      };
     });
 
     return () => {
       unsubscribeAuth();
+      if (unsubscribeProfile) {
+        unsubscribeProfile();
+      }
     };
   }, []);
 
@@ -135,7 +140,10 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
       const credential = await auth().createUserWithEmailAndPassword(email, password);
       const firebaseUser = credential.user;
 
-      // 2. Crear perfil del usuario en Firestore en estado "pendiente" (US-19)
+      // 2. Enviar correo de verificación oficial de Firebase
+      await firebaseUser.sendEmailVerification();
+
+      // 3. Crear perfil del usuario en Firestore en estado "pendiente" (US-19)
       await firestore()
         .collection('usuarios')
         .doc(firebaseUser.uid)
@@ -155,14 +163,45 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     }
   }, []);
 
+  const verifyCode = useCallback(async () => {
+    setError(null);
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) throw new Error('No hay usuario autenticado');
+
+      // Recargamos el usuario para refrescar el estado de verificación desde el servidor
+      await currentUser.reload();
+
+      if (!currentUser.emailVerified) {
+        throw new Error('El correo electrónico aún no ha sido verificado. Por favor revisa tu bandeja de entrada o carpeta de spam y haz clic en el enlace.');
+      }
+
+      // Cambiamos el estado a "activo"
+      await firestore()
+        .collection('usuarios')
+        .doc(currentUser.uid)
+        .update({
+          estado: 'activo',
+        });
+      
+      // Actualizamos el token local (asegura que los claims estén frescos si usaran Cloud Functions)
+      const token = await currentUser.getIdToken(true);
+      await saveSessionToken(token);
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
   const authValue = useMemo(() => ({
     user,
     loading,
     error,
     login,
     logout,
-    register
-  }), [user, loading, error, login, logout, register]);
+    register,
+    verifyCode
+  }), [user, loading, error, login, logout, register, verifyCode]);
 
   return (
     <AuthContext.Provider value={authValue}>
