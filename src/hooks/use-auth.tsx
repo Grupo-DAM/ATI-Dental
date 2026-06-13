@@ -41,19 +41,23 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Suscribirse a cambios en el estado de autenticación de Firebase
+    let unsubscribeProfile: (() => void) | null = null;
+
     const unsubscribeAuth = auth().onAuthStateChanged(async (firebaseUser) => {
       setError(null);
-      
+
       if (!firebaseUser) {
-        // No hay sesión activa
+        if (unsubscribeProfile) {
+          unsubscribeProfile();
+          unsubscribeProfile = null; // Evitamos ejecuciones duplicadas
+        }
+
         setUser(null);
         await removeSessionToken();
         setLoading(false);
         return;
       }
 
-      // Guardar el token JWT de forma encriptada en SecureStore
       try {
         const token = await firebaseUser.getIdToken();
         await saveSessionToken(token);
@@ -61,9 +65,8 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
         console.error('Error al guardar token JWT tras cambio de sesión:', err);
       }
 
-      // Suscribirse al documento de perfil del usuario en Firestore en tiempo real
-      // para reaccionar a cambios de rol, estado (pendiente -> activo), o idioma
-      const unsubscribeProfile = firestore()
+      if (unsubscribeProfile) unsubscribeProfile();
+      unsubscribeProfile = firestore()
         .collection('usuarios')
         .doc(firebaseUser.uid)
         .onSnapshot(
@@ -80,30 +83,30 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
                 idiomaPreferencia: data.idiomaPreferencia,
               });
             } else {
-              // El documento de Firestore aún no existe (puede estar creándose)
-              // Establecemos datos base del perfil temporalmente
               setUser({
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
-                estado: 'pendiente', // Por defecto para US-19
+                estado: 'pendiente',
               });
             }
             setLoading(false);
           },
           (err) => {
-            console.error('Error al escuchar el perfil del usuario en Firestore:', err);
-            setError(err.message);
+            // Evaluamos de forma defensiva si el error es provocado por el deslogueo reactivo
+            if (auth().currentUser) {
+              console.error('Error al escuchar el perfil del usuario en Firestore:', err);
+              setError(err.message);
+            }
             setLoading(false);
           }
         );
-
-      return () => {
-        unsubscribeProfile();
-      };
     });
 
     return () => {
       unsubscribeAuth();
+      if (unsubscribeProfile) {
+        unsubscribeProfile();
+      }
     };
   }, []);
 

@@ -1,3 +1,4 @@
+// src/app/(tabs)/explore.tsx
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import React from 'react';
@@ -12,7 +13,7 @@ import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-export default function TabTwoScreen() {
+export default function ExploreScreen() {
   const safeAreaInsets = useSafeAreaInsets();
   const insets = {
     ...safeAreaInsets,
@@ -62,12 +63,12 @@ export default function TabTwoScreen() {
         <ThemedView style={styles.sectionsWrapper}>
           <Collapsible title="File-based routing">
             <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
+              This app is isolated using Route Groups. The entry point is{' '}
+              <ThemedText type="code">src/app/index.tsx</ThemedText> which redirects to either the auth flow or the tabs flow.
             </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
+            <ThemedText type="small" style={{ marginTop: Spacing.two }}>
+              Your login sits in <ThemedText type="code">src/app/(auth)/login.tsx</ThemedText> and this screen sits in{' '}
+              <ThemedText type="code">src/app/(tabs)/explore.tsx</ThemedText>
             </ThemedText>
             <ExternalLink href="https://docs.expo.dev/router/introduction">
               <ThemedText type="linkPrimary">Learn more</ThemedText>

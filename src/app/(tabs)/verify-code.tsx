@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, View, Button, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Button, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NetInfo from '@react-native-community/netinfo';
 import { useAuth } from '@/hooks/use-auth';

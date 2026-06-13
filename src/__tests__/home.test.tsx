@@ -1,6 +1,7 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
-import HomeScreen from '../index';
+import { render, waitFor } from '@testing-library/react-native';
+import HomeScreen from '../app/(tabs)/home';
+import { AuthProvider } from '@/hooks/use-auth';
 
 // Una utilidad matemática simple para verificar que Jest ejecuta lógica pura sin problemas.
 const sumValues = (a: number, b: number) => a + b;
@@ -12,9 +13,15 @@ describe('Smoke Test: Pure Logic', () => {
 });
 
 describe('HomeScreen', () => {
-  it('renders correctly and contains welcome text', () => {
-    const { getByText, toJSON } = render(<HomeScreen />);
-    expect(getByText(/Welcome to/i)).toBeTruthy();
+  it('renders correctly and contains welcome text', async () => {
+    const { getByText, toJSON } = render(
+        <AuthProvider>
+            <HomeScreen />
+        </AuthProvider>
+    );
+    await waitFor(() => {
+      expect(getByText(/Welcome to/i)).toBeTruthy();
+    });
     //assert to verify the render is not null
     expect(toJSON()).toBeTruthy();
   });
