@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Platform, StyleSheet, TextInput, TextInputProps, Pressable, Image, Linking } from 'react-native';
-import { SymbolView } from 'expo-symbols';
+import { StyleSheet, TextInput, TextInputProps, Pressable, Image, Linking } from 'react-native';
 
 import { Fonts, ThemeColor, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -11,12 +10,12 @@ const EyeIcon = require('@/assets/icons/eye.png');
 const EyeSlashedIcon = require('@/assets/icons/eye-slashed.png');
 
 export type ThemedTextInputProps = TextInputProps & {
-    fieldName?: String
+    fieldName?: string;
     themeColor?: ThemeColor;
     isSecure?: boolean;
     icon?: ImageSourcePropType;
     error?: boolean;
-    errorMessage?: String;
+    errorMessage?: string;
 };
 
 export function ThemedTextInput({
@@ -35,7 +34,7 @@ export function ThemedTextInput({
   const [passwordVisible, setPasswordVisible] = useState(!isSecure);
 
   const activeTextColor = themeColor ? theme[themeColor] : theme.text;
-  const iconColor = '#9E8BAC' || '#888';
+  const iconColor = '#9E8BAC';
   const showErrorMessage = errorMessage !== "";
 
   return (

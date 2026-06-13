@@ -5,8 +5,7 @@ import { ThemedTextInput } from '@/components/themed-text-input';
 import { HorizontalLogo } from '@/components/horizontal-logo';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
-import { Platform, StyleSheet, Image } from 'react-native';
-import { TextInput, Pressable, Button, Alert } from 'react-native';
+import { StyleSheet, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
 
@@ -36,7 +35,7 @@ export default function LoginScreen() {
         setEmailError(false);
         setNetworkError(false);
 
-        let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+        let reg = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
         if (email.trim().length === 0 || password.trim().length === 0) {
             setHasError(true)
@@ -62,6 +61,7 @@ export default function LoginScreen() {
             router.replace('/(tabs)/home');
         } catch (error: any) {
             setHasError(true);
+            console.error("Error en la operación de autenticación:", error);
             setErrorMessage(wrongCredentialsMessage);
         } finally {
             setIsLoading(false);
