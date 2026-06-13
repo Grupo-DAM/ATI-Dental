@@ -4,7 +4,7 @@ import RegisterScreen from '../app/(tabs)/register';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
-import renderer from 'react-test-renderer';
+import renderer, { act } from 'react-test-renderer';
 
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
@@ -33,9 +33,14 @@ describe('RegisterScreen', () => {
     (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: true });
   });
 
-  it('renders correctly and matches snapshot', () => {
-    const tree = renderer.create(<RegisterScreen />).toJSON();
-    expect(tree).toMatchSnapshot();
+  it('renders correctly and matches snapshot', async () => {
+      const { toJSON } = render(<RegisterScreen />);
+
+      await waitFor(() => {
+        expect(toJSON()).toBeTruthy();
+      });
+
+      expect(toJSON()).toMatchSnapshot();
   });
 
   it('shows error if email is invalid', async () => {
@@ -86,7 +91,9 @@ describe('RegisterScreen', () => {
     fireEvent.changeText(getByPlaceholderText('Mínimo 6 caracteres'), '123456');
     fireEvent.changeText(getByPlaceholderText('Vuelve a escribir la contraseña'), '123456');
     
-    fireEvent.press(getByText('Registrarse'));
+    await act(async () => {
+      fireEvent.press(getByText('Registrarse'));
+    });
     
     await waitFor(() => {
       expect(mockRegister).toHaveBeenCalledWith('test@example.com', '123456');
@@ -103,7 +110,9 @@ describe('RegisterScreen', () => {
     fireEvent.changeText(getByPlaceholderText('Mínimo 6 caracteres'), '123456');
     fireEvent.changeText(getByPlaceholderText('Vuelve a escribir la contraseña'), '123456');
     
-    fireEvent.press(getByText('Registrarse'));
+    await act(async () => {
+      fireEvent.press(getByText('Registrarse'));
+    });
     
     expect(await findByText('El correo electrónico ya se encuentra registrado.')).toBeTruthy();
   });

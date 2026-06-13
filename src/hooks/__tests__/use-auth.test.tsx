@@ -174,6 +174,8 @@ describe('useAuth Hook', () => {
       globalAny.triggerAuthStateChange(mockFirebaseUser);
     });
 
+    auth().currentUser = mockFirebaseUser as any;
+
     // Simular error de Firestore
     await act(async () => {
       globalAny.triggerFirestoreError(new Error('Permission Denied'));
