@@ -1,7 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import React from 'react';
 import { useColorScheme } from 'react-native';
-import { Stack } from 'expo-router'; // Importamos Stack de Expo Router
+import { Stack } from 'expo-router';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { AuthProvider } from '@/hooks/use-auth';

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import NetInfo from '@react-native-community/netinfo';
 import auth from '@react-native-firebase/auth';
-import ProfileScreen from '../profile';
+import ProfileScreen from '../app/(tabs)/profile';
 import renderer from 'react-test-renderer';
 
 jest.mock('@react-native-community/netinfo', () => ({

@@ -6,8 +6,8 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { Image } from 'expo-image';
-import { VerificationLinkModal } from '../components/OTPModal';
-import { Colors } from '../constants/theme';
+import { VerificationLinkModal } from '@/components/OTPModal';
+import { Colors } from '@/constants/theme';
 
 export default function ProfileScreen() {
   const [name, setName] = useState('Valeria');
@@ -162,7 +162,7 @@ export default function ProfileScreen() {
 
         <View style={{ alignItems: 'center' }}>
           <Image
-            source={require('../../assets/expo.icon/Assets/logo-dental.svg')}
+            source={require('@/assets/expo.icon/Assets/logo-dental.svg')}
             style={{ width: 28, height: 28, marginBottom: 2 }}
             contentFit="contain"
             tintColor="white"
@@ -198,7 +198,7 @@ export default function ProfileScreen() {
             <View style={styles.avatarRow}>
 
               <Image
-                source={require('../../assets/expo.icon/Assets/avatar.png')}
+                source={require('@/assets/expo.icon/Assets/avatar.png')}
                 style={{ width: 80, height: 80, borderRadius: 40 }}
                 contentFit="cover"
               />
@@ -241,7 +241,7 @@ export default function ProfileScreen() {
             <Text style={styles.label}>Correo Electrónico</Text>
             <View style={[styles.inputWithIcon, errors.email ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}>
               <Image
-                source={require('../../assets/expo.icon/Assets/email.svg')}
+                source={require('@/assets/expo.icon/Assets/email.svg')}
                 style={{ width: 18, height: 18, marginRight: 10 }}
                 contentFit="contain"
                 tintColor="#A0AEC0"
@@ -275,7 +275,7 @@ export default function ProfileScreen() {
         <View style={[styles.cardContainer, { marginTop: 20 }]}>
           <View style={styles.cardHeader}>
             <Image
-              source={require('../../assets/expo.icon/Assets/language.svg')}
+              source={require('@/assets/expo.icon/Assets/language.svg')}
               style={{ width: 24, height: 24, marginRight: 10 }}
               contentFit="contain"
               tintColor={Colors.light.main}
@@ -297,7 +297,7 @@ export default function ProfileScreen() {
               </View>
               {language === 'es' && (
                 <Image
-                  source={require('../../assets/expo.icon/Assets/check_circle.svg')}
+                  source={require('@/assets/expo.icon/Assets/check_circle.svg')}
                   style={{ width: 24, height: 24 }}
                   contentFit="contain"
                   tintColor={Colors.light.main}
@@ -325,7 +325,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity testID="btn-save" onPress={handleSave} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.light.main, borderRadius: 6, paddingVertical: 12, paddingHorizontal: 20 }}>
             <Image
-              source={require('../../assets/expo.icon/Assets/save-icon.svg')}
+              source={require('@/assets/expo.icon/Assets/save-icon.svg')}
               style={{ width: 18, height: 18, marginRight: 8 }}
               contentFit="contain"
               tintColor="white"

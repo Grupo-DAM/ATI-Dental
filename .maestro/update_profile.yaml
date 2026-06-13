@@ -2,7 +2,7 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 - tapOn:
-    id: "profile-button"
+    id: "profile-tab"
 
 - extendedWaitUntil:
     visible: "Perfil e Idioma"

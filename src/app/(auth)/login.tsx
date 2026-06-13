@@ -147,7 +147,7 @@ export default function LoginScreen() {
                     </ThemedText>
                     <ThemedText
                         style={styles.signInLink}
-                        onPress={() => router.replace('/(tabs)/home')}>
+                        onPress={() => router.replace('/register')}>
                         Registrarse
                     </ThemedText>
                 </ThemedView>
