@@ -27,16 +27,25 @@ appId: com.proyect1.ATIDental
     id: "email-input"
 - eraseText
 
+# =======================================================
+# ESCENARIO 3: LOGIN ERRONEO
+# =======================================================
+- tapOn:
+      id: "email-input"
+- inputText: "soamaia03@gmail.com"    # 🔐 Debe ser un usuario real en tu Authentication de Firebase
+- hideKeyboard
+- tapOn:
+      id: "login-button"
+- assertVisible: "El correo o la contraseña son incorrectos."
+
+# Limpiamos los campos para el siguiente flujo
 - tapOn:
       id: "password-input"
 - eraseText
 
 # =======================================================
-# ESCENARIO 3: LOGIN EXITOSO CON FIREBASE REAL Y LOGOUT
+# ESCENARIO 4: LOGIN EXITOSO CON FIREBASE REAL Y LOGOUT
 # =======================================================
-- tapOn:
-    id: "email-input"
-- inputText: "soamaia03@gmail.com"    # 🔐 Debe ser un usuario real en tu Authentication de Firebase
 - tapOn:
     id: "password-input"
 - inputText: "Robin123456"
@@ -51,7 +60,7 @@ appId: com.proyect1.ATIDental
     timeout: 10000                 # Le damos hasta 10 segundos por si el internet está lento
 
 # =======================================================
-# ESCENARIO 4: CIERRE DE SESIÓN SEGURO
+# ESCENARIO 5: CIERRE DE SESIÓN SEGURO
 # =======================================================
 - tapOn: "Cerrar sesión"           # Hace clic en el botón rojo que agregamos en tu HomeScreen
 

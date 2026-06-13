@@ -59,9 +59,8 @@ export default function LoginScreen() {
             }
             await login(email, password);
             router.replace('/(tabs)/home');
-        } catch (error: any) {
+        } catch {
             setHasError(true);
-            console.error("Error en la operación de autenticación:", error);
             setErrorMessage(wrongCredentialsMessage);
         } finally {
             setIsLoading(false);
