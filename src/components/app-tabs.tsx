@@ -75,6 +75,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
+        testID="profile-tab"
         onPress={() => handleNavigate('profile')}
         style={styles.tabItem}>
         <Image

@@ -1,67 +1,154 @@
 appId: com.proyect1.ATIDental
 ---
 - launchApp
-- tapOn: "Perfil"
+- tapOn:
+    id: "profile-button"
+
+- extendedWaitUntil:
+    visible: "Perfil e Idioma"
+    timeout: 10000
 
 # Validar Nombre Vacío
-- tapOn: "input-name"
+- tapOn:
+    id: "input-name"
 - eraseText
-- tapOn: "btn-save"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "btn-save"
+    direction: DOWN
+    timeout: 10000
+    speed: 40
+- tapOn:
+    id: "btn-save"
 - assertVisible: "El nombre no puede estar vacío"
 
 # Restaurar Nombre
-- tapOn: "input-name"
+- tapOn:
+   id: "input-name"
 - inputText: "Valeria"
 
 # Validar Apellido Vacío
-- tapOn: "input-lastname"
+- tapOn:
+   id: "input-lastname"
 - eraseText
-- tapOn: "btn-save"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "btn-save"
+    direction: DOWN
+    timeout: 10000
+    speed: 40
+- tapOn:
+    id: "btn-save"
 - assertVisible: "El apellido no puede estar vacío"
 
 # Restaurar Apellido
-- tapOn: "input-lastname"
+- tapOn:
+    id: "input-lastname"
 - inputText: "Smith"
 
 # Validar Correo Vacío
-- tapOn: "input-email"
+- tapOn:
+    id: "input-email"
 - eraseText
-- tapOn: "btn-save"
+- tapOn:
+    id: "input-email"
+- eraseText
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "btn-save"
+    direction: DOWN
+    timeout: 10000
+    speed: 40
+- tapOn:
+    id: "btn-save"
 - assertVisible: "El correo electrónico no puede estar vacío"
 
 # Validar formato de correo invalido
-- tapOn: "input-email"
+- tapOn:
+    id: "input-email"
 - inputText: "correo-invalido"
-- tapOn: "btn-save"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "btn-save"
+    direction: DOWN
+    timeout: 10000
+    speed: 40
+- tapOn:
+    id: "btn-save"
+- scrollUntilVisible:
+    element:
+      id: "input-email"
+    direction: UP
+    timeout: 10000
+    speed: 40
 - assertVisible: "Formato de correo inválido"
 
 # Correo ya en uso
-- tapOn: "input-email"
+- tapOn:
+    id: "input-email"
 - eraseText
 - inputText: "usado@atidental.com"
-- tapOn: "btn-save"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "btn-save"
+    direction: DOWN
+    timeout: 10000
+    speed: 40
+- tapOn:
+    id: "btn-save"
 - assertVisible: "Este correo ya está registrado en otra cuenta."
 
 # Caida de red
-- tapOn: "input-email"
+- tapOn:
+    id: "input-email"
+- eraseText
+- tapOn:
+    id: "input-email"
 - eraseText
 - inputText: "sinred@atidental.com"
-- tapOn: "btn-save"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "btn-save"
+    direction: DOWN
+    timeout: 10000
+    speed: 40
+- tapOn:
+    id: "btn-save"
 - assertVisible: "Confirmación de Correo"
-- tapOn: "btn-resend-link"
+- tapOn:
+    id: "btn-resend-link"
 - assertVisible: "Sin conexión a internet. Intenta de nuevo."
-- tapOn: "OK"
-- tapOn: "btn-close-modal"
+- tapOn:
+    id: "btn-close-modal"
 - assertVisible: "No se realizaron cambios debido a un error previo."
 - tapOn: "OK"
 
 # Flujo exitoso
-- tapOn: "input-email"
+- tapOn:
+    id: "input-email"
+- eraseText
+- tapOn:
+    id: "input-email"
 - eraseText
 - inputText: "dr.nuevo@atidental.com"
-- tapOn: "btn-save"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "btn-save"
+    direction: DOWN
+    timeout: 10000
+    speed: 40
+- tapOn:
+    id: "btn-save"
 - assertVisible: "Confirmación de Correo"
-- tapOn: "btn-close-modal"
+- tapOn:
+    id: "btn-close-modal"
 - assertVisible: "Tu perfil y correo se han verificado y actualizado con éxito."
 - tapOn: "OK"
 

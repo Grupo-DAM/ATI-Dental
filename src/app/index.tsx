@@ -41,6 +41,7 @@ export default function HomeScreen() {
             Welcome to&nbsp;Expo
           </ThemedText>
           <TouchableOpacity
+            testID="profile-button"
             onPress={() => router.push('/profile')}
             style={{ marginTop: 20, padding: 15, backgroundColor: '#5D3382', borderRadius: 8, alignItems: 'center' }}
           >
