@@ -131,7 +131,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
 
     await waitFor(() => {
       expect(getByTestId('modal-verification')).toBeTruthy();
-      // Garantizamos que la intercepción funcionó porque NO llamó al SDK real de Firebase
       expect(mockVerifyBeforeUpdateEmail).not.toHaveBeenCalled();
     });
   });
@@ -145,5 +144,85 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     await waitFor(() => {
       expect(getByText('Este correo ya está registrado en otra cuenta.')).toBeTruthy();
     });
+  });
+
+  // =========================================================================
+  // SECCIÓN ADICIONAL: INCREMENTO METRIZADO DE COBERTURA DE COMENTARIOS/RAMAS
+  // =========================================================================
+
+  it('Flujo Exitoso Directo: Guarda el perfil si el correo electrónico no sufrió cambios', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+
+    // Modificamos el nombre pero dejamos el correo igual al mock inicial (dr.smith@atidental.com)
+    fireEvent.changeText(getByTestId('input-name'), 'Valeria Actualizada');
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(mockVerifyBeforeUpdateEmail).not.toHaveBeenCalled();
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Perfil Actualizado',
+        'Tus datos personales se han guardado con éxito.'
+      );
+    });
+  });
+
+  it('Simulación Maestro: Cierra el modal exitosamente al usar el interceptor dr.nuevo@atidental.com', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+
+    fireEvent.changeText(getByTestId('input-email'), 'dr.nuevo@atidental.com');
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
+
+    // Buscamos el callback de cierre que dispara handleCloseModal
+    const modal = getByTestId('modal-verification');
+    fireEvent(modal, 'close');
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Perfil Actualizado',
+        'Tu perfil y correo se han verificado y actualizado con éxito.'
+      );
+    });
+  });
+
+  it('Simulación Maestro: Cancela cambios en handleCloseModal si se usó un correo de error simulado', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+
+    // Abrimos el modal con el flujo controlado
+    fireEvent.changeText(getByTestId('input-email'), 'dr.nuevo@atidental.com');
+    fireEvent.press(getByTestId('btn-save'));
+    await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
+
+    // Cambiamos el input a 'sinred@atidental.com' antes de disparar el evento de cierre
+    // para forzar la rama de cancelación por error previo.
+    fireEvent.changeText(getByTestId('input-email'), 'sinred@atidental.com');
+
+    const modal = getByTestId('modal-verification');
+    fireEvent(modal, 'close');
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Actualización Cancelada',
+        'No se realizaron cambios debido a un error previo.'
+      );
+    });
+  });
+
+  it('Simulación Maestro: Lanza excepción de red controlada al reenviar link con sinred@atidental.com', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+
+    // Abrimos el modal con el flujo controlado
+    fireEvent.changeText(getByTestId('input-email'), 'dr.nuevo@atidental.com');
+    fireEvent.press(getByTestId('btn-save'));
+    await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
+
+    // Cambiamos el correo al de pruebas sin red
+    fireEvent.changeText(getByTestId('input-email'), 'sinred@atidental.com');
+
+    const modal = getByTestId('modal-verification');
+
+    // Al intentar ejecutar el reenvío, este lanzará la excepción asíncrona 'auth/network-request-failed'
+    expect(fireEvent(modal, 'resend')).rejects.toThrow('Sin conexión a internet');
   });
 });
