@@ -114,6 +114,7 @@ export default function LoginScreen() {
                     testID="password-input"
                     placeholder="Contraseña"
                     isSecure={true}
+                    login = {true}
                     fieldName="Contraseña"
                     value={password}
                     onChangeText={setPassword}
@@ -146,8 +147,9 @@ export default function LoginScreen() {
                         ¿No tienes una cuenta?
                     </ThemedText>
                     <ThemedText
+                        testID = "signIn-link"
                         style={styles.signInLink}
-                        onPress={() => router.replace('/(tabs)/home')}>
+                        onPress={() => router.replace('/register')}>
                         Registrarse
                     </ThemedText>
                 </ThemedView>
@@ -213,14 +215,6 @@ const createStyles = (theme: any) => StyleSheet.create({
         color: theme.accentText,
         fontSize: 16,
         fontWeight: 'regular'
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 15,
-        color: '#000',
     },
     socialMediaBtns: {
         flexDirection: 'row',

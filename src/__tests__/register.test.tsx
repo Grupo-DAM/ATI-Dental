@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import RegisterScreen from '../app/(tabs)/register';
+import RegisterScreen from '../app/(auth)/register';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
@@ -80,7 +80,7 @@ describe('RegisterScreen', () => {
     
     fireEvent.press(getByText('Registrarse'));
     
-    expect(await findByText('No hay conexión a internet. Por favor, revisa tu red e intenta de nuevo.')).toBeTruthy();
+    expect(await findByText('Error de conexión con el servidor. Intente más tarde.')).toBeTruthy();
     expect(mockRegister).not.toHaveBeenCalled();
   });
 
