@@ -54,6 +54,7 @@ export default function ProfileScreen() {
 
         if (email === 'usado@atidental.com') {
           const errorSimulado = new Error('Email already in use');
+          console.log('Error simulado: Email already in use');
           (errorSimulado as any).code = 'auth/email-already-in-use';
           throw errorSimulado;
         }

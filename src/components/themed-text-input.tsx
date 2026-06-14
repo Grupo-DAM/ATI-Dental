@@ -23,6 +23,7 @@ export function ThemedTextInput({
   placeholder,
   themeColor,
   isSecure = false,
+  login = false,
   icon,
   fieldName,
   error = false,
@@ -43,7 +44,7 @@ export function ThemedTextInput({
             <ThemedText style={styles.label}>
                 {fieldName}
             </ThemedText>
-            {isSecure && (
+            {login && (
                 <ThemedText
                     style={styles.forgotPassword}
                     onPress={() => Linking.openURL('https://reactnative.dev')}>

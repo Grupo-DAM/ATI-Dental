@@ -9,25 +9,639 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
       },
       {
         "flex": 1,
+        "gap": 32,
+        "justifyContent": "center",
+        "padding": 20,
       },
     ]
   }
 >
-  <RNCSafeAreaView
-    edges={
-      {
-        "bottom": "additive",
-        "left": "additive",
-        "right": "additive",
-        "top": "additive",
-      }
-    }
+  <View
     style={
-      {
-        "flex": 1,
-        "justifyContent": "center",
-        "padding": 20,
+      [
+        {
+          "backgroundColor": "#ffffff",
+        },
+        {
+          "gap": 8,
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "backgroundColor": "#ffffff",
+          },
+          [
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "height": 50,
+              "justifyContent": "center",
+            },
+            undefined,
+          ],
+        ]
       }
+    >
+      <Image
+        source={1}
+        style={
+          [
+            {
+              "tintColor": "#5B2D8B",
+            },
+          ]
+        }
+      />
+    </View>
+    <Text
+      style={
+        [
+          {
+            "color": "#141018",
+          },
+          {
+            "fontSize": 16,
+            "fontWeight": 500,
+            "lineHeight": 24,
+          },
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          {
+            "fontSize": 32,
+            "fontWeight": "bold",
+            "textAlign": "center",
+          },
+        ]
+      }
+    >
+      Registro
+    </Text>
+    <Text
+      style={
+        [
+          {
+            "color": "#141018",
+          },
+          {
+            "fontSize": 16,
+            "fontWeight": 500,
+            "lineHeight": 24,
+          },
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          {
+            "color": "#725C8A",
+            "fontSize": 16,
+            "fontWeight": "regular",
+            "textAlign": "center",
+          },
+        ]
+      }
+    >
+      Ingresa tus credenciales para crear tu cuenta
+    </Text>
+  </View>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#ffffff",
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "backgroundColor": "#ffffff",
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#ffffff",
+            },
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "color": "#141018",
+              },
+              {
+                "fontSize": 16,
+                "fontWeight": 500,
+                "lineHeight": 24,
+              },
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              {
+                "color": "#141018",
+                "fontSize": 14,
+                "fontWeight": 500,
+              },
+            ]
+          }
+        >
+          Correo electrónico
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#F0F0F3",
+            },
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": undefined,
+                "borderColor": "#DBD4E2",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "height": 50,
+                "marginBottom": 24,
+                "paddingLeft": 16,
+                "paddingRight": 4,
+              },
+              undefined,
+              false,
+            ],
+          ]
+        }
+      >
+        <TextInput
+          autoCapitalize="none"
+          autoCorrect={false}
+          editable={true}
+          keyboardType="email-address"
+          onChangeText={[Function]}
+          placeholder="ejemplo@correo.com"
+          placeholderTextColor="#9E8BAC"
+          secureTextEntry={false}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 16,
+                "height": "100%",
+                "paddingVertical": 0,
+              },
+              {
+                "color": "#141018",
+                "fontFamily": "System",
+              },
+            ]
+          }
+          testID="email-input"
+          value=""
+        />
+        <Image
+          source={1}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "justifyContent": "center",
+                "margin": 8,
+              },
+              {
+                "tintColor": "#9E8BAC",
+              },
+            ]
+          }
+        />
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "backgroundColor": "#ffffff",
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#ffffff",
+            },
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "color": "#141018",
+              },
+              {
+                "fontSize": 16,
+                "fontWeight": 500,
+                "lineHeight": 24,
+              },
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              {
+                "color": "#141018",
+                "fontSize": 14,
+                "fontWeight": 500,
+              },
+            ]
+          }
+        >
+          Contraseña
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#F0F0F3",
+            },
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": undefined,
+                "borderColor": "#DBD4E2",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "height": 50,
+                "marginBottom": 24,
+                "paddingLeft": 16,
+                "paddingRight": 4,
+              },
+              undefined,
+              false,
+            ],
+          ]
+        }
+      >
+        <TextInput
+          editable={true}
+          onChangeText={[Function]}
+          placeholder="Mínimo 6 caracteres"
+          placeholderTextColor="#9E8BAC"
+          secureTextEntry={true}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 16,
+                "height": "100%",
+                "paddingVertical": 0,
+              },
+              {
+                "color": "#141018",
+                "fontFamily": "System",
+              },
+            ]
+          }
+          testID="password-input"
+          value=""
+        />
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "justifyContent": "center",
+                "padding": 8,
+              },
+              false,
+            ]
+          }
+        >
+          <Image
+            source={1}
+            style={
+              [
+                {
+                  "tintColor": "#9E8BAC",
+                },
+              ]
+            }
+          />
+        </View>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "backgroundColor": "#ffffff",
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#ffffff",
+            },
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "color": "#141018",
+              },
+              {
+                "fontSize": 16,
+                "fontWeight": 500,
+                "lineHeight": 24,
+              },
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              {
+                "color": "#141018",
+                "fontSize": 14,
+                "fontWeight": 500,
+              },
+            ]
+          }
+        >
+          Confirmar Contraseña
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#F0F0F3",
+            },
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": undefined,
+                "borderColor": "#DBD4E2",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "height": 50,
+                "marginBottom": 24,
+                "paddingLeft": 16,
+                "paddingRight": 4,
+              },
+              undefined,
+              false,
+            ],
+          ]
+        }
+      >
+        <TextInput
+          editable={true}
+          onChangeText={[Function]}
+          placeholder="Vuelve a escribir la contraseña"
+          placeholderTextColor="#9E8BAC"
+          secureTextEntry={true}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 16,
+                "height": "100%",
+                "paddingVertical": 0,
+              },
+              {
+                "color": "#141018",
+                "fontFamily": "System",
+              },
+            ]
+          }
+          testID="confirm-password-input"
+          value=""
+        />
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "justifyContent": "center",
+                "padding": 8,
+              },
+              false,
+            ]
+          }
+        >
+          <Image
+            source={1}
+            style={
+              [
+                {
+                  "tintColor": "#9E8BAC",
+                },
+              ]
+            }
+          />
+        </View>
+      </View>
+    </View>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": false,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "backgroundColor": "#5B2D8B",
+            "borderRadius": 8,
+            "height": 48,
+            "justifyContent": "center",
+            "marginBottom": 16,
+            "marginTop": 8,
+          },
+          false,
+        ]
+      }
+      testID="signIn-button"
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "#141018",
+            },
+            {
+              "fontSize": 16,
+              "fontWeight": 500,
+              "lineHeight": 24,
+            },
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            {
+              "color": "#ffffff",
+              "fontSize": 16,
+              "fontWeight": "600",
+            },
+          ]
+        }
+      >
+        Registrarse
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#ffffff",
+        },
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 8,
+          "justifyContent": "center",
+        },
+      ]
     }
   >
     <Text
@@ -36,11 +650,10 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           {
             "color": "#141018",
           },
-          false,
           {
-            "fontSize": 48,
-            "fontWeight": 600,
-            "lineHeight": 52,
+            "fontSize": 16,
+            "fontWeight": 500,
+            "lineHeight": 24,
           },
           false,
           false,
@@ -48,187 +661,47 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           false,
           false,
           false,
+          false,
           {
-            "marginBottom": 24,
+            "color": "#725C8A",
+            "fontSize": 14,
+            "fontWeight": "regular",
             "textAlign": "center",
           },
         ]
       }
     >
-      Registro
+      ¿Ya tienes cuenta?
     </Text>
-    <View
+    <Text
+      onPress={[Function]}
       style={
-        {
-          "gap": 8,
-        }
+        [
+          {
+            "color": "#141018",
+          },
+          {
+            "fontSize": 16,
+            "fontWeight": 500,
+            "lineHeight": 24,
+          },
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          {
+            "color": "#5B2D8B",
+            "fontSize": 14,
+            "fontWeight": "bold",
+          },
+        ]
       }
     >
-      <View
-        style={
-          {
-            "marginBottom": 4,
-          }
-        }
-      >
-        <Text
-          style={
-            {
-              "color": "#444",
-              "fontSize": 15,
-              "fontWeight": "bold",
-              "marginBottom": 8,
-            }
-          }
-        >
-          Correo Electrónico
-        </Text>
-        <TextInput
-          autoCapitalize="none"
-          keyboardType="email-address"
-          onChangeText={[Function]}
-          placeholder="ejemplo@correo.com"
-          style={
-            {
-              "backgroundColor": "#fff",
-              "borderColor": "#ccc",
-              "borderRadius": 8,
-              "borderWidth": 1,
-              "padding": 12,
-            }
-          }
-          value=""
-        />
-      </View>
-      <View
-        style={
-          {
-            "marginBottom": 4,
-          }
-        }
-      >
-        <Text
-          style={
-            {
-              "color": "#444",
-              "fontSize": 15,
-              "fontWeight": "bold",
-              "marginBottom": 8,
-            }
-          }
-        >
-          Contraseña
-        </Text>
-        <TextInput
-          onChangeText={[Function]}
-          placeholder="Mínimo 6 caracteres"
-          secureTextEntry={true}
-          style={
-            {
-              "backgroundColor": "#fff",
-              "borderColor": "#ccc",
-              "borderRadius": 8,
-              "borderWidth": 1,
-              "padding": 12,
-            }
-          }
-          value=""
-        />
-      </View>
-      <View
-        style={
-          {
-            "marginBottom": 4,
-          }
-        }
-      >
-        <Text
-          style={
-            {
-              "color": "#444",
-              "fontSize": 15,
-              "fontWeight": "bold",
-              "marginBottom": 8,
-            }
-          }
-        >
-          Confirmar Contraseña
-        </Text>
-        <TextInput
-          onChangeText={[Function]}
-          placeholder="Vuelve a escribir la contraseña"
-          secureTextEntry={true}
-          style={
-            {
-              "backgroundColor": "#fff",
-              "borderColor": "#ccc",
-              "borderRadius": 8,
-              "borderWidth": 1,
-              "padding": 12,
-            }
-          }
-          value=""
-        />
-      </View>
-      <View
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "opacity": 1,
-          }
-        }
-      >
-        <View
-          style={
-            [
-              {},
-            ]
-          }
-        >
-          <Text
-            style={
-              [
-                {
-                  "color": "#007AFF",
-                  "fontSize": 18,
-                  "margin": 8,
-                  "textAlign": "center",
-                },
-              ]
-            }
-          >
-            Registrarse
-          </Text>
-        </View>
-      </View>
-    </View>
-  </RNCSafeAreaView>
+      Iniciar sesión
+    </Text>
+  </View>
 </View>
 `;
