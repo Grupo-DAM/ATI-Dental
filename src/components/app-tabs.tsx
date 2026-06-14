@@ -1,17 +1,18 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { useTheme } from '@/hooks/use-theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function AppTabs() {
+    const renderTabBar = useCallback((props: any) => <CustomTabBar {...props} />, []);
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
       }}
-      tabBar={CustomTabBar}
+      tabBar={renderTabBar}
     >
       <Tabs.Screen name="home" options={{ title: 'Inicio' }} />
       <Tabs.Screen name="explore" options={{ title: 'Pacientes' }} />
@@ -19,15 +20,6 @@ export default function AppTabs() {
     </Tabs>
   );
 }
-
-const getTabPaddingBottom = (os: typeof Platform.OS, bottomInset: number): number => {
-  if (os === 'ios') {
-    return bottomInset > 0 ? bottomInset : 24;
-  }
-
-  // Condicional para Android / otros
-  return bottomInset > 0 ? bottomInset + 4 : 12;
-};
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const colors = useTheme();
@@ -39,7 +31,14 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   };
 
   // Dynamic padding compensation for iOS gestures and Android navigation bars
-  const dynamicPaddingBottom = getTabPaddingBottom(Platform.OS, insets.bottom);
+  let dynamicPaddingBottom = 12;
+
+  if (Platform.OS === 'ios') {
+      dynamicPaddingBottom = insets.bottom > 0 ? insets.bottom : 24;
+  } else {
+      // Lógica para Android
+      dynamicPaddingBottom = insets.bottom > 0 ? insets.bottom + 4 : 12;
+  }
 
   return (
     <View
