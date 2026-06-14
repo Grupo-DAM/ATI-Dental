@@ -146,6 +146,17 @@ describe('Login Flow (TDD)', () => {
         expect(networkErrorMessage).toBeTruthy();
     });
 
+    it('should redirect to register page', async () => {
+        const { getByTestId } = render(<LoginScreen />);
+
+        const sigInLink = getByTestId('signIn-link');
+
+        fireEvent.press(sigInLink);
+        await waitFor(() => {
+            expect(mockReplace).toHaveBeenCalledWith('/register');
+        });
+    });
+
     it('should match the baseline visual snapshot of the login screen', async () => {
         let tree;
 

@@ -11,7 +11,7 @@ export default function AppTabs() {
       screenOptions={{
         headerShown: false,
       }}
-      tabBar={(props) => <CustomTabBar {...props} />}
+      tabBar={CustomTabBar}
     >
       <Tabs.Screen name="home" options={{ title: 'Inicio' }} />
       <Tabs.Screen name="explore" options={{ title: 'Pacientes' }} />
@@ -19,6 +19,15 @@ export default function AppTabs() {
     </Tabs>
   );
 }
+
+const getTabPaddingBottom = (os: typeof Platform.OS, bottomInset: number): number => {
+  if (os === 'ios') {
+    return bottomInset > 0 ? bottomInset : 24;
+  }
+
+  // Condicional para Android / otros
+  return bottomInset > 0 ? bottomInset + 4 : 12;
+};
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const colors = useTheme();
@@ -30,17 +39,17 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   };
 
   // Dynamic padding compensation for iOS gestures and Android navigation bars
-  const dynamicPaddingBottom = Platform.OS === 'ios'
-    ? (insets.bottom > 0 ? insets.bottom : 24)
-    : (insets.bottom > 0 ? insets.bottom + 4 : 12);
+  const dynamicPaddingBottom = getTabPaddingBottom(Platform.OS, insets.bottom);
 
   return (
-    <View style={[
-      styles.tabBar,
-      {
-        backgroundColor: colors.background,
-        paddingBottom: dynamicPaddingBottom,
-      }
+    <View
+      testID='tabBar'
+      style={[
+          styles.tabBar,
+          {
+            backgroundColor: colors.background,
+            paddingBottom: dynamicPaddingBottom,
+          }
     ]}>
       {/* 1. HOME TAB */}
       <TouchableOpacity
@@ -81,6 +90,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
       <View style={styles.floatingButtonContainer}>
         <TouchableOpacity
+          testID = 'center-btn'
           activeOpacity={0.8}
           style={[styles.floatingButton, { backgroundColor: colors.main }]}
           onPress={() => {

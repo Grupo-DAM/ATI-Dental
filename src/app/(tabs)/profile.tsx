@@ -50,7 +50,7 @@ export default function ProfileScreen() {
     }
     if (!email.trim()) {
       newErrors.email = 'El correo electrónico no puede estar vacío';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
       newErrors.email = 'Formato de correo inválido';
     }
 
@@ -67,12 +67,13 @@ export default function ProfileScreen() {
 
     try {
         if (email === 'usado@atidental.com') {
-            // Para prueba maestro
             console.log('Interceptando correo de prueba: usado@atidental.com');
-            throw {
-              code: 'auth/email-already-in-use',
-              message: 'The email address is already in use by another account.'
-            };
+
+            const firebaseError = new Error('The email address is already in use by another account.');
+
+            (firebaseError as any).code = 'auth/email-already-in-use';
+
+            throw firebaseError;
         }
 
         if (email === 'dr.nuevo@atidental.com') {

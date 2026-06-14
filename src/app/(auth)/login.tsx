@@ -147,6 +147,7 @@ export default function LoginScreen() {
                         ¿No tienes una cuenta?
                     </ThemedText>
                     <ThemedText
+                        testID = "signIn-link"
                         style={styles.signInLink}
                         onPress={() => router.replace('/register')}>
                         Registrarse

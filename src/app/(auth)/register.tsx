@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, View, Button, Text, ActivityIndicator, Pressable, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, Pressable, Image } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { useAuth } from '@/hooks/use-auth';
 import { ThemedText } from '@/components/themed-text';
@@ -203,18 +202,18 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold'
   },
-  labelContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: 8
-  },
-  label: {
-      color: theme.accentText,
-      fontSize: 14,
-      fontWeight: 'regular',
-      textAlign: 'center'
-  },
+    labelContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8
+    },
+    label: {
+        color: theme.accentText,
+        fontSize: 14,
+        fontWeight: 'regular',
+        textAlign: 'center'
+    },
     titleContainer: {
         gap: 8
     },
@@ -245,12 +244,6 @@ const createStyles = (theme: any) => StyleSheet.create({
         color: '#ffffff',
         fontSize: 16,
         fontWeight: '600',
-    },
-    labelContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 8
     },
     popupTitle: {
         color: theme.error,

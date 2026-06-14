@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import auth from '@react-native-firebase/auth';
 import ProfileScreen from '../app/(tabs)/profile';
@@ -14,7 +15,9 @@ jest.mock('@react-native-firebase/auth', () => {
   return () => ({
     currentUser: {
       email: 'dr.smith@atidental.com',
+      displayName: 'Valeria Smith',
       verifyBeforeUpdateEmail: mockVerifyBeforeUpdateEmail,
+      updateProfile: jest.fn().mockResolvedValue(true),
     },
   });
 });
@@ -22,9 +25,14 @@ jest.mock('@react-native-firebase/auth', () => {
 describe('ProfileScreen - Enlace de Verificación de Correo', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: true });
     mockVerifyBeforeUpdateEmail.mockResolvedValue(true);
   });
+
+  // ========================================================
+  // TUS PRUEBAS ORIGINALES (INTACTAS)
+  // ========================================================
 
   it('Caso Borde 3: Falla validación síncrona si el correo es inválido', async () => {
     const { getByTestId, getByText } = render(<ProfileScreen />);
@@ -90,9 +98,52 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     });
   });
 
-    it('Coincide con la instantánea (Snapshot Test)', () => {
-      const tree = renderer.create(<ProfileScreen />).toJSON();
-      expect(tree).toMatchSnapshot();
-    });
-});
+  it('Coincide con la instantánea (Snapshot Test)', () => {
+    let tree;
 
+    act(() => {
+        tree = renderer.create(<ProfileScreen />).toJSON();
+    });
+
+    expect(tree).toMatchSnapshot();
+  });
+
+  // ========================================================
+  // NUEVAS PRUEBAS DE COBERTURA (SIN ROMPER LAS ANTERIORES)
+  // ========================================================
+
+  it('Caso Borde 3.3: Falla validación síncrona si el apellido está vacío', async () => {
+    const { getByTestId, getByText } = render(<ProfileScreen />);
+
+    fireEvent.changeText(getByTestId('input-lastname'), '');
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(getByText('El apellido no puede estar vacío')).toBeTruthy();
+    });
+  });
+
+  it('Simulación Maestro: Intercepta dr.nuevo@atidental.com y abre el modal sin llamar a Firebase', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+
+    fireEvent.changeText(getByTestId('input-email'), 'dr.nuevo@atidental.com');
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(getByTestId('modal-verification')).toBeTruthy();
+      // Garantizamos que la intercepción funcionó porque NO llamó al SDK real de Firebase
+      expect(mockVerifyBeforeUpdateEmail).not.toHaveBeenCalled();
+    });
+  });
+
+  it('Simulación Maestro: Muestra error en pantalla si el correo ya está en uso', async () => {
+    const { getByTestId, getByText } = render(<ProfileScreen />);
+
+    fireEvent.changeText(getByTestId('input-email'), 'usado@atidental.com');
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(getByText('Este correo ya está registrado en otra cuenta.')).toBeTruthy();
+    });
+  });
+});

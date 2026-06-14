@@ -36,6 +36,21 @@ export const VerificationLinkModal = ({ visible, email, onResend, onClose }: Ver
       }
     };
 
+    const renderStatusContent = () => {
+      if (loading) {
+        return <ActivityIndicator color={currentColors.main} style={{ marginBottom: Spacing.three }} />;
+      }
+
+      if (message) {
+        return (
+          <Text style={{ color: currentColors.main, marginBottom: Spacing.three, fontWeight: '600' }}>
+            {message}
+          </Text>
+        );
+      }
+
+      return null;
+    };
 
   return (
     <Modal visible={visible} transparent testID="modal-verification">
@@ -53,11 +68,7 @@ export const VerificationLinkModal = ({ visible, email, onResend, onClose }: Ver
             Por favor, revisa tu bandeja de entrada y haz clic en el enlace para completar la actualización de tu perfil.
           </Text>
 
-          {loading ? (
-            <ActivityIndicator color={currentColors.main} style={{ marginBottom: Spacing.three }} />
-          ) : message ? (
-            <Text style={{ color: currentColors.main, marginBottom: Spacing.three, fontWeight: '600' }}>{message}</Text>
-          ) : null}
+          {renderStatusContent()}
 
           <TouchableOpacity
             testID="btn-resend-link"
