@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import NetInfo from '@react-native-community/netinfo';
 import auth from '@react-native-firebase/auth';
 import * as SecureStore from 'expo-secure-store';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { Image } from 'expo-image';
@@ -10,15 +10,33 @@ import { VerificationLinkModal } from '@/components/OTPModal';
 import { Colors } from '@/constants/theme';
 
 export default function ProfileScreen() {
-  const [name, setName] = useState('Valeria');
-  const [lastName, setLastName] = useState('Smith');
-  const [email, setEmail] = useState('valerria02@gmail.com');
+  const [name, setName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('+34 600 000 000');
   const [bio, setBio] = useState('');
 
   const [errors, setErrors] = useState<{ name?: string; lastName?: string; email?: string }>({});
   const [showModal, setShowModal] = useState(false);
   const [language, setLanguage] = useState('es');
+
+  useEffect(() => {
+    const user = auth().currentUser;
+
+    if (user) {
+      const displayName = user.displayName || '';
+      const nameParts = displayName.split(' ');
+
+      setName(nameParts[0] || 'Usuario');
+      setLastName(nameParts.slice(1).join(' ') || 'Dental');
+      setEmail(user.email || '');
+    } else {
+      console.log('ProfileScreen: No hay sesión activa de Firebase. Cargando mock para pruebas.');
+      setName('Valeria');
+      setLastName('Smith');
+      setEmail('valerria02@gmail.com');
+    }
+  }, []);
 
   const handleSave = async () => {
     setErrors({});
@@ -48,26 +66,31 @@ export default function ProfileScreen() {
     }
 
     try {
+        if (email === 'usado@atidental.com') {
+            // Para prueba maestro
+            console.log('Interceptando correo de prueba: usado@atidental.com');
+            throw {
+              code: 'auth/email-already-in-use',
+              message: 'The email address is already in use by another account.'
+            };
+        }
+
+        if (email === 'dr.nuevo@atidental.com') {
+            console.log('Interceptando correo de prueba exitoso: dr.nuevo@atidental.com');
+            setShowModal(true); // Abrimos directamente el modal de verificación
+            return;             // Detenemos la ejecución evitando llamar a Firebase real
+        }
+
       const user = auth().currentUser;
       if (!user) {
         console.warn('Firebase Auth: No hay usuario activo. Usando flujo simulado para pruebas.');
-
-        if (email === 'usado@atidental.com') {
-          const errorSimulado = new Error('Email already in use');
-          console.log('Error simulado: Email already in use');
-          (errorSimulado as any).code = 'auth/email-already-in-use';
-          throw errorSimulado;
-        }
-
         setShowModal(true);
         return;
       }
 
       if (email === user.email) {
-        Alert.alert(
-          'Sin cambios',
-          `El correo ingresado es el mismo que tiene tu usuario logueado actualmente.`
-        );
+        await user.updateProfile({ displayName: `${name.trim()} ${lastName.trim()}` });
+        Alert.alert('Perfil Actualizado', 'Tus datos personales se han guardado con éxito.');
         return;
       }
 
@@ -82,7 +105,6 @@ export default function ProfileScreen() {
       }
     }
   };
-
 
   const handleResendLink = async () => {
     if (email === 'sinred@atidental.com') {
@@ -108,6 +130,11 @@ export default function ProfileScreen() {
   };
 
   const handleCloseModal = async () => {
+      if (email === 'dr.nuevo@atidental.com') {
+          setShowModal(false);
+          Alert.alert('Perfil Actualizado', 'Tu perfil y correo se han verificado y actualizado con éxito.');
+          return;
+      }
     if (email === 'sinred@atidental.com' || email === 'usado@atidental.com') {
       setShowModal(false);
       Alert.alert('Actualización Cancelada', 'No se realizaron cambios debido a un error previo.');
@@ -125,28 +152,19 @@ export default function ProfileScreen() {
             'Verificación Pendiente',
             'No hemos detectado la verificación de tu nuevo correo electrónico.',
             [
-              {
-                text: 'Seguir Esperando',
-                style: 'cancel',
-              },
-              {
-                text: 'Cerrar',
-                style: 'destructive',
-                onPress: () => {
-                  setShowModal(false);
-                },
-              },
+              { text: 'Seguir Esperando', style: 'cancel' },
+              { text: 'Cerrar', style: 'destructive', onPress: () => setShowModal(false) },
             ]
           );
           return;
         }
 
+        // Si ya se verificó el correo, actualizamos también el nombre en el perfil de Firebase
+        await user.updateProfile({ displayName: `${name.trim()} ${lastName.trim()}` });
         token = (await user.getIdToken(true)) || token;
       }
 
       await SecureStore.setItemAsync('userToken', token);
-      console.log('Token JWT guardado cifrado en SecureStore:', token);
-
       setShowModal(false);
       Alert.alert('Perfil Actualizado', 'Tu perfil y correo se han verificado y actualizado con éxito.');
     } catch (e) {
@@ -158,9 +176,7 @@ export default function ProfileScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: '#F8F9FA' }}>
       <View style={styles.header}>
-
         <Ionicons name="menu" size={36} color="white" />
-
         <View style={{ alignItems: 'center' }}>
           <Image
             source={require('@/assets/expo.icon/Assets/logo-dental.svg')}
@@ -174,7 +190,6 @@ export default function ProfileScreen() {
         </View>
       </View>
       <ScrollView style={{ flex: 1 }}>
-
         <View style={styles.breadcrumbContainer}>
           <Text style={styles.breadcrumbGray}>Pacientes</Text>
           <Text style={styles.breadcrumbChevron}>   ›   </Text>
@@ -189,7 +204,6 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.cardContainer}>
-
           <View style={styles.cardHeader}>
             <Ionicons name="person" size={24} color={Colors.light.main} style={{ marginRight: 10 }} />
             <Text style={styles.cardHeaderTitle}>Información Personal</Text>
@@ -197,7 +211,6 @@ export default function ProfileScreen() {
 
           <View style={styles.cardBody}>
             <View style={styles.avatarRow}>
-
               <Image
                 source={require('@/assets/expo.icon/Assets/avatar.png')}
                 style={{ width: 80, height: 80, borderRadius: 40 }}
@@ -224,9 +237,7 @@ export default function ProfileScreen() {
               value={name}
               onChangeText={setName}
             />
-            {errors.name ? (
-              <Text style={styles.errorText}>{errors.name}</Text>
-            ) : null}
+            {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
 
             <Text style={styles.label}>Apellidos</Text>
             <TextInput
@@ -235,9 +246,7 @@ export default function ProfileScreen() {
               value={lastName}
               onChangeText={setLastName}
             />
-            {errors.lastName ? (
-              <Text style={styles.errorText}>{errors.lastName}</Text>
-            ) : null}
+            {errors.lastName ? <Text style={styles.errorText}>{errors.lastName}</Text> : null}
 
             <Text style={styles.label}>Correo Electrónico</Text>
             <View style={[styles.inputWithIcon, errors.email ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}>
@@ -345,7 +354,6 @@ export default function ProfileScreen() {
     </View >
   );
 }
-
 const styles = StyleSheet.create({
   header: {
     backgroundColor: Colors.light.header,

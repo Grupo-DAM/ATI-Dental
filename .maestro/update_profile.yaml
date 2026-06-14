@@ -1,6 +1,22 @@
 appId: com.proyect1.ATIDental
 ---
 - launchApp
+
+- tapOn:
+    id: "email-input"
+- inputText: "soamaia03@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Robin123456"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-header"
+    timeout: 10000
+
 - tapOn:
     id: "profile-tab"
 
