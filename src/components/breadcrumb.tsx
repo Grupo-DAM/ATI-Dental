@@ -7,7 +7,7 @@ export type BreadcrumbProps = {
   current: string;
 };
 
-export function Breadcrumb({ parent, current }: BreadcrumbProps) {
+export function Breadcrumb({ parent, current }: Readonly<BreadcrumbProps>) {
   return (
     <View style={styles.container}>
       <Text style={styles.parentText}>{parent}</Text>

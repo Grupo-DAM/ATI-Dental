@@ -78,6 +78,160 @@ describe('ContactsScreen', () => {
     });
   });
 
+  it('debe manejar error al abrir email (Linking.canOpenURL = false) y permitir copiar al portapapeles', async () => {
+    jest.spyOn(Linking, 'canOpenURL').mockResolvedValue(false);
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    
+    const { getByTestId } = render(<ContactsScreen />);
+    const emailBtn = getByTestId('btn-contact-email');
+    fireEvent.press(emailBtn);
+    
+    await waitFor(() => {
+      expect(Linking.canOpenURL).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalledWith(
+        'Contacto por Email',
+        expect.stringContaining('No se pudo abrir el gestor de correo'),
+        expect.any(Array)
+      );
+    });
+
+    const buttons = alertSpy.mock.calls[0][2];
+    const copyBtn = buttons.find(b => b.text === 'Copiar al Portapapeles');
+    expect(copyBtn).toBeDefined();
+    
+    copyBtn.onPress();
+    expect(Clipboard.setString).toHaveBeenCalledWith('admin@ejemplo.com');
+    expect(alertSpy).toHaveBeenLastCalledWith('Copiado', 'Dirección de correo copiada al portapapeles.');
+  });
+
+  it('debe manejar error al abrir email (Linking.canOpenURL lanza excepcion) y permitir copiar', async () => {
+    jest.spyOn(Linking, 'canOpenURL').mockRejectedValue(new Error('error canOpenURL'));
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    
+    const { getByTestId } = render(<ContactsScreen />);
+    const emailBtn = getByTestId('btn-contact-email');
+    fireEvent.press(emailBtn);
+    
+    await waitFor(() => {
+      expect(Linking.canOpenURL).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalledWith(
+        'Contacto por Email',
+        expect.stringContaining('No se pudo abrir el gestor de correo'),
+        expect.any(Array)
+      );
+    });
+  });
+
+  it('debe manejar error al hacer llamada (Linking.canOpenURL = false) y permitir copiar al portapapeles', async () => {
+    jest.spyOn(Linking, 'canOpenURL').mockResolvedValue(false);
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    
+    const { getByTestId } = render(<ContactsScreen />);
+    const phoneBtn = getByTestId('btn-contact-phone');
+    fireEvent.press(phoneBtn);
+    
+    await waitFor(() => {
+      expect(Linking.canOpenURL).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalledWith(
+        'Llamada Telefónica',
+        expect.stringContaining('Este dispositivo no admite llamadas telefónicas'),
+        expect.any(Array)
+      );
+    });
+
+    const buttons = alertSpy.mock.calls[0][2];
+    const copyBtn = buttons.find(b => b.text === 'Copiar al Portapapeles');
+    expect(copyBtn).toBeDefined();
+    
+    copyBtn.onPress();
+    expect(Clipboard.setString).toHaveBeenCalledWith('+123456789');
+    expect(alertSpy).toHaveBeenLastCalledWith('Copiado', 'Número copiado al portapapeles.');
+  });
+
+  it('debe manejar error al abrir WhatsApp (Linking.openURL lanza error)', async () => {
+    jest.spyOn(Linking, 'openURL').mockRejectedValue(new Error('WhatsApp error'));
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    
+    const { getByTestId } = render(<ContactsScreen />);
+    const waBtn = getByTestId('btn-contact-whatsapp');
+    fireEvent.press(waBtn);
+    
+    await waitFor(() => {
+      expect(Linking.openURL).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalledWith('Error', 'No se pudo abrir la aplicación de WhatsApp ni el navegador.');
+    });
+  });
+
+  it('debe abrir la URL de Instagram al presionar el canal de Instagram', async () => {
+    const { getAllByText } = render(<ContactsScreen />);
+    const instagramBtn = getAllByText('Instagram')[0];
+    fireEvent.press(instagramBtn);
+
+    await waitFor(() => {
+      expect(Linking.openURL).toHaveBeenCalledWith(
+        expect.stringContaining('instagram')
+      );
+    });
+  });
+
+  it('debe abrir la URL de Facebook al presionar el canal de Facebook', async () => {
+    const { getAllByText } = render(<ContactsScreen />);
+    const facebookBtn = getAllByText('Facebook')[0];
+    fireEvent.press(facebookBtn);
+
+    await waitFor(() => {
+      expect(Linking.openURL).toHaveBeenCalledWith(
+        expect.stringContaining('facebook')
+      );
+    });
+  });
+
+  it('debe manejar error al abrir redes sociales (Linking.openURL lanza error)', async () => {
+    jest.spyOn(Linking, 'openURL').mockRejectedValue(new Error('Social error'));
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    
+    const { getAllByText } = render(<ContactsScreen />);
+    const instagramBtn = getAllByText('Instagram')[0];
+    fireEvent.press(instagramBtn);
+
+    await waitFor(() => {
+      expect(Linking.openURL).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalledWith('Error', expect.stringContaining('No se pudo abrir el enlace de instagram'));
+    });
+  });
+
+  it('debe abrir la URL de Instagram al presionar una tarjeta de publicación de Instagram', async () => {
+    const { getByText } = render(<ContactsScreen />);
+    const postTitle = getByText('¡Nueva tecnología en clínica!');
+    fireEvent.press(postTitle);
+
+    await waitFor(() => {
+      expect(Linking.openURL).toHaveBeenCalledWith(
+        expect.stringContaining('instagram')
+      );
+    });
+  });
+
+  it('debe llamar a handleEmailPress e handlePhonePress desde una tarjeta de responsable', async () => {
+    const { getAllByTestId } = render(<ContactsScreen />);
+    const emailQuickBtns = getAllByTestId('btn-quick-email');
+    const phoneQuickBtns = getAllByTestId('btn-quick-phone');
+    
+    fireEvent.press(emailQuickBtns[0]);
+    await waitFor(() => {
+      expect(Linking.openURL).toHaveBeenCalledWith(
+        expect.stringContaining('mailto:admin@ejemplo.com')
+      );
+    });
+
+    fireEvent.press(phoneQuickBtns[0]);
+    await waitFor(() => {
+      expect(Linking.openURL).toHaveBeenCalledWith(
+        expect.stringContaining('tel:+123456789')
+      );
+    });
+  });
+
   it('Coincide con la instantánea (Snapshot Test)', () => {
     let tree;
     act(() => {

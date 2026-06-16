@@ -9,7 +9,7 @@ export type ContactButtonProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-export function ContactButton({ type, onPress, style }: ContactButtonProps) {
+export function ContactButton({ type, onPress, style }: Readonly<ContactButtonProps>) {
   let backgroundColor = Colors.light.main;
   let text = 'Enviar Correo';
   let iconName: keyof typeof Ionicons.glyphMap = 'mail';
