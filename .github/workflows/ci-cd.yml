@@ -77,7 +77,7 @@ jobs:
             npm install --ignore-scripts
           fi
           # Como usamos --ignore-scripts por seguridad, ejecutamos patch-package manualmente
-          npx patch-package
+          ./node_modules/.bin/patch-package
 
       - name: Run Jest Test Suite
         run: |
@@ -120,7 +120,7 @@ jobs:
             npm install --ignore-scripts
           fi
           # Como usamos --ignore-scripts por seguridad, ejecutamos patch-package manualmente
-          npx patch-package
+          ./node_modules/.bin/patch-package
 
       - name: Setup Expo and EAS CLI
         uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8
