@@ -71,11 +71,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci --ignore-scripts
-          else
-            npm install --ignore-scripts
-          fi
+          npm ci --ignore-scripts
           # Como usamos --ignore-scripts por seguridad, ejecutamos patch-package manualmente
           ./node_modules/.bin/patch-package
 
@@ -114,11 +110,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci --ignore-scripts
-          else
-            npm install --ignore-scripts
-          fi
+          npm ci --ignore-scripts
           # Como usamos --ignore-scripts por seguridad, ejecutamos patch-package manualmente
           ./node_modules/.bin/patch-package
 
