@@ -315,6 +315,7 @@ export default function ProfileScreen() {
             </Text>
 
             <TouchableOpacity
+              testID="btn-lang-es"
               style={[styles.languageOption, language === 'es' && { borderColor: Colors.light.main, borderWidth: 2 }]}
               onPress={() => setLanguage('es')}
             >
@@ -333,6 +334,7 @@ export default function ProfileScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
+              testID="btn-lang-en"
               style={[styles.languageOption, language === 'en' && { borderColor: Colors.light.main, borderWidth: 2 }]}
               onPress={() => setLanguage('en')}
             >

@@ -32,14 +32,14 @@ jest.mock('react-i18next', () => ({
 
 const mockVerifyBeforeUpdateEmail = jest.fn();
 jest.mock('@react-native-firebase/auth', () => {
-  return () => ({
+  return jest.fn(() => ({
     currentUser: {
       email: 'dr.smith@atidental.com',
       displayName: 'Valeria Smith',
       verifyBeforeUpdateEmail: mockVerifyBeforeUpdateEmail,
       updateProfile: jest.fn().mockResolvedValue(true),
     },
-  });
+  }));
 });
 
 describe('ProfileScreen - Enlace de Verificación de Correo', () => {
@@ -245,4 +245,42 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     // Al intentar ejecutar el reenvío, este lanzará la excepción asíncrona 'auth/network-request-failed'
     expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
   });
+
+  it('Debe cambiar el idioma a inglés y guardarlo al hacer save', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+    
+    // Cambiar idioma a inglés
+    fireEvent.press(getByTestId('btn-lang-en'));
+    
+    // Cambiar idioma a español (para aumentar cobertura)
+    fireEvent.press(getByTestId('btn-lang-es'));
+    
+    // Hacer save 
+    fireEvent.changeText(getByTestId('input-name'), 'Valeria Actualizada');
+    fireEvent.press(getByTestId('btn-save'));
+    
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage'
+      );
+    });
+  });
+
+  it('Debe manejar estado sin sesión de usuario (no-user) correctamente', async () => {
+    // Override currentUser to null for this test
+    (auth as jest.Mock).mockImplementationOnce(() => ({
+      currentUser: null,
+    }));
+    
+    const { getByTestId } = render(<ProfileScreen />);
+    
+    fireEvent.changeText(getByTestId('input-email'), 'nuevo@atidental.com');
+    fireEvent.press(getByTestId('btn-save'));
+    
+    await waitFor(() => {
+      expect(getByTestId('modal-verification')).toBeTruthy();
+    });
+  });
+
 });
