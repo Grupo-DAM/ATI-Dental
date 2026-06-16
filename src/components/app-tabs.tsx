@@ -17,6 +17,7 @@ export default function AppTabs() {
       <Tabs.Screen name="home" options={{ title: 'Inicio' }} />
       <Tabs.Screen name="explore" options={{ title: 'Pacientes' }} />
       <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
+      <Tabs.Screen name="contacts" options={{ title: 'Contacto' }} />
     </Tabs>
   );
 }

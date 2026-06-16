@@ -3,6 +3,7 @@ export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 export ANDROID_HOME=/home/miguel-ciavato/Android/Sdk
 export NVM_DIR=/home/miguel-ciavato/.nvm
 export PATH="$JAVA_HOME/bin:$NVM_DIR/versions/node/v20.19.4/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+export ELECTRON_DISABLE_SANDBOX=1
 
 echo "JAVA_HOME=$JAVA_HOME"
 echo "Node: $(node --version) -> $(which node)"

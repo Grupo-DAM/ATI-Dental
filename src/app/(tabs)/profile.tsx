@@ -8,6 +8,8 @@ import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View 
 import { Image } from 'expo-image';
 import { VerificationLinkModal } from '@/components/OTPModal';
 import { Colors } from '@/constants/theme';
+import { AppHeader } from '@/components/app-header';
+import { Breadcrumb } from '@/components/breadcrumb';
 
 export default function ProfileScreen() {
   const [name, setName] = useState('');
@@ -176,26 +178,9 @@ export default function ProfileScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F8F9FA' }}>
-      <View style={styles.header}>
-        <Ionicons name="menu" size={36} color="white" />
-        <View style={{ alignItems: 'center' }}>
-          <Image
-            source={require('@/assets/expo.icon/Assets/logo-dental.svg')}
-            style={{ width: 28, height: 28, marginBottom: 2 }}
-            contentFit="contain"
-            tintColor="white"
-          />
-          <Text style={[styles.headerTitle, { fontSize: 14, fontWeight: 'bold' }]}>
-            ATI Dental
-          </Text>
-        </View>
-      </View>
+      <AppHeader />
       <ScrollView style={{ flex: 1 }}>
-        <View style={styles.breadcrumbContainer}>
-          <Text style={styles.breadcrumbGray}>Pacientes</Text>
-          <Text style={styles.breadcrumbChevron}>   ›   </Text>
-          <Text style={styles.breadcrumbPurple}>Perfil e Idioma</Text>
-        </View>
+        <Breadcrumb parent="Pacientes" current="Perfil e Idioma" />
 
         <View style={styles.titleSection}>
           <Text style={styles.mainTitle}>Perfil e Idioma</Text>
@@ -356,32 +341,8 @@ export default function ProfileScreen() {
   );
 }
 const styles = StyleSheet.create({
-  header: {
-    backgroundColor: Colors.light.header,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 15,
-  },
-  headerTitle: {
-    color: 'white',
-    fontSize: 22,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  breadcrumbContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EDF2F7',
-  },
-  breadcrumbGray: { color: '#718096', fontSize: 14 },
-  breadcrumbChevron: { color: '#CBD5E0', fontSize: 14 },
-  breadcrumbPurple: { color: Colors.light.header, fontSize: 14, fontWeight: '600' },
+
+
 
   titleSection: {
     paddingHorizontal: 20,

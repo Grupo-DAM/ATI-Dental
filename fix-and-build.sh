@@ -15,11 +15,15 @@ echo "Node: $(node --version) -> $(which node)"
 echo "NPM:  $(npm --version)"
 echo ""
 
-cd /home/miguel-ciavato/Documents/github-repos/ati-dental-mobile
+cd /home/miguel-ciavato/Documents/github-repos/ati-dental-mobile/android
 
 echo "Deteniendo daemons de Gradle..."
-cd android && ./gradlew --stop 2>/dev/null
+./gradlew --stop 2>/dev/null
 echo ""
+
+echo "Limpiando caché de CMake (.cxx) y builds anteriores para evitar GLOB mismatch..."
+rm -rf app/.cxx app/build build .gradle
+
 # -Pandroid.overrideNumberOfProcessors=2 limita el número de núcleos que Gradle y Ninja 
 # usarán para compilar. Esto evita que tu Ubuntu se congele o se quede sin RAM (OOM),
 # pero sin romper la configuración de CMake.
