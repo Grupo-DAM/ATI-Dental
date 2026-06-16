@@ -6,6 +6,13 @@ import { ContactButton } from '../contact/contact-button';
 import { ResponsibleCard } from '../contact/responsible-card';
 
 // Mock dependencies
+const mockPush = jest.fn();
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
 jest.mock('expo-image', () => ({
   Image: 'Image',
 }));
@@ -39,6 +46,16 @@ describe('Módulo de Contacto - Componentes Reutilizables', () => {
       fireEvent.press(menuBtn);
       
       expect(mockMenuPress).toHaveBeenCalledTimes(1);
+    });
+
+    it('debe navegar a /contacts si no se proporciona onMenuPress', () => {
+      mockPush.mockClear();
+      const { getByTestId } = render(<AppHeader />);
+      
+      const menuBtn = getByTestId('menu-btn');
+      fireEvent.press(menuBtn);
+      
+      expect(mockPush).toHaveBeenCalledWith('/contacts');
     });
   });
 

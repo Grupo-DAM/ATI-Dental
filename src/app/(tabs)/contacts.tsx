@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { ContactButton } from '@/components/contact/contact-button';
@@ -38,7 +39,7 @@ const responsibles = [
     role: 'Gerente de Operaciones',
     description: 'Encargada de la logística diaria, recursos humanos y gestión de citas.',
     isOnline: false,
-    imageUrl: { uri: 'https://images.unsplash.com/photo-1594824813573-246434de83fb?auto=format&fit=crop&w=256&h=256&q=80' },
+    imageUrl: { uri: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&h=256&q=80' },
   },
   {
     id: '3',
@@ -237,13 +238,19 @@ export default function ContactsScreen() {
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => handleSocialLinkPress('instagram')}
-              style={styles.socialChannelHeader}
             >
-              <Ionicons name="logo-instagram" size={22} color="#E1306C" style={styles.socialIcon} />
-              <View>
-                <Text style={styles.socialName}>Instagram</Text>
-                <Text style={styles.socialTag}>@ati_dental</Text>
-              </View>
+              <LinearGradient
+                colors={['#833AB4', '#E1306C', '#F56040']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.socialChannelHeader}
+              >
+                <Ionicons name="logo-instagram" size={22} color="#FFFFFF" style={styles.socialIcon} />
+                <View>
+                  <Text style={[styles.socialName, { color: '#FFFFFF' }]}>Instagram</Text>
+                  <Text style={[styles.socialTag, { color: '#FFFFFF' }]}>@ati_dental</Text>
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.instagramScroll}>
@@ -380,6 +387,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    padding: 12,
+    borderRadius: 8,
   },
   socialIcon: {
     marginRight: 10,
