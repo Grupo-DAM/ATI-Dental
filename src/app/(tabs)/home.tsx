@@ -71,6 +71,19 @@ export default function HomeScreen() {
           />
         </ThemedView>
 
+        {/* BOTÓN PARA PANTALLA DE EJEMPLO DE CONTACTO */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.exampleButton,
+            pressed && styles.logoutButtonPressed
+          ]}
+          onPress={() => router.push('/contact-example')}
+        >
+          <ThemedText style={styles.exampleText}>
+            Ver Pantalla de Ejemplo (Contacto)
+          </ThemedText>
+        </Pressable>
+
         {/* 💡 BOTÓN DE CERRAR SESIÓN */}
         <Pressable
           style={({ pressed }) => [
@@ -138,6 +151,20 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   logoutText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  exampleButton: {
+    alignSelf: 'stretch',
+    backgroundColor: '#5B2D8B', // Eminence Colors
+    borderRadius: Spacing.four,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: Spacing.two,
+  },
+  exampleText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
