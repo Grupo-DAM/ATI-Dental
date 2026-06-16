@@ -44,6 +44,12 @@ jest.mock('expo-image', () => ({
   Image: 'Image',
 }));
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
 // ========================================================
 // SUITE DE TESTS UNITARIOS
 // ========================================================
@@ -57,10 +63,10 @@ describe('AppTabs Component & CustomTabBar', () => {
   it('debe renderizar correctamente todos los textos del TabBar', () => {
     render(<AppTabs />);
 
-    expect(screen.getByText('Inicio')).toBeTruthy();
-    expect(screen.getByText('Pacientes')).toBeTruthy();
-    expect(screen.getByText('Agenda')).toBeTruthy();
-    expect(screen.getByText('Perfil')).toBeTruthy();
+    expect(screen.getByText('tabs.home')).toBeTruthy();
+    expect(screen.getByText('tabs.explore')).toBeTruthy();
+    expect(screen.getByText('tabs.agenda')).toBeTruthy();
+    expect(screen.getByText('tabs.profile')).toBeTruthy();
   });
 
   it('should call the navigation function after pressing an available Tab', () => {
@@ -96,7 +102,7 @@ describe('AppTabs Component & CustomTabBar', () => {
 
     render(<AppTabs />);
 
-    const agendaTab = screen.getByText('Agenda').parent;
+    const agendaTab = screen.getByText('tabs.agenda').parent;
     if (agendaTab) {
       fireEvent.press(agendaTab);
     }
@@ -120,8 +126,8 @@ describe('AppTabs Component & CustomTabBar', () => {
 
     render(<AppTabs />);
 
-    const textInicio = screen.getByText('Inicio');
-    const textPacientes = screen.getByText('Pacientes');
+    const textInicio = screen.getByText('tabs.home');
+    const textPacientes = screen.getByText('tabs.explore');
 
     expect(StyleSheet.flatten(textInicio.props.style)).toMatchObject({ color: mockColors.textSecondary });
     expect(StyleSheet.flatten(textPacientes.props.style)).toMatchObject({ color: mockColors.main });
