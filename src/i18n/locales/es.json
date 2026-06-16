@@ -1,0 +1,40 @@
+{
+  "profile": {
+    "title": "Perfil e Idioma",
+    "subtitle": "Administra tu información personal y las preferencias de idioma del sistema.",
+    "personalInfo": "Información Personal",
+    "profilePicture": "Foto de Perfil",
+    "change": "Cambiar",
+    "remove": "Eliminar",
+    "avatarHelp": "JPG, GIF o PNG. Max 1MB.",
+    "firstName": "Nombre",
+    "lastName": "Apellidos",
+    "email": "Correo Electrónico",
+    "phone": "Teléfono",
+    "bio": "Bio Profesional",
+    "bioPlaceholder": "Breve descripción para el perfil público.",
+    "interfaceLanguage": "Idioma de la Interfaz",
+    "languageDesc": "Selecciona el idioma preferido para la interfaz del sistema ATI Dental.",
+    "spanish": "Español",
+    "spanishDesc": "Idioma predeterminado para México y Latam.",
+    "english": "English (Inglés)",
+    "englishDesc": "Standard interface language.",
+    "cancel": "Cancelar",
+    "saveChanges": "Guardar Cambios",
+    "alerts": {
+      "updatedTitle": "Perfil Actualizado",
+      "updatedMessage": "Tus datos personales se han guardado con éxito.",
+      "updatedVerifiedMessage": "Tu perfil y correo se han verificado y actualizado con éxito.",
+      "errorTitle": "Error",
+      "noInternet": "Sin conexión a internet",
+      "canceledTitle": "Actualización Cancelada",
+      "canceledMessage": "No se realizaron cambios debido a un error previo.",
+      "emptyName": "El nombre no puede estar vacío",
+      "emptyLastName": "El apellido no puede estar vacío",
+      "emptyEmail": "El correo electrónico no puede estar vacío",
+      "invalidEmail": "Formato de correo inválido",
+      "emailInUse": "Este correo ya está registrado en otra cuenta.",
+      "updateError": "Ocurrió un error al intentar actualizar el correo."
+    }
+  }
+}

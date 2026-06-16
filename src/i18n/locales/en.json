@@ -1,0 +1,40 @@
+{
+  "profile": {
+    "title": "Profile & Language",
+    "subtitle": "Manage your personal information and system language preferences.",
+    "personalInfo": "Personal Information",
+    "profilePicture": "Profile Picture",
+    "change": "Change",
+    "remove": "Remove",
+    "avatarHelp": "JPG, GIF, or PNG. Max 1MB.",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "bio": "Professional Bio",
+    "bioPlaceholder": "Short description for public profile.",
+    "interfaceLanguage": "Interface Language",
+    "languageDesc": "Select your preferred language for the ATI Dental system interface.",
+    "spanish": "Spanish",
+    "spanishDesc": "Default language for Mexico and Latam.",
+    "english": "English",
+    "englishDesc": "Standard interface language.",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "alerts": {
+      "updatedTitle": "Profile Updated",
+      "updatedMessage": "Your personal data has been saved successfully.",
+      "updatedVerifiedMessage": "Your profile and email have been verified and updated successfully.",
+      "errorTitle": "Error",
+      "noInternet": "No internet connection",
+      "canceledTitle": "Update Canceled",
+      "canceledMessage": "No changes were made due to a previous error.",
+      "emptyName": "First name cannot be empty",
+      "emptyLastName": "Last name cannot be empty",
+      "emptyEmail": "Email cannot be empty",
+      "invalidEmail": "Invalid email format",
+      "emailInUse": "This email is already registered to another account.",
+      "updateError": "An error occurred while trying to update the email."
+    }
+  }
+}

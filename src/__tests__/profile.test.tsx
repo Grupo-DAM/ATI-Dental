@@ -10,6 +10,26 @@ jest.mock('@react-native-community/netinfo', () => ({
   fetch: jest.fn(),
 }));
 
+jest.mock('@react-native-firebase/firestore', () => {
+  return () => ({
+    collection: jest.fn(() => ({
+      doc: jest.fn(() => ({
+        update: jest.fn().mockResolvedValue(true),
+      })),
+    })),
+  });
+});
+
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: {
+      language: 'es',
+      changeLanguage: jest.fn().mockResolvedValue(true),
+    },
+  }),
+}));
+
 const mockVerifyBeforeUpdateEmail = jest.fn();
 jest.mock('@react-native-firebase/auth', () => {
   return () => ({
@@ -41,7 +61,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     fireEvent.press(getByTestId('btn-save'));
 
     await waitFor(() => {
-      expect(getByText('Formato de correo inválido')).toBeTruthy();
+      expect(getByText('profile.alerts.invalidEmail')).toBeTruthy();
       expect(mockVerifyBeforeUpdateEmail).not.toHaveBeenCalled();
     });
   });
@@ -54,7 +74,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     fireEvent.press(getByTestId('btn-save'));
 
     await waitFor(() => {
-      expect(getByText('El nombre no puede estar vacío')).toBeTruthy();
+      expect(getByText('profile.alerts.emptyName')).toBeTruthy();
       expect(mockVerifyBeforeUpdateEmail).not.toHaveBeenCalled();
     });
   });
@@ -119,7 +139,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     fireEvent.press(getByTestId('btn-save'));
 
     await waitFor(() => {
-      expect(getByText('El apellido no puede estar vacío')).toBeTruthy();
+      expect(getByText('profile.alerts.emptyLastName')).toBeTruthy();
     });
   });
 
@@ -142,7 +162,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     fireEvent.press(getByTestId('btn-save'));
 
     await waitFor(() => {
-      expect(getByText('Este correo ya está registrado en otra cuenta.')).toBeTruthy();
+      expect(getByText('profile.alerts.emailInUse')).toBeTruthy();
     });
   });
 
@@ -160,8 +180,8 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     await waitFor(() => {
       expect(mockVerifyBeforeUpdateEmail).not.toHaveBeenCalled();
       expect(Alert.alert).toHaveBeenCalledWith(
-        'Perfil Actualizado',
-        'Tus datos personales se han guardado con éxito.'
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage'
       );
     });
   });
@@ -180,8 +200,8 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
 
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
-        'Perfil Actualizado',
-        'Tu perfil y correo se han verificado y actualizado con éxito.'
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedVerifiedMessage'
       );
     });
   });
@@ -203,8 +223,8 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
 
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
-        'Actualización Cancelada',
-        'No se realizaron cambios debido a un error previo.'
+        'profile.alerts.canceledTitle',
+        'profile.alerts.canceledMessage'
       );
     });
   });
@@ -223,6 +243,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     const modal = getByTestId('modal-verification');
 
     // Al intentar ejecutar el reenvío, este lanzará la excepción asíncrona 'auth/network-request-failed'
-    expect(fireEvent(modal, 'resend')).rejects.toThrow('Sin conexión a internet');
+    expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
   });
 });
