@@ -20,11 +20,11 @@ jest.setTimeout(120000); // 2 minutes for reassure performance measurements
 describe('Performance testing', () => {
   it('HomeScreen renders fast enough', async () => {
     await measureRenders(<HomeScreen />);
-    expect(true).toBe(true);
+    expect(HomeScreen).toBeDefined();
   });
 
   it('ProfileScreen renders fast enough without performance regressions', async () => {
     await measureRenders(<ProfileScreen />);
-    expect(true).toBe(true);
+    expect(ProfileScreen).toBeDefined();
   });
 });
