@@ -10,7 +10,7 @@ export type AppHeaderProps = {
   onMenuPress?: () => void;
 };
 
-export function AppHeader({ title = 'ATI Dental', onMenuPress }: AppHeaderProps) {
+export function AppHeader({ title = 'ATI Dental', onMenuPress }: Readonly<AppHeaderProps>) {
   const insets = useSafeAreaInsets();
 
   return (

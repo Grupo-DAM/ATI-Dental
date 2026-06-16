@@ -21,7 +21,7 @@ export function ResponsibleCard({
   isOnline,
   onEmailPress,
   onPhonePress,
-}: ResponsibleCardProps) {
+}: Readonly<ResponsibleCardProps>) {
   return (
     <View style={styles.card}>
       <View style={styles.avatarContainer}>
