@@ -36,5 +36,30 @@
       "emailInUse": "This email is already registered to another account.",
       "updateError": "An error occurred while trying to update the email."
     }
+  },
+  "tabs": {
+    "home": "Home",
+    "explore": "Patients",
+    "agenda": "Schedule",
+    "profile": "Profile"
+  },
+  "login": {
+    "title": "Welcome back",
+    "subtitle": "Enter your credentials to access your dashboard",
+    "emailPlaceholder": "example@email.com",
+    "emailLabel": "Email address",
+    "passwordPlaceholder": "Password",
+    "passwordLabel": "Password",
+    "loginButton": "Sign in",
+    "noAccount": "Don't have an account?",
+    "register": "Register",
+    "orContinueWith": "OR CONTINUE WITH",
+    "errors": {
+      "empty": "Please fill in all fields.",
+      "wrongCredentials": "Email or password is incorrect.",
+      "invalidEmail": "Invalid email format.",
+      "networkTitle": "Connection Error",
+      "networkMessage": "Connection error with the server. Please try again later."
+    }
   }
 }

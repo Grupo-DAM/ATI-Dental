@@ -36,5 +36,30 @@
       "emailInUse": "Este correo ya está registrado en otra cuenta.",
       "updateError": "Ocurrió un error al intentar actualizar el correo."
     }
+  },
+  "tabs": {
+    "home": "Inicio",
+    "explore": "Pacientes",
+    "agenda": "Agenda",
+    "profile": "Perfil"
+  },
+  "login": {
+    "title": "Bienvenido de nuevo",
+    "subtitle": "Ingresa tus credenciales para acceder a tu panel",
+    "emailPlaceholder": "ejemplo@correo.com",
+    "emailLabel": "Correo electrónico",
+    "passwordPlaceholder": "Contraseña",
+    "passwordLabel": "Contraseña",
+    "loginButton": "Iniciar sesión",
+    "noAccount": "¿No tienes una cuenta?",
+    "register": "Registrarse",
+    "orContinueWith": "O CONTINÚA CON",
+    "errors": {
+      "empty": "Por favor, rellena todos los campos.",
+      "wrongCredentials": "El correo o la contraseña son incorrectos.",
+      "invalidEmail": "El formato del correo no es válido.",
+      "networkTitle": "Error de conexión",
+      "networkMessage": "Error de conexión con el servidor. Intente más tarde."
+    }
   }
 }

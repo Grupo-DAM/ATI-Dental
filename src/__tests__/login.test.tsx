@@ -11,6 +11,12 @@ jest.mock('@/hooks/use-auth', () => ({
     }),
 }));
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
 const mockReplace = jest.fn();
 jest.mock('expo-router', () => ({
     router: {
@@ -83,7 +89,7 @@ describe('Login Flow (TDD)', () => {
         expect(mockReplace).not.toHaveBeenCalled();
         expect(mockReplace).not.toHaveBeenCalledWith('/(tabs)/home');
 
-        const secureErrorMessage = await findByText('El correo o la contraseña son incorrectos.');
+        const secureErrorMessage = await findByText('login.errors.wrongCredentials');
         expect(secureErrorMessage).toBeTruthy();
 
         const rawBackendError = queryByText('auth/invalid-credential');
@@ -99,7 +105,7 @@ describe('Login Flow (TDD)', () => {
         expect(mockLoginFn).not.toHaveBeenCalled();
         expect(mockReplace).not.toHaveBeenCalled();
 
-        const validationMessage = await findByText('Por favor, rellena todos los campos.');
+        const validationMessage = await findByText('login.errors.empty');
         expect(validationMessage).toBeTruthy();
     });
 
@@ -117,7 +123,7 @@ describe('Login Flow (TDD)', () => {
         expect(mockLoginFn).not.toHaveBeenCalled();
         expect(mockReplace).not.toHaveBeenCalled();
 
-        const validationMessage = await findByText('El formato del correo no es válido.');
+        const validationMessage = await findByText('login.errors.invalidEmail');
         expect(validationMessage).toBeTruthy();
     });
 
@@ -142,7 +148,7 @@ describe('Login Flow (TDD)', () => {
         });
         expect(mockReplace).not.toHaveBeenCalled();
 
-        const networkErrorMessage = await findByText('Error de conexión con el servidor. Intente más tarde.');
+        const networkErrorMessage = await findByText('login.errors.networkMessage');
         expect(networkErrorMessage).toBeTruthy();
     });
 
