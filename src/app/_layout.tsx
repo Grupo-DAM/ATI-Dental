@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { AuthProvider } from '@/hooks/use-auth';
+import '@/i18n';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

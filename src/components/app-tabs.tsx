@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native
 import { Image } from 'expo-image';
 import { useTheme } from '@/hooks/use-theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export default function AppTabs() {
     const renderTabBar = useCallback((props: any) => <CustomTabBar {...props} />, []);
@@ -25,6 +26,7 @@ export default function AppTabs() {
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const colors = useTheme();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const activeRouteName = state.routes[state.index].name;
 
   const handleNavigate = (routeName: string) => {
@@ -66,7 +68,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             styles.label,
             { color: activeRouteName === 'home' ? colors.main : colors.textSecondary },
           ]}>
-          Inicio
+          {t('tabs.home')}
         </Text>
       </TouchableOpacity>
 
@@ -84,7 +86,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             styles.label,
             { color: activeRouteName === 'explore' ? colors.main : colors.textSecondary },
           ]}>
-          Pacientes
+          {t('tabs.explore')}
         </Text>
       </TouchableOpacity>
 
@@ -115,7 +117,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           tintColor={colors.textSecondary}
         />
         <Text style={[styles.label, { color: colors.textSecondary }]}>
-          Agenda
+          {t('tabs.agenda')}
         </Text>
       </TouchableOpacity>
 
@@ -134,7 +136,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             styles.label,
             { color: activeRouteName === 'profile' ? colors.main : colors.textSecondary },
           ]}>
-          Perfil
+          {t('tabs.profile')}
         </Text>
       </TouchableOpacity>
     </View>

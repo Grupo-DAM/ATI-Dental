@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import NetInfo from '@react-native-community/netinfo';
-import auth from '@react-native-firebase/auth';
+import { auth, firestore } from '@/config/firebase';
 import * as SecureStore from 'expo-secure-store';
 import React, { useState, useEffect } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Image } from 'expo-image';
 import { VerificationLinkModal } from '@/components/OTPModal';
@@ -12,6 +13,7 @@ import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 
 export default function ProfileScreen() {
+  const { t, i18n } = useTranslation();
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -20,7 +22,11 @@ export default function ProfileScreen() {
 
   const [errors, setErrors] = useState<{ name?: string; lastName?: string; email?: string }>({});
   const [showModal, setShowModal] = useState(false);
-  const [language, setLanguage] = useState('es');
+  const [language, setLanguage] = useState(i18n.language || 'es');
+
+  useEffect(() => {
+    setLanguage(i18n.language || 'es');
+  }, [i18n.language]);
 
   useEffect(() => {
     const user = auth().currentUser;
@@ -40,30 +46,35 @@ export default function ProfileScreen() {
     }
   }, []);
 
-  const handleSave = async () => {
-    setErrors({});
+  const validateForm = () => {
     const newErrors: { name?: string; lastName?: string; email?: string } = {};
-
-    if (!name.trim()) {
-      newErrors.name = 'El nombre no puede estar vacío';
-    }
-    if (!lastName.trim()) {
-      newErrors.lastName = 'El apellido no puede estar vacío';
-    }
+    if (!name.trim()) newErrors.name = t('profile.alerts.emptyName');
+    if (!lastName.trim()) newErrors.lastName = t('profile.alerts.emptyLastName');
+    
     if (!email.trim()) {
-      newErrors.email = 'El correo electrónico no puede estar vacío';
+      newErrors.email = t('profile.alerts.emptyEmail');
     } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-      newErrors.email = 'Formato de correo inválido';
+      newErrors.email = t('profile.alerts.invalidEmail');
     }
+    return newErrors;
+  };
 
+  const handleSave = async () => {
+    const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
+    setErrors({});
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
-      Alert.alert('Error', 'Sin conexión a internet');
+      Alert.alert(t('profile.alerts.errorTitle'), t('profile.alerts.noInternet'));
+      // Optimistic update of UI language anyway, if network fails
+      const prevLanguage = i18n.language;
+      if (language !== prevLanguage) {
+        i18n.changeLanguage(language);
+      }
       return;
     }
 
@@ -88,12 +99,27 @@ export default function ProfileScreen() {
       if (!user) {
         console.warn('Firebase Auth: No hay usuario activo. Usando flujo simulado para pruebas.');
         setShowModal(true);
+        // Change language locally in mock
+        if (language !== i18n.language) {
+          i18n.changeLanguage(language);
+        }
         return;
+      }
+
+      // Optimistic UI: Apply language change immediately
+      if (language !== i18n.language) {
+        i18n.changeLanguage(language);
       }
 
       if (email === user.email) {
         await user.updateProfile({ displayName: `${name.trim()} ${lastName.trim()}` });
-        Alert.alert('Perfil Actualizado', 'Tus datos personales se han guardado con éxito.');
+        
+        // Sync language to Firestore in background
+        firestore().collection('usuarios').doc(user.uid).update({
+          idiomaPreferencia: language
+        }).catch(err => console.error('Error al sincronizar idioma en Firestore', err));
+
+        Alert.alert(t('profile.alerts.updatedTitle'), t('profile.alerts.updatedMessage'));
         return;
       }
 
@@ -102,23 +128,23 @@ export default function ProfileScreen() {
 
     } catch (e: any) {
       if (e.code === 'auth/email-already-in-use') {
-        setErrors({ email: 'Este correo ya está registrado en otra cuenta.' });
+        setErrors({ email: t('profile.alerts.emailInUse') });
       } else {
-        setErrors({ email: 'Ocurrió un error al intentar actualizar el correo.' });
+        setErrors({ email: t('profile.alerts.updateError') });
       }
     }
   };
 
   const handleResendLink = async () => {
     if (email === 'sinred@atidental.com') {
-      const errorRed = new Error('Sin conexión a internet');
+      const errorRed = new Error(t('profile.alerts.noInternet'));
       (errorRed as any).code = 'auth/network-request-failed';
       throw errorRed;
     }
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
-      const errorRed = new Error('Sin conexión a internet');
+      const errorRed = new Error(t('profile.alerts.noInternet'));
       (errorRed as any).code = 'auth/network-request-failed';
       throw errorRed;
     }
@@ -135,12 +161,12 @@ export default function ProfileScreen() {
   const handleCloseModal = async () => {
       if (email === 'dr.nuevo@atidental.com') {
           setShowModal(false);
-          Alert.alert('Perfil Actualizado', 'Tu perfil y correo se han verificado y actualizado con éxito.');
+          Alert.alert(t('profile.alerts.updatedTitle'), t('profile.alerts.updatedVerifiedMessage'));
           return;
       }
     if (email === 'sinred@atidental.com' || email === 'usado@atidental.com') {
       setShowModal(false);
-      Alert.alert('Actualización Cancelada', 'No se realizaron cambios debido a un error previo.');
+      Alert.alert(t('profile.alerts.canceledTitle'), t('profile.alerts.canceledMessage'));
       return;
     }
     try {
@@ -156,7 +182,7 @@ export default function ProfileScreen() {
             'No hemos detectado la verificación de tu nuevo correo electrónico.',
             [
               { text: 'Seguir Esperando', style: 'cancel' },
-              { text: 'Cerrar', style: 'destructive', onPress: () => setShowModal(false) },
+              { text: t('profile.cancel'), style: 'destructive', onPress: () => setShowModal(false) },
             ]
           );
           return;
@@ -165,11 +191,16 @@ export default function ProfileScreen() {
         // Si ya se verificó el correo, actualizamos también el nombre en el perfil de Firebase
         await user.updateProfile({ displayName: `${name.trim()} ${lastName.trim()}` });
         token = (await user.getIdToken(true)) || token;
+        
+        // Sync language to Firestore in background
+        firestore().collection('usuarios').doc(user.uid).update({
+          idiomaPreferencia: language
+        }).catch(err => console.error('Error al sincronizar idioma en Firestore', err));
       }
 
       await SecureStore.setItemAsync('userToken', token);
       setShowModal(false);
-      Alert.alert('Perfil Actualizado', 'Tu perfil y correo se han verificado y actualizado con éxito.');
+      Alert.alert(t('profile.alerts.updatedTitle'), t('profile.alerts.updatedVerifiedMessage'));
     } catch (e) {
       console.error('Error al guardar el token:', e);
       setShowModal(false);
@@ -180,19 +211,19 @@ export default function ProfileScreen() {
     <View style={{ flex: 1, backgroundColor: '#F8F9FA' }}>
       <AppHeader />
       <ScrollView style={{ flex: 1 }}>
-        <Breadcrumb parent="Pacientes" current="Perfil e Idioma" />
+        <Breadcrumb parent="Pacientes" current={t('profile.title')} />
 
         <View style={styles.titleSection}>
-          <Text style={styles.mainTitle}>Perfil e Idioma</Text>
+          <Text style={styles.mainTitle}>{t('profile.title')}</Text>
           <Text style={styles.subtitle}>
-            Administra tu información personal y las preferencias de idioma del sistema.
+            {t('profile.subtitle')}
           </Text>
         </View>
 
         <View style={styles.cardContainer}>
           <View style={styles.cardHeader}>
             <Ionicons name="person" size={24} color={Colors.light.main} style={{ marginRight: 10 }} />
-            <Text style={styles.cardHeaderTitle}>Información Personal</Text>
+            <Text style={styles.cardHeaderTitle}>{t('profile.personalInfo')}</Text>
           </View>
 
           <View style={styles.cardBody}>
@@ -203,20 +234,20 @@ export default function ProfileScreen() {
                 contentFit="cover"
               />
               <View style={{ marginLeft: 16 }}>
-                <Text style={styles.avatarLabel}>Foto de Perfil</Text>
+                <Text style={styles.avatarLabel}>{t('profile.profilePicture')}</Text>
                 <View style={styles.avatarButtonsRow}>
                   <TouchableOpacity style={styles.btnCambiar}>
-                    <Text style={styles.btnCambiarText}>Cambiar</Text>
+                    <Text style={styles.btnCambiarText}>{t('profile.change')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity>
-                    <Text style={styles.btnEliminarText}>Eliminar</Text>
+                    <Text style={styles.btnEliminarText}>{t('profile.remove')}</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.avatarHelpText}>JPG, GIF o PNG. Max 1MB.</Text>
+                <Text style={styles.avatarHelpText}>{t('profile.avatarHelp')}</Text>
               </View>
             </View>
 
-            <Text style={styles.label}>Nombre</Text>
+            <Text style={styles.label}>{t('profile.firstName')}</Text>
             <TextInput
               testID="input-name"
               style={[styles.input, errors.name ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}
@@ -225,7 +256,7 @@ export default function ProfileScreen() {
             />
             {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
 
-            <Text style={styles.label}>Apellidos</Text>
+            <Text style={styles.label}>{t('profile.lastName')}</Text>
             <TextInput
               testID="input-lastname"
               style={[styles.input, errors.lastName ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}
@@ -234,7 +265,7 @@ export default function ProfileScreen() {
             />
             {errors.lastName ? <Text style={styles.errorText}>{errors.lastName}</Text> : null}
 
-            <Text style={styles.label}>Correo Electrónico</Text>
+            <Text style={styles.label}>{t('profile.email')}</Text>
             <View style={[styles.inputWithIcon, errors.email ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}>
               <Image
                 source={require('@/assets/expo.icon/Assets/email.svg')}
@@ -254,15 +285,15 @@ export default function ProfileScreen() {
               <Text style={styles.errorText}>{errors.email}</Text>
             ) : null}
 
-            <Text style={styles.label}>Teléfono</Text>
+            <Text style={styles.label}>{t('profile.phone')}</Text>
             <TextInput style={styles.input} value={phone} onChangeText={setPhone} />
 
-            <Text style={styles.label}>Bio Profesional</Text>
+            <Text style={styles.label}>{t('profile.bio')}</Text>
             <TextInput
               style={[styles.input, { height: 90, textAlignVertical: 'top' }]}
               value={bio}
               onChangeText={setBio}
-              placeholder="Breve descripción para el perfil público."
+              placeholder={t('profile.bioPlaceholder')}
               placeholderTextColor="#A0AEC0"
               multiline
             />
@@ -276,20 +307,21 @@ export default function ProfileScreen() {
               contentFit="contain"
               tintColor={Colors.light.main}
             />
-            <Text style={styles.cardHeaderTitle}>Idioma de la Interfaz</Text>
+            <Text style={styles.cardHeaderTitle}>{t('profile.interfaceLanguage')}</Text>
           </View>
           <View style={styles.cardBody}>
             <Text style={{ fontSize: 14, color: '#718096', marginBottom: 20, lineHeight: 20 }}>
-              Selecciona el idioma preferido para la interfaz del sistema ATI Dental.
+              {t('profile.languageDesc')}
             </Text>
 
             <TouchableOpacity
+              testID="btn-lang-es"
               style={[styles.languageOption, language === 'es' && { borderColor: Colors.light.main, borderWidth: 2 }]}
               onPress={() => setLanguage('es')}
             >
               <View>
-                <Text style={styles.languageTitle}>Español</Text>
-                <Text style={styles.languageSubtitle}>Idioma predeterminado para México y Latam.</Text>
+                <Text style={styles.languageTitle}>{t('profile.spanish')}</Text>
+                <Text style={styles.languageSubtitle}>{t('profile.spanishDesc')}</Text>
               </View>
               {language === 'es' && (
                 <Image
@@ -302,12 +334,13 @@ export default function ProfileScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
+              testID="btn-lang-en"
               style={[styles.languageOption, language === 'en' && { borderColor: Colors.light.main, borderWidth: 2 }]}
               onPress={() => setLanguage('en')}
             >
               <View>
-                <Text style={styles.languageTitle}>English (Inglés)</Text>
-                <Text style={styles.languageSubtitle}>Standard interface language.</Text>
+                <Text style={styles.languageTitle}>{t('profile.english')}</Text>
+                <Text style={styles.languageSubtitle}>{t('profile.englishDesc')}</Text>
               </View>
               {language === 'en' && <Ionicons name="checkmark-circle" size={24} color={Colors.light.header} />}
             </TouchableOpacity>
@@ -316,7 +349,7 @@ export default function ProfileScreen() {
 
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 30, marginBottom: 20, paddingHorizontal: 20 }}>
           <TouchableOpacity style={{ borderWidth: 1, borderColor: '#CBD5E0', borderRadius: 6, paddingVertical: 12, paddingHorizontal: 20, marginRight: 15, backgroundColor: 'white' }}>
-            <Text style={{ color: '#4A5568', fontWeight: '600', fontSize: 15 }}>Cancelar</Text>
+            <Text style={{ color: '#4A5568', fontWeight: '600', fontSize: 15 }}>{t('profile.cancel')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity testID="btn-save" onPress={handleSave} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.light.main, borderRadius: 6, paddingVertical: 12, paddingHorizontal: 20 }}>
@@ -326,7 +359,7 @@ export default function ProfileScreen() {
               contentFit="contain"
               tintColor="white"
             />
-            <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>Guardar Cambios</Text>
+            <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>{t('profile.saveChanges')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView >
@@ -436,4 +469,3 @@ const styles = StyleSheet.create({
   languageSubtitle: { fontSize: 13, color: '#718096' },
 
 });
-

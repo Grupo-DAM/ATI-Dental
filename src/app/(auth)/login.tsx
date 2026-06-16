@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { StyleSheet, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
+import { useTranslation } from 'react-i18next';
 
 const EmailIcon = require('@/assets/icons/email.png');
 const GoogleIcon = require('@/assets/icons/Google.png');
@@ -25,10 +26,11 @@ export default function LoginScreen() {
     const [emailError, setEmailError] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [networkError, setNetworkError] = useState(false);
+    const { t } = useTranslation();
 
-    const emptyErrorMessage = 'Por favor, rellena todos los campos.';
-    const wrongCredentialsMessage = 'El correo o la contraseña son incorrectos.';
-    const emailErrorMessage = 'El formato del correo no es válido.';
+    const emptyErrorMessage = t('login.errors.empty');
+    const wrongCredentialsMessage = t('login.errors.wrongCredentials');
+    const emailErrorMessage = t('login.errors.invalidEmail');
 
     const handleLogin = async () => {
         setHasError(false);
@@ -76,11 +78,10 @@ export default function LoginScreen() {
                 />
                 <ThemedView style={{width: '90%', backgroundColor: theme.errorBackground}}>
                     <ThemedText style={styles.popupTitle}>
-                        Error de conexión
+                        {t('login.errors.networkTitle')}
                     </ThemedText>
                     <ThemedText style={[styles.label, {color: theme.error, textAlign: 'left'}]}>
-                        Error de conexión con el servidor. Intente
-                        más tarde.
+                        {t('login.errors.networkMessage')}
                     </ThemedText>
                 </ThemedView>
             </ThemedView>)}
@@ -88,34 +89,34 @@ export default function LoginScreen() {
             <ThemedView style={styles.titleContainer}>
                 <HorizontalLogo/>
                 <ThemedText style={styles.title}>
-                    Bienvenido de nuevo
+                    {t('login.title')}
                 </ThemedText>
                 <ThemedText style={styles.subtitle}>
-                    Ingresa tus credenciales para acceder a tu panel
+                    {t('login.subtitle')}
                 </ThemedText>
             </ThemedView>
 
             <ThemedView>
                 <ThemedTextInput
                      testID="email-input"
-                     placeholder="ejemplo@correo.com"
+                     placeholder={t('login.emailPlaceholder')}
                      value={email}
                      onChangeText={setEmail}
                      keyboardType="email-address"
                      autoCapitalize="none"
                      autoCorrect={false}
                      icon={EmailIcon}
-                     fieldName="Correo electrónico"
+                     fieldName={t('login.emailLabel')}
                      error = {hasError || emailError}
                      errorMessage = {emailError? emailErrorMessage: ''}
                      editable={!isLoading}
                   />
                  <ThemedTextInput
                     testID="password-input"
-                    placeholder="Contraseña"
+                    placeholder={t('login.passwordPlaceholder')}
                     isSecure={true}
                     login = {true}
-                    fieldName="Contraseña"
+                    fieldName={t('login.passwordLabel')}
                     value={password}
                     onChangeText={setPassword}
                     error = {hasError}
@@ -136,7 +137,7 @@ export default function LoginScreen() {
                     disabled={isLoading}
                 >
                     <ThemedText style={styles.buttonText}>
-                        Iniciar sesión
+                        {t('login.loginButton')}
                     </ThemedText>
                 </Pressable>
             </ThemedView>
@@ -144,18 +145,18 @@ export default function LoginScreen() {
             <ThemedView style={{gap: 16}}>
                 <ThemedView style={styles.labelContainer}>
                     <ThemedText style={styles.label}>
-                        ¿No tienes una cuenta?
+                        {t('login.noAccount')}
                     </ThemedText>
                     <ThemedText
                         testID = "signIn-link"
                         style={styles.signInLink}
                         onPress={() => router.replace('/register')}>
-                        Registrarse
+                        {t('login.register')}
                     </ThemedText>
                 </ThemedView>
 
                 <ThemedText style={styles.label}>
-                    O CONTINÚA CON
+                    {t('login.orContinueWith')}
                 </ThemedText>
 
                 <ThemedView style={styles.socialMediaBtns}>

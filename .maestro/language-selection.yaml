@@ -1,0 +1,22 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp:
+    clearState: true
+# Asumimos navegación al tab de Perfil en un estado logueado o de mock
+- tapOn: "Perfil"
+- assertVisible: "Perfil e Idioma"
+# Seleccionamos idioma Inglés
+- scrollUntilVisible:
+    element: "English (Inglés)"
+- tapOn: "English (Inglés)"
+- tapOn:
+    id: "btn-save"
+- assertVisible: "Perfil Actualizado"
+- tapOn: "OK"
+# Verificamos que la UI haya cambiado
+- assertVisible: "Profile & Language"
+# Forzamos cierre para probar la persistencia
+- stopApp
+- launchApp
+- tapOn: "Profile"
+- assertVisible: "Profile & Language"
