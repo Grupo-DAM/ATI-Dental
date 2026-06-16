@@ -46,26 +46,26 @@ export default function ProfileScreen() {
     }
   }, []);
 
-  const handleSave = async () => {
-    setErrors({});
+  const validateForm = () => {
     const newErrors: { name?: string; lastName?: string; email?: string } = {};
-
-    if (!name.trim()) {
-      newErrors.name = t('profile.alerts.emptyName');
-    }
-    if (!lastName.trim()) {
-      newErrors.lastName = t('profile.alerts.emptyLastName');
-    }
+    if (!name.trim()) newErrors.name = t('profile.alerts.emptyName');
+    if (!lastName.trim()) newErrors.lastName = t('profile.alerts.emptyLastName');
+    
     if (!email.trim()) {
       newErrors.email = t('profile.alerts.emptyEmail');
     } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
       newErrors.email = t('profile.alerts.invalidEmail');
     }
+    return newErrors;
+  };
 
+  const handleSave = async () => {
+    const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
+    setErrors({});
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
