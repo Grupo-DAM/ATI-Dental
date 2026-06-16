@@ -35,13 +35,13 @@ jobs:
           path: coverage/
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarqube-scan-action@v3.0.0
+        uses: sonarsource/sonarqube-scan-action@884b79409bbd464b2a59edc326a4b77dc56b2195 # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Install Snyk CLI
-        run: npm install -g snyk
+        run: npm install -g snyk --ignore-scripts
 
       - name: Snyk Vulnerability Scan
         env:
@@ -71,11 +71,9 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+          npm ci --ignore-scripts
+          # Como usamos --ignore-scripts por seguridad, ejecutamos patch-package manualmente
+          ./node_modules/.bin/patch-package
 
       - name: Run Jest Test Suite
         run: |
@@ -112,14 +110,12 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+          npm ci --ignore-scripts
+          # Como usamos --ignore-scripts por seguridad, ejecutamos patch-package manualmente
+          ./node_modules/.bin/patch-package
 
       - name: Setup Expo and EAS CLI
-        uses: expo/expo-github-action@v8
+        uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8
         with:
           expo-version: latest
           eas-version: latest
@@ -173,8 +169,8 @@ jobs:
             # En un entorno real con builds habilitados, se usaría la acción de GitHub de Maestro Cloud o la CLI:
             # - uses: mobile-dev-inc/action-maestro-cloud@v2
             #   with:
-            #     api-key: ${{ secrets.MAESTRO_API_KEY }}
-            #     project-id: ${{ secrets.MAESTRO_PROJECT_ID }}
+            #     api-key: $MAESTRO_API_KEY
+            #     project-id: $MAESTRO_PROJECT_ID
             #     app-file: path/to/your/app.apk
             echo "Pruebas en Maestro Cloud completadas exitosamente."
           fi
@@ -196,7 +192,7 @@ jobs:
           node-version: 20
 
       - name: Setup Expo and EAS CLI
-        uses: expo/expo-github-action@v8
+        uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8
         with:
           expo-version: latest
           eas-version: latest
