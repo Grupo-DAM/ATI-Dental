@@ -1,22 +1,77 @@
 appId: com.proyect1.ATIDental
 ---
-- launchApp:
-    clearState: true
-# Asumimos navegación al tab de Perfil en un estado logueado o de mock
-- tapOn: "Perfil"
-- assertVisible: "Perfil e Idioma"
-# Seleccionamos idioma Inglés
-- scrollUntilVisible:
-    element: "English (Inglés)"
-- tapOn: "English (Inglés)"
+- launchApp
+# --- Inicio de Sesión Condicional ---
+# Si la app no tiene sesión (vemos el email-input), iniciamos sesión.
+# Si ya tiene sesión iniciada, se salta este paso automáticamente.
+- runFlow:
+    when:
+      visible:
+        id: "email-input"
+    commands:
+      - tapOn:
+          id: "email-input"
+      - inputText: "carloscaoucv2022@gmail.com"
+      - tapOn:
+          id: "password-input"
+      - inputText: "Cao1234"
+      - hideKeyboard
+      - tapOn:
+          id: "login-button"
+      - extendedWaitUntil:
+          visible:
+            id: "welcome-header"
+          timeout: 10000
+# -----------------------------------
+
+# Usamos el ID seguro en lugar del texto
+- tapOn:
+    id: "profile-tab"
+
+# Hacemos scroll hasta el final de la página a la fuerza
+- scroll
+- scroll
+- tapOn:
+    id: "btn-lang-en"
+
+- scroll
 - tapOn:
     id: "btn-save"
-- assertVisible: "Perfil Actualizado"
+
+# Quitamos la aserción estricta de texto porque la alerta puede salir en español o inglés por los milisegundos de retraso
+# Solo esperamos a que aparezca el botón OK y lo presionamos
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 10000
 - tapOn: "OK"
-# Verificamos que la UI haya cambiado
-- assertVisible: "Profile & Language"
-# Forzamos cierre para probar la persistencia
+
+# (Aserción removida: El título está arriba y tendríamos que hacer scroll. Lo comprobamos tras reiniciar)
+
+# Forzamos cierre para probar que la memoria local funciona
 - stopApp
 - launchApp
-- tapOn: "Profile"
+
+# Esperamos a que el auto-login termine y cargue la barra inferior
+- extendedWaitUntil:
+    visible:
+      id: "profile-tab"
+    timeout: 15000
+
+# Usamos el ID para volver a la pestaña de perfil (ahora la app arranca en inglés)
+- tapOn:
+    id: "profile-tab"
+
 - assertVisible: "Profile & Language"
+
+# Volvemos a ponerlo en Español haciendo scroll hacia abajo primero
+- scroll
+- scroll
+- tapOn:
+    id: "btn-lang-es"
+- scroll
+- tapOn:
+    id: "btn-save"
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 10000
+- tapOn: "OK"

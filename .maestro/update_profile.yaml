@@ -40,6 +40,12 @@ appId: com.proyect1.ATIDental
 - assertVisible: "El nombre no puede estar vacío"
 
 # Restaurar Nombre
+- scrollUntilVisible:
+    element:
+      id: "input-name"
+    direction: UP
+    timeout: 10000
+    speed: 40
 - tapOn:
    id: "input-name"
 - inputText: "Valeria"
@@ -60,6 +66,12 @@ appId: com.proyect1.ATIDental
 - assertVisible: "El apellido no puede estar vacío"
 
 # Restaurar Apellido
+- scrollUntilVisible:
+    element:
+      id: "input-lastname"
+    direction: UP
+    timeout: 10000
+    speed: 40
 - tapOn:
     id: "input-lastname"
 - inputText: "Smith"
@@ -83,6 +95,12 @@ appId: com.proyect1.ATIDental
 - assertVisible: "El correo electrónico no puede estar vacío"
 
 # Validar formato de correo invalido
+- scrollUntilVisible:
+    element:
+      id: "input-email"
+    direction: UP
+    timeout: 10000
+    speed: 40
 - tapOn:
     id: "input-email"
 - inputText: "correo-invalido"
@@ -104,6 +122,12 @@ appId: com.proyect1.ATIDental
 - assertVisible: "Formato de correo inválido"
 
 # Correo ya en uso
+- scrollUntilVisible:
+    element:
+      id: "input-email"
+    direction: UP
+    timeout: 10000
+    speed: 40
 - tapOn:
     id: "input-email"
 - eraseText
@@ -120,6 +144,12 @@ appId: com.proyect1.ATIDental
 - assertVisible: "Este correo ya está registrado en otra cuenta."
 
 # Caida de red
+- scrollUntilVisible:
+    element:
+      id: "input-email"
+    direction: UP
+    timeout: 10000
+    speed: 40
 - tapOn:
     id: "input-email"
 - eraseText
@@ -146,6 +176,12 @@ appId: com.proyect1.ATIDental
 - tapOn: "OK"
 
 # Flujo exitoso
+- scrollUntilVisible:
+    element:
+      id: "input-email"
+    direction: UP
+    timeout: 10000
+    speed: 40
 - tapOn:
     id: "input-email"
 - eraseText
