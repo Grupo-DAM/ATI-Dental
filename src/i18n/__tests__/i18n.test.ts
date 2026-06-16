@@ -62,5 +62,27 @@ describe('i18n Configuration', () => {
       await detector.cacheUserLanguage!('en');
       expect(AsyncStorage.setItem).toHaveBeenCalledWith('user-language', 'en');
     });
+    it('should log error if AsyncStorage.getItem throws', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const error = new Error('AsyncStorage error');
+      (AsyncStorage.getItem as jest.Mock).mockRejectedValueOnce(error);
+      
+      const callback = jest.fn();
+      await detector.detect!(callback);
+      
+      expect(consoleSpy).toHaveBeenCalledWith('Error reading language from AsyncStorage', error);
+      consoleSpy.mockRestore();
+    });
+
+    it('should log error if AsyncStorage.setItem throws', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const error = new Error('AsyncStorage write error');
+      (AsyncStorage.setItem as jest.Mock).mockRejectedValueOnce(error);
+      
+      await detector.cacheUserLanguage!('en');
+      
+      expect(consoleSpy).toHaveBeenCalledWith('Error saving language to AsyncStorage', error);
+      consoleSpy.mockRestore();
+    });
   });
 });
