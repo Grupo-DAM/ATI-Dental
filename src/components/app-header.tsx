@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 
@@ -12,6 +13,15 @@ export type AppHeaderProps = {
 
 export function AppHeader({ title = 'ATI Dental', onMenuPress }: Readonly<AppHeaderProps>) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+
+  const handleMenuPress = () => {
+    if (onMenuPress) {
+      onMenuPress();
+    } else {
+      router.push('/contacts');
+    }
+  };
 
   return (
     <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
@@ -26,7 +36,7 @@ export function AppHeader({ title = 'ATI Dental', onMenuPress }: Readonly<AppHea
           {title}
         </Text>
       </View>
-      <TouchableOpacity testID="menu-btn" onPress={onMenuPress} activeOpacity={0.7} style={styles.menuButton}>
+      <TouchableOpacity testID="menu-btn" onPress={handleMenuPress} activeOpacity={0.7} style={styles.menuButton}>
         <Ionicons name="menu" size={36} color="white" />
       </TouchableOpacity>
     </View>
