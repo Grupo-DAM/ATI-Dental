@@ -39,7 +39,7 @@ const responsibles = [
     role: 'Gerente de Operaciones',
     description: 'Encargada de la logística diaria, recursos humanos y gestión de citas.',
     isOnline: false,
-    imageUrl: { uri: 'https://images.unsplash.com/photo-1594824813573-246434de83fb?auto=format&fit=crop&w=256&h=256&q=80' },
+    imageUrl: { uri: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&h=256&q=80' },
   },
   {
     id: '3',
