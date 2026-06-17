@@ -43,20 +43,22 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
+export const mockOnSnapshot = jest.fn((onSuccess: any, onError: any) => {
+  onSuccess({
+    docs: [
+      { id: '1', data: () => ({ name: 'Dr. Alejandro V.', role: 'Director Médico', imageUrl: 'http://' }) },
+      { id: '2', data: () => ({ name: 'Dra. Sofia M.', role: 'Gerente de Operaciones', imageUrl: 'http://' }) },
+      { id: '3', data: () => ({ name: 'Ing. Carlos R.', role: 'Soporte Técnico', imageUrl: 'http://' }) },
+    ],
+    metadata: { fromCache: false },
+  });
+  return jest.fn();
+});
+
 jest.mock('@/config/firebase', () => ({
   firestore: () => ({
     collection: () => ({
-      onSnapshot: (onSuccess: any) => {
-        onSuccess({
-          docs: [
-            { id: '1', data: () => ({ name: 'Dr. Alejandro V.', role: 'Director Médico', imageUrl: 'http://' }) },
-            { id: '2', data: () => ({ name: 'Dra. Sofia M.', role: 'Gerente de Operaciones', imageUrl: 'http://' }) },
-            { id: '3', data: () => ({ name: 'Ing. Carlos R.', role: 'Soporte Técnico', imageUrl: 'http://' }) },
-          ],
-          metadata: { fromCache: false },
-        });
-        return jest.fn();
-      }
+      onSnapshot: (...args: any[]) => mockOnSnapshot(...args)
     })
   })
 }));
@@ -273,6 +275,22 @@ describe('ContactsScreen', () => {
         expect.stringContaining('tel:+123456789')
       );
     });
+  });
+
+  it('debe manejar error al obtener responsables desde firestore', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    mockOnSnapshot.mockImplementationOnce((onSuccess: any, onError: any) => {
+      if (onError) {
+        onError(new Error('Firestore error'));
+      }
+      return jest.fn();
+    });
+
+    render(<ContactsScreen />);
+    
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Error fetching responsibles: ", expect.any(Error));
+    consoleErrorSpy.mockRestore();
   });
 
   it('Coincide con la instantánea (Snapshot Test)', () => {
