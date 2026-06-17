@@ -61,5 +61,28 @@
       "networkTitle": "Connection Error",
       "networkMessage": "Connection error with the server. Please try again later."
     }
+  },
+  "contacts": {
+    "title": "Information & Contact",
+    "subtitle": "Manage communication with the team and check recent activity.",
+    "responsibles": "Site Responsibles",
+    "directContact": "Direct Contact",
+    "directContactSubtitle": "Official communication channels for urgent inquiries.",
+    "socialActivity": "Social Media Activity",
+    "offlineMode": "Showing data in offline mode",
+    "alerts": {
+      "emailTitle": "Contact by Email",
+      "emailError": "Could not open mail client.\n\nSupport address:\n{{email}}",
+      "phoneTitle": "Phone Call",
+      "phoneError": "This device does not support phone calls.\n\nContact number:\n{{phone}}",
+      "copyToClipboard": "Copy to Clipboard",
+      "copiedTitle": "Copied",
+      "copiedEmail": "Email address copied to clipboard.",
+      "copiedPhone": "Phone number copied to clipboard.",
+      "close": "Close",
+      "error": "Error",
+      "whatsappError": "Could not open WhatsApp or browser.",
+      "socialError": "Could not open {{platform}} link."
+    }
   }
 }

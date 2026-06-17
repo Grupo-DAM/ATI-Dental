@@ -18,6 +18,51 @@ jest.mock('@/hooks/use-theme', () => ({
   }),
 }));
 
+jest.mock('@react-native-community/netinfo', () => ({
+  useNetInfo: () => ({ isConnected: true }),
+}));
+
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, options?: any) => {
+      if (key === 'contacts.title') return 'Información y Contacto';
+      if (key === 'contacts.responsibles') return 'Responsables del Sitio';
+      if (key === 'contacts.alerts.emailTitle') return 'Contacto por Email';
+      if (key === 'contacts.alerts.emailError') return 'No se pudo abrir el gestor de correo';
+      if (key === 'contacts.alerts.phoneTitle') return 'Llamada Telefónica';
+      if (key === 'contacts.alerts.phoneError') return 'Este dispositivo no admite llamadas telefónicas';
+      if (key === 'contacts.alerts.copyToClipboard') return 'Copiar al Portapapeles';
+      if (key === 'contacts.alerts.copiedTitle') return 'Copiado';
+      if (key === 'contacts.alerts.copiedEmail') return 'Dirección de correo copiada al portapapeles.';
+      if (key === 'contacts.alerts.copiedPhone') return 'Número copiado al portapapeles.';
+      if (key === 'contacts.alerts.error') return 'Error';
+      if (key === 'contacts.alerts.whatsappError') return 'No se pudo abrir la aplicación de WhatsApp ni el navegador.';
+      if (key === 'contacts.alerts.socialError') return `No se pudo abrir el enlace de ${options?.platform}`;
+      return key;
+    }
+  }),
+}));
+
+export const mockOnSnapshot = jest.fn((onSuccess: any, onError: any) => {
+  onSuccess({
+    docs: [
+      { id: '1', data: () => ({ name: 'Dr. Alejandro V.', role: 'Director Médico', imageUrl: 'http://' }) },
+      { id: '2', data: () => ({ name: 'Dra. Sofia M.', role: 'Gerente de Operaciones', imageUrl: 'http://' }) },
+      { id: '3', data: () => ({ name: 'Ing. Carlos R.', role: 'Soporte Técnico', imageUrl: 'http://' }) },
+    ],
+    metadata: { fromCache: false },
+  });
+  return jest.fn();
+});
+
+jest.mock('@/config/firebase', () => ({
+  firestore: () => ({
+    collection: () => ({
+      onSnapshot: (...args: any[]) => mockOnSnapshot(...args)
+    })
+  })
+}));
+
 describe('ContactsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,9 +73,9 @@ describe('ContactsScreen', () => {
   });
 
   it('debe renderizar correctamente todos los títulos y responsables', () => {
-    const { getByText } = render(<ContactsScreen />);
+    const { getAllByText, getByText } = render(<ContactsScreen />);
     
-    expect(getByText('Información y Contacto')).toBeTruthy();
+    expect(getAllByText('Información y Contacto').length).toBeGreaterThan(0);
     expect(getByText('Responsables del Sitio')).toBeTruthy();
     expect(getByText('Dr. Alejandro V.')).toBeTruthy();
     expect(getByText('Dra. Sofia M.')).toBeTruthy();
@@ -230,6 +275,22 @@ describe('ContactsScreen', () => {
         expect.stringContaining('tel:+123456789')
       );
     });
+  });
+
+  it('debe manejar error al obtener responsables desde firestore', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    mockOnSnapshot.mockImplementationOnce((onSuccess: any, onError: any) => {
+      if (onError) {
+        onError(new Error('Firestore error'));
+      }
+      return jest.fn();
+    });
+
+    render(<ContactsScreen />);
+    
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Error fetching responsibles: ", expect.any(Error));
+    consoleErrorSpy.mockRestore();
   });
 
   it('Coincide con la instantánea (Snapshot Test)', () => {
