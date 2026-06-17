@@ -227,8 +227,8 @@ export default function ContactsScreen() {
                   description={resp.description}
                   imageUrl={typeof resp.imageUrl === 'string' ? { uri: resp.imageUrl } : resp.imageUrl}
                   isOnline={resp.isOnline}
-                  onEmailPress={() => handleEmailPress()}
-                  onPhonePress={() => handlePhonePress()}
+                  onEmailPress={() => handleEmailPress(resp.email)}
+                  onPhonePress={() => handlePhonePress(resp.phone)}
                 />
               ))}
             </View>
@@ -245,18 +245,9 @@ export default function ContactsScreen() {
             {t('contacts.directContactSubtitle')}
           </Text>
           <View style={styles.buttonGroup}>
-            <View style={{ width: '100%', alignItems: 'center', marginBottom: 4 }}>
-              <ContactButton type="email" onPress={() => handleEmailPress()} />
-              <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 4, fontFamily: 'Open Sans' }}>{Config.contact.email}</Text>
-            </View>
-            <View style={{ width: '100%', alignItems: 'center', marginBottom: 4 }}>
-              <ContactButton type="phone" onPress={() => handlePhonePress()} />
-              <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 4, fontFamily: 'Open Sans' }}>{Config.contact.phone}</Text>
-            </View>
-            <View style={{ width: '100%', alignItems: 'center', marginBottom: 4 }}>
-              <ContactButton type="whatsapp" onPress={handleWhatsAppPress} />
-              <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 4, fontFamily: 'Open Sans' }}>{Config.contact.whatsApp}</Text>
-            </View>
+            <ContactButton type="email" onPress={() => handleEmailPress()} />
+            <ContactButton type="phone" onPress={() => handlePhonePress()} />
+            <ContactButton type="whatsapp" onPress={handleWhatsAppPress} />
           </View>
         </View>
 
