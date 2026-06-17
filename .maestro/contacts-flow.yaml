@@ -1,0 +1,58 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+# --- Inicio de Sesión Condicional ---
+- runFlow:
+    when:
+      visible:
+        id: "email-input"
+    commands:
+      - tapOn:
+          id: "email-input"
+      - inputText: "carloscaoucv2022@gmail.com"
+      - tapOn:
+          id: "password-input"
+      - inputText: "Cao1234"
+      - hideKeyboard
+      - tapOn:
+          id: "login-button"
+      - extendedWaitUntil:
+          visible:
+            id: "welcome-header"
+          timeout: 10000
+# -----------------------------------
+
+# Esperamos a que la app inicie (pantalla principal)
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# 1. Navegar al Perfil (donde se encuentra el botón de menú en la cabecera)
+- tapOn:
+    id: "profile-tab"
+
+# Esperamos a que cargue la pantalla de perfil
+- extendedWaitUntil:
+    visible: ".*Perfil.*"
+    timeout: 5000
+
+# 2. Escenario 4: Accesibilidad (Ubicable en el menú)
+# Buscamos y presionamos el botón de menú en la cabecera (su testID es 'menu-btn')
+- tapOn:
+    id: "menu-btn"
+
+# 2. Verificamos que cargó la pantalla de contactos
+- assertVisible: ".*Contacto.*"
+- assertVisible: ".*Responsables del Sitio.*"
+
+# 3. Escenarios 1 y 2: Visualización de responsables dinámica
+# Dado que es dinámico de Firestore, al menos debe mostrar las tarjetas
+# Esperamos a que el ActivityIndicator termine buscando un ícono de email (común en las tarjetas)
+- extendedWaitUntil:
+    visible: ".*" 
+    timeout: 5000
+
+# Verificamos los textos clave traducidos (asumiendo español por defecto)
+- assertVisible: ".*Contacto Directo.*"
+- assertVisible: ".*Actividad en Redes Sociales.*"

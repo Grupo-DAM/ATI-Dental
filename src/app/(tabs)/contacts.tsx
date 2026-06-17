@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Alert,
   Clipboard,
@@ -11,8 +11,12 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
+import { useNetInfo } from '@react-native-community/netinfo';
+
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { ContactButton } from '@/components/contact/contact-button';
@@ -20,36 +24,10 @@ import { ResponsibleCard } from '@/components/contact/responsible-card';
 import { Config } from '@/constants/config';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { firestore } from '@/config/firebase';
 
 // Mock images representing local assets or high-quality photos
 const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
-
-const responsibles = [
-  {
-    id: '1',
-    name: 'Dr. Alejandro V.',
-    role: 'Director Médico',
-    description: 'Responsable de la supervisión clínica y protocolos de atención al paciente.',
-    isOnline: true,
-    imageUrl: { uri: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=256&h=256&q=80' },
-  },
-  {
-    id: '2',
-    name: 'Dra. Sofia M.',
-    role: 'Gerente de Operaciones',
-    description: 'Encargada de la logística diaria, recursos humanos y gestión de citas.',
-    isOnline: false,
-    imageUrl: { uri: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&h=256&q=80' },
-  },
-  {
-    id: '3',
-    name: 'Ing. Carlos R.',
-    role: 'Soporte Técnico',
-    description: 'Mantenimiento de la plataforma, seguridad de datos y soporte TI.',
-    isOnline: true,
-    imageUrl: { uri: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=256&h=256&q=80' },
-  },
-];
 
 const instagramPosts = [
   {
@@ -96,8 +74,40 @@ const facebookPosts = [
   },
 ];
 
+
+
 export default function ContactsScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
+  const netInfo = useNetInfo();
+
+  const [responsibles, setResponsibles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isFromCache, setIsFromCache] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('responsibles')
+      .onSnapshot(
+        (snapshot) => {
+          const data = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setResponsibles(data);
+          setIsFromCache(snapshot.metadata.fromCache);
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Error fetching responsibles: ", error);
+          setLoading(false);
+        }
+      );
+
+    return () => unsubscribe();
+  }, []);
+
+
 
   const handleEmailPress = async (customEmail?: string) => {
     const targetEmail = customEmail || Config.contact.email;
@@ -111,17 +121,17 @@ export default function ContactsScreen() {
       }
     } catch (error) {
       Alert.alert(
-        'Contacto por Email',
-        `No se pudo abrir el gestor de correo.\n\nDirección de soporte:\n${targetEmail}`,
+        t('contacts.alerts.emailTitle'),
+        t('contacts.alerts.emailError', { email: targetEmail }),
         [
           {
-            text: 'Copiar al Portapapeles',
+            text: t('contacts.alerts.copyToClipboard'),
             onPress: () => {
               Clipboard.setString(targetEmail);
-              Alert.alert('Copiado', 'Dirección de correo copiada al portapapeles.');
+              Alert.alert(t('contacts.alerts.copiedTitle'), t('contacts.alerts.copiedEmail'));
             },
           },
-          { text: 'Cerrar', style: 'cancel' },
+          { text: t('contacts.alerts.close'), style: 'cancel' },
         ]
       );
     }
@@ -139,17 +149,17 @@ export default function ContactsScreen() {
       }
     } catch (error) {
       Alert.alert(
-        'Llamada Telefónica',
-        `Este dispositivo no admite llamadas telefónicas.\n\nNúmero de contacto:\n${targetPhone}`,
+        t('contacts.alerts.phoneTitle'),
+        t('contacts.alerts.phoneError', { phone: targetPhone }),
         [
           {
-            text: 'Copiar al Portapapeles',
+            text: t('contacts.alerts.copyToClipboard'),
             onPress: () => {
               Clipboard.setString(targetPhone);
-              Alert.alert('Copiado', 'Número copiado al portapapeles.');
+              Alert.alert(t('contacts.alerts.copiedTitle'), t('contacts.alerts.copiedPhone'));
             },
           },
-          { text: 'Cerrar', style: 'cancel' },
+          { text: t('contacts.alerts.close'), style: 'cancel' },
         ]
       );
     }
@@ -159,10 +169,9 @@ export default function ContactsScreen() {
     const formattedPhone = Config.contact.whatsApp.replace(/[^0-9+]/g, '');
     const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(Config.contact.whatsAppMessage)}`;
     try {
-      // WhatsApp can always open in browser if app isn't installed
       await Linking.openURL(url);
     } catch (error) {
-      Alert.alert('Error', 'No se pudo abrir la aplicación de WhatsApp ni el navegador.');
+      Alert.alert(t('contacts.alerts.error'), t('contacts.alerts.whatsappError'));
     }
   };
 
@@ -171,58 +180,83 @@ export default function ContactsScreen() {
     try {
       await Linking.openURL(url);
     } catch (error) {
-      Alert.alert('Error', `No se pudo abrir el enlace de ${platform}.`);
+      Alert.alert(t('contacts.alerts.error'), t('contacts.alerts.socialError', { platform }));
     }
   };
+
+  const isOffline = !netInfo.isConnected || isFromCache;
 
   return (
     <View style={styles.container}>
       <AppHeader />
-      <Breadcrumb parent="Sistema" current="Contacto" />
+      <Breadcrumb parent={t('tabs.home')} current={t('contacts.title')} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Title Section */}
         <View style={styles.titleSection}>
-          <Text style={styles.mainTitle}>Información y Contacto</Text>
+          <Text style={styles.mainTitle}>{t('contacts.title')}</Text>
           <Text style={styles.subtitle}>
-            Gestione la comunicación con el equipo y revise la actividad reciente.
+            {t('contacts.subtitle')}
           </Text>
         </View>
+
+        {isOffline && (
+          <View style={styles.offlineBanner}>
+            <Ionicons name="cloud-offline-outline" size={16} color="#B45309" style={{ marginRight: 6 }} />
+            <Text style={styles.offlineText}>{t('contacts.offlineMode')}</Text>
+          </View>
+        )}
+
+
 
         {/* Section 1: Responsables */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Ionicons name="card" size={20} color={Colors.light.main} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>Responsables del Sitio</Text>
+            <Text style={styles.sectionTitle}>{t('contacts.responsibles')}</Text>
           </View>
-          <View style={styles.responsiblesList}>
-            {responsibles.map((resp) => (
-              <ResponsibleCard
-                key={resp.id}
-                name={resp.name}
-                role={resp.role}
-                description={resp.description}
-                imageUrl={resp.imageUrl}
-                isOnline={resp.isOnline}
-                onEmailPress={() => handleEmailPress()}
-                onPhonePress={() => handlePhonePress()}
-              />
-            ))}
-          </View>
+          
+          {loading ? (
+            <ActivityIndicator size="large" color={Colors.light.main} style={{ padding: 20 }} />
+          ) : (
+            <View style={styles.responsiblesList}>
+              {responsibles.map((resp) => (
+                <ResponsibleCard
+                  key={resp.id}
+                  name={resp.name}
+                  role={resp.role}
+                  description={resp.description}
+                  imageUrl={typeof resp.imageUrl === 'string' ? { uri: resp.imageUrl } : resp.imageUrl}
+                  isOnline={resp.isOnline}
+                  onEmailPress={() => handleEmailPress()}
+                  onPhonePress={() => handlePhonePress()}
+                />
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Section 2: Contacto Directo */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Ionicons name="chatbubbles" size={20} color={Colors.light.main} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>Contacto Directo</Text>
+            <Text style={styles.sectionTitle}>{t('contacts.directContact')}</Text>
           </View>
           <Text style={styles.directContactSubtitle}>
-            Canales de comunicación oficiales para consultas urgentes.
+            {t('contacts.directContactSubtitle')}
           </Text>
           <View style={styles.buttonGroup}>
-            <ContactButton type="email" onPress={() => handleEmailPress()} />
-            <ContactButton type="phone" onPress={() => handlePhonePress()} />
-            <ContactButton type="whatsapp" onPress={handleWhatsAppPress} />
+            <View style={{ width: '100%', alignItems: 'center', marginBottom: 4 }}>
+              <ContactButton type="email" onPress={() => handleEmailPress()} />
+              <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 4, fontFamily: 'Open Sans' }}>{Config.contact.email}</Text>
+            </View>
+            <View style={{ width: '100%', alignItems: 'center', marginBottom: 4 }}>
+              <ContactButton type="phone" onPress={() => handlePhonePress()} />
+              <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 4, fontFamily: 'Open Sans' }}>{Config.contact.phone}</Text>
+            </View>
+            <View style={{ width: '100%', alignItems: 'center', marginBottom: 4 }}>
+              <ContactButton type="whatsapp" onPress={handleWhatsAppPress} />
+              <Text style={{ fontSize: 13, color: '#6B7280', marginTop: 4, fontFamily: 'Open Sans' }}>{Config.contact.whatsApp}</Text>
+            </View>
           </View>
         </View>
 
@@ -230,7 +264,7 @@ export default function ContactsScreen() {
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Ionicons name="share-social" size={20} color={Colors.light.main} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>Actividad en Redes Sociales</Text>
+            <Text style={styles.sectionTitle}>{t('contacts.socialActivity')}</Text>
           </View>
 
           {/* Instagram Subfeed */}
@@ -341,6 +375,24 @@ const styles = StyleSheet.create({
     color: '#6B7280', // Pale Sky
     lineHeight: 20,
     fontFamily: 'Open Sans',
+  },
+  offlineBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  offlineText: {
+    fontSize: 12,
+    color: '#B45309',
+    fontFamily: 'Open Sans',
+    fontWeight: '600',
   },
   sectionContainer: {
     backgroundColor: '#F9FAFB',

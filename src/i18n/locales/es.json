@@ -61,5 +61,28 @@
       "networkTitle": "Error de conexión",
       "networkMessage": "Error de conexión con el servidor. Intente más tarde."
     }
+  },
+  "contacts": {
+    "title": "Información y Contacto",
+    "subtitle": "Gestione la comunicación con el equipo y revise la actividad reciente.",
+    "responsibles": "Responsables del Sitio",
+    "directContact": "Contacto Directo",
+    "directContactSubtitle": "Canales de comunicación oficiales para consultas urgentes.",
+    "socialActivity": "Actividad en Redes Sociales",
+    "offlineMode": "Mostrando datos en modo offline",
+    "alerts": {
+      "emailTitle": "Contacto por Email",
+      "emailError": "No se pudo abrir el gestor de correo.\n\nDirección de soporte:\n{{email}}",
+      "phoneTitle": "Llamada Telefónica",
+      "phoneError": "Este dispositivo no admite llamadas telefónicas.\n\nNúmero de contacto:\n{{phone}}",
+      "copyToClipboard": "Copiar al Portapapeles",
+      "copiedTitle": "Copiado",
+      "copiedEmail": "Dirección de correo copiada al portapapeles.",
+      "copiedPhone": "Número copiado al portapapeles.",
+      "close": "Cerrar",
+      "error": "Error",
+      "whatsappError": "No se pudo abrir la aplicación de WhatsApp ni el navegador.",
+      "socialError": "No se pudo abrir el enlace de {{platform}}."
+    }
   }
 }
