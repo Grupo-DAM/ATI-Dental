@@ -56,3 +56,13 @@ appId: com.proyect1.ATIDental
 # Verificamos los textos clave traducidos (asumiendo español por defecto)
 - assertVisible: ".*Contacto Directo.*"
 - assertVisible: ".*Actividad en Redes Sociales.*"
+
+# Probar la pulsación del botón de Email y validar el flujo alternativo
+# Presiona el botón de contacto por Email
+- tapOn:
+    id: "btn-contact-email"
+# Verifica que se muestre la alerta con la opción de copiar al portapapeles
+- assertVisible: ".*Contacto por Email.*"
+- assertVisible: ".*Copiar al Portapapeles.*"
+# Presiona el botón para cerrar la alerta y regresar a la pantalla de contacto
+- tapOn: "Cerrar"
