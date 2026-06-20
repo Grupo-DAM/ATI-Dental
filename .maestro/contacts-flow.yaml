@@ -2,6 +2,11 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
+# Esperar a que la app inicie y se quite la pantalla de carga (splash screen)
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+
 # --- Inicio de Sesión Condicional ---
 - runFlow:
     when:
@@ -23,10 +28,11 @@ appId: com.proyect1.ATIDental
           timeout: 10000
 # -----------------------------------
 
-# Esperamos a que la app inicie (pantalla principal)
+# Esperamos a que la app inicie (pantalla principal) y aparezca la barra de navegación
 - extendedWaitUntil:
-    visible: ".*"
-    timeout: 10000
+    visible:
+      id: "profile-tab"
+    timeout: 15000
 
 # 1. Navegar al Perfil (donde se encuentra el botón de menú en la cabecera)
 - tapOn:
@@ -34,7 +40,7 @@ appId: com.proyect1.ATIDental
 
 # Esperamos a que cargue la pantalla de perfil
 - extendedWaitUntil:
-    visible: ".*Perfil.*"
+    visible: ".*(Perfil|Profile).*"
     timeout: 5000
 
 # 2. Escenario 4: Accesibilidad (Ubicable en el menú)
@@ -43,8 +49,8 @@ appId: com.proyect1.ATIDental
     id: "menu-btn"
 
 # 2. Verificamos que cargó la pantalla de contactos
-- assertVisible: ".*Contacto.*"
-- assertVisible: ".*Responsables del Sitio.*"
+- assertVisible: ".*(Contacto|Contact).*"
+- assertVisible: ".*(Responsables del Sitio|Site Responsibles).*"
 
 # 3. Escenarios 1 y 2: Visualización de responsables dinámica
 # Dado que es dinámico de Firestore, al menos debe mostrar las tarjetas
@@ -53,6 +59,20 @@ appId: com.proyect1.ATIDental
     visible: ".*" 
     timeout: 5000
 
-# Verificamos los textos clave traducidos (asumiendo español por defecto)
-- assertVisible: ".*Contacto Directo.*"
-- assertVisible: ".*Actividad en Redes Sociales.*"
+# Hacemos scroll hasta encontrar los textos clave traducidos
+- scrollUntilVisible:
+    element: ".*(Contacto Directo|Direct Contact).*"
+    direction: DOWN
+- scrollUntilVisible:
+    element: ".*(Actividad en Redes Sociales|Social Media Activity).*"
+    direction: DOWN
+
+# Probar la pulsación del botón de Email y validar el flujo alternativo
+# Presiona el botón de contacto por Email
+- tapOn:
+    id: "btn-contact-email"
+# Verifica que se muestre la alerta con la opción de copiar al portapapeles
+- assertVisible: ".*Contacto por Email.*"
+- assertVisible: ".*(Copiar al Portapapeles|COPIAR AL PORTAPAPELES).*"
+# Presiona el botón para cerrar la alerta y regresar a la pantalla de contacto
+- tapOn: "(Cerrar|CERRAR)"

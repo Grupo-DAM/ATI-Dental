@@ -46,7 +46,8 @@
       "@react-native-firebase/auth",
       "expo-secure-store",
       "expo-image",
-      "expo-localization"
+      "expo-localization",
+      "./scripts/withAndroidQueries.js"
     ],
     "experiments": {
       "typedRoutes": true,
