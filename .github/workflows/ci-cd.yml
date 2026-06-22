@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - qa
   pull_request:
     branches:
       - main
+      - qa
   workflow_dispatch: # Allows manual execution from the GitHub Actions tab
 
 jobs:
@@ -97,7 +99,8 @@ jobs:
     name: "Fase 3: Cloud Build (EAS Build)"
     runs-on: ubuntu-latest
     needs: test # Executes only after tests pass successfully
-    if: github.event_name == 'workflow_dispatch' # Solo corre si el pipeline se dispara manualmente
+    # Solo corre si el pipeline se dispara manualmente o se hace push a la rama qa
+    if: github.ref == 'refs/heads/qa' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -113,6 +116,19 @@ jobs:
           npm ci --ignore-scripts
           # Como usamos --ignore-scripts por seguridad, ejecutamos patch-package manualmente
           ./node_modules/.bin/patch-package
+
+      - name: Inject QA Firebase Configuration
+        if: github.ref == 'refs/heads/qa'
+        env:
+          FIREBASE_QA_BASE64: ${{ secrets.ANDROID_FIREBASE_QA_JSON_BASE64 }}
+        run: |
+          if [ -z "$FIREBASE_QA_BASE64" ]; then
+            echo "::error::El secreto ANDROID_FIREBASE_QA_JSON_BASE64 no está configurado en GitHub."
+            exit 1
+          else
+            echo "Decodificando e inyectando configuración de Firebase para QA..."
+            echo "$FIREBASE_QA_BASE64" | base64 --decode > ./google-services.json
+          fi
 
       - name: Setup Expo and EAS CLI
         uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8

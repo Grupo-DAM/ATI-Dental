@@ -48,5 +48,8 @@ coverage/
 
 # Firebase configuration files
 google-services.json
+google-services.qa.json
 GoogleService-Info.plist
 
+# IDE Android studio
+.idea/
