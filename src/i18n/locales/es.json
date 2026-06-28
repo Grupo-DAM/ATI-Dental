@@ -43,6 +43,27 @@
     "agenda": "Agenda",
     "profile": "Perfil"
   },
+  "navigation": {
+    "title": "Navegación",
+    "patientList": "Listado de Pacientes",
+    "registerPatient": "Registrar Paciente",
+    "profileLanguage": "Perfil e Idioma",
+    "contact": "Contacto",
+    "administration": "Administración",
+    "adminUsers": "Administrar Usuarios",
+    "adminReports": "Generar Reportes",
+    "adminContactInfo": "Actualizar información de contacto",
+    "comingSoon": "Esta sección estará disponible próximamente.",
+    "defaultUser": "Usuario",
+    "roles": {
+      "odontologo": "Odontólogo",
+      "asistente": "Asistente",
+      "admin": "Administrador",
+      "medico": "Médico",
+      "usuarioExterno": "Usuario externo",
+      "default": "Usuario"
+    }
+  },
   "login": {
     "title": "Bienvenido de nuevo",
     "subtitle": "Ingresa tus credenciales para acceder a tu panel",

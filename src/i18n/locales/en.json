@@ -43,6 +43,27 @@
     "agenda": "Schedule",
     "profile": "Profile"
   },
+  "navigation": {
+    "title": "Navigation",
+    "patientList": "Patient List",
+    "registerPatient": "Register Patient",
+    "profileLanguage": "Profile & Language",
+    "contact": "Contact",
+    "administration": "Administration",
+    "adminUsers": "Manage Users",
+    "adminReports": "Generate Reports",
+    "adminContactInfo": "Update contact information",
+    "comingSoon": "This section will be available soon.",
+    "defaultUser": "User",
+    "roles": {
+      "odontologo": "Dentist",
+      "asistente": "Assistant",
+      "admin": "Administrator",
+      "medico": "Physician",
+      "usuarioExterno": "External user",
+      "default": "User"
+    }
+  },
   "login": {
     "title": "Welcome back",
     "subtitle": "Enter your credentials to access your dashboard",

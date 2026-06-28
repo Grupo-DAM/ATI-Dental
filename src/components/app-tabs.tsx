@@ -18,7 +18,11 @@ export default function AppTabs() {
       <Tabs.Screen name="home" options={{ title: 'Inicio' }} />
       <Tabs.Screen name="explore" options={{ title: 'Pacientes' }} />
       <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
-      <Tabs.Screen name="contacts" options={{ title: 'Contacto' }} />
+      <Tabs.Screen name="contacts" options={{ href: null, title: 'Contacto' }} />
+      <Tabs.Screen name="register-patient" options={{ href: null, title: 'Registrar Paciente' }} />
+      <Tabs.Screen name="admin/users" options={{ href: null, title: 'Admin Usuarios' }} />
+      <Tabs.Screen name="admin/reports" options={{ href: null, title: 'Admin Reportes' }} />
+      <Tabs.Screen name="update-contact-info" options={{ href: null, title: 'Actualizar contacto' }} />
     </Tabs>
   );
 }

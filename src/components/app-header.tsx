@@ -5,6 +5,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
+import { useNavigationMenu } from '@/hooks/use-navigation-menu';
 
 export type AppHeaderProps = {
   title?: string;
@@ -14,13 +15,20 @@ export type AppHeaderProps = {
 export function AppHeader({ title = 'ATI Dental', onMenuPress }: Readonly<AppHeaderProps>) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const navigationMenu = useNavigationMenu();
 
   const handleMenuPress = () => {
     if (onMenuPress) {
       onMenuPress();
-    } else {
-      router.push('/contacts');
+      return;
     }
+
+    if (navigationMenu) {
+      navigationMenu.open();
+      return;
+    }
+
+    router.push('/contacts');
   };
 
   return (
