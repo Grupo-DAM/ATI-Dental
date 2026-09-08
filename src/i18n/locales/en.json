@@ -84,5 +84,23 @@
       "whatsappError": "Could not open WhatsApp or browser.",
       "socialError": "Could not open {{platform}} link."
     }
+  },
+  "admin": {
+    "path": "Administration"
+  },
+  "admin-users": {
+    "title": "List of Users",
+    "subtitle": "Manage and view all your users.",
+    "path": "Users",
+    "stateLabel": "STATUS:",
+    "activeStatus": "Active",
+    "inactiveStatus": "Inactive",
+    "roleLabel": "ROLE:",
+    "adminRole": "Administrator",
+    "patientRole": "Patient"
+  },
+  "user-card": {
+    "lastVisitLabel": "LAST VISIT:",
+    "nextVisitLabel": "NEXT VISIT:"
   }
 }

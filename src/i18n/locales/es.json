@@ -84,5 +84,23 @@
       "whatsappError": "No se pudo abrir la aplicación de WhatsApp ni el navegador.",
       "socialError": "No se pudo abrir el enlace de {{platform}}."
     }
+  },
+  "admin": {
+    "path": "Administración"
+  },
+  "admin-users": {
+    "title": "Listado de Usuarios",
+    "subtitle": "Gestiona y consulta de todos tus usuarios.",
+    "path": "Usuarios",
+    "statusLabel": "ESTADO:",
+    "activeStatus": "Activo",
+    "inactiveStatus": "Inactivo",
+    "roleLabel": "ROL:",
+    "adminRole": "Administrador",
+    "patientRole": "Paciente"
+  },
+  "user-card": {
+    "lastVisitLabel": "ÚLTIMA VISITA:",
+    "nextVisitLabel": "PRÓXIMA CITA:"
   }
 }
