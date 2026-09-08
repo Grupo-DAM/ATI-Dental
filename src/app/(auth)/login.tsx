@@ -269,7 +269,7 @@ const createStyles = (theme: any) => StyleSheet.create({
         gap: 8,
         borderWidth: 1,
         borderColor: theme.border,
-        backgroundColor: theme.backgroundColor,
+        backgroundColor: theme.backgroundElement,
         borderRadius: 8,
         paddingHorizontal: 16,
         height: 50,

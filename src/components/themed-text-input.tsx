@@ -103,7 +103,7 @@ const createStyles = (theme: any) => StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: theme.border,
-        backgroundColor: theme.backgroundColor,
+        backgroundColor: theme.backgroundElement,
         borderRadius: 8,
         paddingLeft: Spacing.three || 12,
         paddingRight: 4,
