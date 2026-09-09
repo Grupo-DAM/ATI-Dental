@@ -49,6 +49,7 @@ type MenuItem = {
 type AdminSubItem = {
   testID: string;
   route: string;
+  segment: string;
   labelKey: string;
 };
 
@@ -95,16 +96,19 @@ const ADMIN_SUBMENU_ITEMS: AdminSubItem[] = [
   {
     testID: 'nav-item-admin-users',
     route: '/(tabs)/admin/users',
+    segment: 'users',
     labelKey: 'navigation.adminUsers',
   },
   {
     testID: 'nav-item-admin-reports',
     route: '/(tabs)/admin/reports',
+    segment: 'reports',
     labelKey: 'navigation.adminReports',
   },
   {
     testID: 'nav-item-admin-contact-info',
     route: '/(tabs)/update-contact-info',
+    segment: 'update-contact-info',
     labelKey: 'navigation.adminContactInfo',
   },
 ];
@@ -167,6 +171,7 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
   }));
 
   const activeSegment = segments[segments.length - 1];
+  const isAdminRouteActive = ADMIN_SUBMENU_ITEMS.some((item) => item.segment === activeSegment);
   const showAdminSection = isAdminUser(user);
   const displayName = getNavigationDisplayName(user, t('navigation.defaultUser'));
   const roleLabel = t(getRoleLabelKey(user?.rol));
@@ -227,7 +232,11 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
                 testID="nav-item-admin-toggle"
                 accessibilityRole="button"
                 onPress={() => setAdminExpanded((prev) => !prev)}
-                style={({ pressed }) => [styles.menuItem, pressed && styles.pressed]}>
+                style={({ pressed }) => [
+                  styles.menuItem,
+                  isAdminRouteActive && styles.menuItemActive,
+                  pressed && styles.pressed,
+                ]}>
                 <NavigationMenuIconSlot
                   iconKey="admin"
                   source={require('@/assets/expo.icon/Assets/admin.svg')}
@@ -251,7 +260,11 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
                       testID={item.testID}
                       accessibilityRole="button"
                       onPress={() => navigateTo(item.route)}
-                      style={({ pressed }) => [styles.subMenuItem, pressed && styles.pressed]}>
+                      style={({ pressed }) => [
+                        styles.subMenuItem,
+                        activeSegment === item.segment && styles.menuItemActive,
+                        pressed && styles.pressed,
+                      ]}>
                       <Text style={styles.subMenuItemText}>{t(item.labelKey)}</Text>
                     </Pressable>
                   ))}

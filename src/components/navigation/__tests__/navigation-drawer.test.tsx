@@ -9,10 +9,11 @@ jest.mock('expo-image', () => ({
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockUseSegments = jest.fn(() => ['(tabs)', 'explore']);
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
-  useSegments: () => ['(tabs)', 'explore'],
+  useSegments: () => mockUseSegments(),
 }));
 
 jest.mock('react-i18next', () => ({
@@ -30,6 +31,7 @@ const { useAuth } = jest.requireMock('@/hooks/use-auth');
 describe('NavigationDrawer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseSegments.mockReturnValue(['(tabs)', 'explore']);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
   });
 
@@ -91,6 +93,23 @@ describe('NavigationDrawer', () => {
     expect(screen.getByTestId('nav-item-admin-users')).toBeTruthy();
     fireEvent.press(screen.getByTestId('nav-item-admin-reports'));
     expect(mockPush).toHaveBeenCalledWith('/(tabs)/admin/reports');
+  });
+
+  it('resalta Administración en rutas de admin', () => {
+    mockUseSegments.mockReturnValue(['(tabs)', 'admin', 'users']);
+    useAuth.mockReturnValue({
+      user: { uid: '1', email: 'admin@test.com', rol: 'admin', nombre: 'Admin' },
+      logout: jest.fn(),
+    });
+
+    render(<NavigationDrawer visible onClose={jest.fn()} />);
+
+    const adminToggle = screen.getByTestId('nav-item-admin-toggle');
+    const style = adminToggle.props.style;
+    const flat = Array.isArray(style)
+      ? Object.assign({}, ...style.filter((item: object | false | undefined) => Boolean(item)))
+      : style;
+    expect(flat.backgroundColor).toBe('rgba(255, 255, 255, 0.18)');
   });
 
   it('cierra sesión desde el pie del menú', async () => {
