@@ -2,16 +2,25 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { Image } from 'expo-image';
 import { useRouter, useSegments } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
+import Animated, {
+  cancelAnimation,
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { scheduleOnRN } from 'react-native-worklets';
 import { useTranslation } from 'react-i18next';
 
 import { NavigationMenuIconSlot } from '@/components/navigation/navigation-menu-icon-slot';
@@ -31,14 +40,65 @@ type MenuRoute =
   | '/(tabs)/contacts';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.1';
+const SLIDE_IN_MS = 280;
+const SLIDE_OUT_MS = 220;
 
 export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawerProps>) {
   const { t } = useTranslation();
   const router = useRouter();
   const segments = useSegments();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const { user } = useAuth();
   const [adminExpanded, setAdminExpanded] = useState(false);
+  const [isMounted, setIsMounted] = useState(visible);
+  const wasVisibleRef = useRef(visible);
+  const translateX = useSharedValue(width);
+
+  const unmountDrawer = useCallback(() => {
+    wasVisibleRef.current = false;
+    setIsMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if (visible) {
+      wasVisibleRef.current = true;
+      setIsMounted(true);
+      translateX.value = withTiming(0, {
+        duration: SLIDE_IN_MS,
+        easing: Easing.out(Easing.cubic),
+      });
+      return () => {
+        cancelAnimation(translateX);
+      };
+    }
+
+    if (!wasVisibleRef.current) {
+      return;
+    }
+
+    translateX.value = withTiming(
+      width,
+      {
+        duration: SLIDE_OUT_MS,
+        easing: Easing.in(Easing.cubic),
+      },
+      (finished) => {
+        'worklet';
+        if (finished) {
+          scheduleOnRN(unmountDrawer);
+        }
+      },
+    );
+
+    return () => {
+      cancelAnimation(translateX);
+    };
+  }, [translateX, unmountDrawer, visible, width]);
+
+  const panelStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
 
   const activeSegment = segments[segments.length - 1];
   const showAdminSection = isAdminUser(user);
@@ -67,11 +127,11 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
 
   return (
     <Modal
-      visible={visible}
-      animationType="slide"
+      visible={isMounted}
+      animationType="none"
       presentationStyle="fullScreen"
       onRequestClose={onClose}>
-      <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      <Animated.View style={[styles.container, { paddingBottom: insets.bottom }, panelStyle]}>
         <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
           <Pressable
             testID="nav-drawer-close"
@@ -93,7 +153,14 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
               isActive('explore') && styles.menuItemActive,
               pressed && styles.pressed,
             ]}>
-            <NavigationMenuIconSlot iconKey="patients" />
+            <NavigationMenuIconSlot iconKey="patients"> 
+                <Image
+                  source={require('@/assets/expo.icon/Assets/patients.svg')}
+                  style={{ width: 24, height: 24 }}
+                  contentFit="contain"
+                  tintColor="#FFFFFF"
+                />
+            </NavigationMenuIconSlot>
             <Text style={styles.menuItemText}>{t('navigation.patientList')}</Text>
           </Pressable>
 
@@ -106,7 +173,14 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
               isActive('register-patient') && styles.menuItemActive,
               pressed && styles.pressed,
             ]}>
-            <NavigationMenuIconSlot iconKey="register" />
+            <NavigationMenuIconSlot iconKey="register">   
+                <Image
+                  source={require('@/assets/expo.icon/Assets/register-patient.svg')}
+                  style={{ width: 24, height: 24 }}
+                  contentFit="contain"
+                  tintColor="#FFFFFF"
+                /> 
+            </NavigationMenuIconSlot>
             <Text style={styles.menuItemText}>{t('navigation.registerPatient')}</Text>
           </Pressable>
 
@@ -119,7 +193,14 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
               isActive('profile') && styles.menuItemActive,
               pressed && styles.pressed,
             ]}>
-            <NavigationMenuIconSlot iconKey="profile" />
+            <NavigationMenuIconSlot iconKey="profile">
+              <Image
+                source={require('@/assets/expo.icon/Assets/profile.svg')}
+                style={{ width: 24, height: 24 }}
+                contentFit="contain"
+                tintColor="#FFFFFF"
+              />
+            </NavigationMenuIconSlot>
             <Text style={styles.menuItemText}>{t('navigation.profileLanguage')}</Text>
           </Pressable>
 
@@ -132,7 +213,14 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
               isActive('contacts') && styles.menuItemActive,
               pressed && styles.pressed,
             ]}>
-            <NavigationMenuIconSlot iconKey="contact" />
+            <NavigationMenuIconSlot iconKey="contact">
+              <Image
+                source={require('@/assets/expo.icon/Assets/contact.svg')}
+                style={{ width: 24, height: 24 }}
+                contentFit="contain"
+                tintColor="#FFFFFF"
+              />
+            </NavigationMenuIconSlot>
             <Text style={styles.menuItemText}>{t('navigation.contact')}</Text>
           </Pressable>
 
@@ -143,7 +231,14 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
                 accessibilityRole="button"
                 onPress={() => setAdminExpanded((prev) => !prev)}
                 style={({ pressed }) => [styles.menuItem, pressed && styles.pressed]}>
-                <NavigationMenuIconSlot iconKey="admin" />
+                <NavigationMenuIconSlot iconKey="admin">  
+                  <Image
+                    source={require('@/assets/expo.icon/Assets/admin.svg')}
+                    style={{ width: 24, height: 24 }}
+                    contentFit="contain"
+                    tintColor="#FFFFFF"
+                  />
+                </NavigationMenuIconSlot>
                 <Text style={[styles.menuItemText, styles.adminTitle]}>
                   {t('navigation.administration')}
                 </Text>
@@ -211,7 +306,7 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
           </View>
           <Text style={styles.version}>v{APP_VERSION}</Text>
         </View>
-      </View>
+      </Animated.View>
     </Modal>
   );
 }

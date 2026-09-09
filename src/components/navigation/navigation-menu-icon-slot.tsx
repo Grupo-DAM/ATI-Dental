@@ -39,10 +39,6 @@ const styles = StyleSheet.create({
   slot: {
     width: 24,
     height: 24,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.35)',
-    borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
