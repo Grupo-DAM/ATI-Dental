@@ -54,6 +54,7 @@
     "adminReports": "Generar Reportes",
     "adminContactInfo": "Actualizar información de contacto",
     "comingSoon": "Esta sección estará disponible próximamente.",
+    "logout": "Cerrar sesión",
     "defaultUser": "Usuario",
     "roles": {
       "odontologo": "Odontólogo",

@@ -49,7 +49,7 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
   const segments = useSegments();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [adminExpanded, setAdminExpanded] = useState(false);
   const [isMounted, setIsMounted] = useState(visible);
   const wasVisibleRef = useRef(visible);
@@ -121,6 +121,16 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
   const navigateTo = (route: MenuRoute) => {
     onClose();
     router.push(route);
+  };
+
+  const handleLogout = async () => {
+    onClose();
+    try {
+      await logout();
+      router.replace('/(auth)/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
   };
 
   const isActive = (segment: string) => activeSegment === segment;
@@ -289,22 +299,32 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
         </ScrollView>
 
         <View style={styles.footer}>
-          <View style={styles.footerUser}>
-            <Image
-              source={require('@/assets/expo.icon/Assets/avatar.png')}
-              style={styles.avatar}
-              contentFit="cover"
-            />
-            <View style={styles.footerUserText}>
-              <Text style={styles.footerName} numberOfLines={1}>
-                {displayName}
-              </Text>
-              <Text style={styles.footerRole} numberOfLines={1}>
-                {roleLabel}
-              </Text>
+          <Pressable
+            testID="nav-item-logout"
+            accessibilityRole="button"
+            onPress={handleLogout}
+            style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}>
+            <Ionicons name="log-out-outline" size={22} color="#FFFFFF" />
+            <Text style={styles.logoutText}>{t('navigation.logout')}</Text>
+          </Pressable>
+          <View style={styles.footerTop}>
+            <View style={styles.footerUser}>
+              <Image
+                source={require('@/assets/expo.icon/Assets/avatar.png')}
+                style={styles.avatar}
+                contentFit="cover"
+              />
+              <View style={styles.footerUserText}>
+                <Text style={styles.footerName} numberOfLines={1}>
+                  {displayName}
+                </Text>
+                <Text style={styles.footerRole} numberOfLines={1}>
+                  {roleLabel}
+                </Text>
+              </View>
             </View>
+            <Text style={styles.version}>v{APP_VERSION}</Text>
           </View>
-          <Text style={styles.version}>v{APP_VERSION}</Text>
         </View>
       </Animated.View>
     </Modal>
@@ -389,13 +409,33 @@ const styles = StyleSheet.create({
     fontFamily: 'Open Sans',
   },
   footer: {
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    gap: 4,
+  },
+  footerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 48,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    gap: 12,
+  },
+  logoutText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Open Sans',
   },
   footerUser: {
     flexDirection: 'row',
