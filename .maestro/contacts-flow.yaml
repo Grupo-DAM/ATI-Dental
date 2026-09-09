@@ -43,12 +43,19 @@ appId: com.proyect1.ATIDental
     visible: ".*(Perfil|Profile).*"
     timeout: 5000
 
-# 2. Escenario 4: Accesibilidad (Ubicable en el menú)
-# Buscamos y presionamos el botón de menú en la cabecera (su testID es 'menu-btn')
+# 2. Abrir menú de navegación y entrar a Contacto
 - tapOn:
     id: "menu-btn"
 
-# 2. Verificamos que cargó la pantalla de contactos
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-contact"
+    timeout: 5000
+
+- tapOn:
+    id: "nav-item-contact"
+
+# Verificamos que cargó la pantalla de contactos
 - assertVisible: ".*(Contacto|Contact).*"
 - assertVisible: ".*(Responsables del Sitio|Site Responsibles).*"
 

@@ -11,7 +11,7 @@ export interface UserProfile {
   email: string | null;
   nombre?: string;
   alias?: string;
-  rol?: 'odontologo' | 'asistente' | 'administrador' | 'medico' | 'usuario_externo' | (string & {});
+  rol?: 'odontologo' | 'asistente' | 'admin' | 'medico' | 'usuario_externo' | (string & {});
   estado?: 'pendiente' | 'activo' | 'inactivo' | (string & {});
   idiomaPreferencia?: 'es' | 'en' | (string & {});
 }
