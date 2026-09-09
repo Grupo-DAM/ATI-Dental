@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { Image } from 'expo-image';
-import { useRouter, useSegments } from 'expo-router';
+import { type Href, useRouter, useSegments } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
@@ -23,7 +23,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useTranslation } from 'react-i18next';
 
-import { NavigationMenuIconSlot } from '@/components/navigation/navigation-menu-icon-slot';
+import {
+  NavigationMenuIconSlot,
+  type NavigationMenuIconKey,
+} from '@/components/navigation/navigation-menu-icon-slot';
+import { getNavigationDisplayName } from '@/constants/navigation-user';
 import { getRoleLabelKey, isAdminUser } from '@/constants/user-roles';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
@@ -33,15 +37,77 @@ type NavigationDrawerProps = {
   onClose: () => void;
 };
 
-type MenuRoute =
-  | '/(tabs)/explore'
-  | '/(tabs)/register-patient'
-  | '/(tabs)/profile'
-  | '/(tabs)/contacts';
+type MenuItem = {
+  testID: string;
+  route: string;
+  segment: string;
+  iconKey: NavigationMenuIconKey;
+  icon: number;
+  labelKey: string;
+};
+
+type AdminSubItem = {
+  testID: string;
+  route: string;
+  labelKey: string;
+};
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.1';
 const SLIDE_IN_MS = 280;
 const SLIDE_OUT_MS = 220;
+
+const MAIN_MENU_ITEMS: MenuItem[] = [
+  {
+    testID: 'nav-item-patients',
+    route: '/(tabs)/explore',
+    segment: 'explore',
+    iconKey: 'patients',
+    icon: require('@/assets/expo.icon/Assets/patients.svg'),
+    labelKey: 'navigation.patientList',
+  },
+  {
+    testID: 'nav-item-register-patient',
+    route: '/(tabs)/register-patient',
+    segment: 'register-patient',
+    iconKey: 'register',
+    icon: require('@/assets/expo.icon/Assets/register-patient.svg'),
+    labelKey: 'navigation.registerPatient',
+  },
+  {
+    testID: 'nav-item-profile',
+    route: '/(tabs)/profile',
+    segment: 'profile',
+    iconKey: 'profile',
+    icon: require('@/assets/expo.icon/Assets/profile.svg'),
+    labelKey: 'navigation.profileLanguage',
+  },
+  {
+    testID: 'nav-item-contact',
+    route: '/(tabs)/contacts',
+    segment: 'contacts',
+    iconKey: 'contact',
+    icon: require('@/assets/expo.icon/Assets/contact.svg'),
+    labelKey: 'navigation.contact',
+  },
+];
+
+const ADMIN_SUBMENU_ITEMS: AdminSubItem[] = [
+  {
+    testID: 'nav-item-admin-users',
+    route: '/(tabs)/admin/users',
+    labelKey: 'navigation.adminUsers',
+  },
+  {
+    testID: 'nav-item-admin-reports',
+    route: '/(tabs)/admin/reports',
+    labelKey: 'navigation.adminReports',
+  },
+  {
+    testID: 'nav-item-admin-contact-info',
+    route: '/(tabs)/update-contact-info',
+    labelKey: 'navigation.adminContactInfo',
+  },
+];
 
 export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawerProps>) {
   const { t } = useTranslation();
@@ -102,25 +168,12 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
 
   const activeSegment = segments[segments.length - 1];
   const showAdminSection = isAdminUser(user);
-
-  const displayName = useMemo(() => {
-    if (user?.nombre?.trim()) {
-      return user.nombre.trim();
-    }
-    if (user?.alias?.trim()) {
-      return user.alias.trim();
-    }
-    if (user?.email) {
-      return user.email.split('@')[0];
-    }
-    return t('navigation.defaultUser');
-  }, [t, user?.alias, user?.email, user?.nombre]);
-
+  const displayName = getNavigationDisplayName(user, t('navigation.defaultUser'));
   const roleLabel = t(getRoleLabelKey(user?.rol));
 
-  const navigateTo = (route: MenuRoute) => {
+  const navigateTo = (route: string) => {
     onClose();
-    router.push(route);
+    router.push(route as Href);
   };
 
   const handleLogout = async () => {
@@ -132,8 +185,6 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
       console.error('Error al cerrar sesión:', error);
     }
   };
-
-  const isActive = (segment: string) => activeSegment === segment;
 
   return (
     <Modal
@@ -154,85 +205,21 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
         </View>
 
         <ScrollView style={styles.menuScroll} contentContainerStyle={styles.menuContent}>
-          <Pressable
-            testID="nav-item-patients"
-            accessibilityRole="button"
-            onPress={() => navigateTo('/(tabs)/explore')}
-            style={({ pressed }) => [
-              styles.menuItem,
-              isActive('explore') && styles.menuItemActive,
-              pressed && styles.pressed,
-            ]}>
-            <NavigationMenuIconSlot iconKey="patients"> 
-                <Image
-                  source={require('@/assets/expo.icon/Assets/patients.svg')}
-                  style={{ width: 24, height: 24 }}
-                  contentFit="contain"
-                  tintColor="#FFFFFF"
-                />
-            </NavigationMenuIconSlot>
-            <Text style={styles.menuItemText}>{t('navigation.patientList')}</Text>
-          </Pressable>
-
-          <Pressable
-            testID="nav-item-register-patient"
-            accessibilityRole="button"
-            onPress={() => navigateTo('/(tabs)/register-patient')}
-            style={({ pressed }) => [
-              styles.menuItem,
-              isActive('register-patient') && styles.menuItemActive,
-              pressed && styles.pressed,
-            ]}>
-            <NavigationMenuIconSlot iconKey="register">   
-                <Image
-                  source={require('@/assets/expo.icon/Assets/register-patient.svg')}
-                  style={{ width: 24, height: 24 }}
-                  contentFit="contain"
-                  tintColor="#FFFFFF"
-                /> 
-            </NavigationMenuIconSlot>
-            <Text style={styles.menuItemText}>{t('navigation.registerPatient')}</Text>
-          </Pressable>
-
-          <Pressable
-            testID="nav-item-profile"
-            accessibilityRole="button"
-            onPress={() => navigateTo('/(tabs)/profile')}
-            style={({ pressed }) => [
-              styles.menuItem,
-              isActive('profile') && styles.menuItemActive,
-              pressed && styles.pressed,
-            ]}>
-            <NavigationMenuIconSlot iconKey="profile">
-              <Image
-                source={require('@/assets/expo.icon/Assets/profile.svg')}
-                style={{ width: 24, height: 24 }}
-                contentFit="contain"
-                tintColor="#FFFFFF"
-              />
-            </NavigationMenuIconSlot>
-            <Text style={styles.menuItemText}>{t('navigation.profileLanguage')}</Text>
-          </Pressable>
-
-          <Pressable
-            testID="nav-item-contact"
-            accessibilityRole="button"
-            onPress={() => navigateTo('/(tabs)/contacts')}
-            style={({ pressed }) => [
-              styles.menuItem,
-              isActive('contacts') && styles.menuItemActive,
-              pressed && styles.pressed,
-            ]}>
-            <NavigationMenuIconSlot iconKey="contact">
-              <Image
-                source={require('@/assets/expo.icon/Assets/contact.svg')}
-                style={{ width: 24, height: 24 }}
-                contentFit="contain"
-                tintColor="#FFFFFF"
-              />
-            </NavigationMenuIconSlot>
-            <Text style={styles.menuItemText}>{t('navigation.contact')}</Text>
-          </Pressable>
+          {MAIN_MENU_ITEMS.map((item) => (
+            <Pressable
+              key={item.testID}
+              testID={item.testID}
+              accessibilityRole="button"
+              onPress={() => navigateTo(item.route)}
+              style={({ pressed }) => [
+                styles.menuItem,
+                activeSegment === item.segment && styles.menuItemActive,
+                pressed && styles.pressed,
+              ]}>
+              <NavigationMenuIconSlot iconKey={item.iconKey} source={item.icon} />
+              <Text style={styles.menuItemText}>{t(item.labelKey)}</Text>
+            </Pressable>
+          ))}
 
           {showAdminSection ? (
             <View style={styles.adminSection} testID="nav-admin-section">
@@ -241,14 +228,10 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
                 accessibilityRole="button"
                 onPress={() => setAdminExpanded((prev) => !prev)}
                 style={({ pressed }) => [styles.menuItem, pressed && styles.pressed]}>
-                <NavigationMenuIconSlot iconKey="admin">  
-                  <Image
-                    source={require('@/assets/expo.icon/Assets/admin.svg')}
-                    style={{ width: 24, height: 24 }}
-                    contentFit="contain"
-                    tintColor="#FFFFFF"
-                  />
-                </NavigationMenuIconSlot>
+                <NavigationMenuIconSlot
+                  iconKey="admin"
+                  source={require('@/assets/expo.icon/Assets/admin.svg')}
+                />
                 <Text style={[styles.menuItemText, styles.adminTitle]}>
                   {t('navigation.administration')}
                 </Text>
@@ -262,36 +245,16 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
 
               {adminExpanded ? (
                 <View style={styles.adminSubmenu}>
-                  <Pressable
-                    testID="nav-item-admin-users"
-                    accessibilityRole="button"
-                    onPress={() => {
-                      onClose();
-                      router.push('/(tabs)/admin/users');
-                    }}
-                    style={({ pressed }) => [styles.subMenuItem, pressed && styles.pressed]}>
-                    <Text style={styles.subMenuItemText}>{t('navigation.adminUsers')}</Text>
-                  </Pressable>
-                  <Pressable
-                    testID="nav-item-admin-reports"
-                    accessibilityRole="button"
-                    onPress={() => {
-                      onClose();
-                      router.push('/(tabs)/admin/reports');
-                    }}
-                    style={({ pressed }) => [styles.subMenuItem, pressed && styles.pressed]}>
-                    <Text style={styles.subMenuItemText}>{t('navigation.adminReports')}</Text>
-                  </Pressable>
-                  <Pressable
-                    testID="nav-item-admin-contact-info"
-                    accessibilityRole="button"
-                    onPress={() => {
-                      onClose();
-                      router.push('/(tabs)/update-contact-info');
-                    }}
-                    style={({ pressed }) => [styles.subMenuItem, pressed && styles.pressed]}>
-                    <Text style={styles.subMenuItemText}>{t('navigation.adminContactInfo')}</Text>
-                  </Pressable>
+                  {ADMIN_SUBMENU_ITEMS.map((item) => (
+                    <Pressable
+                      key={item.testID}
+                      testID={item.testID}
+                      accessibilityRole="button"
+                      onPress={() => navigateTo(item.route)}
+                      style={({ pressed }) => [styles.subMenuItem, pressed && styles.pressed]}>
+                      <Text style={styles.subMenuItemText}>{t(item.labelKey)}</Text>
+                    </Pressable>
+                  ))}
                 </View>
               ) : null}
             </View>
@@ -307,7 +270,7 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
             <Ionicons name="log-out-outline" size={22} color="#FFFFFF" />
             <Text style={styles.logoutText}>{t('navigation.logout')}</Text>
           </Pressable>
-          <View style={styles.footerTop}>
+          <View style={styles.footerProfile}>
             <View style={styles.footerUser}>
               <Image
                 source={require('@/assets/expo.icon/Assets/avatar.png')}
@@ -416,7 +379,7 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255, 255, 255, 0.15)',
     gap: 4,
   },
-  footerTop: {
+  footerProfile: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

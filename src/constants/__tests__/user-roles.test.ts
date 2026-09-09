@@ -15,6 +15,11 @@ describe('user-roles', () => {
 
   it('resuelve claves i18n de rol', () => {
     expect(getRoleLabelKey(USER_ROLES.ODONTOLOGO)).toBe('navigation.roles.odontologo');
+    expect(getRoleLabelKey(USER_ROLES.ASISTENTE)).toBe('navigation.roles.asistente');
+    expect(getRoleLabelKey(USER_ROLES.ADMIN)).toBe('navigation.roles.admin');
+    expect(getRoleLabelKey('administrador')).toBe('navigation.roles.admin');
+    expect(getRoleLabelKey(USER_ROLES.MEDICO)).toBe('navigation.roles.medico');
+    expect(getRoleLabelKey(USER_ROLES.USUARIO_EXTERNO)).toBe('navigation.roles.usuarioExterno');
     expect(getRoleLabelKey(undefined)).toBe('navigation.roles.default');
   });
 });

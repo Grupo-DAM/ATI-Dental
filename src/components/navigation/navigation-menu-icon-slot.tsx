@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
+import { Image } from 'expo-image';
 
 export type NavigationMenuIconKey =
   | 'patients'
@@ -10,27 +11,39 @@ export type NavigationMenuIconKey =
 
 type NavigationMenuIconSlotProps = {
   iconKey: NavigationMenuIconKey;
-  /** Sustituye el placeholder por tu icono (Image, Svg, etc.). */
+  source?: number;
+  /** Sustituye el icono por defecto (Image, Svg, etc.). */
   children?: React.ReactNode;
   style?: ViewStyle;
 };
 
 /**
  * Reserva espacio fijo (24×24) para el icono del menú.
- * Sustituye `children` cuando tengas los assets listos.
  */
 export function NavigationMenuIconSlot({
   iconKey,
+  source,
   children,
   style,
 }: Readonly<NavigationMenuIconSlotProps>) {
+  const icon = children ?? (
+    source ? (
+      <Image
+        source={source}
+        style={styles.icon}
+        contentFit="contain"
+        tintColor="#FFFFFF"
+      />
+    ) : null
+  );
+
   return (
     <View
       testID={`nav-icon-slot-${iconKey}`}
       style={[styles.slot, style]}
-      accessibilityElementsHidden={!children}
-      importantForAccessibility={children ? 'auto' : 'no-hide-descendants'}>
-      {children}
+      accessibilityElementsHidden={!icon}
+      importantForAccessibility={icon ? 'auto' : 'no-hide-descendants'}>
+      {icon}
     </View>
   );
 }
@@ -42,5 +55,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  icon: {
+    width: 24,
+    height: 24,
   },
 });
