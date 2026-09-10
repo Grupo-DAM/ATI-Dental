@@ -170,7 +170,7 @@ const createStyles = (theme: any) => StyleSheet.create({
         fontWeight: '400'
     },
     btnTextSelected: {
-        color: 'white'
+        color: Colors.light.backgroundElement
     },
     changePageSymbol: {
        transform: [{rotate: '180deg'}]

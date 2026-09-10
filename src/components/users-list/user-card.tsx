@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react';
 import { View, StyleSheet, Image, Text, Pressable, Alert } from 'react-native';
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
+import { ThemedView } from '@/components/themed-view';
+import { ThemedText } from '@/components/themed-text';
 
 import { useTranslation } from 'react-i18next';
 import { Color, Spacing } from '@/constants/theme';

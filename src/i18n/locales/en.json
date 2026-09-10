@@ -113,7 +113,10 @@
   "patients-list": {
     "searchPatients": "Search Patient",
     "orderByLastVisit": "Last visit",
-    "orderByNextVisit": "Next visit"
+    "orderByNextVisit": "Next visit",
+    "noResults": "No patient card matches the search query.",
+    "noResultsQuestion": "New patient?",
+    "registerPatient": "Register Patient"
   },
   "admin-users": {
     "title": "List of Users",
@@ -133,7 +136,10 @@
     "dentistRole": "Dentist",
     "patientRole": "Patient",
     "externalUserRole": "External User",
-    "searchResult": "Showing {{min}} to {{max}}\nof {{total}} results"
+    "searchResult": "Showing {{min}} to {{max}}\nof {{total}} results",
+    "noResults": "No user profile matches the search query.",
+    "noResultsQuestion":  "New user?",
+    "registerUser": "Register User"
   },
   "user-card": {
     "lastVisitLabel": "LAST VISIT:",

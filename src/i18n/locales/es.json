@@ -113,7 +113,10 @@
   "patients-list": {
     "searchPatients": "Buscar Paciente",
     "orderByLastVisit": "Última visita",
-    "orderByNextVisit": "Próxima visita"
+    "orderByNextVisit": "Próxima visita",
+    "noResults": "No hay fichas de pacientes que coincidan con la búsqueda.",
+    "noResultsQuestion": "¿Nuevo paciente?",
+    "registerPatient": "Registrar Paciente"
   },
   "admin-users": {
     "title": "Listado de Usuarios",
@@ -133,7 +136,10 @@
     "dentistRole": "Dentista",
     "patientRole": "Paciente",
     "externalUserRole": "Usuario Externo",
-    "searchResult": "Mostrando {{min}} a {{max}}\nde {{total}} resultados"
+    "searchResult": "Mostrando {{min}} a {{max}}\nde {{total}} resultados",
+    "noResults": "No hay perfiles de usuarios que coincidan con la búsqueda.",
+    "noResultsQuestion":  "¿Nuevo usuario?",
+    "registerUser": "Registrar Usuario"
   },
   "user-card": {
     "lastVisitLabel": "ÚLTIMA VISITA:",

@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import React, { useMemo, useState, useEffect } from 'react';
-import { View, Text, Platform, StyleSheet, Image, TextInput, Pressable} from 'react-native';
+import { Image } from 'expo-image';
+import { View, Text, Platform, StyleSheet, TextInput, Pressable} from 'react-native';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { DropdownSelector } from '@/components/ui/dropdown-selector.tsx';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-const SearchIcon = require('@/assets/icons/search.png');
+const SearchIcon = require('@/assets/icons/search.svg');
 
 type ListType = {
     general?: boolean;
@@ -62,6 +63,7 @@ export function SearchFilter({general= true, value='', onChangeText, onChangeOrd
               <View style = {styles.inputContainer}>
                   <Image
                       source={SearchIcon}
+                      contentFit="contain"
                       style={styles.icon}
                     />
                   <TextInput
@@ -82,6 +84,9 @@ export function SearchFilter({general= true, value='', onChangeText, onChangeOrd
                 onChangeOption = {changeOrder}
               ></DropdownSelector>
           </View>
+          <Pressable>
+
+          </Pressable>
         </View>
     );
 }
@@ -127,7 +132,9 @@ const createStyles = (theme: any) => StyleSheet.create({
         margin: Spacing.two || 8,
         justifyContent: 'center',
         alignItems: 'center',
-        tintColor: theme.placeholderColor
+        tintColor: theme.placeholderColor,
+        height: 12,
+        width: 12
     },
     orderByContainer: {
         width: '25%',

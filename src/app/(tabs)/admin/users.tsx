@@ -6,12 +6,13 @@ import { View, Text, Platform, StyleSheet, Image, TextInput,
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
-import { SearchFilter } from '@/components/search-filter-selector';
-import { ListPages } from '@/components/list-pages-viewer';
+import { SearchFilter } from '@/components/users-list/search-filter-selector';
+import { ListPages } from '@/components/users-list/list-pages-viewer';
+import { NoResultSearch } from '@/components/users-list/no-results';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { useTheme } from '@/hooks/use-theme';
-import { UserCard } from '@/components/user-card';
+import { UserCard } from '@/components/users-list/user-card';
 import { firestore } from '@/config/firebase';
 
 export default function AdminUserList() {
@@ -130,22 +131,25 @@ export default function AdminUserList() {
                 }}
                 onChangeOrder = {setOrderBy}
               />
-
               {/* List of users*/}
-              {paginatedUsers.map((user: userList) => (
-                  <UserCard key = {user.id}
-                    ID="#P-0042"
-                    name={user.nombre}
-                    email= {user.email}
-                    type='general'
-                    status={user.estado}
-                    role= {user.rol}
-                  />
-              ))}
+              {filteredUsers.length == 0 ? (
+                  <NoResultSearch general = {true} />
+              ) : (
+                  paginatedUsers.map((user: userList) => (
+                        <UserCard key = {user.id}
+                          ID="#P-0042"
+                          name={user.nombre}
+                          email= {user.email}
+                          type='general'
+                          status={user.estado}
+                          role= {user.rol}
+                        />
+                  ))
+              )}
 
               {/*Selection of result pages*/}
               <ListPages
-                total= {users.length}
+                total= {filteredUsers.length}
                 maxRange= {maxRange}
                 minRange= {minRange}
                 currentPage= {currentPage}
