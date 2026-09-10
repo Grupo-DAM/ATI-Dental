@@ -110,13 +110,21 @@
   "admin": {
     "path": "Administration"
   },
+  "patients-list": {
+    "searchPatients": "Search Patient",
+    "orderByLastVisit": "Last visit",
+    "orderByNextVisit": "Next visit"
+  },
   "admin-users": {
     "title": "List of Users",
     "subtitle": "Manage and view all your users.",
     "path": "Users",
-    "searchUsers": "Search Users",
+    "searchUsers": "Search User",
     "searchUserPlaceholder": "Name, lastname or ID...",
     "orderBy": "Order by",
+    "orderByName": "Name",
+    "orderByLastName": "Lastname",
+    "orderByID": "ID",
     "stateLabel": "STATUS:",
     "activeStatus": "Active",
     "inactiveStatus": "Inactive",
