@@ -8,11 +8,22 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-export function DropdownSelector({children}: {children: string[]}) {
+type DropdownSelectorProps = {
+    children: string[];
+    onChangeOption: (indx: int) => void;
+};
+
+export function DropdownSelector({children, onChangeOption}: DropdownSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [option, setOption] = useState(children?.[0]);
   const theme = useTheme();
   const styles = createStyles(theme);
+
+  const changeOption = (opt: string, index: number) => {
+      setOption(opt);
+      onChangeOption(index);
+  };
+
   return (
     <ThemedView>
       <Pressable
@@ -33,10 +44,10 @@ export function DropdownSelector({children}: {children: string[]}) {
       {isOpen && (
         <Animated.View entering={FadeIn.duration(200)}>
           <ThemedView type="backgroundElement" style={styles.content}>
-            {children.map((opt: string) => (
+            {children.map((opt: string, index: number) => (
                 <Pressable key={opt}
                     style={({ pressed }) => [pressed && styles.pressedHeading]}
-                    onPress={() => setOption(opt)}>
+                    onPress={() => changeOption(opt, index)}>
                     <ThemedText
                         style = {styles.text}
                         key={opt}

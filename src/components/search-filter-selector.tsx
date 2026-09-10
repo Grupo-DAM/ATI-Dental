@@ -10,13 +10,18 @@ import { useTheme } from '@/hooks/use-theme';
 const SearchIcon = require('@/assets/icons/search.png');
 
 type ListType = {
-    general?: boolean
+    general?: boolean;
+    value: string;
+    onChangeText: (text: string) => void;
+    onChangeOrder: (text: string) => void;
 };
 
-export function SearchFilter({general= true}: ListType) {
+export function SearchFilter({general= true, value='', onChangeText, onChangeOrder}: ListType) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
+
+    const [option, setOption] = useState<int>(0);
 
     const orderByOptions = useMemo(() => {
        return general
@@ -34,6 +39,20 @@ export function SearchFilter({general= true}: ListType) {
              ];
     }, [general, t]);
 
+    const changeOrder = (indx: int) => {
+        if (indx == 0) {
+            onChangeOrder('name')
+        } else if (indx == 1) {
+            onChangeOrder('lastname')
+        } else if (indx == 2){
+            onChangeOrder('id')
+        } else if (indx == 3) {
+            onChangeOrder('lastVisit')
+        } else if (indx == 4) {
+            onChangeOrder('nextVisit')
+        }
+    }
+
     return (
         <View style = {styles.filterContainer}>
           <View style = {styles.searchContainer}>
@@ -49,6 +68,8 @@ export function SearchFilter({general= true}: ListType) {
                       placeholder={t('admin-users.searchUserPlaceholder')}
                       placeholderTextColor= {theme.placeholderColor}
                       style={styles.input}
+                      value = {value}
+                      onChangeText = {onChangeText}
                     />
               </View>
           </View>
@@ -58,6 +79,7 @@ export function SearchFilter({general= true}: ListType) {
               </Text>
               <DropdownSelector
                 children = {orderByOptions}
+                onChangeOption = {changeOrder}
               ></DropdownSelector>
           </View>
         </View>

@@ -1,6 +1,6 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, Platform, StyleSheet, Image, TextInput,
   ScrollView, Pressable} from 'react-native';
 import { ThemedView } from '@/components/themed-view';
@@ -21,7 +21,6 @@ export default function AdminUserList() {
 
     const pageCapacity = 5;
     const [ currentPage, setCurrentPage ] = useState<int>(0);
-    const [ totalPages, setTotalPages ] = useState<int>(0);
 
     const [ users, setUsers ] = useState<any[]>([]);
     const [ loading, setLoading ] = useState(true);
@@ -38,16 +37,6 @@ export default function AdminUserList() {
               setUsers(data);
               setIsFromCache(snapshot.metadata.fromCache);
 
-              const totalDocs = data.length;
-              const calculatedPages = Math.ceil(totalDocs / pageCapacity);
-              setTotalPages(calculatedPages);
-
-              if (totalDocs > 0) {
-                  setCurrentPage(1);
-              } else {
-                  setCurrentPage(0);
-              }
-
               setLoading(false);
             },
             (error) => {
@@ -59,18 +48,67 @@ export default function AdminUserList() {
         return () => userList()
     }, []);
 
+    const [searchQuery, setSearchQuery] = useState('');
+    const [orderBy, setOrderBy] = useState('name');
+
+    const filteredUsers = useMemo(() => {
+        return users.filter((user) => {
+            const query = searchQuery.toLowerCase().trim();
+            const matchesName = user.nombre?.toLowerCase().includes(query);
+            const matchesEmail = user.email?.toLowerCase().includes(query);
+            // falta la opcion de filtrar por ID cuando se añada a los usuarios
+            return matchesName || matchesEmail;
+        }).sort((a, b) => {
+              if (orderBy === 'name') {
+                  const nameA = a.nombre?.toLowerCase() || '';
+                  const nameB = b.nombre?.toLowerCase() || '';
+                  const hasA = nameA.length > 0;
+                  const hasB = nameB.length > 0;
+
+                  if (hasA && !hasB) return -1;
+                  if (!hasA && hasB) return 1;
+
+                  return nameA.localeCompare(nameB);
+              } else if (orderBy === 'lastname') {
+                  const partsA = a.nombre?.toLowerCase().split(' ') || [];
+                  const partsB = b.nombre?.toLowerCase().split(' ') || [];
+
+                  const lastNameA = partsA.slice(1).join(' ') || '';
+                  const lastNameB = partsB.slice(1).join(' ') || '';
+                  const hasA = lastNameA.length > 0;
+                  const hasB = lastNameB.length > 0;
+
+                  if (hasA && !hasB) return -1;
+                  if (!hasA && hasB) return 1;
+
+                  return lastNameA.localeCompare(lastNameB);
+              }
+              // falta la opcion de ordenar por ID cuando se añada a los usuarios
+              return 0;
+          });
+    }, [users, searchQuery, orderBy]);
+
     const startIndex = (currentPage - 1) * pageCapacity;
     const endIndex = startIndex + pageCapacity;
-    const paginatedUsers = users.slice(startIndex, endIndex);
+    const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
 
-    const minRange = users.length > 0 ? startIndex + 1 : 0;
-    const maxRange = Math.min(endIndex, users.length);
+    const minRange = filteredUsers.length > 0 ? startIndex + 1 : 0;
+    const maxRange = Math.min(endIndex, filteredUsers.length);
+    const totalPages = Math.ceil(filteredUsers.length / pageCapacity);
+
+    useEffect(() => {
+        if (filteredUsers.length > 0 && currentPage === 0) {
+            setCurrentPage(1);
+        } else if (filteredUsers.length === 0) {
+            setCurrentPage(0);
+        }
+    }, [filteredUsers, currentPage]);
 
     return (
         <ThemedView style={styles.container}>
             <AppHeader />
             <Breadcrumb parent={t('admin.path')} current={t('admin-users.path')} />
-            <ScrollView>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
 
 
               {/* Title Section */}
@@ -83,7 +121,15 @@ export default function AdminUserList() {
 
 
               {/* Filter section */}
-              <SearchFilter></SearchFilter>
+              <SearchFilter
+                general={true}
+                value={searchQuery}
+                onChangeText={(text) => {
+                    setSearchQuery(text);
+                    setCurrentPage(1);
+                }}
+                onChangeOrder = {setOrderBy}
+              />
 
               {/* List of users*/}
               {paginatedUsers.map((user: userList) => (
@@ -113,7 +159,7 @@ export default function AdminUserList() {
 
 const createStyles = (theme: any) => StyleSheet.create({
   scrollContent: {
-    paddingBottom: Platform.OS === 'ios' ? 100 : 80,
+    flexGrow: 1,
   },
   container: {
     flex: 1,

@@ -133,7 +133,7 @@
     "dentistRole": "Dentista",
     "patientRole": "Paciente",
     "externalUserRole": "Usuario Externo",
-    "searchResult": "Mostrando {{min}} a {{max}} \n de {{total}} resultados"
+    "searchResult": "Mostrando {{min}} a {{max}}\nde {{total}} resultados"
   },
   "user-card": {
     "lastVisitLabel": "ÚLTIMA VISITA:",
