@@ -92,12 +92,17 @@
     "title": "List of Users",
     "subtitle": "Manage and view all your users.",
     "path": "Users",
+    "searchUsers": "Search Users",
+    "searchUserPlaceholder": "Name, lastname or ID...",
+    "orderBy": "Order by",
     "stateLabel": "STATUS:",
     "activeStatus": "Active",
     "inactiveStatus": "Inactive",
     "roleLabel": "ROLE:",
     "adminRole": "Administrator",
-    "patientRole": "Patient"
+    "dentistRole": "Dentist",
+    "patientRole": "Patient",
+    "externalUserRole": "External User"
   },
   "user-card": {
     "lastVisitLabel": "LAST VISIT:",

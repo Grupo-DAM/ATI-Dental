@@ -26,11 +26,12 @@ export const Colors = {
     cardSeparator: '#D1D5DB',
     error: '#BA1A1A',
     logo: '#5B2D8B',
-    errorBackground: '#FFDAD6'
+    errorBackground: '#FFDAD6',
+    placeholderColor: '#9E8BAC'
   },
   dark: {
     text: '#ffffff',
-    textNames: '#E0E7FF',
+    textNames: '#E0E7FF', //tundra
     pageTitle: '#D1D5DB',
     pageSubtitle: '#9CA3AF',
     breadcrumbSeparator: '#6B7280',
@@ -46,7 +47,8 @@ export const Colors = {
     cardSeparator: '#374151',
     error: '#BA1A1A',
     logo: '#ffffff',
-    errorBackground: '#FFDAD6'
+    errorBackground: '#FFDAD6',
+    placeholderColor: '#9E8BAC'
   },
 } as const;
 

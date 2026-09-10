@@ -9,6 +9,8 @@ import { useTheme } from '@/hooks/use-theme';
 
 //Este componente sirve tanto para el listado de pacientes como para el listado de usuarios
 
+const EditIcon = require('@/assets/icons/edit.png');
+const ViewIcon = require('@/assets/icons/view.png');
 
 const getInitials = (name: string) => {
     if (!name) return '??';
@@ -26,9 +28,14 @@ const getStatusString = (status: boolean, t ) => {
 };
 
 const getRoleString = (role: string, t) => {
-    if (role === 'administrator')
+    const lowerCaseRole = role.toLowerCase();
+    if (lowerCaseRole === 'administrador')
         return t('admin-users.adminRole');
-    return t('admin-users.patientRole');
+    if (lowerCaseRole === 'paciente')
+        return t('admin-users.patientRole');
+    if (lowerCaseRole === 'dentista')
+        return t('admin-users.dentistRole');
+    return t('admin-users.externalUserRole');
 };
 
 type PatientData = {
@@ -94,26 +101,20 @@ export function UserCard({
                         <ThemedText style={styles.text}>{email}</ThemedText>
                     </View>
                 </View>
-                {type === 'general' ? (
+
                     <View style={styles.date}>
+                    {!type === 'patient' && (
                         <Image
-                            source = {require('../../assets/images/icons/edit.png')}
-                            style = {styles.icon, styles.editIcon}
+                            source = {ViewIcon}
+                            style = {styles.icon}
+                        />
+                    )}
+                        <Image
+                            source = {EditIcon}
+                            style = {[styles.icon, styles.editIcon]}
                         />
                         {/* for the switch it's better to use the material design library for react native*/}
                     </View>
-                ):(
-                    <View style={styles.date}>
-                        <Image
-                            source = {require('../../assets/images/icons/view.png')}
-                            style = {styles.icon}
-                        />
-                        <Image
-                            source = {require('../../assets/images/icons/edit.png')}
-                            style = {styles.icon, styles.editIcon}
-                        />
-                    </View>
-                )}
 
             </View>
             <View style={styles.visitInfo}>
@@ -161,7 +162,8 @@ const createStyles = (theme: any) => StyleSheet.create({
         borderBottomColor: theme.cardSeparator,
         borderBottomWidth: 1,
         paddingHorizontal: Spacing.four,
-        backgroundColor: theme.backgroundElement
+        backgroundColor: theme.backgroundElement,
+        paddingTop: 6
     },
     patientInfo: {
         flexDirection: 'row',
@@ -185,6 +187,7 @@ const createStyles = (theme: any) => StyleSheet.create({
         fontSize: 12,
         fontWeight: 'bold',
         color: theme.textNames,
+        marginBottom: -10
     },
     visitInfo: {
         flexDirection: 'row',

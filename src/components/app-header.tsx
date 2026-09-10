@@ -19,7 +19,7 @@ export function AppHeader({ title = 'ATI Dental', onMenuPress }: Readonly<AppHea
     if (onMenuPress) {
       onMenuPress();
     } else {
-      router.push('/contacts');
+      router.push('/admin-user-list');
     }
   };
 
