@@ -203,7 +203,7 @@ export default function ContactsScreen() {
     }
   };
 
-  const isOffline = !netInfo.isConnected || isFromCache;
+  const isOffline = !netInfo.isConnected && isFromCache;
 
   return (
     <View style={styles.container}>
@@ -241,6 +241,7 @@ export default function ContactsScreen() {
               {responsibles.map((resp) => (
                 <ResponsibleCard
                   key={resp.id}
+                  title={resp.title}
                   name={resp.name}
                   role={resp.role}
                   description={resp.description}
