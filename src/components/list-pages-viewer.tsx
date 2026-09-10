@@ -13,13 +13,16 @@ type PageButtonProps = {
   selected: boolean;
   symbol: boolean;
   left: boolean;
+  onPress: () => void;
   children: React.ReactNode; // Pass page number dynamically
 };
 
-function PageButton({ theme, styles, selected, symbol, left, children }: PageButtonProps) {
+function PageButton({ theme, styles, selected, symbol, left, onPress, children }: PageButtonProps) {
   return (
     /* FIXED: Rest styles first, then override with selected styles */
-    <Pressable style={[styles.pageBtn, selected && styles.pageBtnSelected]}>
+    <Pressable
+        style={[styles.pageBtn, selected && styles.pageBtnSelected]}
+        onPress = {onPress}>
       {symbol ? (
           <View style = {left && styles.changePageSymbol}>
             <SymbolView
@@ -45,6 +48,7 @@ type SearchResults = {
     maxRange?: int;
     currentPage?: int;
     totalPages?: int;
+    onPageChange: (page: number) => void;
 };
 
 export function ListPages({
@@ -52,10 +56,31 @@ export function ListPages({
     maxRange= 0,
     minRange= 0,
     currentPage= 0,
-    totalPages= 0}: SearchResults) {
+    totalPages= 0,
+    onPageChange }: SearchResults) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
+
+     const getFirstBtnPage = () => {
+        if (totalPages > 3 && currentPage > 2) {
+            return currentPage - 1;
+        }
+        return 1;
+     };
+
+     const getSecondBtnPage = () => {
+        if (currentPage === 1) return 2;
+        if (currentPage === totalPages) return totalPages - 1;
+        return currentPage;
+     };
+
+     const getThirdBtnPage = () => {
+        if (totalPages > 3 && currentPage <= totalPages - 2) {
+            return currentPage + 1;
+        }
+        return totalPages;
+     };
 
     return (
         <View style = {styles.spacer}>
@@ -71,23 +96,28 @@ export function ListPages({
                 {(totalPages > 0) && (
                     <PageButton
                         theme = {theme} styles={styles} selected={currentPage == 1}
-                        symbol = {totalPages > 3 && currentPage > 2} left = {true}>
+                        symbol = {totalPages > 3 && currentPage > 2} left = {true}
+                        onPress={() => onPageChange(getFirstBtnPage())}>
                         {(totalPages <= 3 || currentPage <= 2) && 1}
                     </PageButton>
                 )}
                 {(totalPages > 1) && (
                     <PageButton
-                        theme = {theme} styles={styles} selected={currentPage > 1 && currentPage < totalPages}
-                        symbol = {false}>
-                        {(currentPage == 1) && 2}
-                        {(currentPage == totalPages) && (totalPages - 1)}
+                        theme = {theme} styles={styles}
+                        selected={(currentPage > 1 && currentPage < totalPages) ||
+                            (currentPage == totalPages && totalPages == 2)}
+                        symbol = {false}
+                        onPress={() => onPageChange(getSecondBtnPage())}>
+                        {(currentPage == 1 || totalPages == 2) && 2}
+                        {(currentPage == totalPages && totalPages > 2) && (totalPages - 1)}
                         {(currentPage > 1 && currentPage < totalPages) && currentPage}
                     </PageButton>
                 )}
                 {(totalPages > 2) && (
                     <PageButton
                         theme = {theme} styles={styles} selected={currentPage == totalPages}
-                        symbol = {totalPages > 3 && currentPage <= totalPages - 2} left = {false}>
+                        symbol = {totalPages > 3 && currentPage <= totalPages - 2} left = {false}
+                        onPress={() => onPageChange(getThirdBtnPage())}>
                         {(totalPages <= 3 || currentPage > totalPages - 2) && totalPages}
                     </PageButton>
                 )}

@@ -19,9 +19,13 @@ export default function AdminUserList() {
     const theme = useTheme();
     const styles = createStyles(theme);
 
+    const pageCapacity = 5;
+    const [ currentPage, setCurrentPage ] = useState<int>(0);
+    const [ totalPages, setTotalPages ] = useState<int>(0);
+
     const [ users, setUsers ] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [isFromCache, setIsFromCache] = useState(false);
+    const [ loading, setLoading ] = useState(true);
+    const [ isFromCache, setIsFromCache ] = useState(false)
 
     useEffect(() => {
         const userList = firestore().collection('usuarios')
@@ -33,6 +37,17 @@ export default function AdminUserList() {
               }));
               setUsers(data);
               setIsFromCache(snapshot.metadata.fromCache);
+
+              const totalDocs = data.length;
+              const calculatedPages = Math.ceil(totalDocs / pageCapacity);
+              setTotalPages(calculatedPages);
+
+              if (totalDocs > 0) {
+                  setCurrentPage(1);
+              } else {
+                  setCurrentPage(0);
+              }
+
               setLoading(false);
             },
             (error) => {
@@ -43,6 +58,13 @@ export default function AdminUserList() {
 
         return () => userList()
     }, []);
+
+    const startIndex = (currentPage - 1) * pageCapacity;
+    const endIndex = startIndex + pageCapacity;
+    const paginatedUsers = users.slice(startIndex, endIndex);
+
+    const minRange = users.length > 0 ? startIndex + 1 : 0;
+    const maxRange = Math.min(endIndex, users.length);
 
     return (
         <ThemedView style={styles.container}>
@@ -64,7 +86,7 @@ export default function AdminUserList() {
               <SearchFilter></SearchFilter>
 
               {/* List of users*/}
-              {users.map((user: userList) => (
+              {paginatedUsers.map((user: userList) => (
                   <UserCard key = {user.id}
                     ID="#P-0042"
                     name={user.nombre}
@@ -76,7 +98,14 @@ export default function AdminUserList() {
               ))}
 
               {/*Selection of result pages*/}
-              <ListPages/>
+              <ListPages
+                total= {users.length}
+                maxRange= {maxRange}
+                minRange= {minRange}
+                currentPage= {currentPage}
+                totalPages= {totalPages}
+                onPageChange = {setCurrentPage}
+              />
             </ScrollView>
         </ThemedView>
     );
