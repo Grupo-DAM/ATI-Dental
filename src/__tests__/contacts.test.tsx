@@ -44,6 +44,7 @@ jest.mock('react-i18next', () => ({
 }));
 
 export const mockOnSnapshot = jest.fn((onSuccess: any, onError: any) => {
+  // Mock for collection('responsibles')
   onSuccess({
     docs: [
       { id: '1', data: () => ({ name: 'Dr. Alejandro V.', role: 'Director Médico', imageUrl: 'http://' }) },
@@ -55,10 +56,23 @@ export const mockOnSnapshot = jest.fn((onSuccess: any, onError: any) => {
   return jest.fn();
 });
 
+export const mockDocOnSnapshot = jest.fn((onSuccess: any, onError: any) => {
+  // Mock for doc('contacto') — exists is exposed both as a method and property
+  // to match the compatibility shim in update-contact-info.tsx
+  onSuccess({
+    exists: () => true,
+    data: () => ({ email: 'admin@ejemplo.com', telefono: '+123456789', whatsapp: '+123456789' }),
+  });
+  return jest.fn();
+});
+
 jest.mock('@/config/firebase', () => ({
   firestore: () => ({
-    collection: () => ({
-      onSnapshot: (...args: any[]) => mockOnSnapshot(...args)
+    collection: (col: string) => ({
+      onSnapshot: (...args: any[]) => mockOnSnapshot(...args),
+      doc: () => ({
+        onSnapshot: (...args: any[]) => mockDocOnSnapshot(...args)
+      })
     })
   })
 }));
