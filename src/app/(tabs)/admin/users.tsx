@@ -1,11 +1,13 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
-import { View, Text, Platform, StyleSheet, Image, TextInput, Pressable} from 'react-native';
+import { View, Text, Platform, StyleSheet, Image, TextInput,
+  ScrollView, Pressable} from 'react-native';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { SearchFilter } from '@/components/search-filter-selector';
+import { ListPages } from '@/components/list-pages-viewer';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { useTheme } from '@/hooks/use-theme';
@@ -46,7 +48,8 @@ export default function AdminUserList() {
         <ThemedView style={styles.container}>
             <AppHeader />
             <Breadcrumb parent={t('admin.path')} current={t('admin-users.path')} />
-              <View>
+            <ScrollView>
+
 
               {/* Title Section */}
               <View style={styles.titleSection}>
@@ -73,18 +76,18 @@ export default function AdminUserList() {
               ))}
 
               {/*Selection of result pages*/}
-
-              </View>
+              <ListPages/>
+            </ScrollView>
         </ThemedView>
     );
 }
 
 const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   scrollContent: {
     paddingBottom: Platform.OS === 'ios' ? 100 : 80,
+  },
+  container: {
+    flex: 1,
   },
   titleSection: {
     paddingHorizontal: 20,

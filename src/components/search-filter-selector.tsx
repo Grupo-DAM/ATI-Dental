@@ -1,4 +1,3 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import React, { useMemo, useState, useEffect } from 'react';
 import { View, Text, Platform, StyleSheet, Image, TextInput, Pressable} from 'react-native';

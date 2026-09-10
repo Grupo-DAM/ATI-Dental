@@ -132,7 +132,8 @@
     "adminRole": "Administrator",
     "dentistRole": "Dentist",
     "patientRole": "Patient",
-    "externalUserRole": "External User"
+    "externalUserRole": "External User",
+    "searchResult": "Showing {{min}} to {{max}} \n of {{total}} results"
   },
   "user-card": {
     "lastVisitLabel": "LAST VISIT:",

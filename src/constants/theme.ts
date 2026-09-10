@@ -17,6 +17,7 @@ export const Colors = {
     background: '#F7F6F8',
     backgroundElement: '#ffffff',
     backgroundSelected: '#E0E1E6',
+    backgroundSecondary: '#F9FAFB', // athens Gray
     textSecondary: '#60646C',
     header: '#52287D',
     accentText: '#725C8A',
@@ -38,6 +39,7 @@ export const Colors = {
     background: '#000000',
     backgroundElement: '#121315',
     backgroundSelected: '#2E3135',
+    backgroundSecondary: '#1F1F1F',
     textSecondary: '#B0B4BA',
     header: '#52287D',
     accentText: '#725C8A',

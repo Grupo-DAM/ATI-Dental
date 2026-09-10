@@ -53,7 +53,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
       style={[
           styles.tabBar,
           {
-            backgroundColor: colors.background,
+            backgroundColor: colors.backgroundElement,
             paddingBottom: dynamicPaddingBottom,
           }
     ]}>
