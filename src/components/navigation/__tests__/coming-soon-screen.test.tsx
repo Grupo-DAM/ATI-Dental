@@ -26,7 +26,6 @@ describe('ComingSoonScreen', () => {
   it('reutiliza la pantalla en las rutas placeholder', () => {
     const screens = [
       [RegisterPatientScreen, 'navigation.registerPatient'],
-      [AdminUsersScreen, 'navigation.adminUsers'],
     ] as const;
 
     screens.forEach(([Screen, titleKey]) => {

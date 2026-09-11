@@ -47,7 +47,8 @@
       "expo-secure-store",
       "expo-image",
       "expo-localization",
-      "./scripts/withAndroidQueries.js"
+      "./scripts/withAndroidQueries.js",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

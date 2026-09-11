@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 export type BreadcrumbProps = {
   parent: string;
@@ -8,6 +9,9 @@ export type BreadcrumbProps = {
 };
 
 export function Breadcrumb({ parent, current }: Readonly<BreadcrumbProps>) {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
   return (
     <View style={styles.container}>
       <Text style={styles.parentText}>{parent}</Text>
@@ -17,27 +21,27 @@ export function Breadcrumb({ parent, current }: Readonly<BreadcrumbProps>) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: 'white',
+    backgroundColor: theme.backgroundElement,
     borderBottomWidth: 1,
-    borderBottomColor: '#EDF2F7',
+    borderBottomColor: theme.pageSeparator,
   },
   parentText: {
-    color: '#718096',
+    color: theme.pageSubtitle,
     fontSize: 14,
     fontFamily: 'Open Sans',
   },
   chevron: {
-    color: '#CBD5E0',
+    color: theme.breadcrumbSeparator,
     fontSize: 14,
   },
   currentText: {
-    color: Colors.light.header,
+    color: theme.header,
     fontSize: 14,
     fontWeight: '600',
     fontFamily: 'Open Sans',

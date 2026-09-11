@@ -179,5 +179,43 @@
     "kpiThisMonth": "This month",
     "mauLegend": "MAU (Monthly Active)",
     "dauLegend": "DAU (Daily)"
+  },
+  "admin": {
+    "path": "Administration"
+  },
+  "patients-list": {
+    "searchPatients": "Search Patient",
+    "orderByLastVisit": "Last visit",
+    "orderByNextVisit": "Next visit",
+    "noResults": "No patient card matches the search query.",
+    "noResultsQuestion": "New patient?",
+    "registerPatient": "Register Patient"
+  },
+  "admin-users": {
+    "title": "List of Users",
+    "subtitle": "Manage and view all your users.",
+    "path": "Users",
+    "searchUsers": "Search User",
+    "searchUserPlaceholder": "Name, lastname or ID...",
+    "orderBy": "Order by",
+    "orderByName": "Name",
+    "orderByLastName": "Lastname",
+    "orderByID": "ID",
+    "stateLabel": "STATUS:",
+    "activeStatus": "Active",
+    "inactiveStatus": "Inactive",
+    "roleLabel": "ROLE:",
+    "searchResult": "Showing {{min}} to {{max}}\nof {{total}} results",
+    "noResults": "No user profile matches the search query.",
+    "noResultsQuestion":  "New user?",
+    "registerUser": "Register User",
+    "errorUpdateUserStatus": "Couldn't update user status.",
+    "filters": "Filters",
+    "filterByRole": "Role",
+    "filterByStatus": "Status"
+  },
+  "user-card": {
+    "lastVisitLabel": "LAST VISIT:",
+    "nextVisitLabel": "NEXT VISIT:"
   }
 }

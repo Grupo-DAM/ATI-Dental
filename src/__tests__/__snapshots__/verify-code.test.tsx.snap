@@ -5,7 +5,7 @@ exports[`VerifyCodeScreen renders correctly and matches snapshot 1`] = `
   style={
     [
       {
-        "backgroundColor": "#ffffff",
+        "backgroundColor": "#F7F6F8",
       },
       {
         "flex": 1,

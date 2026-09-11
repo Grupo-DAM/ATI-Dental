@@ -179,5 +179,43 @@
     "kpiThisMonth": "Este mes",
     "mauLegend": "MAU (Activos Mensuales)",
     "dauLegend": "DAU (Diarios)"
+  },
+  "admin": {
+    "path": "Administración"
+  },
+  "patients-list": {
+    "searchPatients": "Buscar Paciente",
+    "orderByLastVisit": "Última visita",
+    "orderByNextVisit": "Próxima visita",
+    "noResults": "No hay fichas de pacientes que coincidan con la búsqueda.",
+    "noResultsQuestion": "¿Nuevo paciente?",
+    "registerPatient": "Registrar Paciente"
+  },
+  "admin-users": {
+    "title": "Listado de Usuarios",
+    "subtitle": "Gestiona y consulta de todos tus usuarios.",
+    "path": "Usuarios",
+    "searchUsers": "Buscar Usuario",
+    "searchUserPlaceholder": "Nombre, apellido o ID...",
+    "orderBy": "Ordenar por",
+    "orderByName": "Nombre",
+    "orderByLastName": "Apellido",
+    "orderByID": "ID",
+    "statusLabel": "ESTADO:",
+    "activeStatus": "Activo",
+    "inactiveStatus": "Inactivo",
+    "roleLabel": "ROL:",
+    "searchResult": "Mostrando {{min}} a {{max}}\nde {{total}} resultados",
+    "noResults": "No hay perfiles de usuarios que coincidan con la búsqueda.",
+    "noResultsQuestion":  "¿Nuevo usuario?",
+    "registerUser": "Registrar Usuario",
+    "errorUpdateUserStatus": "No se pudo actualizar el estado del usuario",
+    "filters": "Filtros",
+    "filterByRole": "Rol",
+    "filterByStatus": "Estado"
+  },
+  "user-card": {
+    "lastVisitLabel": "ÚLTIMA VISITA:",
+    "nextVisitLabel": "PRÓXIMA CITA:"
   }
 }
