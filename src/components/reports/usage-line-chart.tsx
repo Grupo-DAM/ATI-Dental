@@ -21,7 +21,7 @@ export interface UsageLineChartProps {
 /**
  * Generates a smooth cubic Bezier path string from a set of 2D points.
  */
-function buildBezierPath(points: { x: number; y: number }[]): string {
+export function buildBezierPath(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
   if (points.length === 1) return `M ${points[0].x},${points[0].y}`;
 
