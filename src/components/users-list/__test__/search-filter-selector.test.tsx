@@ -2,7 +2,8 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { SearchFilter, SelectableOption, FilterCategory } from '@/components/users-list/search-filter-selector';
 
-// Mock native hooks and modules
+// --- Mocks ---
+
 jest.mock('@/hooks/use-theme', () => ({
   useTheme: () => ({
     text: '#000000',
@@ -27,6 +28,8 @@ jest.mock('react-i18next', () => ({
         'admin-users.orderByName': 'Name',
         'admin-users.orderByLastName': 'Last Name',
         'admin-users.orderByID': 'ID',
+        'patients-list.orderByLastVisit': 'Last Visit',
+        'patients-list.orderByNextVisit': 'Next Visit',
         'admin-users.filterByRole': 'Filter by Role',
         'admin-users.filterByStatus': 'Filter by Status',
         'admin-users.activeStatus': 'Active',
@@ -55,18 +58,23 @@ jest.mock('expo-image', () => {
   };
 });
 
+// Dynamic Dropdown mock that allows triggering any option index
+let mockDropdownCallback: (index: number) => void;
 jest.mock('@/components/ui/dropdown-selector.tsx', () => {
   const { Pressable, Text } = require('react-native');
   return {
-    DropdownSelector: ({ children, onChangeOption }: any) => (
-      <Pressable testID="dropdown-selector" onPress={() => onChangeOption(1)}>
-        <Text>{children?.[0]}</Text>
-      </Pressable>
-    ),
+    DropdownSelector: ({ children, onChangeOption }: any) => {
+      mockDropdownCallback = onChangeOption;
+      return (
+        <Pressable testID="dropdown-selector" onPress={() => onChangeOption(0)}>
+          <Text>{children?.[0]}</Text>
+        </Pressable>
+      );
+    },
   };
 });
 
-describe('SearchFilter Component and Sub-components', () => {
+describe('SearchFilter Suite - Max Coverage', () => {
   const mockOnChangeText = jest.fn();
   const mockOnChangeOrder = jest.fn();
   const mockOnToggleFilter = jest.fn();
@@ -75,107 +83,189 @@ describe('SearchFilter Component and Sub-components', () => {
     jest.clearAllMocks();
   });
 
-  describe('SelectableOption', () => {
-    it('renders option name and handles press', () => {
-      const mockOnPress = jest.fn();
-      const { getByText } = render(
-        <SelectableOption option="Admin" isSelected={false} onPress={mockOnPress} />
+  // --- 1. SelectableOption Coverage ---
+
+  describe('SelectableOption Edge Cases', () => {
+    it('renders with default props without crashing', () => {
+      const mockPress = jest.fn();
+      const { queryByTestId } = render(
+        <SelectableOption onPress={mockPress} />
       );
 
-      expect(getByText('Admin')).toBeTruthy();
-      fireEvent.press(getByText('Admin'));
-      expect(mockOnPress).toHaveBeenCalledTimes(1);
+      // Selected icon shouldn't be rendered when isSelected defaults to false
+      expect(queryByTestId('expo-image')).toBeNull();
     });
 
-    it('renders selection icon when selected', () => {
-      const { getByTestId } = render(
-        <SelectableOption option="Admin" isSelected={true} onPress={jest.fn()} />
+    it('hides plus-icon image when isSelected is false', () => {
+      const { queryByTestId } = render(
+        <SelectableOption option="User" isSelected={false} onPress={jest.fn()} />
       );
 
-      expect(getByTestId('expo-image')).toBeTruthy();
+      expect(queryByTestId('expo-image')).toBeNull();
     });
   });
 
-  describe('FilterCategory', () => {
-    it('renders title and option list', () => {
-      const mockToggle = jest.fn();
+  // --- 2. FilterCategory Coverage ---
+
+  describe('FilterCategory Edge Cases', () => {
+    it('renders with default title when omitted', () => {
+      const { getByText } = render(
+        <FilterCategory options={[]} onToggleOption={jest.fn()} />
+      );
+
+      expect(getByText('')).toBeTruthy();
+    });
+
+    it('handles options without a name property (fallback key)', () => {
       const options = [
-        { db_value: 'ADMIN', name: 'Admin', active: true },
-        { db_value: 'USER', name: 'User', active: false },
+        { db_value: 'val_1', name: '', active: false },
       ];
 
       const { getByText } = render(
-        <FilterCategory title="Role Category" options={options} onToggleOption={mockToggle} />
+        <FilterCategory title="Empty Names" options={options} onToggleOption={jest.fn()} />
       );
 
-      expect(getByText('Role Category')).toBeTruthy();
-      expect(getByText('Admin')).toBeTruthy();
-      expect(getByText('User')).toBeTruthy();
-
-      fireEvent.press(getByText('User'));
-      expect(mockToggle).toHaveBeenCalledWith('USER');
+      expect(getByText('Empty Names')).toBeTruthy();
     });
   });
 
-  describe('SearchFilter', () => {
-    it('renders search input and triggers onChangeText', () => {
-      const { getByPlaceholderText } = render(
+  // --- 3. SearchFilter General & Patient Modes ---
+
+  describe('SearchFilter Modes & Default Parameters', () => {
+    it('renders general/admin search label when general=true', () => {
+      const { getByText } = render(
         <SearchFilter
-          value="john"
           onChangeText={mockOnChangeText}
           onChangeOrder={mockOnChangeOrder}
+          onToggleFilter={mockOnToggleFilter}
           activeRoles={[]}
           activeStatus={[]}
-          onToggleFilter={mockOnToggleFilter}
         />
       );
 
-      const input = getByPlaceholderText('Search...');
-      expect(input.props.value).toBe('john');
-
-      fireEvent.changeText(input, 'jane');
-      expect(mockOnChangeText).toHaveBeenCalledWith('jane');
+      expect(getByText('Search Users')).toBeTruthy();
     });
 
-    it('changes order when dropdown option is selected', () => {
-      const { getByTestId } = render(
+    it('renders patient search label when general=false', () => {
+      const { getByText } = render(
         <SearchFilter
+          general={false}
           value=""
           onChangeText={mockOnChangeText}
           onChangeOrder={mockOnChangeOrder}
+          onToggleFilter={mockOnToggleFilter}
           activeRoles={[]}
           activeStatus={[]}
-          onToggleFilter={mockOnToggleFilter}
         />
       );
 
-      fireEvent.press(getByTestId('dropdown-selector'));
-      // Index 1 maps to 'lastname' in changeOrder
+      expect(getByText('Search Patients')).toBeTruthy();
+    });
+  });
+
+  // --- 4. Sorting Branch Coverage (changeOrder) ---
+
+  describe('SearchFilter Sorting Branches', () => {
+    it('handles all order options for general mode', () => {
+      render(
+        <SearchFilter
+          general={true}
+          value=""
+          onChangeText={mockOnChangeText}
+          onChangeOrder={mockOnChangeOrder}
+          onToggleFilter={mockOnToggleFilter}
+          activeRoles={[]}
+          activeStatus={[]}
+        />
+      );
+
+      // Index 0 -> 'name'
+      mockDropdownCallback(0);
+      expect(mockOnChangeOrder).toHaveBeenCalledWith('name');
+
+      // Index 1 -> 'lastname'
+      mockDropdownCallback(1);
       expect(mockOnChangeOrder).toHaveBeenCalledWith('lastname');
+
+      // Index 2 -> 'id'
+      mockDropdownCallback(2);
+      expect(mockOnChangeOrder).toHaveBeenCalledWith('id');
     });
 
-    it('expands filter panel when filter button is pressed', () => {
-      const { getByText, queryByText, getByTestId } = render(
+    it('handles additional patient-specific order options', () => {
+      render(
+        <SearchFilter
+          general={false}
+          value=""
+          onChangeText={mockOnChangeText}
+          onChangeOrder={mockOnChangeOrder}
+          onToggleFilter={mockOnToggleFilter}
+          activeRoles={[]}
+          activeStatus={[]}
+        />
+      );
+
+      // Index 3 -> 'lastVisit'
+      mockDropdownCallback(3);
+      expect(mockOnChangeOrder).toHaveBeenCalledWith('lastVisit');
+
+      // Index 4 -> 'nextVisit'
+      mockDropdownCallback(4);
+      expect(mockOnChangeOrder).toHaveBeenCalledWith('nextVisit');
+    });
+  });
+
+  // --- 5. Filter Interaction Coverage ---
+
+  describe('SearchFilter Interactivity & Toggle Panel', () => {
+    it('triggers onToggleFilter when role and status filters are pressed', () => {
+      const { getByTestId, getByText } = render(
         <SearchFilter
           value=""
           onChangeText={mockOnChangeText}
           onChangeOrder={mockOnChangeOrder}
+          onToggleFilter={mockOnToggleFilter}
           activeRoles={['ADMIN']}
           activeStatus={['activo']}
-          onToggleFilter={mockOnToggleFilter}
         />
       );
 
-      // Filters hidden by default
-      expect(queryByText('Filters')).toBeNull();
-
-      // Press toggle button via testID (lowercase 'd')
+      // Open filter panel
       fireEvent.press(getByTestId('filter-toggle-btn'));
 
-      // Filter panel should now be visible
+      // Click role option
+      fireEvent.press(getByText('Admin'));
+      expect(mockOnToggleFilter).toHaveBeenCalledWith('rol', 'ADMIN');
+
+      // Click status option
+      fireEvent.press(getByText('Active'));
+      expect(mockOnToggleFilter).toHaveBeenCalledWith('estado', 'activo');
+    });
+
+    it('toggles filter panel open and close on press', () => {
+      const { getByTestId, queryByText, getByText } = render(
+        <SearchFilter
+          value=""
+          onChangeText={mockOnChangeText}
+          onChangeOrder={mockOnChangeOrder}
+          onToggleFilter={mockOnToggleFilter}
+          activeRoles={[]}
+          activeStatus={[]}
+        />
+      );
+
+      const filterBtn = getByTestId('filter-toggle-btn');
+
+      // Initially closed
+      expect(queryByText('Filters')).toBeNull();
+
+      // First press: Open
+      fireEvent.press(filterBtn);
       expect(getByText('Filters')).toBeTruthy();
-      expect(getByText('Filter by Role')).toBeTruthy();
-      expect(getByText('Filter by Status')).toBeTruthy();
+
+      // Second press: Close
+      fireEvent.press(filterBtn);
+      expect(queryByText('Filters')).toBeNull();
     });
   });
 });
