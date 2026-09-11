@@ -10,31 +10,53 @@ import { Platform } from 'react-native';
 export const Colors = {
   light: {
     text: '#141018',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
+    textNames: '#4A4A4A',
+    pageTitle: '#1F2937',
+    pageSubtitle: '#6B7280',
+    breadcrumbSeparator: '#9CA3AF',
+    background: '#F7F6F8',
+    backgroundElement: '#ffffff',
     backgroundSelected: '#E0E1E6',
+    backgroundSecondary: '#F9FAFB', // athens Gray
     textSecondary: '#60646C',
     header: '#52287D',
     accentText: '#725C8A',
     main: '#5B2D8B',
     border: '#DBD4E2',
+    pageSeparator: '#EDF2F7',
+    cardSeparator: '#D1D5DB',
     error: '#BA1A1A',
     logo: '#5B2D8B',
-    errorBackground: '#FFDAD6'
+    errorBackground: '#FFDAD6',
+    placeholderColor: '#9E8BAC',
+    offlineBannerBackground: '#FEF3C7',
+    offlineBannerBorder: '#FDE68A',
+    offlineBannerText: '#B45309'
   },
   dark: {
     text: '#ffffff',
+    textNames: '#E0E7FF', //tundra
+    pageTitle: '#D1D5DB',
+    pageSubtitle: '#9CA3AF',
+    breadcrumbSeparator: '#6B7280',
     background: '#000000',
-    backgroundElement: '#212225',
+    backgroundElement: '#121315',
     backgroundSelected: '#2E3135',
+    backgroundSecondary: '#1F1F1F',
     textSecondary: '#B0B4BA',
     header: '#52287D',
     accentText: '#725C8A',
     main: '#5B2D8B',
     border: '#DBD4E2',
+    pageSeparator: '#262C36',
+    cardSeparator: '#374151',
     error: '#BA1A1A',
     logo: '#ffffff',
-    errorBackground: '#FFDAD6'
+    errorBackground: '#FFDAD6',
+    placeholderColor: '#9E8BAC',
+    offlineBannerBackground: '#FEF3C7',
+    offlineBannerBorder: '#FDE68A',
+    offlineBannerText: '#B45309'
   },
 } as const;
 

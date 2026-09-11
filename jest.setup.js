@@ -164,3 +164,60 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+jest.mock('@react-native-community/netinfo', () => {
+  const defaultState = {
+    type: 'wifi',
+    isConnected: true,
+    isInternetReachable: true,
+    details: {
+      isConnectionExpensive: false,
+    },
+  };
+
+  // Definimos la función del hook
+  const useNetInfo = jest.fn(() => defaultState);
+
+  return {
+    __esModule: true,
+    default: {
+      getCurrentState: jest.fn(() => Promise.resolve(defaultState)),
+      addEventListener: jest.fn(() => jest.fn()),
+      useNetInfo: useNetInfo,
+      fetch: jest.fn(() => Promise.resolve(defaultState)),
+    },
+    // 👈 FIXED: Exportamos el hook de forma directa en la raíz para soportar { useNetInfo }
+    useNetInfo: useNetInfo,
+    InternetReachability: {
+      update: jest.fn(),
+      isInternetReachable: true,
+    }
+  };
+});jest.mock('@react-native-community/netinfo', () => {
+ const defaultState = {
+   type: 'wifi',
+   isConnected: true,
+   isInternetReachable: true,
+   details: {
+     isConnectionExpensive: false,
+   },
+ };
+
+ // Definimos la función del hook
+ const useNetInfo = jest.fn(() => defaultState);
+
+ return {
+   __esModule: true,
+   default: {
+     getCurrentState: jest.fn(() => Promise.resolve(defaultState)),
+     addEventListener: jest.fn(() => jest.fn()),
+     useNetInfo: useNetInfo,
+     fetch: jest.fn(() => Promise.resolve(defaultState)),
+   },
+   // 👈 FIXED: Exportamos el hook de forma directa en la raíz para soportar { useNetInfo }
+   useNetInfo: useNetInfo,
+   InternetReachability: {
+     update: jest.fn(),
+     isInternetReachable: true,
+   }
+ };
+});

@@ -14,7 +14,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "white",
+        "backgroundColor": "#ffffff",
         "borderBottomColor": "#EDF2F7",
         "borderBottomWidth": 1,
         "flexDirection": "row",
@@ -26,7 +26,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
     <Text
       style={
         {
-          "color": "#718096",
+          "color": "#6B7280",
           "fontFamily": "Open Sans",
           "fontSize": 14,
         }
@@ -37,7 +37,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
     <Text
       style={
         {
-          "color": "#CBD5E0",
+          "color": "#9CA3AF",
           "fontSize": 14,
         }
       }

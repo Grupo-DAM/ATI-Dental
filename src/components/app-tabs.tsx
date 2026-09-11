@@ -53,12 +53,13 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
       style={[
           styles.tabBar,
           {
-            backgroundColor: colors.background,
+            backgroundColor: colors.backgroundElement,
             paddingBottom: dynamicPaddingBottom,
           }
     ]}>
       {/* 1. HOME TAB */}
       <TouchableOpacity
+        testID="home-tab"
         onPress={() => handleNavigate('home')}
         style={styles.tabItem}
       >
