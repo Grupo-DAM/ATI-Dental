@@ -1,16 +1,19 @@
 import React, { type ReactNode } from 'react';
-import { View, StyleSheet, Image, Text, Pressable, Alert } from 'react-native';
+import { Image } from 'expo-image';
+import { View, StyleSheet, Text, Pressable, Alert } from 'react-native';
+import { Switch } from '@/components/ui/switch.tsx';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 
 import { useTranslation } from 'react-i18next';
 import { Color, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { getRoleLabelKey, type AppUserRole } from '@/constants/user-roles';
 
 //Este componente sirve tanto para el listado de pacientes como para el listado de usuarios
 
-const EditIcon = require('@/assets/icons/edit.png');
-const ViewIcon = require('@/assets/icons/view.png');
+const EditIcon = require('@/assets/icons/edit.svg');
+const ViewIcon = require('@/assets/icons/view.svg');
 
 const getInitials = (name: string) => {
     if (!name) return '??';
@@ -27,15 +30,9 @@ const getStatusString = (status: boolean, t ) => {
     return t('admin-users.inactiveStatus');
 };
 
-const getRoleString = (role: string, t) => {
-    const lowerCaseRole = role.toLowerCase();
-    if (lowerCaseRole === 'administrador')
-        return t('admin-users.adminRole');
-    if (lowerCaseRole === 'paciente')
-        return t('admin-users.patientRole');
-    if (lowerCaseRole === 'dentista')
-        return t('admin-users.dentistRole');
-    return t('admin-users.externalUserRole');
+const getRoleString = (role: AppUserRole | undefined, t: any) => {
+    const translationKey = getRoleLabelKey(role);
+    return t(translationKey);
 };
 
 type PatientData = {
@@ -49,6 +46,7 @@ type PatientData = {
 type GeneralUserData = {
     type: 'general';
     status?: boolean;
+    switchStatus: () => void;
     role?: string;
     lastVisit?: never;
     nextVisit?: never;
@@ -71,6 +69,7 @@ export function UserCard({
         lastVisit='-',
         nextVisit='-',
         status=true,
+        switchStatus,
         role='User'
     }: userCard) {
     const { t } = useTranslation();
@@ -103,7 +102,7 @@ export function UserCard({
                 </View>
 
                     <View style={styles.date}>
-                    {!type === 'patient' && (
+                    {type === 'patient' && (
                         <Image
                             source = {ViewIcon}
                             style = {styles.icon}
@@ -113,7 +112,13 @@ export function UserCard({
                             source = {EditIcon}
                             style = {[styles.icon, styles.editIcon]}
                         />
-                        {/* for the switch it's better to use the material design library for react native*/}
+
+                    {type === 'general' && (
+                        <Switch
+                            value = {status}
+                            onSwitch = {switchStatus}
+                        />
+                     )}
                     </View>
 
             </View>
@@ -211,8 +216,8 @@ const createStyles = (theme: any) => StyleSheet.create({
         color: theme.main,
     },
     icon: {
-        width: 24,
-        height: 24,
+        width: 21,
+        height: 21,
         resizeMode: 'contain',
     },
     editIcon: {

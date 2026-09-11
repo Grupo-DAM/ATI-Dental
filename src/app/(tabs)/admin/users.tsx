@@ -1,8 +1,9 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
+import auth from '@react-native-firebase/auth';
 import { useTranslation } from 'react-i18next';
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, Platform, StyleSheet, Image, TextInput,
-  ScrollView, Pressable} from 'react-native';
+import { View, Text, Platform, StyleSheet, TextInput,
+  ScrollView, Pressable, Alert} from 'react-native';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -14,6 +15,7 @@ import { Breadcrumb } from '@/components/breadcrumb';
 import { useTheme } from '@/hooks/use-theme';
 import { UserCard } from '@/components/users-list/user-card';
 import { firestore } from '@/config/firebase';
+import { USER_ROLES, LEGACY_ADMIN_ROLE } from '@/constants/user-roles';
 
 export default function AdminUserList() {
     const { t } = useTranslation();
@@ -49,6 +51,50 @@ export default function AdminUserList() {
         return () => userList()
     }, []);
 
+    const toggleUserStatus = async (userId: string, currentStatus: string) => {
+        const currentUser = auth().currentUser;
+
+        if (!currentUser) {
+            Alert.alert("Acceso Denegado", "Debes iniciar sesión para realizar modificaciones.");
+            return;
+        }
+
+        const nextStatus = currentStatus === 'activo' ? 'inactivo' : 'activo';
+
+        try {
+            await firestore()
+                .collection('usuarios')
+                .doc(userId)
+                .update({
+                    estado: nextStatus
+                });
+        } catch (error) {
+            console.error("Error updating user status in DB: ", error);
+            Alert.alert("Error", t('admin-users.errorUpdateUserStatus'));
+        }
+    };
+
+    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+
+    const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+
+    const handleToggleFilter = (categoryTitle: string, optionName: string) => {
+        setCurrentPage(1); // Reset page on filter toggle
+        if (categoryTitle === 'rol') {
+            setSelectedRoles(prev =>
+                prev.includes(optionName)
+                    ? prev.filter(r => r !== optionName)
+                    : [...prev, optionName]
+            );
+        } else if (categoryTitle === 'estado') {
+            setSelectedStatus(prev =>
+                prev.includes(optionName)
+                    ? prev.filter(s => s !== optionName)
+                    : [...prev, optionName]
+            );
+        }
+    };
+
     const [searchQuery, setSearchQuery] = useState('');
     const [orderBy, setOrderBy] = useState('name');
 
@@ -58,7 +104,17 @@ export default function AdminUserList() {
             const matchesName = user.nombre?.toLowerCase().includes(query);
             const matchesEmail = user.email?.toLowerCase().includes(query);
             // falta la opcion de filtrar por ID cuando se añada a los usuarios
-            return matchesName || matchesEmail;
+            const matchesSearch = matchesName || matchesEmail;
+
+            const matchesRole = selectedRoles.length === 0 || selectedRoles.some(role => {
+                 if (role === USER_ROLES.ADMIN) {
+                     return user.rol === USER_ROLES.ADMIN || user.rol === LEGACY_ADMIN_ROLE;
+                 }
+                 return user.rol === role;
+            });
+            const matchesStatus = selectedStatus.length === 0 ||  selectedStatus.includes(user.estado);
+
+            return matchesSearch && matchesRole && matchesStatus;
         }).sort((a, b) => {
               if (orderBy === 'name') {
                   const nameA = a.nombre?.toLowerCase() || '';
@@ -87,7 +143,7 @@ export default function AdminUserList() {
               // falta la opcion de ordenar por ID cuando se añada a los usuarios
               return 0;
           });
-    }, [users, searchQuery, orderBy]);
+    }, [users, searchQuery, orderBy, selectedRoles, selectedStatus, t]);
 
     const startIndex = (currentPage - 1) * pageCapacity;
     const endIndex = startIndex + pageCapacity;
@@ -130,6 +186,9 @@ export default function AdminUserList() {
                     setCurrentPage(1);
                 }}
                 onChangeOrder = {setOrderBy}
+                activeRoles={selectedRoles}
+                activeStatus={selectedStatus}
+                onToggleFilter={handleToggleFilter}
               />
               {/* List of users*/}
               {filteredUsers.length == 0 ? (
@@ -141,7 +200,8 @@ export default function AdminUserList() {
                           name={user.nombre}
                           email= {user.email}
                           type='general'
-                          status={user.estado}
+                          status={user.estado === 'activo'}
+                          switchStatus = {()=>toggleUserStatus(user.id, user.estado)}
                           role= {user.rol}
                         />
                   ))

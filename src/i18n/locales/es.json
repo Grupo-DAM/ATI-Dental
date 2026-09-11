@@ -132,14 +132,14 @@
     "activeStatus": "Activo",
     "inactiveStatus": "Inactivo",
     "roleLabel": "ROL:",
-    "adminRole": "Administrador",
-    "dentistRole": "Dentista",
-    "patientRole": "Paciente",
-    "externalUserRole": "Usuario Externo",
     "searchResult": "Mostrando {{min}} a {{max}}\nde {{total}} resultados",
     "noResults": "No hay perfiles de usuarios que coincidan con la búsqueda.",
     "noResultsQuestion":  "¿Nuevo usuario?",
-    "registerUser": "Registrar Usuario"
+    "registerUser": "Registrar Usuario",
+    "errorUpdateUserStatus": "No se pudo actualizar el estado del usuario",
+    "filters": "Filtros",
+    "filterByRole": "Rol",
+    "filterByStatus": "Estado"
   },
   "user-card": {
     "lastVisitLabel": "ÚLTIMA VISITA:",
