@@ -1,0 +1,776 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapshot: verifica la estructura visual sin regresiones 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "#FAFAFB",
+      "flex": 1,
+    }
+  }
+  testID="admin-reports-screen"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "white",
+        "borderBottomColor": "#EDF2F7",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "paddingHorizontal": 20,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <Text
+      style={
+        {
+          "color": "#718096",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+        }
+      }
+    >
+      Administración
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#CBD5E0",
+          "fontSize": 14,
+        }
+      }
+    >
+         ›   
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#52287D",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+    >
+      Reportes
+    </Text>
+  </View>
+  <RCTScrollView
+    contentContainerStyle={
+      [
+        {
+          "paddingHorizontal": 20,
+          "paddingTop": 20,
+        },
+        {
+          "paddingBottom": 90,
+        },
+      ]
+    }
+    showsVerticalScrollIndicator={false}
+    style={
+      {
+        "flex": 1,
+      }
+    }
+  >
+    <View>
+      <View
+        style={
+          {
+            "alignSelf": "center",
+            "maxWidth": 800,
+            "width": "100%",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#1F2937",
+              "fontFamily": "Open Sans",
+              "fontSize": 24,
+              "fontWeight": "800",
+              "marginBottom": 6,
+            }
+          }
+        >
+          Generar Reportes
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#6B7280",
+              "fontFamily": "Open Sans",
+              "fontSize": 14,
+              "lineHeight": 20,
+              "marginBottom": 20,
+            }
+          }
+        >
+          Consulte y exporte reportes de usuarios, pacientes, citas, y actvidad del sistema
+        </Text>
+        <View
+          style={
+            {
+              "marginBottom": 20,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#374151",
+                "fontFamily": "Open Sans",
+                "fontSize": 13,
+                "fontWeight": "600",
+                "marginBottom": 6,
+              }
+            }
+          >
+            Tipo de reporte
+          </Text>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "opacity": 1,
+                "paddingHorizontal": 14,
+                "paddingVertical": 12,
+              }
+            }
+            testID="report-type-select"
+          >
+            <Text
+              numberOfLines={1}
+              style={
+                {
+                  "color": "#1F2937",
+                  "flex": 1,
+                  "fontFamily": "Open Sans",
+                  "fontSize": 14,
+                }
+              }
+            >
+              Visualizar tiempo de uso por usuario
+            </Text>
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#6B7280",
+                    "fontSize": 18,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 12,
+              "marginBottom": 20,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#5B2D8B",
+                "borderRadius": 12,
+                "borderWidth": 1.5,
+                "elevation": 2,
+                "flex": 1,
+                "flexDirection": "row",
+                "gap": 10,
+                "padding": 12,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+              }
+            }
+            testID="kpi-total-access"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#F3E8FF",
+                  "borderRadius": 22,
+                  "height": 44,
+                  "justifyContent": "center",
+                  "width": 44,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#5B2D8B",
+                      "fontSize": 24,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "ionicons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "flex": 1,
+                }
+              }
+            >
+              <Text
+                style={
+                  {
+                    "color": "#718096",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 9.5,
+                    "fontWeight": "700",
+                    "letterSpacing": 0.4,
+                    "marginBottom": 2,
+                  }
+                }
+              >
+                TOTAL ACCESOS (HOY)
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#1F2937",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 20,
+                    "fontWeight": "800",
+                  }
+                }
+                testID="kpi-total-access-val"
+              >
+                0
+              </Text>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#5B2D8B",
+                "borderRadius": 12,
+                "borderWidth": 1.5,
+                "elevation": 2,
+                "flex": 1,
+                "flexDirection": "row",
+                "gap": 10,
+                "padding": 12,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+              }
+            }
+            testID="kpi-active-users"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#F3E8FF",
+                  "borderRadius": 22,
+                  "height": 44,
+                  "justifyContent": "center",
+                  "width": 44,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#5B2D8B",
+                      "fontSize": 24,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "ionicons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "flex": 1,
+                }
+              }
+            >
+              <Text
+                style={
+                  {
+                    "color": "#718096",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 9.5,
+                    "fontWeight": "700",
+                    "letterSpacing": 0.4,
+                    "marginBottom": 2,
+                  }
+                }
+              >
+                USUARIOS ACTIVOS
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#1F2937",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 20,
+                    "fontWeight": "800",
+                  }
+                }
+                testID="kpi-active-users-val"
+              >
+                0
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#E2E8F0",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "elevation": 2,
+              "marginBottom": 20,
+              "padding": 16,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 2,
+                "width": 0,
+              },
+              "shadowOpacity": 0.04,
+              "shadowRadius": 4,
+            }
+          }
+          testID="chart-card"
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "marginBottom": 12,
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#5B2D8B",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                }
+              }
+              testID="chart-title"
+            >
+              Tiempo de Uso Diario
+            </Text>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#F7FAFC",
+                  "borderColor": "#E2E8F0",
+                  "borderRadius": 6,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "opacity": 1,
+                  "paddingHorizontal": 8,
+                  "paddingVertical": 4,
+                }
+              }
+              testID="period-filter-btn"
+            >
+              <Text
+                style={
+                  {
+                    "color": "#718096",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 12,
+                    "fontWeight": "500",
+                  }
+                }
+              >
+                Últimos 30 días
+              </Text>
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#718096",
+                      "fontSize": 14,
+                    },
+                    {
+                      "marginLeft": 4,
+                    },
+                    {
+                      "fontFamily": "ionicons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "height": 200,
+                "justifyContent": "center",
+                "paddingHorizontal": 24,
+              }
+            }
+            testID="chart-empty-state"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#F7FAFC",
+                  "borderColor": "#EDF2F7",
+                  "borderRadius": 32,
+                  "borderWidth": 1,
+                  "height": 64,
+                  "justifyContent": "center",
+                  "marginBottom": 12,
+                  "width": 64,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#A0AEC0",
+                      "fontSize": 36,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "ionicons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+            </View>
+            <Text
+              style={
+                {
+                  "color": "#718096",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 14,
+                  "lineHeight": 20,
+                  "textAlign": "center",
+                }
+              }
+            >
+              No hay registros de tiempo de uso en este rango de fechas
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 12,
+              "justifyContent": "flex-end",
+              "marginBottom": 20,
+            }
+          }
+        >
+          <View
+            accessibilityLabel="Imprimir"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "elevation": 1,
+                "height": 38,
+                "justifyContent": "center",
+                "opacity": 1,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+                "width": 44,
+              }
+            }
+            testID="print-btn"
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#374151",
+                    "fontSize": 20,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="Exportar PDF"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#5B2D8B",
+                "borderRadius": 8,
+                "elevation": 2,
+                "flexDirection": "row",
+                "height": 38,
+                "justifyContent": "center",
+                "opacity": 1,
+                "paddingHorizontal": 16,
+                "shadowColor": "#5B2D8B",
+                "shadowOffset": {
+                  "height": 2,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.2,
+                "shadowRadius": 3,
+              }
+            }
+            testID="export-pdf-btn"
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#FFFFFF",
+                    "fontSize": 16,
+                  },
+                  {
+                    "marginRight": 4,
+                  },
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#FFFFFF",
+                  "fontSize": 13,
+                  "fontWeight": "700",
+                  "letterSpacing": 0.5,
+                }
+              }
+            >
+              PDF
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;

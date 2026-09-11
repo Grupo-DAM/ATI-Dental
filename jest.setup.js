@@ -26,8 +26,10 @@ jest.mock('@react-native-firebase/firestore', () => {
   const mockFirestoreInstance = {
     collection: jest.fn(() => mockFirestoreInstance),
     doc: jest.fn(() => mockFirestoreInstance),
+    where: jest.fn(() => mockFirestoreInstance),
     orderBy: jest.fn(() => mockFirestoreInstance),
     limit: jest.fn(() => mockFirestoreInstance),
+    get: jest.fn(() => Promise.resolve({ docs: [], empty: true })),
     onSnapshot: jest.fn((onNext, onError) => {
       globalThis.registeredFirestoreOnNext = onNext;
       globalThis.registeredFirestoreOnError = onError;
@@ -41,6 +43,42 @@ jest.mock('@react-native-firebase/firestore', () => {
     serverTimestamp: jest.fn(() => 'mock-server-timestamp'),
   };
   return mockFirestore;
+});
+
+// Mock react-native-svg
+jest.mock('react-native-svg', () => {
+  const React = require('react');
+  const MockSvgComponent = (name) => {
+    const Comp = (props) => React.createElement(name, props, props.children);
+    Comp.displayName = name;
+    return Comp;
+  };
+  return {
+    __esModule: true,
+    default: MockSvgComponent('Svg'),
+    Svg: MockSvgComponent('Svg'),
+    Circle: MockSvgComponent('Circle'),
+    Ellipse: MockSvgComponent('Ellipse'),
+    G: MockSvgComponent('G'),
+    Text: MockSvgComponent('Text'),
+    TSpan: MockSvgComponent('TSpan'),
+    TextPath: MockSvgComponent('TextPath'),
+    Path: MockSvgComponent('Path'),
+    Polygon: MockSvgComponent('Polygon'),
+    Polyline: MockSvgComponent('Polyline'),
+    Line: MockSvgComponent('Line'),
+    Rect: MockSvgComponent('Rect'),
+    Use: MockSvgComponent('Use'),
+    Image: MockSvgComponent('Image'),
+    Symbol: MockSvgComponent('Symbol'),
+    Defs: MockSvgComponent('Defs'),
+    LinearGradient: MockSvgComponent('LinearGradient'),
+    RadialGradient: MockSvgComponent('RadialGradient'),
+    Stop: MockSvgComponent('Stop'),
+    ClipPath: MockSvgComponent('ClipPath'),
+    Pattern: MockSvgComponent('Pattern'),
+    Mask: MockSvgComponent('Mask'),
+  };
 });
 
 jest.mock('@react-native-firebase/storage', () => {

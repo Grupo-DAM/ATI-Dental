@@ -4,6 +4,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export type ResponsibleCardProps = {
+  title?: string;
   name: string;
   role: string;
   description: string;
@@ -14,6 +15,7 @@ export type ResponsibleCardProps = {
 };
 
 export function ResponsibleCard({
+  title,
   name,
   role,
   description,
@@ -35,7 +37,9 @@ export function ResponsibleCard({
         />
       </View>
       <View style={styles.contentContainer}>
-        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.name}>
+          {title ? `${title}. ${name}` : name}
+        </Text>
         <Text style={styles.role}>{role}</Text>
         <Text style={styles.description}>{description}</Text>
         <View style={styles.actionsRow}>

@@ -82,6 +82,7 @@ export default function ContactsScreen() {
   const netInfo = useNetInfo();
 
   const [responsibles, setResponsibles] = useState<any[]>([]);
+  const [globalContact, setGlobalContact] = useState<{ email?: string; telefono?: string; whatsapp?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFromCache, setIsFromCache] = useState(false);
 
@@ -107,10 +108,27 @@ export default function ContactsScreen() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('configuracion')
+      .doc('contacto')
+      .onSnapshot(
+        (doc) => {
+          if (typeof doc.exists === 'function' ? doc.exists() : doc.exists) {
+            setGlobalContact(doc.data() as any);
+          }
+        },
+        (error) => {
+          console.error("Error fetching global contact: ", error);
+        }
+      );
+    return () => unsubscribe();
+  }, []);
+
 
 
   const handleEmailPress = async (customEmail?: string) => {
-    const targetEmail = customEmail || Config.contact.email;
+    const targetEmail = customEmail || globalContact?.email || Config.contact.email;
     const url = `mailto:${targetEmail}?subject=${encodeURIComponent(Config.contact.emailSubject)}`;
     try {
       const canOpen = await Linking.canOpenURL(url);
@@ -138,7 +156,7 @@ export default function ContactsScreen() {
   };
 
   const handlePhonePress = async (customPhone?: string) => {
-    const targetPhone = customPhone || Config.contact.phone;
+    const targetPhone = customPhone || globalContact?.telefono || Config.contact.phone;
     const url = `tel:${targetPhone}`;
     try {
       const canOpen = await Linking.canOpenURL(url);
@@ -166,7 +184,8 @@ export default function ContactsScreen() {
   };
 
   const handleWhatsAppPress = async () => {
-    const formattedPhone = Config.contact.whatsApp.replace(/[^0-9+]/g, '');
+    const rawWhatsApp = globalContact?.whatsapp || Config.contact.whatsApp;
+    const formattedPhone = rawWhatsApp.replace(/[^0-9+]/g, '');
     const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(Config.contact.whatsAppMessage)}`;
     try {
       await Linking.openURL(url);
@@ -184,7 +203,7 @@ export default function ContactsScreen() {
     }
   };
 
-  const isOffline = !netInfo.isConnected || isFromCache;
+  const isOffline = !netInfo.isConnected && isFromCache;
 
   return (
     <View style={styles.container}>
@@ -222,6 +241,7 @@ export default function ContactsScreen() {
               {responsibles.map((resp) => (
                 <ResponsibleCard
                   key={resp.id}
+                  title={resp.title}
                   name={resp.name}
                   role={resp.role}
                   description={resp.description}
