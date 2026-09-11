@@ -114,7 +114,7 @@ export default function ContactsScreen() {
       .doc('contacto')
       .onSnapshot(
         (doc) => {
-          if (doc.exists) {
+          if (typeof doc.exists === 'function' ? doc.exists() : doc.exists) {
             setGlobalContact(doc.data() as any);
           }
         },
