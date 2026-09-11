@@ -5,7 +5,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
   style={
     [
       {
-        "backgroundColor": "#ffffff",
+        "backgroundColor": "#F7F6F8",
       },
       {
         "flex": 1,
@@ -20,7 +20,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
     style={
       [
         {
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#F7F6F8",
         },
         {
           "gap": 8,
@@ -32,7 +32,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
       style={
         [
           {
-            "backgroundColor": "#ffffff",
+            "backgroundColor": "#F7F6F8",
           },
           [
             {
@@ -119,7 +119,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
     style={
       [
         {
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#F7F6F8",
         },
         undefined,
       ]
@@ -129,7 +129,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
       style={
         [
           {
-            "backgroundColor": "#ffffff",
+            "backgroundColor": "#F7F6F8",
           },
           undefined,
         ]
@@ -139,7 +139,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#ffffff",
+              "backgroundColor": "#F7F6F8",
             },
             {
               "flexDirection": "row",
@@ -181,12 +181,12 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#F0F0F3",
+              "backgroundColor": "#ffffff",
             },
             [
               {
                 "alignItems": "center",
-                "backgroundColor": undefined,
+                "backgroundColor": "#ffffff",
                 "borderColor": "#DBD4E2",
                 "borderRadius": 8,
                 "borderWidth": 1,
@@ -249,7 +249,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
       style={
         [
           {
-            "backgroundColor": "#ffffff",
+            "backgroundColor": "#F7F6F8",
           },
           undefined,
         ]
@@ -259,7 +259,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#ffffff",
+              "backgroundColor": "#F7F6F8",
             },
             {
               "flexDirection": "row",
@@ -301,12 +301,12 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#F0F0F3",
+              "backgroundColor": "#ffffff",
             },
             [
               {
                 "alignItems": "center",
-                "backgroundColor": undefined,
+                "backgroundColor": "#ffffff",
                 "borderColor": "#DBD4E2",
                 "borderRadius": 8,
                 "borderWidth": 1,
@@ -403,7 +403,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
       style={
         [
           {
-            "backgroundColor": "#ffffff",
+            "backgroundColor": "#F7F6F8",
           },
           undefined,
         ]
@@ -413,7 +413,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#ffffff",
+              "backgroundColor": "#F7F6F8",
             },
             {
               "flexDirection": "row",
@@ -455,12 +455,12 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#F0F0F3",
+              "backgroundColor": "#ffffff",
             },
             [
               {
                 "alignItems": "center",
-                "backgroundColor": undefined,
+                "backgroundColor": "#ffffff",
                 "borderColor": "#DBD4E2",
                 "borderRadius": 8,
                 "borderWidth": 1,
@@ -633,7 +633,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
     style={
       [
         {
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#F7F6F8",
         },
         {
           "alignItems": "center",

@@ -164,7 +164,9 @@ export function SearchFilter({general= true, value='', onChangeText, onChangeOrd
                     onChangeOption = {changeOrder}
                   ></DropdownSelector>
               </View>
-              <Pressable style = {({ pressed }) => [styles.filterBtn, pressed && styles.pressedFilterBtn,
+              <Pressable
+                testID="filter-toggle-btn"
+                style = {({ pressed }) => [styles.filterBtn, pressed && styles.pressedFilterBtn,
                   selectFilters && styles.filterBtnActive]}
                 onPress = {() => setSelectFilters(!selectFilters)}>
                 <Image

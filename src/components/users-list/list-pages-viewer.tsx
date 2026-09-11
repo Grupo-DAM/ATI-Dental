@@ -43,11 +43,11 @@ function PageButton({ theme, styles, selected, symbol, left, onPress, children }
 }
 
 type SearchResults = {
-    total?: int;
-    minRange?: int;
-    maxRange?: int;
-    currentPage?: int;
-    totalPages?: int;
+    total?: number;
+    minRange?: number;
+    maxRange?: number;
+    currentPage?: number;
+    totalPages?: number;
     onPageChange: (page: number) => void;
 };
 

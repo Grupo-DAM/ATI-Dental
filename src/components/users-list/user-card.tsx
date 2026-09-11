@@ -40,6 +40,7 @@ type PatientData = {
     lastVisit?: string;
     nextVisit?: string;
     status?: never;
+    switchStatus?: () => void;
     role?: never;
 };
 
@@ -52,7 +53,7 @@ type GeneralUserData = {
     nextVisit?: never;
 };
 
-type userCard = {
+type UserCardProps = {
     ID?: string;
     name?: string;
     email?: string;
@@ -71,7 +72,7 @@ export function UserCard({
         status=true,
         switchStatus,
         role='User'
-    }: userCard) {
+    }: UserCardProps) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);

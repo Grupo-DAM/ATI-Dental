@@ -28,7 +28,6 @@ describe('ComingSoonScreen', () => {
   it('reutiliza la pantalla en las rutas placeholder', () => {
     const screens = [
       [RegisterPatientScreen, 'navigation.registerPatient'],
-      [AdminUsersScreen, 'navigation.adminUsers'],
       [AdminReportsScreen, 'navigation.adminReports'],
       [UpdateContactInfoScreen, 'navigation.adminContactInfo'],
     ] as const;

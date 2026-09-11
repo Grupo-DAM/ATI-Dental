@@ -42,7 +42,7 @@ export function Switch({ value = true, onSwitch }: DropdownSelectorProps) {
   });
 
   return (
-      <Pressable style={styles.pressable} onPress={onSwitch}>
+      <Pressable testID="switch-pressable" style={styles.pressable} onPress={onSwitch}>
         <Animated.View style={[styles.backgroundElement, animatedBackgroundStyle]}>
             <Animated.View style={[styles.switch, animatedSwitchStyle]} />
         </Animated.View>
