@@ -169,6 +169,15 @@
     "sessionRequired": "Debes iniciar sesión para continuar.",
     "loading": "Cargando reportes...",
     "errorLoad": "Ocurrió un error al consultar las sesiones del sistema.",
-    "permissionError": "No tienes permisos en Firestore para consultar las sesiones del sistema."
+    "permissionError": "No tienes permisos en Firestore para consultar las sesiones del sistema.",
+    "reportTypeDauMau": "Usuarios activos diarios vs mensuales",
+    "dauMauChartTitle": "DAU VS MAU",
+    "kpiRatio": "RATIO",
+    "kpiDau": "DAU (DIARIOS)",
+    "kpiMau": "MAU (MENS.)",
+    "kpiDailyAvg": "Prom. diario",
+    "kpiThisMonth": "Este mes",
+    "mauLegend": "MAU (Activos Mensuales)",
+    "dauLegend": "DAU (Diarios)"
   }
 }

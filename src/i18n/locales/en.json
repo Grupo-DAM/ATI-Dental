@@ -169,6 +169,15 @@
     "sessionRequired": "You must be logged in to continue.",
     "loading": "Loading reports...",
     "errorLoad": "An error occurred while fetching system sessions.",
-    "permissionError": "You do not have permission in Firestore to query system sessions."
+    "permissionError": "You do not have permission in Firestore to query system sessions.",
+    "reportTypeDauMau": "Daily vs monthly active users",
+    "dauMauChartTitle": "DAU VS MAU",
+    "kpiRatio": "RATIO",
+    "kpiDau": "DAU (DAILY)",
+    "kpiMau": "MAU (MONTHLY)",
+    "kpiDailyAvg": "Daily avg.",
+    "kpiThisMonth": "This month",
+    "mauLegend": "MAU (Monthly Active)",
+    "dauLegend": "DAU (Daily)"
   }
 }

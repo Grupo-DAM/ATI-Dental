@@ -1,0 +1,90 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+# 1. Esperamos a que la app termine de arrancar y muestre la pantalla de Login
+- extendedWaitUntil:
+    visible: "Iniciar sesión"
+    timeout: 15000
+
+# 2. Llenamos las credenciales y hacemos Login
+- tapOn:
+    id: "email-input"
+- inputText: "jesusecova73@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "123456"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+
+# 3. Esperamos a que cargue la app (welcome-header)
+- extendedWaitUntil:
+    visible:
+      id: "welcome-header"
+    timeout: 15000
+
+# 4. Esperamos y tocamos la pestaña de Perfil
+- extendedWaitUntil:
+    visible:
+      id: "profile-tab"
+    timeout: 10000
+
+- tapOn:
+    id: "profile-tab"
+
+# 5. Abrir el menú lateral
+- extendedWaitUntil:
+    visible:
+      id: "menu-btn"
+    timeout: 10000
+
+- tapOn:
+    id: "menu-btn"
+
+# 6. Desplegar Administración
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-toggle"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-toggle"
+
+# 7. Entrar a Reportes
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-reports"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-reports"
+
+# 8. Abrir el modal de selección de tipo de reporte
+- extendedWaitUntil:
+    visible:
+      id: "report-type-select"
+    timeout: 15000
+
+- tapOn:
+    id: "report-type-select"
+
+# 9. Seleccionar DAU/MAU
+- extendedWaitUntil:
+    visible:
+      id: "type-option-dau-mau"
+    timeout: 10000
+
+- tapOn:
+    id: "type-option-dau-mau"
+
+# 10. Validar componentes de US-27
+- extendedWaitUntil:
+    visible:
+      id: "kpi-dau-mau-container"
+    timeout: 10000
+
+- assertVisible:
+    id: "kpi-dau-mau-container"
+- assertVisible:
+    id: "reports-dau-mau-chart"

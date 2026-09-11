@@ -34,6 +34,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const INITIAL_SESSION_DURATION_MINUTES = 15;
 
 export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -114,6 +115,19 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     setError(null);
     try {
       const credential = await auth().signInWithEmailAndPassword(email, password);
+      if (credential?.user?.uid) {
+          try {
+            await firestore().collection('sesiones').add({
+              userId: credential.user.uid,
+              email: credential.user.email,
+              fecha: new Date(),
+              tiempoInicio: new Date(),
+              tiempoUso: INITIAL_SESSION_DURATION_MINUTES,
+            });
+          } catch (sessionErr) {
+            console.warn('[useAuth] Error al registrar sesión en Firestore:', sessionErr);
+          }
+        }
       return credential;
     } catch (err: any) {
       setError(err.message);

@@ -40,9 +40,31 @@ let mockOnSnapshot = jest.fn((onNext: any, onError?: any) => {
   return jest.fn();
 });
 
+let mockDocSnapshot = jest.fn((onNext: any) => {
+  onNext({
+    exists: () => true,
+    data: () => ({
+      dau: 45,
+      mau: 142,
+      historico: [
+        { label: 'Abr', mau: 125, dau: 35 },
+        { label: 'May', mau: 140, dau: 42 },
+        { label: 'Jun', mau: 135, dau: 40 },
+        { label: 'Jul', mau: 152, dau: 46 },
+        { label: 'Ago', mau: 160, dau: 50 },
+        { label: 'Sep', mau: 142, dau: 45 },
+      ],
+    }),
+  });
+  return jest.fn();
+});
+
 jest.mock('@/config/firebase', () => ({
   firestore: () => ({
     collection: (col?: string) => ({
+      doc: () => ({
+        onSnapshot: (...args: any[]) => mockDocSnapshot(args[0]),
+      }),
       where: () => ({
         onSnapshot: (...args: any[]) => mockOnSnapshot(args[0], args[1]),
       }),
@@ -81,6 +103,15 @@ const mockT = (key: string) => {
     'reports.sessionRequired': 'Debes iniciar sesión para continuar.',
     'reports.loading': 'Cargando reportes...',
     'reports.permissionError': 'No tienes permisos en Firestore para consultar las sesiones del sistema.',
+    'reports.reportTypeDauMau': 'Usuarios activos diarios vs mensuales',
+    'reports.dauMauChartTitle': 'DAU VS MAU',
+    'reports.kpiRatio': 'RATIO',
+    'reports.kpiDau': 'DAU (DIARIOS)',
+    'reports.kpiMau': 'MAU (MENS.)',
+    'reports.kpiDailyAvg': 'Prom. diario',
+    'reports.kpiThisMonth': 'Este mes',
+    'reports.mauLegend': 'MAU (Activos Mensuales)',
+    'reports.dauLegend': 'DAU (Diarios)',
   };
   return translations[key] || key;
 };
@@ -330,5 +361,97 @@ describe('UsageLineChart Component', () => {
     // Press point 1
     fireEvent.press(getByTestId('chart-point-1'));
     expect(getByTestId('chart-tooltip')).toBeTruthy();
+  });
+});
+
+describe('US-27: Visualizar relación DAU/MAU', () => {
+  it('Escenario 1: Consume Firestore reactivamente, calcula ratio y muestra las 3 tarjetas y la gráfica', () => {
+    // Simulamos respuesta con datos de Firestore
+    mockDocSnapshot.mockImplementation((onNext) => {
+      onNext({
+        exists: () => true,
+        data: () => ({
+          dau: 45,
+          mau: 142,
+          historico: [
+            { label: 'Abr', mau: 125, dau: 35 },
+            { label: 'Sep', mau: 142, dau: 45 },
+          ],
+        }),
+      });
+      return jest.fn();
+    });
+
+    const { getByTestId } = render(<AdminReportsScreen />);
+
+    // Cambiar a reporte DAU/MAU
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(getByTestId('type-option-dau-mau'));
+
+    // Verificar las 3 tarjetas con datos calculados desde Firestore
+    expect(getByTestId('kpi-dau-mau-container')).toBeTruthy();
+    expect(getByTestId('kpi-ratio-value').props.children).toEqual([32, '%']);
+    expect(getByTestId('kpi-dau-value').props.children).toBe(45);
+    expect(getByTestId('kpi-mau-value').props.children).toBe(142);
+    expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
+  });
+    it('Escenario 2: Actualización reactiva automática cuando un nuevo usuario incrementa DAU', () => {
+      let snapshotCallback: any;
+      mockDocSnapshot.mockImplementation((onNext) => {
+        snapshotCallback = onNext;
+        // Estado inicial: DAU 45, MAU 142 -> 32%
+        onNext({
+          exists: () => true,
+          data: () => ({ dau: 45, mau: 142, historico: [] }),
+        });
+        return jest.fn();
+      });
+
+      const { getByTestId } = render(<AdminReportsScreen />);
+      fireEvent.press(getByTestId('report-type-select'));
+      fireEvent.press(getByTestId('type-option-dau-mau'));
+
+      expect(getByTestId('kpi-dau-value').props.children).toBe(45);
+      expect(getByTestId('kpi-ratio-value').props.children).toEqual([32, '%']);
+
+      // Simulamos que entra un nuevo usuario único y Firestore emite la actualización reactiva
+      act(() => {
+        snapshotCallback({
+          exists: () => true,
+          data: () => ({ dau: 46, mau: 142, historico: [] }),
+        });
+      });
+
+      // La UI se actualizó en tiempo real
+      expect(getByTestId('kpi-dau-value').props.children).toBe(46);
+    });
+  it('Escenario 3: Manejo seguro en UI ante 0 actividad (división por cero)', () => {
+    // Simulamos que no hay actividad en la base de datos
+    mockDocSnapshot.mockImplementation((onNext) => {
+      onNext({
+        exists: () => true,
+        data: () => ({ dau: 0, mau: 0, historico: [] }),
+      });
+      return jest.fn();
+    });
+
+    const { getByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(getByTestId('type-option-dau-mau'));
+
+    // Debe mostrar 0% en la interfaz sin romperse
+    expect(getByTestId('kpi-ratio-value').props.children).toEqual([0, '%']);
+    expect(getByTestId('kpi-dau-value').props.children).toBe(0);
+    expect(getByTestId('kpi-mau-value').props.children).toBe(0);
+    expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
+  });
+
+  it('Función pura: calculateDauMauRatio realiza el cálculo y protege contra MAU = 0', () => {
+    const { calculateDauMauRatio } = require('@/app/(tabs)/admin/reports');
+    expect(calculateDauMauRatio(45, 142)).toBe(32);
+    expect(calculateDauMauRatio(10, 20)).toBe(50);
+    expect(calculateDauMauRatio(0, 0)).toBe(0);
+    expect(calculateDauMauRatio(5, 0)).toBe(0);
   });
 });
