@@ -27,6 +27,7 @@ export function DropdownSelector({children, onChangeOption}: DropdownSelectorPro
   return (
     <ThemedView>
       <Pressable
+        testID="dropdown-btn"
         style={({ pressed }) => [styles.heading, pressed && styles.pressedHeading]}
         onPress={() => setIsOpen((value) => !value)}>
         <ThemedText style = {styles.text}>{option}</ThemedText>
@@ -42,7 +43,7 @@ export function DropdownSelector({children, onChangeOption}: DropdownSelectorPro
         </ThemedView>
       </Pressable>
       {isOpen && (
-        <Animated.View entering={FadeIn.duration(200)}>
+        <Animated.View testID="dropdown-options" entering={FadeIn.duration(200)}>
           <ThemedView type="backgroundElement" style={styles.content}>
             {children.map((opt: string, index: number) => (
                 <Pressable key={opt}

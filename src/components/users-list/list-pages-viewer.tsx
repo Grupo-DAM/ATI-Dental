@@ -84,7 +84,7 @@ export function ListPages({
 
     return (
         <View style = {styles.spacer}>
-        <View style = {styles.container}>
+        <View testID="list-pages" style = {styles.container}>
             <View style = {styles.textContainer}>
                 <Text style = {styles.text}>{t('admin-users.searchResult', {
                         min: minRange,

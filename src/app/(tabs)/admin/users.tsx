@@ -1,9 +1,11 @@
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import auth from '@react-native-firebase/auth';
 import { useTranslation } from 'react-i18next';
+import NetInfo, { useNetInfo } from '@react-native-community/netinfo';
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, Platform, StyleSheet, TextInput,
-  ScrollView, Pressable, Alert} from 'react-native';
+  ScrollView, Pressable, Alert, ActivityIndicator} from 'react-native';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -21,13 +23,15 @@ export default function AdminUserList() {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
+    const netInfo = useNetInfo();
 
     const pageCapacity = 5;
     const [ currentPage, setCurrentPage ] = useState<int>(0);
 
     const [ users, setUsers ] = useState<any[]>([]);
     const [ loading, setLoading ] = useState(true);
-    const [ isFromCache, setIsFromCache ] = useState(false)
+    const [ isFromCache, setIsFromCache ] = useState(false);
+    const [ isRetrying, setIsRetrying ] = useState(false);
 
     useEffect(() => {
         const userList = firestore().collection('usuarios')
@@ -71,6 +75,25 @@ export default function AdminUserList() {
         } catch (error) {
             console.error("Error updating user status in DB: ", error);
             Alert.alert("Error", t('admin-users.errorUpdateUserStatus'));
+        }
+    };
+
+    const handleRetryConnection = async () => {
+        setIsRetrying(true);
+        try {
+            // Force network check
+            const state = await NetInfo.refresh();
+
+            if (state.isConnected) {
+                // Enable network on Firestore to pull fresh data
+                await firestore().enableNetwork();
+            } else {
+                Alert.alert("Sin Conexión", "Aún no hay acceso a internet.");
+            }
+        } catch (error) {
+            console.error("Error retrying connection: ", error);
+        } finally {
+            setIsRetrying(false);
         }
     };
 
@@ -161,6 +184,8 @@ export default function AdminUserList() {
         }
     }, [filteredUsers, currentPage]);
 
+    const isOffline = !netInfo.isConnected;
+
     return (
         <ThemedView style={styles.container}>
             <AppHeader />
@@ -175,6 +200,32 @@ export default function AdminUserList() {
                   {t('admin-users.subtitle')}
                 </ThemedText>
               </View>
+
+              {isOffline && (
+                <View style={styles.offlineBanner}>
+                    <View style={styles.offlineMessageContainer}>
+                      <Ionicons name="cloud-offline-outline" size={16} color={theme.offlineBannerText} style={{ marginRight: 6 }} />
+                      <Text style={styles.offlineText}>{t('contacts.offlineMode')}</Text>
+                    </View>
+                  <Pressable
+                    style={({ pressed }) => [
+                    styles.retryButton,
+                    pressed && styles.retryButtonPressed
+                    ]}
+                    onPress={handleRetryConnection}
+                    disabled={isRetrying}
+                  >
+                    {isRetrying ? (
+                          <ActivityIndicator size="small" color={theme.offlineBannerText} />
+                        ) : (
+                          <>
+                            <Ionicons name="refresh-outline" size={14} color={theme.offlineBannerText} style={{ marginRight: 4 }} />
+                            <Text style={styles.retryButtonText}>{t('common.retry', 'Reintentar')}</Text>
+                          </>
+                        )}
+                  </Pressable>
+                </View>
+              )}
 
 
               {/* Filter section */}
@@ -289,5 +340,47 @@ const createStyles = (theme: any) => StyleSheet.create({
     },
     orderByContainer: {
         width: '25%',
-    }
+    },offlineBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: theme.offlineBannerBackground || '#FEF3C7',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      marginHorizontal: 16,
+      marginBottom: 16,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.offlineBannerBorder || '#F59E0B',
+    },
+    offlineMessageContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    offlineText: {
+      fontSize: 12,
+      color: theme.offlineBannerText || '#92400E',
+      fontFamily: 'Open Sans',
+      fontWeight: '600',
+    },
+    retryButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(180, 83, 9, 0.1)',
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: 'rgba(180, 83, 9, 0.3)',
+    },
+    retryButtonPressed: {
+      opacity: 0.7,
+    },
+    retryButtonText: {
+      fontSize: 12,
+      color: '#B45309',
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
+    },
 });

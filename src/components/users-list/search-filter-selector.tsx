@@ -147,6 +147,7 @@ export function SearchFilter({general= true, value='', onChangeText, onChangeOrd
                           style={styles.icon}
                         />
                       <TextInput
+                          testID="users-search-bar"
                           placeholder={t('admin-users.searchUserPlaceholder')}
                           placeholderTextColor= {theme.placeholderColor}
                           style={styles.input}
@@ -178,7 +179,7 @@ export function SearchFilter({general= true, value='', onChangeText, onChangeOrd
           </View>
           {/* Expanded filter section should accommodate patient specific filters too*/}
           {selectFilters &&
-              <View style = {styles.filtersContainer}>
+              <View testID="select-filters" style = {styles.filtersContainer}>
                 <Text style = {styles.filterLabels}>{t('admin-users.filters')}</Text>
                 <View style = {styles.filterColumns}>
                     {filterCategoriesAdmin.map((category:FilterCategoryProp, index: number) => (

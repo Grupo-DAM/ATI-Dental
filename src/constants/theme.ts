@@ -28,7 +28,10 @@ export const Colors = {
     error: '#BA1A1A',
     logo: '#5B2D8B',
     errorBackground: '#FFDAD6',
-    placeholderColor: '#9E8BAC'
+    placeholderColor: '#9E8BAC',
+    offlineBannerBackground: '#FEF3C7',
+    offlineBannerBorder: '#FDE68A',
+    offlineBannerText: '#B45309'
   },
   dark: {
     text: '#ffffff',
@@ -50,7 +53,10 @@ export const Colors = {
     error: '#BA1A1A',
     logo: '#ffffff',
     errorBackground: '#FFDAD6',
-    placeholderColor: '#9E8BAC'
+    placeholderColor: '#9E8BAC',
+    offlineBannerBackground: '#FEF3C7',
+    offlineBannerBorder: '#FDE68A',
+    offlineBannerText: '#B45309'
   },
 } as const;
 

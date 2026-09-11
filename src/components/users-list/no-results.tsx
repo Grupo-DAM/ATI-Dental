@@ -22,7 +22,7 @@ export function NoResultSearch ({general = true}: ListType) {
               contentFit="contain"
               style = {styles.lookingGlass}
             />
-            <Text style = {styles.text}>
+            <Text testID="no-search-result-message" style = {styles.text}>
                 {general? t('admin-users.noResults'):t('patients-list.noResults')}
             </Text>
             <Text style = {[styles.text, {marginTop: 32}]}>
