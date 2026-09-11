@@ -71,7 +71,7 @@ export function ListPages({
 
      const getSecondBtnPage = () => {
         if (currentPage === 1) return 2;
-        if (currentPage === totalPages) return totalPages - 1;
+        if (currentPage === totalPages && totalPages > 2) return totalPages - 1;
         return currentPage;
      };
 
