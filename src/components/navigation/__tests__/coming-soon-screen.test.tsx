@@ -2,10 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 
 import { ComingSoonScreen } from '@/components/navigation/coming-soon-screen';
-import AdminReportsScreen from '@/app/(tabs)/admin/reports';
 import AdminUsersScreen from '@/app/(tabs)/admin/users';
 import RegisterPatientScreen from '@/app/(tabs)/register-patient';
-import UpdateContactInfoScreen from '@/app/(tabs)/update-contact-info';
 
 jest.mock('@/components/app-header', () => ({
   AppHeader: () => null,
@@ -29,8 +27,6 @@ describe('ComingSoonScreen', () => {
     const screens = [
       [RegisterPatientScreen, 'navigation.registerPatient'],
       [AdminUsersScreen, 'navigation.adminUsers'],
-      [AdminReportsScreen, 'navigation.adminReports'],
-      [UpdateContactInfoScreen, 'navigation.adminContactInfo'],
     ] as const;
 
     screens.forEach(([Screen, titleKey]) => {
