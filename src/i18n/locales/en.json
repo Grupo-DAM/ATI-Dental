@@ -106,5 +106,43 @@
       "whatsappError": "Could not open WhatsApp or browser.",
       "socialError": "Could not open {{platform}} link."
     }
+  },
+  "updateContact": {
+    "title": "Contact Information",
+    "subtitle": "Update the team's contact information and communication channels.",
+    "responsibles": "Site Responsibles",
+    "directContact": "Direct Contact",
+    "noResponsibles": "No responsibles registered in the database.",
+    "photoLabel": "Profile Picture",
+    "photoHint": "JPG, GIF, or PNG. Max 1MB.",
+    "change": "Change",
+    "delete": "Remove",
+    "fieldTitle": "Title",
+    "fieldName": "Name",
+    "fieldRole": "Position",
+    "fieldDescription": "Description",
+    "placeholderTitle": "Dr",
+    "placeholderName": "Full name",
+    "placeholderRole": "Medical Director",
+    "placeholderDescription": "Brief description of this responsible...",
+    "placeholderEmail": "contact@clinic.com",
+    "placeholderPhone": "+58 424 114 9136",
+    "placeholderWhatsapp": "wa.me/584241149136",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "loading": "Loading information…",
+    "successTitle": "Data updated successfully",
+    "successMessage": "Changes are now visible to all users.",
+    "errorSave": "Could not save the information. Please try again.",
+    "errorLoad": "Could not load data. Check your connection.",
+    "errorSaveTitle": "Save Error",
+    "errorLoadTitle": "Connection Error",
+    "accessDenied": "This screen is exclusive to administrators.",
+    "sessionRequired": "You must be logged in to continue.",
+    "validation": {
+      "invalidEmail": "Enter a valid email address (e.g. contact@clinic.com).",
+      "invalidPhone": "Enter a valid phone number (e.g. +58 424 114 9136).",
+      "emptyWhatsapp": "The WhatsApp link or number cannot be empty."
+    }
   }
 }
