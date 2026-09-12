@@ -14,6 +14,7 @@ export const Colors = {
     pageTitle: '#1F2937',
     pageSubtitle: '#6B7280',
     breadcrumbSeparator: '#9CA3AF',
+    fieldLabel: '#374151', //Oxford Blue
     background: '#F7F6F8',
     backgroundElement: '#ffffff',
     backgroundSelected: '#E0E1E6',
@@ -22,6 +23,7 @@ export const Colors = {
     header: '#52287D',
     accentText: '#725C8A',
     main: '#5B2D8B',
+    overMain: '#ffffff',
     border: '#DBD4E2',
     pageSeparator: '#EDF2F7',
     cardSeparator: '#D1D5DB',
@@ -31,7 +33,14 @@ export const Colors = {
     placeholderColor: '#9E8BAC',
     offlineBannerBackground: '#FEF3C7',
     offlineBannerBorder: '#FDE68A',
-    offlineBannerText: '#B45309'
+    offlineBannerText: '#B45309',
+    chartLegendText: '#A0AEC0',
+    lineChartBottomLine: '#CBD5E0',
+    tooltipBackground: '#1A202C',
+    tooltipLegend: '#E2E8F0',
+    tooltipValue: '#FFFFFF',
+    accentBackground: '#F3E8FF',
+    reportValueText: '#111827', //Ebony
   },
   dark: {
     text: '#ffffff',
@@ -39,6 +48,7 @@ export const Colors = {
     pageTitle: '#D1D5DB',
     pageSubtitle: '#9CA3AF',
     breadcrumbSeparator: '#6B7280',
+    fieldLabel: '#D1D5DB',
     background: '#000000',
     backgroundElement: '#121315',
     backgroundSelected: '#2E3135',
@@ -47,6 +57,7 @@ export const Colors = {
     header: '#52287D',
     accentText: '#725C8A',
     main: '#5B2D8B',
+    overMain: '#ffffff',
     border: '#DBD4E2',
     pageSeparator: '#262C36',
     cardSeparator: '#374151',
@@ -56,7 +67,14 @@ export const Colors = {
     placeholderColor: '#9E8BAC',
     offlineBannerBackground: '#FEF3C7',
     offlineBannerBorder: '#FDE68A',
-    offlineBannerText: '#B45309'
+    offlineBannerText: '#B45309',
+    chartLegendText: '#6B7280',
+    lineChartBottomLine: '#9CA3AF',
+    tooltipBackground: '#1A202C',
+    tooltipLegend: '#E2E8F0',
+    tooltipValue: '#FFFFFF',
+    accentBackground: '#4D2875',
+    reportValueText: '#F8FAFC',
   },
 } as const;
 

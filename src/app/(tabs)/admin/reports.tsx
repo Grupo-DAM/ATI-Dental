@@ -20,6 +20,7 @@ import { UsageLineChart, ChartDataPoint } from '@/components/reports/usage-line-
 import { DauMauLineChart, DauMauDataPoint } from '@/components/reports/dau-mau-line-chart';
 import { Colors, BottomTabInset, MaxContentWidth } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
+import { useTheme } from '@/hooks/use-theme';
 import { isAdminUser } from '@/constants/user-roles';
 import { firestore } from '@/config/firebase';
 
@@ -45,6 +46,8 @@ export function calculateDauMauRatio(dau: number, mau: number): number {
 
 export default function AdminReportsScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = createStyle(theme);
   const { user, loading: authLoading } = useAuth();
 
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>(30);
@@ -442,7 +445,7 @@ export default function AdminReportsScreen() {
               <Text style={styles.selectButtonText} numberOfLines={1}>
                 {reportTypeLabel}
               </Text>
-              <Ionicons name="chevron-down" size={18} color="#6B7280" />
+              <Ionicons name="chevron-down" size={18} color={theme.pageSubtitle} />
             </TouchableOpacity>
           </View>
 
@@ -453,7 +456,7 @@ export default function AdminReportsScreen() {
               {/* Card 1: RATIO */}
               <View style={styles.kpiCardThree} testID="kpi-card-ratio">
               <View style={styles.kpiHeaderSmall}>
-                <Ionicons name="trending-up" size={16} color={Colors.light.main} />
+                <Ionicons name="trending-up" size={16} color={theme.logo} />
                 <Text style={styles.kpiLabelSmall}>{t('reports.kpiRatio')}</Text>
               </View>
               <Text style={styles.kpiValueSmall} testID="kpi-ratio-value">{dauMauRatio}%</Text>
@@ -462,7 +465,7 @@ export default function AdminReportsScreen() {
               {/* Card 2: DAU */}
               <View style={styles.kpiCardThree} testID="kpi-card-dau">
                 <View style={styles.kpiHeaderSmall}>
-                  <Ionicons name="person-outline" size={16} color={Colors.light.main} />
+                  <Ionicons name="person-outline" size={16} color={theme.logo} />
                   <Text style={styles.kpiLabelSmall}>{t('reports.kpiDau')}</Text>
                 </View>
                 <Text style={styles.kpiValueSmall} testID="kpi-dau-value">{dauValue}</Text>
@@ -471,7 +474,7 @@ export default function AdminReportsScreen() {
               {/* Card 3: MAU */}
               <View style={styles.kpiCardThree} testID="kpi-card-mau">
                 <View style={styles.kpiHeaderSmall}>
-                  <Ionicons name="people-outline" size={16} color={Colors.light.main} />
+                  <Ionicons name="people-outline" size={16} color={theme.logo} />
                   <Text style={styles.kpiLabelSmall}>{t('reports.kpiMau')}</Text>
                 </View>
                 <Text style={styles.kpiValueSmall} testID="kpi-mau-value">{mauValue}</Text>
@@ -483,7 +486,7 @@ export default function AdminReportsScreen() {
             {/* Card 1: TOTAL ACCESOS (HOY) */}
             <View style={styles.kpiCard} testID="kpi-total-access">
               <View style={styles.kpiIconWrapper}>
-                <Ionicons name="log-in-outline" size={24} color={Colors.light.main} />
+                <Ionicons name="log-in-outline" size={24} color={theme.logo} />
               </View>
               <View style={styles.kpiTextWrapper}>
                 <Text style={styles.kpiLabel}>{t('reports.totalAccessToday')}</Text>
@@ -496,7 +499,7 @@ export default function AdminReportsScreen() {
             {/* Card 2: USUARIOS ACTIVOS */}
             <View style={styles.kpiCard} testID="kpi-active-users">
               <View style={styles.kpiIconWrapper}>
-                <Ionicons name="people" size={24} color={Colors.light.main} />
+                <Ionicons name="people" size={24} color={theme.logo} />
               </View>
               <View style={styles.kpiTextWrapper}>
                 <Text style={styles.kpiLabel}>{t('reports.activeUsers')}</Text>
@@ -525,7 +528,7 @@ export default function AdminReportsScreen() {
                 testID="period-filter-btn"
               >
                 <Text style={styles.periodFilterText}>{periodLabel}</Text>
-                <Ionicons name="filter" size={14} color="#718096" style={styles.filterIcon} />
+                <Ionicons name="filter" size={14} color={theme.d} style={styles.filterIcon} />
               </TouchableOpacity>
             </View>
 
@@ -540,15 +543,15 @@ export default function AdminReportsScreen() {
               </View>
             ) : loading ? (
               <View style={styles.stateContainer} testID="chart-loading">
-                <ActivityIndicator size="large" color={Colors.light.main} />
+                <ActivityIndicator size="large" color={theme.main} />
                 <Text style={styles.stateText}>{t('reports.loading')}</Text>
               </View>
             ) : queryError ? (
               <View style={styles.emptyContainer} testID="chart-error-state">
                 <View style={styles.emptyIconCircle}>
-                  <Ionicons name="shield-outline" size={36} color={Colors.light.error} />
+                  <Ionicons name="shield-outline" size={36} color={theme.error} />
                 </View>
-                <Text style={[styles.emptyText, { color: Colors.light.error, fontWeight: '600' }]}>
+                <Text style={[styles.emptyText, { color: theme.error, fontWeight: '600' }]}>
                   {queryError}
                 </Text>
               </View>
@@ -556,7 +559,7 @@ export default function AdminReportsScreen() {
               /* Scenario 3: Empty state para el reporte de tiempo de uso */
               <View style={styles.emptyContainer} testID="chart-empty-state">
                 <View style={styles.emptyIconCircle}>
-                  <Ionicons name="analytics-outline" size={36} color="#A0AEC0" />
+                  <Ionicons name="analytics-outline" size={36} color={theme.chartLegendText} />
                 </View>
                 <Text style={styles.emptyText}>{t('reports.emptyState')}</Text>
               </View>
@@ -566,7 +569,7 @@ export default function AdminReportsScreen() {
                   data={chartData}
                   height={230}
                   unit={selectedReportType === 'usage' ? 'min' : 'acc'}
-                  lineColor={Colors.light.main}
+                  lineColor={theme.main}
                   testID="reports-usage-chart"
                 />
               </View>
@@ -583,7 +586,7 @@ export default function AdminReportsScreen() {
               testID="print-btn"
               accessibilityLabel={t('reports.print')}
             >
-              <Ionicons name="print-outline" size={20} color="#374151" />
+              <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
             </TouchableOpacity>
 
             {/* PDF Export Button */}
@@ -594,7 +597,7 @@ export default function AdminReportsScreen() {
               testID="export-pdf-btn"
               accessibilityLabel={t('reports.exportPdf')}
             >
-              <Ionicons name="document-text" size={16} color="#FFFFFF" style={{ marginRight: 4 }} />
+              <Ionicons name="document-text" size={16} color={theme.overMain} style={{ marginRight: 4 }} />
               <Text style={styles.pdfBtnText}>PDF</Text>
             </TouchableOpacity>
           </View>
@@ -641,7 +644,7 @@ export default function AdminReportsScreen() {
                     : t('reports.period30Days')}
                 </Text>
                 {selectedPeriod === p && (
-                  <Ionicons name="checkmark" size={18} color={Colors.light.main} />
+                  <Ionicons name="checkmark" size={18} color={theme.main} />
                 )}
               </TouchableOpacity>
             ))}
@@ -683,7 +686,7 @@ export default function AdminReportsScreen() {
                 {t('reports.reportTypeUsage')}
               </Text>
               {selectedReportType === 'usage' && (
-                <Ionicons name="checkmark" size={18} color={Colors.light.main} />
+                <Ionicons name="checkmark" size={18} color={theme.logo} />
               )}
             </TouchableOpacity>
             {/* Opción DAU / MAU */}
@@ -707,7 +710,7 @@ export default function AdminReportsScreen() {
                 {t('reports.reportTypeDauMau')}
               </Text>
               {selectedReportType === 'dau_mau' && (
-                <Ionicons name="checkmark" size={18} color={Colors.light.main} />
+                <Ionicons name="checkmark" size={18} color={theme.logo} />
               )}
             </TouchableOpacity>
             <TouchableOpacity
@@ -730,7 +733,7 @@ export default function AdminReportsScreen() {
                 {t('reports.chartTitle')}
               </Text>
               {selectedReportType === 'access' && (
-                <Ionicons name="checkmark" size={18} color={Colors.light.main} />
+                <Ionicons name="checkmark" size={18} color={theme.logo} />
               )}
             </TouchableOpacity>
           </View>
@@ -740,10 +743,10 @@ export default function AdminReportsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyle = (theme:any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#FAFAFB',
+    backgroundColor: theme.background,
   },
   scrollView: {
     flex: 1,
@@ -760,13 +763,13 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1F2937',
+    color: theme.pageTitle,
     fontFamily: 'Open Sans',
     marginBottom: 6,
   },
   screenSubtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.pageSubtitle,
     fontFamily: 'Open Sans',
     lineHeight: 20,
     marginBottom: 20,
@@ -775,9 +778,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   fieldLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: theme.fieldLabel,
     fontFamily: 'Open Sans',
     marginBottom: 6,
   },
@@ -785,16 +788,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.backgroundElement,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.cardSeparator,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
   selectButtonText: {
     fontSize: 14,
-    color: '#1F2937',
+    color: theme.textNames,
     fontFamily: 'Open Sans',
     flex: 1,
   },
@@ -807,9 +810,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.backgroundElement,
     borderWidth: 1.5,
-    borderColor: Colors.light.main,
+    borderColor: theme.main,
     borderRadius: 12,
     padding: 12,
     gap: 10,
@@ -823,7 +826,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#F3E8FF',
+    backgroundColor: theme.accentBackground,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -831,24 +834,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   kpiLabel: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: '#718096',
+    fontSize: 10,
+    fontWeight: '400',
+    color: theme.breadcrumbSeparator,
     letterSpacing: 0.4,
     fontFamily: 'Open Sans',
     marginBottom: 2,
   },
   kpiValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#1F2937',
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.reportValueText,
     fontFamily: 'Open Sans',
   },
   chartCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.backgroundElement,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: theme.cardSeparator,
     padding: 16,
     marginBottom: 20,
     shadowColor: '#000',
@@ -866,7 +869,7 @@ const styles = StyleSheet.create({
   chartTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.light.main,
+    color: theme.main,
     fontFamily: 'Open Sans',
   },
   periodFilterBtn: {
@@ -875,13 +878,13 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 6,
-    backgroundColor: '#F7FAFC',
+    backgroundColor: theme.backgroundSecondary,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: theme.cardSeparator,
   },
   periodFilterText: {
     fontSize: 12,
-    color: '#718096',
+    color: theme.pageSubtitle,
     fontFamily: 'Open Sans',
     fontWeight: '500',
   },
@@ -896,7 +899,7 @@ const styles = StyleSheet.create({
   },
   stateText: {
     fontSize: 13,
-    color: '#718096',
+    color: theme.pageSubtitle,
     fontFamily: 'Open Sans',
   },
   emptyContainer: {
@@ -909,16 +912,16 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#F7FAFC',
+    backgroundColor: theme.backgroundSecondary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#EDF2F7',
+    borderColor: theme.tooltipLegend,
   },
   emptyText: {
     fontSize: 14,
-    color: '#718096',
+    color: theme.breadcrumbSeparator,
     textAlign: 'center',
     fontFamily: 'Open Sans',
     lineHeight: 20,
@@ -934,8 +937,8 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
-    backgroundColor: '#FFFFFF',
+    borderColor: theme.cardSeparator,
+    backgroundColor: theme.backgroundElement,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -949,17 +952,17 @@ const styles = StyleSheet.create({
     height: 38,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: Colors.light.main,
+    backgroundColor: theme.main,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.light.main,
+    shadowColor: theme.main,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 2,
   },
   pdfBtnText: {
-    color: '#FFFFFF',
+    color: theme.overMain,
     fontWeight: '700',
     fontSize: 13,
     letterSpacing: 0.5,
@@ -974,7 +977,7 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.backgroundElement,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -986,7 +989,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1F2937',
+    color: theme.pageTitle,
     marginBottom: 12,
     fontFamily: 'Open Sans',
   },
@@ -999,15 +1002,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   modalOptionSelected: {
-    backgroundColor: '#F3E8FF',
+    backgroundColor: theme.accentBackground,
   },
   modalOptionText: {
     fontSize: 14,
-    color: '#374151',
+    color: theme.fieldLabel,
     fontFamily: 'Open Sans',
   },
   modalOptionTextSelected: {
-    color: Colors.light.main,
+    color: theme.logo,
     fontWeight: '600',
   },
   kpiRowThree: {
@@ -1017,11 +1020,11 @@ const styles = StyleSheet.create({
   },
   kpiCardThree: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.backgroundElement,
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: theme.main,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -1037,19 +1040,19 @@ const styles = StyleSheet.create({
   kpiLabelSmall: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#4B5563',
+    color: theme.pageSubtitle,
     fontFamily: 'Open Sans',
   },
   kpiValueSmall: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#111827',
+    color: theme.reportValueText,
     fontFamily: 'Open Sans',
     marginBottom: 2,
   },
   kpiSubSmall: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: theme.breadcrumbSeparator,
     fontFamily: 'Open Sans',
   },
   kpiSubSmallPositive: {

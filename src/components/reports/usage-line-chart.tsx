@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, Text, LayoutChangeEvent, TouchableOpacity } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, Circle, Line, Text as SvgText } from 'react-native-svg';
 import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 export interface ChartDataPoint {
   label: string;
@@ -52,6 +53,9 @@ export function UsageLineChart({
   lineColor = Colors.light.main,
   testID = 'usage-line-chart',
 }: Readonly<UsageLineChartProps>) {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
   const [containerWidth, setContainerWidth] = useState(340);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
@@ -171,13 +175,13 @@ export function UsageLineChart({
                 y1={y}
                 x2={containerWidth - paddingRight}
                 y2={y}
-                stroke="#EDF2F7"
+                stroke={theme.pageSeparator}
                 strokeWidth={1}
               />
               <SvgText
                 x={paddingLeft - 8}
                 y={y + 3.5}
-                fill="#A0AEC0"
+                fill={theme.chartLegendText}
                 fontSize={10}
                 fontWeight="500"
                 textAnchor="end"
@@ -194,7 +198,7 @@ export function UsageLineChart({
           y1={paddingTop + chartHeight}
           x2={containerWidth - paddingRight}
           y2={paddingTop + chartHeight}
-          stroke="#CBD5E0"
+          stroke={theme.lineChartBottomLine}
           strokeWidth={1}
         />
 
@@ -209,7 +213,7 @@ export function UsageLineChart({
               key={`x-label-${d.label}-${index}`}
               x={points[index].x}
               y={paddingTop + chartHeight + 18}
-              fill="#A0AEC0"
+              fill={theme.chartLegendText}
               fontSize={10}
               fontWeight="500"
               textAnchor="middle"
@@ -251,7 +255,7 @@ export function UsageLineChart({
                 cx={p.x}
                 cy={p.y}
                 r={isSelected ? 3.5 : 2.5}
-                fill="#FFFFFF"
+                fill={theme.backgroundElement}
               />
             </React.Fragment>
           );
@@ -278,7 +282,7 @@ export function UsageLineChart({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     position: 'relative',
     width: '100%',
@@ -293,7 +297,7 @@ const styles = StyleSheet.create({
   },
   tooltip: {
     position: 'absolute',
-    backgroundColor: '#1A202C',
+    backgroundColor: theme.tooltipBackground,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -307,12 +311,12 @@ const styles = StyleSheet.create({
     minWidth: 80,
   },
   tooltipDate: {
-    color: '#E2E8F0',
+    color: theme.tooltipLegend,
     fontSize: 10,
     fontWeight: '500',
   },
   tooltipVal: {
-    color: '#FFFFFF',
+    color: theme.tooltipValue,
     fontSize: 12,
     fontWeight: '700',
   },
