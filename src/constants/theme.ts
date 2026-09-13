@@ -41,6 +41,7 @@ export const Colors = {
     tooltipValue: '#FFFFFF',
     accentBackground: '#F3E8FF',
     reportValueText: '#111827', //Ebony
+    positive: '#10B981',
   },
   dark: {
     text: '#ffffff',
@@ -75,6 +76,7 @@ export const Colors = {
     tooltipValue: '#FFFFFF',
     accentBackground: '#4D2875',
     reportValueText: '#F8FAFC',
+    positive: '#10B981',
   },
 } as const;
 

@@ -16,6 +16,8 @@ import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
+import { ModalOptionList, ModalOptionProp } from '@/components/ui/modal-option-list';
+import { KPICard } from '@/components/reports/KPICard';
 import { UsageLineChart, ChartDataPoint } from '@/components/reports/usage-line-chart';
 import { DauMauLineChart, DauMauDataPoint } from '@/components/reports/dau-mau-line-chart';
 import { Colors, BottomTabInset, MaxContentWidth } from '@/constants/theme';
@@ -36,67 +38,7 @@ export interface SessionRecord {
   tiempoUso?: number; // in minutes
 }
 
-type KPICardProp = {
-    tinyType: boolean;
-    label?: string;
-    value?: string;
-    iconName?: string;
-    valueTestID?: string;
-    cardTestID?: string;
-    loading?: boolean;
-    accentSubLabel?: boolean;
-    subLabel?: string;
-}
-
-export function KPICard(
-    {
-       tinyType = false,
-       label,
-       value,
-       iconName,
-       valueTestID,
-       cardTestID,
-       accentSubLabel = false,
-       subLabel = '...',
-       loading = false
-    }
-    : KPICardProp) {
-    const theme = useTheme();
-    const styles = createStyle(theme);
-
-    const iconSize = tinyType ? 16 : 24;
-
-    return(
-        <View style={styles.kpiCardWrapper}>
-            {tinyType == true ? (
-                <View style={styles.kpiCardThree} testID={cardTestID}>
-                  <View style={styles.kpiHeaderSmall}>
-                    <Ionicons name={iconName} size={iconSize} color={theme.logo} />
-                    <Text style={styles.kpiLabelSmall}>{label}</Text>
-                  </View>
-                  <Text style={styles.kpiValueSmall} testID={valueTestID}>
-                    {value}
-                  </Text>
-                  <Text style={ accentSubLabel ? (styles.kpiSubSmallPositive) : (styles.kpiSubSmall)}>{subLabel}</Text>
-                </View>
-            ) : (
-                <View style={styles.kpiCard} testID={cardTestID}>
-                  <View style={styles.kpiIconWrapper}>
-                    <Ionicons name={iconName} size={iconSize} color={theme.logo} />
-                  </View>
-                  <View style={styles.kpiTextWrapper}>
-                    <Text style={styles.kpiLabel}>{label}</Text>
-                    <Text style={styles.kpiValue} testID={valueTestID}>
-                      {loading ? '...' : value}
-                    </Text>
-                  </View>
-                </View>
-            )}
-        </View>
-    );
-}
-
-type PeriodOption = 7 | 15 | 30;
+type PeriodOption = '7' | '15' | '30';
 const DAU_MAU_TARGET_RATIO = 50;
 // Calcula la relación porcentual entre DAU y MAU (Stickiness).
 // Protege la division entre 0.
@@ -110,7 +52,7 @@ export default function AdminReportsScreen() {
   const styles = createStyle(theme);
   const { user, loading: authLoading } = useAuth();
 
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>(30);
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>('30');
   const [selectedReportType, setSelectedReportType] = useState<'usage' | 'access' | 'dau_mau'>('usage');
 
     // Estados DAU / MAU
@@ -135,6 +77,47 @@ export default function AdminReportsScreen() {
 
   const userUid = user?.uid;
   const userRole = user?.rol;
+
+  const reportTypeOptions: ModalOptionProp[] = [
+      {
+          name: 'usage',
+          testID: 'type-option-usage',
+          label: t('reports.reportTypeLabel'),
+      },
+      {
+          name: 'dau_mau',
+          testID: 'type-option-dau-mau',
+          label: t('reports.reportTypeDauMau'),
+      },
+      {
+          name: 'access',
+          testID: 'type-option-access',
+          label: t('reports.chartTitle'),
+      },
+      {
+          name: 'crash_rate',
+          testID: 'type-option-crash-rate',
+          label: t('reports.reportTypeCrashRate'),
+      },
+  ]
+
+  const periodOptions: ModalOptionProp [] = [
+      {
+          name: '7',
+          testID: 'period-option-7',
+          label: t('reports.period7Days'),
+      },
+      {
+          name: '15',
+          testID: 'period-option-15',
+          label: t('reports.period15Days'),
+      },
+      {
+          name: '30',
+          testID: 'period-option-30',
+          label: t('reports.period30Days'),
+      },
+  ]
 
   // 1. Role validation (Admin only)
   useEffect(() => {
@@ -467,6 +450,9 @@ export default function AdminReportsScreen() {
     if (selectedReportType === 'dau_mau') {
         return t('reports.reportTypeDauMau');
       }
+    if (selectedReportType === 'crash_rate') {
+        return t('reports.reportTypeCrashRate');
+      }
     return selectedReportType === 'usage'
       ? t('reports.reportTypeUsage')
       : t('reports.chartTitle');
@@ -584,6 +570,8 @@ export default function AdminReportsScreen() {
                 ? t('reports.dauMauChartTitle')
                 : selectedReportType === 'usage'
                 ? t('reports.chartTitleUsage')
+                : selectedReportType === 'crash_rate'
+                ? t('reports.chartTitleCrashRate')
                 : t('reports.chartTitle')}
               </Text>
               <TouchableOpacity
@@ -670,140 +658,24 @@ export default function AdminReportsScreen() {
       </ScrollView>
 
       {/* Period Selection Modal */}
-      <Modal
-        visible={showPeriodModal}
-        transparent
-        animationType="fade"
+      <ModalOptionList
+        visible = {showPeriodModal}
         onRequestClose={() => setShowPeriodModal(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowPeriodModal(false)}
-        >
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{t('reports.reportTypeLabel')}</Text>
-            {[7, 15, 30].map((p) => (
-              <TouchableOpacity
-                key={p}
-                style={[
-                  styles.modalOption,
-                  selectedPeriod === p && styles.modalOptionSelected,
-                ]}
-                onPress={() => {
-                  setSelectedPeriod(p as PeriodOption);
-                  setShowPeriodModal(false);
-                }}
-                testID={`period-option-${p}`}
-              >
-                <Text
-                  style={[
-                    styles.modalOptionText,
-                    selectedPeriod === p && styles.modalOptionTextSelected,
-                  ]}
-                >
-                  {p === 7
-                    ? t('reports.period7Days')
-                    : p === 15
-                    ? t('reports.period15Days')
-                    : t('reports.period30Days')}
-                </Text>
-                {selectedPeriod === p && (
-                  <Ionicons name="checkmark" size={18} color={theme.main} />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </TouchableOpacity>
-      </Modal>
+        title={t('reports.reportTypeLabel')}
+        options={periodOptions}
+        selectedOption={selectedPeriod}
+        onSelectOption={setSelectedPeriod}
+      />
 
       {/* Report Type Modal */}
-      <Modal
-        visible={showReportTypeModal}
-        transparent
-        animationType="fade"
+      <ModalOptionList
+        visible = {showReportTypeModal}
         onRequestClose={() => setShowReportTypeModal(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowReportTypeModal(false)}
-        >
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{t('reports.reportTypeLabel')}</Text>
-            <TouchableOpacity
-              style={[
-                styles.modalOption,
-                selectedReportType === 'usage' && styles.modalOptionSelected,
-              ]}
-              onPress={() => {
-                setSelectedReportType('usage');
-                setShowReportTypeModal(false);
-              }}
-              testID="type-option-usage"
-            >
-              <Text
-                style={[
-                  styles.modalOptionText,
-                  selectedReportType === 'usage' && styles.modalOptionTextSelected,
-                ]}
-              >
-                {t('reports.reportTypeUsage')}
-              </Text>
-              {selectedReportType === 'usage' && (
-                <Ionicons name="checkmark" size={18} color={theme.logo} />
-              )}
-            </TouchableOpacity>
-            {/* Opción DAU / MAU */}
-            <TouchableOpacity
-              style={[
-                styles.modalOption,
-                selectedReportType === 'dau_mau' && styles.modalOptionSelected,
-              ]}
-              onPress={() => {
-                setSelectedReportType('dau_mau');
-                setShowReportTypeModal(false);
-              }}
-              testID="type-option-dau-mau"
-            >
-              <Text
-                style={[
-                  styles.modalOptionText,
-                  selectedReportType === 'dau_mau' && styles.modalOptionTextSelected,
-                ]}
-              >
-                {t('reports.reportTypeDauMau')}
-              </Text>
-              {selectedReportType === 'dau_mau' && (
-                <Ionicons name="checkmark" size={18} color={theme.logo} />
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.modalOption,
-                selectedReportType === 'access' && styles.modalOptionSelected,
-              ]}
-              onPress={() => {
-                setSelectedReportType('access');
-                setShowReportTypeModal(false);
-              }}
-              testID="type-option-access"
-            >
-              <Text
-                style={[
-                  styles.modalOptionText,
-                  selectedReportType === 'access' && styles.modalOptionTextSelected,
-                ]}
-              >
-                {t('reports.chartTitle')}
-              </Text>
-              {selectedReportType === 'access' && (
-                <Ionicons name="checkmark" size={18} color={theme.logo} />
-              )}
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+        title={t('reports.reportTypeLabel')}
+        options={reportTypeOptions}
+        selectedOption={selectedReportType}
+        onSelectOption={setSelectedReportType}
+      />
     </View>
   );
 }
@@ -871,17 +743,6 @@ const createStyle = (theme:any) => StyleSheet.create({
     gap: 12,
     marginBottom: 20,
   },
-  kpiCardWrapper: {
-    flex: 1,
-    paddingTop: 8,
-    borderRadius: 12,
-    backgroundColor: theme.main,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
   kpiCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -889,31 +750,6 @@ const createStyle = (theme:any) => StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     gap: 10,
-  },
-  kpiIconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: theme.accentBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  kpiTextWrapper: {
-    flex: 1,
-  },
-  kpiLabel: {
-    fontSize: 10,
-    fontWeight: '400',
-    color: theme.breadcrumbSeparator,
-    letterSpacing: 0.4,
-    fontFamily: 'Open Sans',
-    marginBottom: 2,
-  },
-  kpiValue: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: theme.reportValueText,
-    fontFamily: 'Open Sans',
   },
   chartCard: {
     backgroundColor: theme.backgroundElement,
@@ -1035,95 +871,9 @@ const createStyle = (theme:any) => StyleSheet.create({
     fontSize: 13,
     letterSpacing: 0.5,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: theme.backgroundElement,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.pageTitle,
-    marginBottom: 12,
-    fontFamily: 'Open Sans',
-  },
-  modalOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-  },
-  modalOptionSelected: {
-    backgroundColor: theme.accentBackground,
-  },
-  modalOptionText: {
-    fontSize: 14,
-    color: theme.fieldLabel,
-    fontFamily: 'Open Sans',
-  },
-  modalOptionTextSelected: {
-    color: theme.logo,
-    fontWeight: '600',
-  },
   kpiRowThree: {
     flexDirection: 'row',
     gap: 8,
     marginBottom: 20,
-  },
-  kpiCardThree: {
-    backgroundColor: theme.backgroundElement,
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  kpiHeaderSmall: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 6,
-  },
-  kpiLabelSmall: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: theme.pageSubtitle,
-    fontFamily: 'Open Sans',
-  },
-  kpiValueSmall: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: theme.reportValueText,
-    fontFamily: 'Open Sans',
-    marginBottom: 2,
-  },
-  kpiSubSmall: {
-    fontSize: 11,
-    color: theme.breadcrumbSeparator,
-    fontFamily: 'Open Sans',
-  },
-  kpiSubSmallPositive: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#10B981',
-    fontFamily: 'Open Sans',
   },
 });

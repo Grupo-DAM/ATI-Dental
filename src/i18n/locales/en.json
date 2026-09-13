@@ -159,7 +159,7 @@
     "period30Days": "Last 30 days",
     "period15Days": "Last 15 days",
     "period7Days": "Last 7 days",
-    "emptyState": "No hay registros de tiempo de uso en este rango de fechas",
+    "emptyState": "No usage time logs in this date range",
     "print": "Print",
     "exportPdf": "Export PDF",
     "pdfExportSuccess": "Report generated successfully",
@@ -178,7 +178,11 @@
     "kpiDailyAvg": "Daily avg.",
     "kpiThisMonth": "This month",
     "mauLegend": "MAU (Monthly Active)",
-    "dauLegend": "DAU (Daily)"
+    "dauLegend": "DAU (Daily)",
+    "reportTypeCrashRate": "Crash percentage",
+    "totalCrashesToday": "TOTAL CRASHES (TODAY)",
+    "usersWithCrashes": "USER WITH CRASHES",
+    "chartTitleCrashRate": "Crash percentage"
   },
   "admin": {
     "path": "Administration"
