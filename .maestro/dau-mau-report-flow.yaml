@@ -88,3 +88,9 @@ appId: com.proyect1.ATIDental
     id: "kpi-dau-mau-container"
 - assertVisible:
     id: "reports-dau-mau-chart"
+
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

@@ -36,6 +36,66 @@ export interface SessionRecord {
   tiempoUso?: number; // in minutes
 }
 
+type KPICardProp = {
+    tinyType: boolean;
+    label?: string;
+    value?: string;
+    iconName?: string;
+    valueTestID?: string;
+    cardTestID?: string;
+    loading?: boolean;
+    accentSubLabel?: boolean;
+    subLabel?: string;
+}
+
+export function KPICard(
+    {
+       tinyType = false,
+       label,
+       value,
+       iconName,
+       valueTestID,
+       cardTestID,
+       accentSubLabel = false,
+       subLabel = '...',
+       loading = false
+    }
+    : KPICardProp) {
+    const theme = useTheme();
+    const styles = createStyle(theme);
+
+    const iconSize = tinyType ? 16 : 24;
+
+    return(
+        <View style={styles.kpiCardWrapper}>
+            {tinyType == true ? (
+                <View style={styles.kpiCardThree} testID={cardTestID}>
+                  <View style={styles.kpiHeaderSmall}>
+                    <Ionicons name={iconName} size={iconSize} color={theme.logo} />
+                    <Text style={styles.kpiLabelSmall}>{label}</Text>
+                  </View>
+                  <Text style={styles.kpiValueSmall} testID={valueTestID}>
+                    {value}
+                  </Text>
+                  <Text style={ accentSubLabel ? (styles.kpiSubSmallPositive) : (styles.kpiSubSmall)}>{subLabel}</Text>
+                </View>
+            ) : (
+                <View style={styles.kpiCard} testID={cardTestID}>
+                  <View style={styles.kpiIconWrapper}>
+                    <Ionicons name={iconName} size={iconSize} color={theme.logo} />
+                  </View>
+                  <View style={styles.kpiTextWrapper}>
+                    <Text style={styles.kpiLabel}>{label}</Text>
+                    <Text style={styles.kpiValue} testID={valueTestID}>
+                      {loading ? '...' : value}
+                    </Text>
+                  </View>
+                </View>
+            )}
+        </View>
+    );
+}
+
 type PeriodOption = 7 | 15 | 30;
 const DAU_MAU_TARGET_RATIO = 50;
 // Calcula la relación porcentual entre DAU y MAU (Stickiness).
@@ -454,60 +514,65 @@ export default function AdminReportsScreen() {
             /* 3 Tarjetas KPI específicas del Wireframe de DAU/MAU */
             <View style={styles.kpiRowThree} testID="kpi-dau-mau-container">
               {/* Card 1: RATIO */}
-              <View style={styles.kpiCardThree} testID="kpi-card-ratio">
-              <View style={styles.kpiHeaderSmall}>
-                <Ionicons name="trending-up" size={16} color={theme.logo} />
-                <Text style={styles.kpiLabelSmall}>{t('reports.kpiRatio')}</Text>
-              </View>
-              <Text style={styles.kpiValueSmall} testID="kpi-ratio-value">{dauMauRatio}%</Text>
-              <Text style={styles.kpiSubSmallPositive}>{`Meta: ${DAU_MAU_TARGET_RATIO}%`}</Text>
-            </View>
+              <KPICard
+                tinyType = {true}
+                label = {t('reports.kpiRatio')}
+                value = {`${dauMauRatio}%`}
+                iconName = "trending-up"
+                valueTestID = "kpi-ratio-value"
+                cardTestID = "kpi-card-ratio"
+                accentSubLabel = {true}
+                subLabel = {`Meta: ${DAU_MAU_TARGET_RATIO}%`}
+                loading = {loading}
+              />
+
               {/* Card 2: DAU */}
-              <View style={styles.kpiCardThree} testID="kpi-card-dau">
-                <View style={styles.kpiHeaderSmall}>
-                  <Ionicons name="person-outline" size={16} color={theme.logo} />
-                  <Text style={styles.kpiLabelSmall}>{t('reports.kpiDau')}</Text>
-                </View>
-                <Text style={styles.kpiValueSmall} testID="kpi-dau-value">{dauValue}</Text>
-                <Text style={styles.kpiSubSmall}>{t('reports.kpiDailyAvg')}</Text>
-              </View>
+              <KPICard
+                tinyType = {true}
+                label = {t('reports.kpiDau')}
+                value = {dauValue}
+                iconName = "person-outline"
+                valueTestID = "kpi-dau-value"
+                cardTestID = "kpi-card-dau"
+                subLabel = {t('reports.kpiDailyAvg')}
+                loading = {loading}
+              />
+
               {/* Card 3: MAU */}
-              <View style={styles.kpiCardThree} testID="kpi-card-mau">
-                <View style={styles.kpiHeaderSmall}>
-                  <Ionicons name="people-outline" size={16} color={theme.logo} />
-                  <Text style={styles.kpiLabelSmall}>{t('reports.kpiMau')}</Text>
-                </View>
-                <Text style={styles.kpiValueSmall} testID="kpi-mau-value">{mauValue}</Text>
-                <Text style={styles.kpiSubSmall}>{t('reports.kpiThisMonth')}</Text>
-              </View>
+              <KPICard
+                tinyType = {true}
+                label = {t('reports.kpiMau')}
+                value = {mauValue}
+                iconName = "people-outline"
+                valueTestID = "kpi-mau-value"
+                cardTestID = "kpi-card-mau"
+                subLabel = {t('reports.kpiThisMonth')}
+                loading = {loading}
+              />
             </View>
           ) : (
           <View style={styles.kpiRow}>
             {/* Card 1: TOTAL ACCESOS (HOY) */}
-            <View style={styles.kpiCard} testID="kpi-total-access">
-              <View style={styles.kpiIconWrapper}>
-                <Ionicons name="log-in-outline" size={24} color={theme.logo} />
-              </View>
-              <View style={styles.kpiTextWrapper}>
-                <Text style={styles.kpiLabel}>{t('reports.totalAccessToday')}</Text>
-                <Text style={styles.kpiValue} testID="kpi-total-access-val">
-                  {loading ? '...' : totalAccessToday}
-                </Text>
-              </View>
-            </View>
+            <KPICard
+                tinyType={false}
+                label = {t('reports.totalAccessToday')}
+                value = {totalAccessToday}
+                iconName = "log-in-outline"
+                valueTestID = "kpi-total-access-val"
+                cardTestID = "kpi-total-access"
+                loading = {loading}
+            />
 
             {/* Card 2: USUARIOS ACTIVOS */}
-            <View style={styles.kpiCard} testID="kpi-active-users">
-              <View style={styles.kpiIconWrapper}>
-                <Ionicons name="people" size={24} color={theme.logo} />
-              </View>
-              <View style={styles.kpiTextWrapper}>
-                <Text style={styles.kpiLabel}>{t('reports.activeUsers')}</Text>
-                <Text style={styles.kpiValue} testID="kpi-active-users-val">
-                  {loading ? '...' : displayedActiveUsers}
-                </Text>
-              </View>
-            </View>
+            <KPICard
+                tinyType={false}
+                label = {t('reports.activeUsers')}
+                value = {displayedActiveUsers}
+                iconName = "people"
+                valueTestID = "kpi-active-users-val"
+                cardTestID = "kpi-active-users"
+                loading = {loading}
+            />
           </View>
             )}
           {/* Main Chart Card */}
@@ -528,7 +593,7 @@ export default function AdminReportsScreen() {
                 testID="period-filter-btn"
               >
                 <Text style={styles.periodFilterText}>{periodLabel}</Text>
-                <Ionicons name="filter" size={14} color={theme.d} style={styles.filterIcon} />
+                <Ionicons name="filter" size={14} color={theme.pageSubtitle} style={styles.filterIcon} />
               </TouchableOpacity>
             </View>
 
@@ -806,21 +871,24 @@ const createStyle = (theme:any) => StyleSheet.create({
     gap: 12,
     marginBottom: 20,
   },
-  kpiCard: {
+  kpiCardWrapper: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.backgroundElement,
-    borderWidth: 1.5,
-    borderColor: theme.main,
+    paddingTop: 8,
     borderRadius: 12,
-    padding: 12,
-    gap: 10,
+    backgroundColor: theme.main,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 2,
+  },
+  kpiCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.backgroundElement,
+    borderRadius: 12,
+    padding: 12,
+    gap: 10,
   },
   kpiIconWrapper: {
     width: 44,
@@ -1019,12 +1087,9 @@ const createStyle = (theme:any) => StyleSheet.create({
     marginBottom: 20,
   },
   kpiCardThree: {
-    flex: 1,
     backgroundColor: theme.backgroundElement,
     borderRadius: 12,
     padding: 12,
-    borderWidth: 1,
-    borderColor: theme.main,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,

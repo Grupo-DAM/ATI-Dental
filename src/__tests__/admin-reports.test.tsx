@@ -390,7 +390,7 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
 
     // Verificar las 3 tarjetas con datos calculados desde Firestore
     expect(getByTestId('kpi-dau-mau-container')).toBeTruthy();
-    expect(getByTestId('kpi-ratio-value').props.children).toEqual([32, '%']);
+    expect(getByTestId('kpi-ratio-value').props.children).toEqual('32%');
     expect(getByTestId('kpi-dau-value').props.children).toBe(45);
     expect(getByTestId('kpi-mau-value').props.children).toBe(142);
     expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
@@ -412,7 +412,7 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
       fireEvent.press(getByTestId('type-option-dau-mau'));
 
       expect(getByTestId('kpi-dau-value').props.children).toBe(45);
-      expect(getByTestId('kpi-ratio-value').props.children).toEqual([32, '%']);
+      expect(getByTestId('kpi-ratio-value').props.children).toEqual('32%');
 
       // Simulamos que entra un nuevo usuario único y Firestore emite la actualización reactiva
       act(() => {
@@ -441,7 +441,7 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
     fireEvent.press(getByTestId('type-option-dau-mau'));
 
     // Debe mostrar 0% en la interfaz sin romperse
-    expect(getByTestId('kpi-ratio-value').props.children).toEqual([0, '%']);
+    expect(getByTestId('kpi-ratio-value').props.children).toEqual('0%');
     expect(getByTestId('kpi-dau-value').props.children).toBe(0);
     expect(getByTestId('kpi-mau-value').props.children).toBe(0);
     expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
@@ -454,4 +454,19 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
     expect(calculateDauMauRatio(0, 0)).toBe(0);
     expect(calculateDauMauRatio(5, 0)).toBe(0);
   });
+});
+
+describe('US-29: Visualizar porcentaje de fallos de la aplicación', () => {
+    it('Escenario 1: Carga y visualización correcta del porcentaje de fallos (Crash Rate)', () => {
+
+
+    });
+    it('Escenario 2: Actualización reactiva al ocurrir un nuevo cierre inesperado en producción', () => {
+
+
+    });
+    it('Escenario 3: Estabilidad óptima del sistema (0% fallos)', () => {
+
+
+    });
 });
