@@ -43,6 +43,21 @@ jest.mock('@react-native-firebase/auth', () => ({
   }),
 }));
 
+let mockAuthUser: any = {
+  uid: 'admin-123',
+  email: 'admin@test.com',
+  rol: USER_ROLES.ADMIN,
+  estado: 'activo',
+};
+
+jest.mock('@/hooks/use-auth', () => ({
+  useAuth: () => ({
+    user: mockAuthUser,
+    loading: false,
+    error: null,
+  }),
+}));
+
 let mockIsConnected = true;
 jest.mock('@react-native-community/netinfo', () => ({
   useNetInfo: () => ({
@@ -66,7 +81,15 @@ jest.mock('@/hooks/use-theme', () => ({
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, defaultValue?: string) => defaultValue || key,
+    t: (key: string, options?: any) => {
+      if (typeof options === 'string') return options;
+      if (options && typeof options === 'object') {
+        if (typeof options.defaultValue === 'string') {
+          return options.defaultValue.replace(/\{\{(\w+)\}\}/g, (_: string, k: string) => options[k] || '');
+        }
+      }
+      return key;
+    },
   }),
 }));
 
@@ -155,6 +178,12 @@ describe('AdminUserList Suite - Max Coverage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsConnected = true;
+    mockAuthUser = {
+      uid: 'admin-123',
+      email: 'admin@test.com',
+      rol: USER_ROLES.ADMIN,
+      estado: 'activo',
+    };
   });
 
   const emitFirestoreData = (data = mockUsersData) => {
@@ -293,35 +322,142 @@ describe('AdminUserList Suite - Max Coverage', () => {
 
   // --- 5. User Status Update Edge Cases & Errors ---
 
-  it('toggles user status from inactivo to activo', async () => {
-    const { getByTestId } = render(<AdminUserList />);
+  // --- 5. User Status Activation / Deactivation (Gherkin Scenarios) ---
+
+  it('Escenario 1: Activación exitosa de un usuario administrativo', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const { getByTestId, queryByTestId } = render(<AdminUserList />);
     emitFirestoreData();
 
     await waitFor(() => expect(getByTestId('user-card-Bob Jones')).toBeTruthy());
 
-    // Toggle Bob Jones (inactivo -> activo)
+    // Administrador presiona el switch para Bob Jones (inactivo -> abrir modal para activar)
     fireEvent(getByTestId('switch-Bob Jones'), 'valueChange', true);
 
+    // Se visualiza el modal de confirmación
+    await waitFor(() => {
+      expect(getByTestId('user-status-modal')).toBeTruthy();
+      expect(getByTestId('modal-status-title')).toBeTruthy();
+    });
+
+    // Confirma la acción
+    await act(async () => {
+      fireEvent.press(getByTestId('modal-confirm-btn'));
+    });
+
+    // El sistema actualiza en Firestore a "activo"
     expect(mockDoc).toHaveBeenCalledWith('2');
     expect(mockUpdate).toHaveBeenCalledWith({ estado: 'activo' });
+
+    // Muestra alerta de éxito y cierra el modal
+    expect(alertSpy).toHaveBeenCalledWith('Éxito', 'Usuario activado con éxito');
+    expect(queryByTestId('user-status-modal')).toBeNull();
   });
 
-  it('shows alert when firestore status update throws an error', async () => {
+  it('Escenario 2: Cancelación de la activación de usuario', async () => {
+    const { getByTestId, queryByTestId } = render(<AdminUserList />);
+    emitFirestoreData();
+
+    await waitFor(() => expect(getByTestId('user-card-Bob Jones')).toBeTruthy());
+
+    // Abre el modal
+    fireEvent(getByTestId('switch-Bob Jones'), 'valueChange', true);
+    await waitFor(() => expect(getByTestId('user-status-modal')).toBeTruthy());
+
+    // Presiona cancelar
+    fireEvent.press(getByTestId('modal-cancel-btn'));
+
+    // Cierra modal sin alterar Firestore
+    expect(queryByTestId('user-status-modal')).toBeNull();
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it('Escenario 3: Manejo de error por fallo de conexión al intentar activar', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert');
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    mockUpdate.mockRejectedValueOnce(new Error('Update failed'));
+    mockUpdate.mockRejectedValueOnce(new Error('Network connection failed'));
+
+    const { getByTestId, queryByTestId } = render(<AdminUserList />);
+    emitFirestoreData();
+
+    await waitFor(() => expect(getByTestId('user-card-Bob Jones')).toBeTruthy());
+
+    fireEvent(getByTestId('switch-Bob Jones'), 'valueChange', true);
+    await waitFor(() => expect(getByTestId('user-status-modal')).toBeTruthy());
+
+    // Confirma acción pero falla la red
+    await act(async () => {
+      fireEvent.press(getByTestId('modal-confirm-btn'));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith('Error', 'No se pudo activar al usuario. Intente nuevamente');
+    expect(queryByTestId('user-status-modal')).toBeNull();
+    consoleSpy.mockRestore();
+  });
+
+  it('Desactivación exitosa de un usuario administrativo', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const { getByTestId, queryByTestId } = render(<AdminUserList />);
+    emitFirestoreData();
+
+    await waitFor(() => expect(getByTestId('user-card-Alice Smith')).toBeTruthy());
+
+    // Presiona switch de Alice Smith (activo -> abrir modal para desactivar)
+    fireEvent(getByTestId('switch-Alice Smith'), 'valueChange', false);
+    await waitFor(() => expect(getByTestId('user-status-modal')).toBeTruthy());
+
+    // Confirma desactivación
+    await act(async () => {
+      fireEvent.press(getByTestId('modal-confirm-btn'));
+    });
+
+    expect(mockDoc).toHaveBeenCalledWith('1');
+    expect(mockUpdate).toHaveBeenCalledWith({ estado: 'inactivo' });
+    expect(alertSpy).toHaveBeenCalledWith('Éxito', 'Usuario desactivado con éxito');
+    expect(queryByTestId('user-status-modal')).toBeNull();
+  });
+
+  it('Manejo de error al intentar desactivar usuario', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockUpdate.mockRejectedValueOnce(new Error('Permission denied'));
 
     const { getByTestId } = render(<AdminUserList />);
     emitFirestoreData();
 
     await waitFor(() => expect(getByTestId('user-card-Alice Smith')).toBeTruthy());
 
+    fireEvent(getByTestId('switch-Alice Smith'), 'valueChange', false);
+    await waitFor(() => expect(getByTestId('user-status-modal')).toBeTruthy());
+
     await act(async () => {
-      fireEvent(getByTestId('switch-Alice Smith'), 'valueChange', false);
+      fireEvent.press(getByTestId('modal-confirm-btn'));
     });
 
-    expect(alertSpy).toHaveBeenCalledWith('Error', 'admin-users.errorUpdateUserStatus');
+    expect(alertSpy).toHaveBeenCalledWith('Error', 'No se pudo desactivar al usuario. Intente nuevamente');
     consoleSpy.mockRestore();
+  });
+
+  it('Deniega acceso si el usuario autenticado no tiene rol de administrador', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    mockAuthUser = {
+      uid: 'assistant-1',
+      email: 'asistente@test.com',
+      rol: USER_ROLES.ASISTENTE,
+      estado: 'activo',
+    };
+
+    const { getByTestId, queryByTestId } = render(<AdminUserList />);
+    emitFirestoreData();
+
+    await waitFor(() => expect(getByTestId('user-card-Bob Jones')).toBeTruthy());
+
+    // Intenta accionar el switch
+    fireEvent(getByTestId('switch-Bob Jones'), 'valueChange', true);
+
+    expect(alertSpy).toHaveBeenCalledWith('Acceso Denegado', 'Solo los administradores pueden modificar el estado de los usuarios.');
+    expect(queryByTestId('user-status-modal')).toBeNull();
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   // --- 6. Pagination Edge Cases ---

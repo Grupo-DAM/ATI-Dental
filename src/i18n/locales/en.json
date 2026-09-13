@@ -81,7 +81,8 @@
       "wrongCredentials": "Email or password is incorrect.",
       "invalidEmail": "Invalid email format.",
       "networkTitle": "Connection Error",
-      "networkMessage": "Connection error with the server. Please try again later."
+      "networkMessage": "Connection error with the server. Please try again later.",
+      "accountDeactivated": "Your account has been deactivated. Please contact the administrator"
     }
   },
   "contacts": {
@@ -212,7 +213,22 @@
     "errorUpdateUserStatus": "Couldn't update user status.",
     "filters": "Filters",
     "filterByRole": "Role",
-    "filterByStatus": "Status"
+    "filterByStatus": "Status",
+    "confirmActivateTitle": "Activate user",
+    "confirmDeactivateTitle": "Deactivate user",
+    "confirmActivateMessage": "Are you sure you want to activate {{name}}? They will have access to the administrative system.",
+    "confirmDeactivateMessage": "Are you sure you want to deactivate {{name}}? Their administrative access will be revoked.",
+    "userActivatedSuccess": "User activated successfully",
+    "userDeactivatedSuccess": "User deactivated successfully",
+    "errorActivateUser": "Could not activate user. Please try again",
+    "errorDeactivateUser": "Could not deactivate user. Please try again",
+    "adminOnlyAction": "Only administrators can modify user status.",
+    "cancel": "Cancel",
+    "confirmActivateBtn": "Activate",
+    "confirmDeactivateBtn": "Deactivate",
+    "successTitle": "Success",
+    "errorTitle": "Error",
+    "accessDeniedTitle": "Access Denied"
   },
   "user-card": {
     "lastVisitLabel": "LAST VISIT:",

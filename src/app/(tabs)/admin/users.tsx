@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import auth from '@react-native-firebase/auth';
 import { useTranslation } from 'react-i18next';
 import NetInfo, { useNetInfo } from '@react-native-community/netinfo';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, Text, Platform, StyleSheet, TextInput,
   ScrollView, Pressable, Alert, ActivityIndicator} from 'react-native';
 import { ThemedView } from '@/components/themed-view';
@@ -17,13 +17,16 @@ import { Breadcrumb } from '@/components/breadcrumb';
 import { useTheme } from '@/hooks/use-theme';
 import { UserCard } from '@/components/users-list/user-card';
 import { firestore } from '@/config/firebase';
-import { USER_ROLES, LEGACY_ADMIN_ROLE } from '@/constants/user-roles';
+import { USER_ROLES, LEGACY_ADMIN_ROLE, isAdminUser } from '@/constants/user-roles';
+import { useAuth } from '@/hooks/use-auth';
+import { UserStatusModal } from '@/components/users-list/user-status-modal';
 
 export default function AdminUserList() {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
     const netInfo = useNetInfo();
+    const { user: authUser } = useAuth();
 
     const pageCapacity = 5;
     const [ currentPage, setCurrentPage ] = useState<int>(0);
@@ -55,28 +58,86 @@ export default function AdminUserList() {
         return () => userList()
     }, []);
 
-    const toggleUserStatus = async (userId: string, currentStatus: string) => {
+    const [ selectedUserForModal, setSelectedUserForModal ] = useState<{
+        id: string;
+        name: string;
+        targetStatus: 'activo' | 'inactivo';
+        currentStatus: string;
+    } | null>(null);
+    const [ isModalVisible, setIsModalVisible ] = useState(false);
+    const [ isStatusLoading, setIsStatusLoading ] = useState(false);
+
+    const handleInitiateStatusChange = useCallback((userItem: { id: string; nombre?: string; email?: string; estado: string }) => {
         const currentUser = auth().currentUser;
 
         if (!currentUser) {
-            Alert.alert("Acceso Denegado", "Debes iniciar sesión para realizar modificaciones.");
+            Alert.alert(
+                t('admin-users.accessDeniedTitle', 'Acceso Denegado'),
+                t('admin-users.adminOnlyAction', 'Debes iniciar sesión para realizar modificaciones.')
+            );
             return;
         }
 
-        const nextStatus = currentStatus === 'activo' ? 'inactivo' : 'activo';
+        if (authUser && !isAdminUser(authUser)) {
+            Alert.alert(
+                t('admin-users.accessDeniedTitle', 'Acceso Denegado'),
+                t('admin-users.adminOnlyAction', 'Solo los administradores pueden modificar el estado de los usuarios.')
+            );
+            return;
+        }
+
+        const nextStatus: 'activo' | 'inactivo' = userItem.estado === 'activo' ? 'inactivo' : 'activo';
+        setSelectedUserForModal({
+            id: userItem.id,
+            name: userItem.nombre || userItem.email || 'Usuario',
+            targetStatus: nextStatus,
+            currentStatus: userItem.estado,
+        });
+        setIsModalVisible(true);
+    }, [authUser, t]);
+
+    const handleCancelStatusChange = useCallback(() => {
+        if (isStatusLoading) return;
+        setIsModalVisible(false);
+        setSelectedUserForModal(null);
+    }, [isStatusLoading]);
+
+    const handleConfirmStatusChange = useCallback(async () => {
+        if (!selectedUserForModal) return;
+
+        setIsStatusLoading(true);
+        const { id, targetStatus } = selectedUserForModal;
 
         try {
             await firestore()
                 .collection('usuarios')
-                .doc(userId)
+                .doc(id)
                 .update({
-                    estado: nextStatus
+                    estado: targetStatus,
                 });
+
+            setIsModalVisible(false);
+            setSelectedUserForModal(null);
+
+            const successMessage = targetStatus === 'activo'
+                ? t('admin-users.userActivatedSuccess', 'Usuario activado con éxito')
+                : t('admin-users.userDeactivatedSuccess', 'Usuario desactivado con éxito');
+
+            Alert.alert(t('admin-users.successTitle', 'Éxito'), successMessage);
         } catch (error) {
             console.error("Error updating user status in DB: ", error);
-            Alert.alert("Error", t('admin-users.errorUpdateUserStatus'));
+            setIsModalVisible(false);
+            setSelectedUserForModal(null);
+
+            const errorMessage = targetStatus === 'activo'
+                ? t('admin-users.errorActivateUser', 'No se pudo activar al usuario. Intente nuevamente')
+                : t('admin-users.errorDeactivateUser', 'No se pudo desactivar al usuario. Intente nuevamente');
+
+            Alert.alert(t('admin-users.errorTitle', 'Error'), errorMessage);
+        } finally {
+            setIsStatusLoading(false);
         }
-    };
+    }, [selectedUserForModal, t]);
 
     const handleRetryConnection = async () => {
         setIsRetrying(true);
@@ -245,14 +306,14 @@ export default function AdminUserList() {
               {filteredUsers.length == 0 ? (
                   <NoResultSearch general = {true} />
               ) : (
-                  paginatedUsers.map((user: userList) => (
+                  paginatedUsers.map((user: any) => (
                         <UserCard key = {user.id}
                           ID="#P-0042"
                           name={user.nombre}
                           email= {user.email}
                           type='general'
                           status={user.estado === 'activo'}
-                          switchStatus = {()=>toggleUserStatus(user.id, user.estado)}
+                          switchStatus = {()=>handleInitiateStatusChange(user)}
                           role= {user.rol}
                         />
                   ))
@@ -268,6 +329,17 @@ export default function AdminUserList() {
                 onPageChange = {setCurrentPage}
               />
             </ScrollView>
+
+            {selectedUserForModal && (
+                <UserStatusModal
+                    visible={isModalVisible}
+                    userName={selectedUserForModal.name}
+                    targetStatus={selectedUserForModal.targetStatus}
+                    loading={isStatusLoading}
+                    onConfirm={handleConfirmStatusChange}
+                    onCancel={handleCancelStatusChange}
+                />
+            )}
         </ThemedView>
     );
 }

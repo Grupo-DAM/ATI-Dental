@@ -1,0 +1,80 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+- tapOn:
+    id: "email-input"
+- inputText: "soamaia03@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Robin123456"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-header"
+    timeout: 10000
+
+- tapOn:
+    id: "profile-tab"
+
+- tapOn:
+    id: "menu-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "nav-admin-section"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-toggle"
+
+- tapOn:
+    id: "nav-item-admin-users"
+
+- extendedWaitUntil:
+    visible:
+      id: "switch-pressable"
+    timeout: 10000
+
+# Escenario 2: Cancelación de activación/desactivación
+- tapOn:
+    id: "switch-pressable"
+
+- extendedWaitUntil:
+    visible:
+      id: "user-status-modal"
+    timeout: 5000
+
+- tapOn:
+    id: "modal-cancel-btn"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "user-status-modal"
+    timeout: 5000
+
+# Escenario 1: Confirmación de cambio de estado
+- tapOn:
+    id: "switch-pressable"
+
+- extendedWaitUntil:
+    visible:
+      id: "user-status-modal"
+    timeout: 5000
+
+- tapOn:
+    id: "modal-confirm-btn"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "user-status-modal"
+    timeout: 5000
+
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

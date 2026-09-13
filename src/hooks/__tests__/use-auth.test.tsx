@@ -206,6 +206,27 @@ describe('useAuth Hook', () => {
     expect(credential.user.uid).toBe('mock-uid');
   });
 
+  it('rejects login and signs out if the user account is inactive in Firestore', async () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AuthProvider>{children}</AuthProvider>
+    );
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    (firestore().collection('usuarios').doc('mock-uid').get as jest.Mock).mockResolvedValueOnce({
+      exists: () => true,
+      data: () => ({ estado: 'inactivo' }),
+    });
+
+    await act(async () => {
+      await expect(
+        result.current.login('inactive@example.com', 'password123')
+      ).rejects.toThrow('ACCOUNT_DEACTIVATED');
+    });
+
+    expect(auth().signOut).toHaveBeenCalled();
+  });
+
   it('handles login errors correctly', async () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <AuthProvider>{children}</AuthProvider>

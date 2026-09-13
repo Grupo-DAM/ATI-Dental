@@ -61,9 +61,13 @@ export default function LoginScreen() {
             }
             await login(email, password);
             router.replace('/(tabs)/home');
-        } catch {
+        } catch (err: any) {
             setHasError(true);
-            setErrorMessage(wrongCredentialsMessage);
+            if (err?.message === 'ACCOUNT_DEACTIVATED' || err?.code === 'auth/account-deactivated') {
+                setErrorMessage(t('login.errors.accountDeactivated', 'Su cuenta ha sido desactivada. Póngase en contacto con el administrador'));
+            } else {
+                setErrorMessage(wrongCredentialsMessage);
+            }
         } finally {
             setIsLoading(false);
         }

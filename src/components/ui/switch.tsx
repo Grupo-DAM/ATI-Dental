@@ -12,9 +12,10 @@ import { useTheme } from '@/hooks/use-theme';
 type DropdownSelectorProps = {
     value?: boolean;
     onSwitch: () => void;
+    testID?: string;
 };
 
-export function Switch({ value = true, onSwitch }: DropdownSelectorProps) {
+export function Switch({ value = true, onSwitch, testID = "switch-pressable" }: DropdownSelectorProps) {
   const theme = useTheme();
   const styles = createStyles(theme);
 

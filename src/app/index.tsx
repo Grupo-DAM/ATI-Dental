@@ -17,12 +17,12 @@ export default function Index() {
     );
   }
 
-  // 2. Si hay un usuario autenticado, lo mandamos al flujo de la App (con Bottom Tabs)
-  if (user) {
+  // 2. Si hay un usuario autenticado y activo, lo mandamos al flujo de la App (con Bottom Tabs)
+  if (user && user.estado !== 'inactivo') {
     return <Redirect href="/(tabs)/home" />;
   }
 
-  // 3. Si NO está autenticado, lo mandamos directo al Login (sin Bottom Tabs)
+  // 3. Si NO está autenticado o está inactivo, lo mandamos directo al Login (sin Bottom Tabs)
   return <Redirect href="/(auth)/login" />;
 }
 

@@ -81,7 +81,8 @@
       "wrongCredentials": "El correo o la contraseña son incorrectos.",
       "invalidEmail": "El formato del correo no es válido.",
       "networkTitle": "Error de conexión",
-      "networkMessage": "Error de conexión con el servidor. Intente más tarde."
+      "networkMessage": "Error de conexión con el servidor. Intente más tarde.",
+      "accountDeactivated": "Su cuenta ha sido desactivada. Póngase en contacto con el administrador"
     }
   },
   "contacts": {
@@ -212,7 +213,22 @@
     "errorUpdateUserStatus": "No se pudo actualizar el estado del usuario",
     "filters": "Filtros",
     "filterByRole": "Rol",
-    "filterByStatus": "Estado"
+    "filterByStatus": "Estado",
+    "confirmActivateTitle": "Activar usuario",
+    "confirmDeactivateTitle": "Desactivar usuario",
+    "confirmActivateMessage": "¿Estás seguro de que deseas activar a {{name}}? Tendrá acceso al sistema administrativo.",
+    "confirmDeactivateMessage": "¿Estás seguro de que deseas desactivar a {{name}}? Se revocarán sus accesos al sistema administrativo.",
+    "userActivatedSuccess": "Usuario activado con éxito",
+    "userDeactivatedSuccess": "Usuario desactivado con éxito",
+    "errorActivateUser": "No se pudo activar al usuario. Intente nuevamente",
+    "errorDeactivateUser": "No se pudo desactivar al usuario. Intente nuevamente",
+    "adminOnlyAction": "Solo los administradores pueden modificar el estado de los usuarios.",
+    "cancel": "Cancelar",
+    "confirmActivateBtn": "Activar",
+    "confirmDeactivateBtn": "Desactivar",
+    "successTitle": "Éxito",
+    "errorTitle": "Error",
+    "accessDeniedTitle": "Acceso Denegado"
   },
   "user-card": {
     "lastVisitLabel": "ÚLTIMA VISITA:",

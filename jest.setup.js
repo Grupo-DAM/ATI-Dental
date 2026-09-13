@@ -29,7 +29,7 @@ jest.mock('@react-native-firebase/firestore', () => {
     where: jest.fn(() => mockFirestoreInstance),
     orderBy: jest.fn(() => mockFirestoreInstance),
     limit: jest.fn(() => mockFirestoreInstance),
-    get: jest.fn(() => Promise.resolve({ docs: [], empty: true })),
+    get: jest.fn(() => Promise.resolve({ docs: [], empty: true, exists: () => false, data: () => ({}) })),
     onSnapshot: jest.fn((onNext, onError) => {
       globalThis.registeredFirestoreOnNext = onNext;
       globalThis.registeredFirestoreOnError = onError;
