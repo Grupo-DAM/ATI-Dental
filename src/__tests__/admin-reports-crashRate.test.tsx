@@ -1,44 +1,39 @@
 import React from 'react';
-import { render, act, fireEvent } from '@testing-library/react-native';
+import { render, act, fireEvent, waitFor } from '@testing-library/react-native';
 import AdminReportsScreen, { calculateCrashRatePercentage } from '@/app/(tabs)/admin/reports';
 
-// 1. Objeto global mutable para capturar las referencias de los listeners
+// 1. Registro global mutable para capturar listeners por colección/documento
 const firestoreListeners = {
   stability: null as ((doc: any) => void) | null,
 };
 
-// 2. Mock de Firebase Firestore controlado
+// 2. Mock de Firestore con ruteo de documento consolidado
 jest.mock('@/config/firebase', () => ({
   firestore: () => {
     const mockCollection = (colName: string) => ({
       doc: (docName: string) => ({
         onSnapshot: jest.fn((callback) => {
-          firestoreListeners.stability = callback;
-          
-          // Emitir estado inicial con 0 fallos
-          callback({
-            exists: true,
-            data: () => ({
-              totalCrashes: 0,
-              affectedUsers: 0,
-              historico: [],
-            }),
-          });
+          if (colName === 'metricas_estabilidad' && docName === 'actual') {
+            firestoreListeners.stability = callback;
+            // Estado inicial óptimo (0 cierres)
+            callback({
+              exists: true,
+              data: () => ({ totalCrashes: 0, affectedUsers: 0, historico: [] }),
+            });
+          } else {
+            callback({ exists: true, data: () => ({ dau: 0, mau: 0 }) });
+          }
           return jest.fn();
         }),
       }),
       where: () => ({
         onSnapshot: jest.fn((callback) => {
-          // Generamos sesiones asegurando que pasen el filtro de fecha actual del componente
           const nowTimestamp = Date.now();
+          // Emitir 100 sesiones base para calcular el porcentaje (fallos / sesiones) * 100
           callback({
             docs: Array.from({ length: 100 }, (_, i) => ({
               id: `session_${i}`,
-              data: () => ({ 
-                fecha: nowTimestamp, // Sincronizado en tiempo real absoluto
-                tiempoInicio: nowTimestamp,
-                tiempoUso: 10 
-              }),
+              data: () => ({ fecha: nowTimestamp, tiempoInicio: nowTimestamp, tiempoUso: 10 }),
             })),
           });
           return jest.fn();
@@ -52,7 +47,7 @@ jest.mock('@/config/firebase', () => ({
   },
 }));
 
-// Mocks complementarios del entorno nativo
+// Mocks auxiliares
 jest.mock('@/hooks/use-theme', () => ({ useTheme: () => ({ main: '#000' }) }));
 jest.mock('@/hooks/use-auth', () => ({ useAuth: () => ({ user: { uid: '123', rol: 'admin' }, loading: false }) }));
 jest.mock('@react-native-firebase/firestore', () => ({}));
@@ -64,8 +59,8 @@ jest.mock('react-i18next', () => ({
     t: (key: string) => {
       const trans: Record<string, string> = {
         'reports.reportTypeCrashRate': 'Tasa de Fallos',
-        'reports.crashRateTitle': 'Estabilidad',
-        'reports.totalCrashes': 'Total Fallos',
+        'reports.crashRateToday': 'Estabilidad',
+        'reports.totalCrashesToday': 'Total Fallos',
         'reports.affectedUsers': 'Usuarios Afectados',
       };
       return trans[key] || key;
@@ -74,57 +69,47 @@ jest.mock('react-i18next', () => ({
 }));
 
 describe('US-29: Visualizar porcentaje de fallos de la aplicación', () => {
-    beforeEach(() => {
-      firestoreListeners.stability = null;
+  beforeEach(() => {
+    firestoreListeners.stability = null;
+  });
+
+  it('Escenario 1: Calcula correctamente el porcentaje con decimales', () => {
+    expect(calculateCrashRatePercentage(5, 1000)).toBe('0.50%');
+  });
+
+  it('Escenario 2: Actualización reactiva al ocurrir un nuevo cierre inesperado en producción', async () => {
+    const { getByTestId } = render(<AdminReportsScreen />);
+
+    // Seleccionar reporte de crash rate
+    await act(async () => {
+      fireEvent.press(getByTestId('report-type-select'));
+    });
+    await act(async () => {
+      fireEvent.press(getByTestId('type-option-crash-rate'));
     });
 
-    it('Escenario 1: Calcula correctamente el porcentaje con decimales', () => {
-      expect(calculateCrashRatePercentage(5, 1000)).toBe('0.50%');
+    // Verificación inicial (0.00%)
+    expect(getByTestId('kpi-crash-rate-val').props.children).toBe('0.00%');
+
+    // Emisión en tiempo real desde Firestore: 1 fallo acumulado en 100 sesiones = 1.00%
+    await act(async () => {
+      if (firestoreListeners.stability) {
+        firestoreListeners.stability({
+          exists: true,
+          data: () => ({ totalCrashes: 1, affectedUsers: 1, historico: [] }),
+        });
+      }
     });
 
-    it('Escenario 2: Actualización reactiva al ocurrir un nuevo cierre inesperado en producción', async () => {
-      const { getByTestId } = render(<AdminReportsScreen />);
-      
-      // 1. Cambiamos el filtro a Tasa de Fallos
-      const reportTypeSelect = getByTestId('report-type-select');
-      await act(async () => {
-        fireEvent.press(reportTypeSelect);
-      });
-
-      const crashRateOption = getByTestId('type-option-crash-rate');
-      await act(async () => {
-        fireEvent.press(crashRateOption);
-      });
-
-      // 2. Verificamos el estado inicial óptimo en pantalla (0.00%)
-      expect(getByTestId('kpi-crash-rate-val').props.children).toBe('0.00%');
-
-      // 3. --- ACCIÓN DEL ESCENARIO 2 ---
-      // Forzamos la actualización reactiva enviando 1 fallo a través del listener capturado.
-      // El componente procesará de manera segura: (1 fallo / 100 sesiones válidas) * 100 = 1.00%
-      await act(async () => {
-        if (firestoreListeners.stability) {
-          firestoreListeners.stability({
-            exists: true,
-            data: () => ({
-              totalCrashes: 1,
-              affectedUsers: 1,
-              historico: [],
-            }),
-          });
-        }
-      });
-
-      // 4. VERIFICACIÓN: Comprobamos que los valores calculados se inyectaron exitosamente en las tarjetas del bucle
+    // Verificación de actualización reactiva
+    await waitFor(() => {
       expect(getByTestId('kpi-crash-rate-val').props.children).toBe('1.00%');
-      expect(getByTestId('kpi-total-crashes-val').props.children).toBe(1);
     });
+    expect(getByTestId('kpi-total-crashes-val').props.children).toBe(1);
+  });
 
-    it('Escenario 3: retorna 0.00% si hay 0 sesiones y 0 fallos', () => {
-      expect(calculateCrashRatePercentage(0, 0)).toBe('0.00%');
-    });
-
-    it('Escenario 3: retorna 0.00% si hay sesiones y 0 fallos', () => {
-      expect(calculateCrashRatePercentage(0, 150)).toBe('0.00%');
-    });
+  it('Escenario 3: Estabilidad óptima del sistema (0% de fallos)', () => {
+    expect(calculateCrashRatePercentage(0, 0)).toBe('0.00%');
+    expect(calculateCrashRatePercentage(0, 150)).toBe('0.00%');
+  });
 });

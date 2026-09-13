@@ -274,6 +274,53 @@ export default function AdminReportsScreen() {
          loadFallback();
        }
      }, [selectedReportType, userUid, userRole, authLoading]);
+
+  // 5. Reactive Firestore Crashrate/Stability
+  useEffect(() => {
+    if (authLoading || !user || !isAdminUser(user)) return;
+    if (selectedReportType !== 'crash_rate') return;
+
+    let isMounted = true;
+
+    try {
+      const unsubscribe = firestore()
+        .collection('metricas_estabilidad')
+        .doc('actual')
+        .onSnapshot(
+          (docSnapshot) => {
+            if (!isMounted) return;
+
+            if (docSnapshot && docSnapshot.exists) {
+              const data = docSnapshot.data() || {};
+              
+              // Inyección de totales consolidados
+              setTotalCrashesValue(typeof data.totalCrashes === 'number' ? data.totalCrashes : 0);
+              setAffectedUsersValue(typeof data.affectedUsers === 'number' ? data.affectedUsers : 0);
+              
+              if (Array.isArray(data.historico)) {
+                setCrashRateData(data.historico);
+              }
+            } else {
+              // Escenario 3: Si el documento no existe o viene en 0
+              setTotalCrashesValue(0);
+              setAffectedUsersValue(0);
+              setCrashRateData([]);
+            }
+          },
+          (err) => {
+            console.warn('[AdminReportsScreen] Error al obtener estabilidad:', err);
+          }
+        );
+
+      return () => {
+        isMounted = false;
+        if (typeof unsubscribe === 'function') unsubscribe();
+      };
+    } catch (e) {
+      console.error(e);
+    }
+  }, [selectedReportType, userUid, userRole, authLoading]);
+     
   // Helper to extract timestamp millis from varied date formats
   const getRecordTimestamp = (record: SessionRecord): number | null => {
     const raw = record.fecha ?? record.tiempoInicio;
@@ -351,14 +398,10 @@ export default function AdminReportsScreen() {
     return activeUsersCount;
   }, [systemActiveUsersCount, activeUsersCount]);
 
-  const caluculatedCrashRateString = useMemo(() => {
-    return calculateCrashRatePercentage(totalCrashesValue, sessions.length);
-  }, [totalCrashesValue, sessions]);
-
   //dynamic KPI card generator (so the code doesn't suck as much)
   const calculatedCrashRateString = useMemo(() => {
     return calculateCrashRatePercentage(totalCrashesValue, sessions.length);
-  }, [totalCrashesValue, sessions]);
+  }, [totalCrashesValue, sessions.length]);
 
   // Generador Dinámico de la estructura de las tarjetas KPI en base al tipo de reporte activo
   const currentKPICards = useMemo<KPICardProp[]>(() => {
