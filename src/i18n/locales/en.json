@@ -180,8 +180,9 @@
     "mauLegend": "MAU (Monthly Active)",
     "dauLegend": "DAU (Daily)",
     "reportTypeCrashRate": "Crash percentage",
+    "crashRateToday": "CRASHRATE (TODAY)",
     "totalCrashesToday": "TOTAL CRASHES (TODAY)",
-    "usersWithCrashes": "USER WITH CRASHES",
+    "affectedUsers": "AFFECTED USERS",
     "chartTitleCrashRate": "Crash percentage"
   },
   "admin": {

@@ -6,14 +6,17 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/use-theme';
 
-type KPICardProp = {
+type IoniconName = keyof typeof Ionicons.glyphMap;
+
+export type KPICardProp = {
     tinyType: boolean;
     label?: string;
-    value?: string;
-    iconName?: string;
+    value?: any;
+    iconName?: IoniconName;
     valueTestID?: string;
     cardTestID?: string;
     loading?: boolean;
+    hasSubLabel?: boolean;
     accentSubLabel?: boolean;
     subLabel?: string;
 }
@@ -26,6 +29,7 @@ export function KPICard(
        iconName,
        valueTestID,
        cardTestID,
+       hasSubLabel = false,
        accentSubLabel = false,
        subLabel = '...',
        loading = false
@@ -47,7 +51,7 @@ export function KPICard(
                   <Text style={styles.kpiValueSmall} testID={valueTestID}>
                     {value}
                   </Text>
-                  <Text style={ accentSubLabel ? (styles.kpiSubSmallPositive) : (styles.kpiSubSmall)}>{subLabel}</Text>
+                  {hasSubLabel && <Text style={ accentSubLabel ? (styles.kpiSubSmallPositive) : (styles.kpiSubSmall)}>{subLabel}</Text>}
                 </View>
             ) : (
                 <View style={styles.kpiCard} testID={cardTestID}>
@@ -84,6 +88,7 @@ const createStyle = (theme:any) => StyleSheet.create({
     elevation: 2,
   },
   kpiCard: {
+    flex:1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: theme.backgroundElement,
@@ -117,6 +122,7 @@ const createStyle = (theme:any) => StyleSheet.create({
     fontFamily: 'Open Sans',
   },
   kpiCardThree: {
+    flex:1,
     backgroundColor: theme.backgroundElement,
     borderRadius: 12,
     padding: 12,
@@ -137,6 +143,7 @@ const createStyle = (theme:any) => StyleSheet.create({
     fontWeight: '700',
     color: theme.pageSubtitle,
     fontFamily: 'Open Sans',
+    paddingRight: 12
   },
   kpiValueSmall: {
     fontSize: 22,

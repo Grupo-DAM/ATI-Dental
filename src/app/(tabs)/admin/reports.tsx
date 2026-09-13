@@ -17,10 +17,10 @@ import { useTranslation } from 'react-i18next';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { ModalOptionList, ModalOptionProp } from '@/components/ui/modal-option-list';
-import { KPICard } from '@/components/reports/KPICard';
+import { KPICard, KPICardProp } from '@/components/reports/KPICard';
 import { UsageLineChart, ChartDataPoint } from '@/components/reports/usage-line-chart';
 import { DauMauLineChart, DauMauDataPoint } from '@/components/reports/dau-mau-line-chart';
-import { Colors, BottomTabInset, MaxContentWidth } from '@/constants/theme';
+import { BottomTabInset, MaxContentWidth } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { isAdminUser } from '@/constants/user-roles';
@@ -38,12 +38,32 @@ export interface SessionRecord {
   tiempoUso?: number; // in minutes
 }
 
-type PeriodOption = '7' | '15' | '30';
+type PeriodOption = 7 | 15 | 30;
+const AVAILABLE_PERIODS: PeriodOption[] = [7, 15, 30];
+
+export function generatePeriodOptions(t: (key: string) => string): ModalOptionProp[] {
+  return AVAILABLE_PERIODS.map((days) => ({
+    name: days,
+    testID: `period-option-${days}`,
+    label: t(`reports.period${days}Days`), 
+  }));
+}
+
 const DAU_MAU_TARGET_RATIO = 50;
+const CRASH_RATE_TOLERANCE_LIMIT = 0.1;
+
 // Calcula la relación porcentual entre DAU y MAU (Stickiness).
 // Protege la division entre 0.
 export function calculateDauMauRatio(dau: number, mau: number): number {
   return mau > 0 ? Math.round((dau / mau) * 100) : 0;
+}
+
+export function calculateCrashRatePercentage(totalCrashes: number, totalSessions: number): string {
+  if (!totalSessions || totalSessions === 0 || !totalCrashes || totalCrashes === 0) {
+    return '0.00%'; // returns 0.00% if 0 crashes (scenario 3)
+  }
+  const rate = (totalCrashes / totalSessions) * 100;
+  return `${rate.toFixed(2)}%`;
 }
 
 export default function AdminReportsScreen() {
@@ -52,21 +72,27 @@ export default function AdminReportsScreen() {
   const styles = createStyle(theme);
   const { user, loading: authLoading } = useAuth();
 
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>('30');
-  const [selectedReportType, setSelectedReportType] = useState<'usage' | 'access' | 'dau_mau'>('usage');
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>(30);
+  const [selectedReportType, setSelectedReportType] = useState<'usage' | 'access' | 'dau_mau' | 'crash_rate'>('usage');
 
-    // Estados DAU / MAU
-    const [dauValue, setDauValue] = useState<number>(0);
-    const [mauValue, setMauValue] = useState<number>(0);
-    const [dauMauRatio, setDauMauRatio] = useState<number>(0);
-    const [dauMauData, setDauMauData] = useState<DauMauDataPoint[]>([
-      { label: 'Abr', mau: 0, dau: 0 },
-      { label: 'May', mau: 0, dau: 0 },
-      { label: 'Jun', mau: 0, dau: 0 },
-      { label: 'Jul', mau: 0, dau: 0 },
-      { label: 'Ago', mau: 0, dau: 0 },
-      { label: 'Sep', mau: 0, dau: 0 },
-    ]);
+  // Estados DAU / MAU
+  const [dauValue, setDauValue] = useState<number>(0);
+  const [mauValue, setMauValue] = useState<number>(0);
+  const [dauMauRatio, setDauMauRatio] = useState<number>(0);
+  const [dauMauData, setDauMauData] = useState<DauMauDataPoint[]>([
+    { label: 'Abr', mau: 0, dau: 0 },
+    { label: 'May', mau: 0, dau: 0 },
+    { label: 'Jun', mau: 0, dau: 0 },
+    { label: 'Jul', mau: 0, dau: 0 },
+    { label: 'Ago', mau: 0, dau: 0 },
+    { label: 'Sep', mau: 0, dau: 0 },
+  ]);
+
+  // Crash Rate States
+  const [totalCrashesValue, setTotalCrashesValue] = useState<number>(0);
+  const [affectedUsersValue, setAffectedUsersValue] = useState<number>(0);
+  const [crashRateData, setCrashRateData] = useState<ChartDataPoint[]>([]);
+
   const [showPeriodModal, setShowPeriodModal] = useState(false);
   const [showReportTypeModal, setShowReportTypeModal] = useState(false);
 
@@ -79,45 +105,13 @@ export default function AdminReportsScreen() {
   const userRole = user?.rol;
 
   const reportTypeOptions: ModalOptionProp[] = [
-      {
-          name: 'usage',
-          testID: 'type-option-usage',
-          label: t('reports.reportTypeLabel'),
-      },
-      {
-          name: 'dau_mau',
-          testID: 'type-option-dau-mau',
-          label: t('reports.reportTypeDauMau'),
-      },
-      {
-          name: 'access',
-          testID: 'type-option-access',
-          label: t('reports.chartTitle'),
-      },
-      {
-          name: 'crash_rate',
-          testID: 'type-option-crash-rate',
-          label: t('reports.reportTypeCrashRate'),
-      },
+    { name: 'usage', testID: 'type-option-usage', label: t('reports.reportTypeLabel') },
+    { name: 'dau_mau', testID: 'type-option-dau-mau', label: t('reports.reportTypeDauMau') },
+    { name: 'access', testID: 'type-option-access', label: t('reports.chartTitle') },
+    { name: 'crash_rate', testID: 'type-option-crash-rate', label: t('reports.reportTypeCrashRate') },
   ]
 
-  const periodOptions: ModalOptionProp [] = [
-      {
-          name: '7',
-          testID: 'period-option-7',
-          label: t('reports.period7Days'),
-      },
-      {
-          name: '15',
-          testID: 'period-option-15',
-          label: t('reports.period15Days'),
-      },
-      {
-          name: '30',
-          testID: 'period-option-30',
-          label: t('reports.period30Days'),
-      },
-  ]
+  const periodOptions: ModalOptionProp [] = generatePeriodOptions(t);
 
   // 1. Role validation (Admin only)
   useEffect(() => {
@@ -357,8 +351,51 @@ export default function AdminReportsScreen() {
     return activeUsersCount;
   }, [systemActiveUsersCount, activeUsersCount]);
 
+  const caluculatedCrashRateString = useMemo(() => {
+    return calculateCrashRatePercentage(totalCrashesValue, sessions.length);
+  }, [totalCrashesValue, sessions]);
+
+  //dynamic KPI card generator (so the code doesn't suck as much)
+  const calculatedCrashRateString = useMemo(() => {
+    return calculateCrashRatePercentage(totalCrashesValue, sessions.length);
+  }, [totalCrashesValue, sessions]);
+
+  // Generador Dinámico de la estructura de las tarjetas KPI en base al tipo de reporte activo
+  const currentKPICards = useMemo<KPICardProp[]>(() => {
+    if (selectedReportType === 'dau_mau') {
+      return [
+        { tinyType: true, label: t('reports.kpiRatio'), value: `${dauMauRatio}%`, iconName: 'trending-up', 
+          valueTestID: 'kpi-ratio-value', cardTestID: 'kpi-card-ratio', hasSubLabel: true, accentSubLabel: true, subLabel: `Meta: ${DAU_MAU_TARGET_RATIO}%` },
+        { tinyType: true, label: t('reports.kpiDau'), value: dauValue, iconName: 'person-outline', 
+          valueTestID: 'kpi-dau-value', cardTestID: 'kpi-card-dau', hasSubLabel: true, subLabel: t('reports.kpiDailyAvg') },
+        { tinyType: true, label: t('reports.kpiMau'), value: mauValue, iconName: 'people-outline', 
+          valueTestID: 'kpi-mau-value', cardTestID: 'kpi-card-mau', hasSubLabel: true, subLabel: t('reports.kpiThisMonth') }
+      ];
+    }
+
+    if (selectedReportType === 'crash_rate') {
+      return [
+        { tinyType: true, label: t('reports.crashRateToday'), value: calculatedCrashRateString, iconName: 'shield-checkmark-outline', 
+          valueTestID: 'kpi-crash-rate-val', cardTestID: 'kpi-crash-rate'},
+        { tinyType: true, label: t('reports.totalCrashesToday'), value: totalCrashesValue, iconName: 'bug-outline', 
+          valueTestID: 'kpi-total-crashes-val', cardTestID: 'kpi-total-crashes' },
+        { tinyType: true, label: true ? t('reports.affectedUsers') : 'Users', value: affectedUsersValue, iconName: 'sad-outline', 
+          valueTestID: 'kpi-affected-users-val', cardTestID: 'kpi-affected-users' }
+      ];
+    }
+    
+    return [
+      { tinyType: false, label: t('reports.totalAccessToday'), value: totalAccessToday, iconName: 'log-in-outline', 
+        valueTestID: 'kpi-total-access-val', cardTestID: 'kpi-total-access' },
+      { tinyType: false, label: t('reports.activeUsers'), value: displayedActiveUsers, iconName: 'people', 
+        valueTestID: 'kpi-active-users-val', cardTestID: 'kpi-active-users' }
+    ];
+  }, [selectedReportType, dauMauRatio, dauValue, mauValue, calculatedCrashRateString, totalCrashesValue, affectedUsersValue, totalAccessToday, displayedActiveUsers, t]);
+
   // 4. Aggregate data for the chart by day in selected period
   const chartData = useMemo<ChartDataPoint[]>(() => {
+    if (selectedReportType === 'crash_rate') return crashRateData;
+    
     const days = selectedPeriod;
     const now = new Date();
     const result: ChartDataPoint[] = [];
@@ -415,6 +452,7 @@ export default function AdminReportsScreen() {
       if (selectedReportType === 'dau_mau') {
         return dauMauData.length > 0 && dauMauData.some((d) => d.mau > 0 || d.dau > 0);
       }
+      if (selectedReportType === 'crash_rate') return true; 
       if (sessions.length === 0) return false;
       return chartData.some((d) => d.value > 0);
     }, [sessions, chartData, selectedReportType, dauMauData]);
@@ -496,71 +534,23 @@ export default function AdminReportsScreen() {
           </View>
 
           {/* KPI Summary Cards */}
-          {selectedReportType === 'dau_mau' ? (
-            /* 3 Tarjetas KPI específicas del Wireframe de DAU/MAU */
-            <View style={styles.kpiRowThree} testID="kpi-dau-mau-container">
-              {/* Card 1: RATIO */}
+          <View style={selectedReportType === 'usage' ? styles.kpiRow : styles.kpiRowThree} testID="kpi-cards-container">
+            {currentKPICards.map((cardProps, index) => (
               <KPICard
-                tinyType = {true}
-                label = {t('reports.kpiRatio')}
-                value = {`${dauMauRatio}%`}
-                iconName = "trending-up"
-                valueTestID = "kpi-ratio-value"
-                cardTestID = "kpi-card-ratio"
-                accentSubLabel = {true}
-                subLabel = {`Meta: ${DAU_MAU_TARGET_RATIO}%`}
-                loading = {loading}
+                key={cardProps.cardTestID || index}
+                tinyType={cardProps.tinyType}
+                label={cardProps.label}
+                value={cardProps.value}
+                iconName={cardProps.iconName}
+                valueTestID={cardProps.valueTestID}
+                cardTestID={cardProps.cardTestID}
+                hasSubLabel={cardProps.hasSubLabel}
+                accentSubLabel={cardProps.accentSubLabel}
+                subLabel={cardProps.subLabel}
+                loading={loading}
               />
-
-              {/* Card 2: DAU */}
-              <KPICard
-                tinyType = {true}
-                label = {t('reports.kpiDau')}
-                value = {dauValue}
-                iconName = "person-outline"
-                valueTestID = "kpi-dau-value"
-                cardTestID = "kpi-card-dau"
-                subLabel = {t('reports.kpiDailyAvg')}
-                loading = {loading}
-              />
-
-              {/* Card 3: MAU */}
-              <KPICard
-                tinyType = {true}
-                label = {t('reports.kpiMau')}
-                value = {mauValue}
-                iconName = "people-outline"
-                valueTestID = "kpi-mau-value"
-                cardTestID = "kpi-card-mau"
-                subLabel = {t('reports.kpiThisMonth')}
-                loading = {loading}
-              />
-            </View>
-          ) : (
-          <View style={styles.kpiRow}>
-            {/* Card 1: TOTAL ACCESOS (HOY) */}
-            <KPICard
-                tinyType={false}
-                label = {t('reports.totalAccessToday')}
-                value = {totalAccessToday}
-                iconName = "log-in-outline"
-                valueTestID = "kpi-total-access-val"
-                cardTestID = "kpi-total-access"
-                loading = {loading}
-            />
-
-            {/* Card 2: USUARIOS ACTIVOS */}
-            <KPICard
-                tinyType={false}
-                label = {t('reports.activeUsers')}
-                value = {displayedActiveUsers}
-                iconName = "people"
-                valueTestID = "kpi-active-users-val"
-                cardTestID = "kpi-active-users"
-                loading = {loading}
-            />
+            ))}
           </View>
-            )}
           {/* Main Chart Card */}
           <View style={styles.chartCard} testID="chart-card">
             {/* Header: Title and Period Filter */}
@@ -621,7 +611,7 @@ export default function AdminReportsScreen() {
                 <UsageLineChart
                   data={chartData}
                   height={230}
-                  unit={selectedReportType === 'usage' ? 'min' : 'acc'}
+                  unit={selectedReportType === 'usage' ? 'min' : selectedReportType === 'crash_rate' ? '%' : 'acc'}
                   lineColor={theme.main}
                   testID="reports-usage-chart"
                 />

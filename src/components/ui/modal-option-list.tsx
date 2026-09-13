@@ -10,7 +10,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { Colors } from '@/constants/theme';
 
 export type ModalOptionProp = {
-    name?: string;
+    name?: any;
     isSelected?: boolean;
     onSelect?: () => void;
     testID?: string;
@@ -55,9 +55,9 @@ type ModalOptionListProp = {
     visible: boolean;
     onRequestClose: () => void;
     title: string;
-    options: ModalOption[];
-    selectedOption: string;
-    onSelectOption: () => void;
+    options: ModalOptionProp[];
+    selectedOption: any;
+    onSelectOption: (opt: any) => void;
 }
 
 export function ModalOptionList({
