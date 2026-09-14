@@ -34,7 +34,7 @@ export function KPICard(
        subLabel = '...',
        loading = false
     }
-    : KPICardProp) {
+    : Readonly<KPICardProp>) {
     const theme = useTheme();
     const styles = createStyle(theme);
 
@@ -42,7 +42,7 @@ export function KPICard(
 
     return(
         <View style={styles.kpiCardWrapper}>
-            {tinyType == true ? (
+            {tinyType ? (
                 <View style={styles.kpiCardThree} testID={cardTestID}>
                   <View style={styles.kpiHeaderSmall}>
                     <Ionicons name={iconName} size={iconSize} color={theme.logo} />

@@ -190,25 +190,11 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               Visualizar tiempo de uso por usuario
             </Text>
             <Text
-              allowFontScaling={false}
-              selectable={false}
-              style={
-                [
-                  {
-                    "color": "#6B7280",
-                    "fontSize": 18,
-                  },
-                  undefined,
-                  {
-                    "fontFamily": "ionicons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
-              }
+              color="#6B7280"
+              name="chevron-down"
+              size={18}
             >
-              
+              chevron-down
             </Text>
           </View>
         </View>
@@ -267,25 +253,11 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
                 }
               >
                 <Text
-                  allowFontScaling={false}
-                  selectable={false}
-                  style={
-                    [
-                      {
-                        "color": "#5B2D8B",
-                        "fontSize": 24,
-                      },
-                      undefined,
-                      {
-                        "fontFamily": "ionicons",
-                        "fontStyle": "normal",
-                        "fontWeight": "normal",
-                      },
-                      {},
-                    ]
-                  }
+                  color="#5B2D8B"
+                  name="log-in-outline"
+                  size={24}
                 >
-                  
+                  log-in-outline
                 </Text>
               </View>
               <View
@@ -370,25 +342,11 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
                 }
               >
                 <Text
-                  allowFontScaling={false}
-                  selectable={false}
-                  style={
-                    [
-                      {
-                        "color": "#5B2D8B",
-                        "fontSize": 24,
-                      },
-                      undefined,
-                      {
-                        "fontFamily": "ionicons",
-                        "fontStyle": "normal",
-                        "fontWeight": "normal",
-                      },
-                      {},
-                    ]
-                  }
+                  color="#5B2D8B"
+                  name="people"
+                  size={24}
                 >
-                  
+                  people
                 </Text>
               </View>
               <View
@@ -529,27 +487,16 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
                 Últimos 30 días
               </Text>
               <Text
-                allowFontScaling={false}
-                selectable={false}
+                color="#6B7280"
+                name="filter"
+                size={14}
                 style={
-                  [
-                    {
-                      "color": "#6B7280",
-                      "fontSize": 14,
-                    },
-                    {
-                      "marginLeft": 4,
-                    },
-                    {
-                      "fontFamily": "ionicons",
-                      "fontStyle": "normal",
-                      "fontWeight": "normal",
-                    },
-                    {},
-                  ]
+                  {
+                    "marginLeft": 4,
+                  }
                 }
               >
-                
+                filter
               </Text>
             </View>
           </View>
@@ -580,25 +527,11 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               }
             >
               <Text
-                allowFontScaling={false}
-                selectable={false}
-                style={
-                  [
-                    {
-                      "color": "#A0AEC0",
-                      "fontSize": 36,
-                    },
-                    undefined,
-                    {
-                      "fontFamily": "ionicons",
-                      "fontStyle": "normal",
-                      "fontWeight": "normal",
-                    },
-                    {},
-                  ]
-                }
+                color="#A0AEC0"
+                name="analytics-outline"
+                size={36}
               >
-                
+                analytics-outline
               </Text>
             </View>
             <Text
@@ -679,25 +612,11 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
             testID="print-btn"
           >
             <Text
-              allowFontScaling={false}
-              selectable={false}
-              style={
-                [
-                  {
-                    "color": "#374151",
-                    "fontSize": 20,
-                  },
-                  undefined,
-                  {
-                    "fontFamily": "ionicons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
-              }
+              color="#374151"
+              name="print-outline"
+              size={20}
             >
-              
+              print-outline
             </Text>
           </View>
           <View
@@ -752,27 +671,16 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
             testID="export-pdf-btn"
           >
             <Text
-              allowFontScaling={false}
-              selectable={false}
+              color="#ffffff"
+              name="document-text"
+              size={16}
               style={
-                [
-                  {
-                    "color": "#ffffff",
-                    "fontSize": 16,
-                  },
-                  {
-                    "marginRight": 4,
-                  },
-                  {
-                    "fontFamily": "ionicons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
+                {
+                  "marginRight": 4,
+                }
               }
             >
-              
+              document-text
             </Text>
             <Text
               style={

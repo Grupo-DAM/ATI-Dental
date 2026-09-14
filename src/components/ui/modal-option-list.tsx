@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/use-theme';
-import { Colors } from '@/constants/theme';
 
 export type ModalOptionProp = {
     name?: any;
@@ -23,7 +22,7 @@ function ModalOption ({
         onSelect,
         testID,
         label,
-    } : ModalOptionProp ) {
+    } : Readonly<ModalOptionProp> ) {
     const theme = useTheme()
     const styles = createStyles(theme)
 
@@ -67,7 +66,7 @@ export function ModalOptionList({
         options,
         selectedOption,
         onSelectOption
-    } : ModalOptionListProp ) {
+    } : Readonly<ModalOptionListProp> ) {
     const theme = useTheme()
     const styles = createStyles(theme)
 

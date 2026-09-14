@@ -1,10 +1,22 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react-native';
+import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
 
 import AdminReportsScreen from '@/app/(tabs)/admin/reports';
 import { UsageLineChart } from '@/components/reports/usage-line-chart';
+
+// Mock de @expo/vector-icons para evitar advertencias de act(...) por carga asíncrona de fuentes
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  
+  return {
+    Ionicons: (props: any) => React.createElement(Text, props, props.name),
+    MaterialIcons: (props: any) => React.createElement(Text, props, props.name),
+    FontAwesome: (props: any) => React.createElement(Text, props, props.name),
+  };
+});
 
 // Mock dependencies
 jest.mock('expo-router', () => ({
@@ -187,12 +199,12 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
 
     const { getByTestId, getByText, queryByTestId } = render(<AdminReportsScreen />);
 
-    // Chart container is visible and loading is gone
-    expect(queryByTestId('chart-loading')).toBeNull();
-    expect(getByTestId('chart-active-container')).toBeTruthy();
-    expect(getByTestId('reports-usage-chart')).toBeTruthy();
+    await waitFor(() => {
+      expect(queryByTestId('chart-loading')).toBeNull();
+      expect(getByTestId('chart-active-container')).toBeTruthy();
+      expect(getByTestId('reports-usage-chart')).toBeTruthy();
+    });
 
-    // Verify Title and KPI numbers
     expect(getByText('Generar Reportes')).toBeTruthy();
     expect(getByTestId('kpi-total-access-val').props.children).toBe(2);
     expect(getByTestId('kpi-active-users-val').props.children).toBe(2);
@@ -222,7 +234,6 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
 
     expect(getByTestId('kpi-total-access-val').props.children).toBe(1);
 
-    // Simulate new session arrival in real-time
     const updatedSessions = [
       ...initialSessions,
       {
@@ -247,7 +258,6 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
       listener({ docs: updatedSessions, empty: false });
     });
 
-    // KPI values increment dynamically
     expect(getByTestId('kpi-total-access-val').props.children).toBe(3);
     expect(getByTestId('kpi-active-users-val').props.children).toBe(3);
   });
@@ -260,15 +270,20 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
 
     const { getByTestId, getByText, queryByTestId } = render(<AdminReportsScreen />);
 
-    // Chart container is hidden, friendly empty state is displayed
-    expect(queryByTestId('chart-active-container')).toBeNull();
-    expect(getByTestId('chart-empty-state')).toBeTruthy();
+    await waitFor(() => {
+      expect(queryByTestId('chart-active-container')).toBeNull();
+      expect(getByTestId('chart-empty-state')).toBeTruthy();
+    });
+
     expect(
       getByText('No hay registros de tiempo de uso en este rango de fechas')
     ).toBeTruthy();
   });
 
-  it('Manejo de error de permisos en Firestore', () => {
+  it('Manejo de error de permisos en Firestore', async () => {
+    const spyConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const spyConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
     mockOnSnapshot = jest.fn((onNext, onError) => {
       if (onError) {
         onError({ code: 'firestore/permission-denied', message: 'The caller does not have permission' });
@@ -278,10 +293,16 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
 
     const { getByTestId, getByText } = render(<AdminReportsScreen />);
 
-    expect(getByTestId('chart-error-state')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId('chart-error-state')).toBeTruthy();
+    });
+
     expect(
       getByText('No tienes permisos en Firestore para consultar las sesiones del sistema.')
     ).toBeTruthy();
+
+    spyConsoleError.mockRestore();
+    spyConsoleWarn.mockRestore();
   });
 
   it('Seguridad: Redirige si el usuario no es administrador', () => {
@@ -358,15 +379,13 @@ describe('UsageLineChart Component', () => {
     expect(getByTestId('usage-line-chart')).toBeTruthy();
     expect(queryByTestId('chart-tooltip')).toBeNull();
 
-    // Press point 1
     fireEvent.press(getByTestId('chart-point-1'));
     expect(getByTestId('chart-tooltip')).toBeTruthy();
   });
 });
 
 describe('US-27: Visualizar relación DAU/MAU', () => {
-  it('Escenario 1: Consume Firestore reactivamente, calcula ratio y muestra las 3 tarjetas y la gráfica', () => {
-    // Simulamos respuesta con datos de Firestore
+  it('Escenario 1: Consume Firestore reactivamente, calcula ratio y muestra las 3 tarjetas y la gráfica', async () => {
     mockDocSnapshot.mockImplementation((onNext) => {
       onNext({
         exists: () => true,
@@ -384,49 +403,47 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
 
     const { getByTestId } = render(<AdminReportsScreen />);
 
-    // Cambiar a reporte DAU/MAU
     fireEvent.press(getByTestId('report-type-select'));
     fireEvent.press(getByTestId('type-option-dau-mau'));
 
-    // Verificar las 3 tarjetas con datos calculados desde Firestore
-    expect(getByTestId('kpi-cards-container')).toBeTruthy();
-    expect(getByTestId('kpi-ratio-value').props.children).toEqual('32%');
-    expect(getByTestId('kpi-dau-value').props.children).toBe(45);
-    expect(getByTestId('kpi-mau-value').props.children).toBe(142);
-    expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
-  });
-    it('Escenario 2: Actualización reactiva automática cuando un nuevo usuario incrementa DAU', () => {
-      let snapshotCallback: any;
-      mockDocSnapshot.mockImplementation((onNext) => {
-        snapshotCallback = onNext;
-        // Estado inicial: DAU 45, MAU 142 -> 32%
-        onNext({
-          exists: () => true,
-          data: () => ({ dau: 45, mau: 142, historico: [] }),
-        });
-        return jest.fn();
-      });
-
-      const { getByTestId } = render(<AdminReportsScreen />);
-      fireEvent.press(getByTestId('report-type-select'));
-      fireEvent.press(getByTestId('type-option-dau-mau'));
-
-      expect(getByTestId('kpi-dau-value').props.children).toBe(45);
+    await waitFor(() => {
+      expect(getByTestId('kpi-cards-container')).toBeTruthy();
       expect(getByTestId('kpi-ratio-value').props.children).toEqual('32%');
-
-      // Simulamos que entra un nuevo usuario único y Firestore emite la actualización reactiva
-      act(() => {
-        snapshotCallback({
-          exists: () => true,
-          data: () => ({ dau: 46, mau: 142, historico: [] }),
-        });
-      });
-
-      // La UI se actualizó en tiempo real
-      expect(getByTestId('kpi-dau-value').props.children).toBe(46);
+      expect(getByTestId('kpi-dau-value').props.children).toBe(45);
+      expect(getByTestId('kpi-mau-value').props.children).toBe(142);
+      expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
     });
-  it('Escenario 3: Manejo seguro en UI ante 0 actividad (división por cero)', () => {
-    // Simulamos que no hay actividad en la base de datos
+  });
+
+  it('Escenario 2: Actualización reactiva automática cuando un nuevo usuario incrementa DAU', async () => {
+    let snapshotCallback: any;
+    mockDocSnapshot.mockImplementation((onNext) => {
+      snapshotCallback = onNext;
+      onNext({
+        exists: () => true,
+        data: () => ({ dau: 45, mau: 142, historico: [] }),
+      });
+      return jest.fn();
+    });
+
+    const { getByTestId } = render(<AdminReportsScreen />);
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(getByTestId('type-option-dau-mau'));
+
+    expect(getByTestId('kpi-dau-value').props.children).toBe(45);
+    expect(getByTestId('kpi-ratio-value').props.children).toEqual('32%');
+
+    await act(async () => {
+      snapshotCallback({
+        exists: () => true,
+        data: () => ({ dau: 46, mau: 142, historico: [] }),
+      });
+    });
+
+    expect(getByTestId('kpi-dau-value').props.children).toBe(46);
+  });
+
+  it('Escenario 3: Manejo seguro en UI ante 0 actividad (división por cero)', async () => {
     mockDocSnapshot.mockImplementation((onNext) => {
       onNext({
         exists: () => true,
@@ -440,11 +457,12 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
     fireEvent.press(getByTestId('report-type-select'));
     fireEvent.press(getByTestId('type-option-dau-mau'));
 
-    // Debe mostrar 0% en la interfaz sin romperse
-    expect(getByTestId('kpi-ratio-value').props.children).toEqual('0%');
-    expect(getByTestId('kpi-dau-value').props.children).toBe(0);
-    expect(getByTestId('kpi-mau-value').props.children).toBe(0);
-    expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId('kpi-ratio-value').props.children).toEqual('0%');
+      expect(getByTestId('kpi-dau-value').props.children).toBe(0);
+      expect(getByTestId('kpi-mau-value').props.children).toBe(0);
+      expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
+    });
   });
 
   it('Función pura: calculateDauMauRatio realiza el cálculo y protege contra MAU = 0', () => {

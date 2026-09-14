@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { ModalOptionList } from '@/components/ui/modal-option-list'; // Ajusta la ruta a tu archivo
+import { ModalOptionList, ModalOptionProp } from '@/components/ui/modal-option-list'; // Ajusta la ruta a tu componente
 
-// Mockear useTheme para aislar las variables de estilo
+// Mockear useTheme
 jest.mock('@/hooks/use-theme', () => ({
   useTheme: () => ({
     backgroundElement: '#FFF',
@@ -13,11 +13,20 @@ jest.mock('@/hooks/use-theme', () => ({
   }),
 }));
 
+// Mockear @expo/vector-icons para verificar la presencia del checkmark de forma limpia
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return {
+    Ionicons: (props: any) => React.createElement(Text, { testID: `icon-${props.name}` }, props.name),
+  };
+});
+
 describe('Componente ModalOptionList', () => {
   const mockOnRequestClose = jest.fn();
   const mockOnSelectOption = jest.fn();
 
-  const mockOptions = [
+  const mockOptions: ModalOptionProp[] = [
     { name: 'usage', testID: 'opt-usage', label: 'Uso de App' },
     { name: 'dau_mau', testID: 'opt-dau-mau', label: 'Relación DAU/MAU' },
     { name: 'crash_rate', testID: 'opt-crash-rate', label: 'Tasa de Fallos' },
@@ -28,7 +37,7 @@ describe('Componente ModalOptionList', () => {
     onRequestClose: mockOnRequestClose,
     title: 'Seleccionar Reporte',
     options: mockOptions,
-    selectedOption: 'dau_mau', // 'dau_mau' iniciará seleccionada
+    selectedOption: 'dau_mau',
     onSelectOption: mockOnSelectOption,
   };
 
@@ -37,49 +46,75 @@ describe('Componente ModalOptionList', () => {
   });
 
   it('no debe renderizar el contenido en pantalla si visible es false', () => {
-    // Nota: Por comportamiento nativo de React Native, el contenido del Modal 
-    // se oculta si visible={false}.
     const { queryByText } = render(<ModalOptionList {...defaultProps} visible={false} />);
     expect(queryByText('Seleccionar Reporte')).toBeNull();
   });
 
   it('renderiza el título y todas las opciones provistas correctamente', () => {
-    const { getByText, getByTestId } = render(<ModalOptionList {...defaultProps} />);
+    const { getByText } = render(<ModalOptionList {...defaultProps} />);
 
-    // Comprobar título
     expect(getByText('Seleccionar Reporte')).toBeTruthy();
-
-    // Comprobar que todas las opciones se renderizan por su etiqueta textual
     expect(getByText('Uso de App')).toBeTruthy();
     expect(getByText('Relación DAU/MAU')).toBeTruthy();
     expect(getByText('Tasa de Fallos')).toBeTruthy();
   });
 
+  it('renderiza el icono de checkmark únicamente en la opción seleccionada', () => {
+    const { queryAllByTestId } = render(<ModalOptionList {...defaultProps} />);
+
+    // Solo debe haber 1 checkmark visible (el correspondiente a 'dau_mau')
+    const checkmarkIcons = queryAllByTestId('icon-checkmark');
+    expect(checkmarkIcons).toHaveLength(1);
+  });
+
   it('ejecuta onSelectOption y onRequestClose al presionar una opción', () => {
     const { getByTestId } = render(<ModalOptionList {...defaultProps} />);
 
-    // Presionamos sobre la opción de 'Tasa de Fallos' usando su testID
     fireEvent.press(getByTestId('opt-crash-rate'));
 
-    // Debe mandar el identificador 'name' correcto a la función callback
     expect(mockOnSelectOption).toHaveBeenCalledWith('crash_rate');
     expect(mockOnSelectOption).toHaveBeenCalledTimes(1);
-
-    // Debe disparar el cierre automático del modal tras seleccionar
     expect(mockOnRequestClose).toHaveBeenCalledTimes(1);
   });
 
   it('ejecuta onRequestClose cuando se presiona fuera del contenedor (overlay)', () => {
     const { getByText } = render(<ModalOptionList {...defaultProps} />);
-    
-    // En React Native, el elemento raíz bajo el modal suele ser el overlay.
-    // Buscamos el componente del título y navegamos a su contenedor padre para simular el fondo.
+
     const titleElement = getByText('Seleccionar Reporte');
-    const modalOverlay = titleElement.parent?.parent; // Accede al TouchableOpacity del fondo
+    const modalOverlay = titleElement.parent?.parent;
 
     if (modalOverlay) {
       fireEvent.press(modalOverlay);
       expect(mockOnRequestClose).toHaveBeenCalledTimes(1);
     }
+  });
+
+  it('ejecuta onRequestClose cuando el modal dispara su evento nativo de cierre', () => {
+    const { UNSAFE_getByType } = render(<ModalOptionList {...defaultProps} />);
+    const { Modal } = require('react-native');
+
+    const modalComponent = UNSAFE_getByType(Modal);
+    modalComponent.props.onRequestClose();
+
+    expect(mockOnRequestClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('cubre los valores por defecto cuando no se pasan propiedades opcionales o sin seleccionar', () => {
+    const minimalProps = {
+      onRequestClose: mockOnRequestClose,
+      options: [
+        { name: 'default_opt', label: 'Opción Defecto' }
+      ],
+      selectedOption: null,
+      onSelectOption: mockOnSelectOption,
+    };
+
+    // Asignamos la desestructuración de getByText desde el render
+    const { getByText } = render(
+      // @ts-ignore para forzar probar los fallbacks por defecto
+      <ModalOptionList {...minimalProps} visible={true} />
+    );
+
+    expect(getByText('Opción Defecto')).toBeTruthy();
   });
 });

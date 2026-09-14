@@ -8,7 +8,6 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
-  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -275,6 +274,45 @@ export default function AdminReportsScreen() {
        }
      }, [selectedReportType, userUid, userRole, authLoading]);
 
+  // Helper to Build history lookup map from raw array
+  const buildHistoryMap = (historico: any[]): Map<string, number> => {
+    const historyMap = new Map<string, number>();
+
+    for (const item of historico) {
+      const rawVal = typeof item.value === 'number' ? item.value : (Number(item.tasa) || 0);
+      const key = item.date || item.fecha || item.label;
+
+      if (key) {
+        historyMap.set(String(key), rawVal);
+      }
+    }
+
+    return historyMap;
+  };
+
+  // Helper to Generate padded time-series chart data
+  const generatePaddedChartData = (historyMap: Map<string, number>, periodDays: number): ChartDataPoint[] => {
+    const paddedData: ChartDataPoint[] = [];
+    const now = new Date();
+
+    for (let i = periodDays - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(now.getDate() - i);
+
+      const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const dayNumLabel = String(d.getDate());
+      const matchedValue = historyMap.get(dateKey) ?? historyMap.get(dayNumLabel) ?? 0.0;
+
+      paddedData.push({
+        label: dayNumLabel,
+        value: matchedValue,
+        date: dateKey,
+      });
+    }
+
+    return paddedData;
+  };
+    
   // 5. Reactive Firestore Crashrate/Stability
   useEffect(() => {
     if (authLoading || !user || !isAdminUser(user)) return;
@@ -292,58 +330,32 @@ export default function AdminReportsScreen() {
           (docSnapshot) => {
             if (!isMounted) return;
 
-            // 2. Comprobación híbrida segura de existencia del documento
             const exists = typeof docSnapshot?.exists === 'function'
               ? docSnapshot.exists()
               : Boolean(docSnapshot?.exists);
 
-            if (docSnapshot && exists) {
-              const data = typeof docSnapshot.data === 'function' 
-                ? docSnapshot.data() || {} 
-                : (docSnapshot.data || {});
+            if (!docSnapshot || !exists) {
+              setCrashRateData([]);
+              setLoading(false);
+              return;
+            }
 
-              // Inyección de valores numéricos para KPIs
-              setTotalCrashesValue(typeof data.totalCrashes === 'number' ? data.totalCrashes : 0);
-              setAffectedUsersValue(typeof data.affectedUsers === 'number' ? data.affectedUsers : 0);
+            const data = typeof docSnapshot.data === 'function' 
+              ? docSnapshot.data() || {} 
+              : (docSnapshot.data || {});
 
-              // Mapeo explícito de histórico
-              if (Array.isArray(data.historico)) {
-                const historyMap = new Map<string, number>();
-                data.historico.forEach((item: any) => {
-                  const rawVal = typeof item.value === 'number' ? item.value : (Number(item.tasa) || 0);
-                  const val = rawVal <= 1 && rawVal > 0 ? rawVal : rawVal;
-                  
-                  const key = item.date || item.fecha || item.label;
-                  if (key) historyMap.set(String(key), val);
-                });
+            // Inyección de valores numéricos para KPIs
+            setTotalCrashesValue(typeof data.totalCrashes === 'number' ? data.totalCrashes : 0);
+            setAffectedUsersValue(typeof data.affectedUsers === 'number' ? data.affectedUsers : 0);
 
-                const paddedData: ChartDataPoint[] = [];
-                const now = new Date();
-
-                for (let i = selectedPeriod - 1; i >= 0; i--) {
-                  const d = new Date();
-                  d.setDate(now.getDate() - i);
-                  
-                  const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                  const dayNumLabel = String(d.getDate());
-
-                  const matchedValue = historyMap.get(dateKey) ?? historyMap.get(dayNumLabel) ?? 0.0;
-
-                  paddedData.push({
-                    label: dayNumLabel,
-                    value: matchedValue,
-                    date: dateKey,
-                  });
-                }
-
-                setCrashRateData(paddedData);
-              } else {
-                setCrashRateData([]);
-              }
+            // Procesamiento de datos del gráfico mediante auxiliares
+            if (Array.isArray(data.historico)) {
+              const historyMap = buildHistoryMap(data.historico);
+              setCrashRateData(generatePaddedChartData(historyMap, selectedPeriod));
             } else {
               setCrashRateData([]);
             }
-            
+
             setLoading(false);
           },
           (err) => {
@@ -587,6 +599,30 @@ export default function AdminReportsScreen() {
       : t('reports.chartTitle');
   }, [selectedReportType, t]);
 
+  const getChartTitle = (reportType: string): string => {
+    switch (reportType) {
+      case 'dau_mau':
+        return t('reports.dauMauChartTitle');
+      case 'usage':
+        return t('reports.chartTitleUsage');
+      case 'crash_rate':
+        return t('reports.chartTitleCrashRate');
+      default:
+        return t('reports.chartTitle');
+    }
+  };
+
+  const getChartUnit = (reportType: string): string => {
+  switch (reportType) {
+    case 'usage':
+      return 'min';
+    case 'crash_rate':
+      return '%';
+    default:
+      return 'acc';
+  }
+};
+
   return (
     <View style={styles.screen} testID="admin-reports-screen">
       <AppHeader />
@@ -647,13 +683,7 @@ export default function AdminReportsScreen() {
             {/* Header: Title and Period Filter */}
             <View style={styles.chartHeader}>
               <Text style={styles.chartTitle} testID="chart-title">
-                {selectedReportType === 'dau_mau'
-                ? t('reports.dauMauChartTitle')
-                : selectedReportType === 'usage'
-                ? t('reports.chartTitleUsage')
-                : selectedReportType === 'crash_rate'
-                ? t('reports.chartTitleCrashRate')
-                : t('reports.chartTitle')}
+                {getChartTitle(selectedReportType)}
               </Text>
               <TouchableOpacity
                 style={styles.periodFilterBtn}
@@ -702,7 +732,7 @@ export default function AdminReportsScreen() {
                 <UsageLineChart
                   data={chartData}
                   height={230}
-                  unit={selectedReportType === 'usage' ? 'min' : selectedReportType === 'crash_rate' ? '%' : 'acc'}
+                  unit={getChartUnit(selectedReportType)}
                   lineColor={theme.main}
                   testID="reports-usage-chart"
                 />
