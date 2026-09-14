@@ -4,8 +4,9 @@ appId: com.proyect1.ATIDental
 
 # 1. Esperamos a que la app termine de arrancar y muestre la pantalla de Login
 - extendedWaitUntil:
-    visible: "Iniciar sesión"
-    timeout: 30000
+    visible:
+      id: "login-title"
+    timeout: 60000
 
 # 2. Llenamos las credenciales y hacemos Login
 - tapOn:

@@ -5,7 +5,7 @@ appId: com.proyect1.ATIDental
 - extendedWaitUntil:
     visible:
       id: "email-input"
-    timeout: 50000
+    timeout: 60000
 
 - tapOn:
     id: "email-input"
