@@ -1,6 +1,12 @@
 appId: com.proyect1.ATIDental
 ---
 - launchApp
+
+- extendedWaitUntil:
+    visible:
+      id: "login-title"
+    timeout: 60000
+
 # =======================================================
 # ESCENARIO 1: VALIDACIÓN DE CAMPOS VACÍOS
 # =======================================================
@@ -62,9 +68,17 @@ appId: com.proyect1.ATIDental
 # =======================================================
 # ESCENARIO 5: CIERRE DE SESIÓN SEGURO
 # =======================================================
-- tapOn: "Cerrar sesión"           # Hace clic en el botón rojo que agregamos en tu HomeScreen
+- tapOn:
+    id: "profile-tab"
+
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"
 
 # Comprobamos que regresamos sanos y salvos a la pantalla de Login
 - extendedWaitUntil:
-    visible: "Bienvenido de nuevo"
+    visible: 
+        id: "login-title"
     timeout: 5000
