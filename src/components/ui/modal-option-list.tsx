@@ -89,6 +89,7 @@ export function ModalOptionList({
                 {/* Options of the modal */}
                 {options.map((opt: any, index: number) => (
                     <ModalOption
+                        key={opt.name+index}
                         name={opt.name}
                         isSelected={selectedOption === opt.name}
                         onSelect = {() => {

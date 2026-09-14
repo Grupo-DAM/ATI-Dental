@@ -2,39 +2,35 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import React from 'react';
 import { useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
-import firestoreModule from '@react-native-firebase/firestore'; // Importación para FieldValue
+import firestoreModule from '@react-native-firebase/firestore';
 import { firestore } from '@/config/firebase';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { AuthProvider } from '@/hooks/use-auth';
 import '@/i18n';
 
 // -------------------------------------------------------------
-// CAPTURADOR GLOBAL DE ERRORES (Frontend / Sin Backend)
+// CAPTURADOR GLOBAL DE ERRORES (Optimizado y No Bloqueante)
 // -------------------------------------------------------------
 const defaultHandler = ErrorUtils.getGlobalHandler();
 
-ErrorUtils.setGlobalHandler(async (error, isFatal) => {
-  // Solo registramos si es un cierre fatal/inesperado
+ErrorUtils.setGlobalHandler((error, isFatal) => {
   if (isFatal) {
-    try {
-      // Escritura atómica correcta usando firestoreModule.FieldValue
-      await firestore()
-        .collection('metricas_estabilidad')
-        .doc('actual')
-        .set(
-          {
-            totalCrashes: firestoreModule.FieldValue.increment(1),
-            affectedUsers: firestoreModule.FieldValue.increment(1),
-            ultimoFallo: Date.now(),
-          },
-          { merge: true }
-        );
-    } catch (e) {
-      console.error('[GlobalErrorHandler] No se pudo guardar el crash:', e);
-    }
+    // 🔥 Fire-and-forget: No usar await aquí para no bloquear la salida del sistema ni la UI
+    firestore()
+      .collection('metricas_estabilidad')
+      .doc('actual')
+      .set(
+        {
+          totalCrashes: firestoreModule.FieldValue.increment(1),
+          affectedUsers: firestoreModule.FieldValue.increment(1),
+          ultimoFallo: Date.now(),
+        },
+        { merge: true }
+      )
+      .catch((e) => console.error('[GlobalErrorHandler] Error enviando crash:', e));
   }
 
-  // Ejecuta la respuesta normal del sistema (cerrar la app o mostrar diálogo)
+  // Ejecución sincrónica e inmediata del handler original
   if (defaultHandler) {
     defaultHandler(error, isFatal);
   }
@@ -46,9 +42,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        {/* Asegúrate de que este componente no se quede como un velo bloqueando toques */}
         <AnimatedSplashOverlay />
 
-        {/* Un Stack raíz invisible que decide si mostrar el grupo (auth) o (tabs) */}
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(auth)" />

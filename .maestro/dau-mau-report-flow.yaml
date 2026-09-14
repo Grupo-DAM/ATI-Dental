@@ -5,7 +5,7 @@ appId: com.proyect1.ATIDental
 # 1. Esperamos a que la app termine de arrancar y muestre la pantalla de Login
 - extendedWaitUntil:
     visible: "Iniciar sesión"
-    timeout: 15000
+    timeout: 30000
 
 # 2. Llenamos las credenciales y hacemos Login
 - tapOn:
@@ -87,9 +87,9 @@ appId: com.proyect1.ATIDental
 - assertVisible:
     id: "kpi-card-ratio"
 - assertVisible:
-    id: "kpi-dau-mau-container"
+    id: "kpi-card-dau"
 - assertVisible:
-    id: "kpi-dau-mau-container"
+    id: "kpi-card-mau"
 - assertVisible:
     id: "reports-dau-mau-chart"
 

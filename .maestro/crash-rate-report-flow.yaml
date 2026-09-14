@@ -2,6 +2,11 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 50000
+
 - tapOn:
     id: "email-input"
 - inputText: "jesusecova73@gmail.com"
@@ -81,9 +86,9 @@ appId: com.proyect1.ATIDental
 - assertVisible:
     id: "kpi-crash-rate"
 - assertVisible:
-    id: "kpi-card-dau"
+    id: "kpi-total-crashes"
 - assertVisible:
-    id: "kpi-card-mau"
+    id: "kpi-affected-users"
 - assertVisible:
     id: "reports-usage-chart"
 

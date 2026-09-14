@@ -281,6 +281,8 @@ export default function AdminReportsScreen() {
     if (selectedReportType !== 'crash_rate') return;
 
     let isMounted = true;
+    setLoading(true);
+    setQueryError(null);
 
     try {
       const unsubscribe = firestore()
@@ -290,25 +292,66 @@ export default function AdminReportsScreen() {
           (docSnapshot) => {
             if (!isMounted) return;
 
-            if (docSnapshot && docSnapshot.exists) {
-              const data = docSnapshot.data() || {};
-              
-              // Inyección de totales consolidados
+            // 2. Comprobación híbrida segura de existencia del documento
+            const exists = typeof docSnapshot?.exists === 'function'
+              ? docSnapshot.exists()
+              : Boolean(docSnapshot?.exists);
+
+            if (docSnapshot && exists) {
+              const data = typeof docSnapshot.data === 'function' 
+                ? docSnapshot.data() || {} 
+                : (docSnapshot.data || {});
+
+              // Inyección de valores numéricos para KPIs
               setTotalCrashesValue(typeof data.totalCrashes === 'number' ? data.totalCrashes : 0);
               setAffectedUsersValue(typeof data.affectedUsers === 'number' ? data.affectedUsers : 0);
-              
+
+              // Mapeo explícito de histórico
               if (Array.isArray(data.historico)) {
-                setCrashRateData(data.historico);
+                const historyMap = new Map<string, number>();
+                data.historico.forEach((item: any) => {
+                  const rawVal = typeof item.value === 'number' ? item.value : (Number(item.tasa) || 0);
+                  const val = rawVal <= 1 && rawVal > 0 ? rawVal : rawVal;
+                  
+                  const key = item.date || item.fecha || item.label;
+                  if (key) historyMap.set(String(key), val);
+                });
+
+                const paddedData: ChartDataPoint[] = [];
+                const now = new Date();
+
+                for (let i = selectedPeriod - 1; i >= 0; i--) {
+                  const d = new Date();
+                  d.setDate(now.getDate() - i);
+                  
+                  const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                  const dayNumLabel = String(d.getDate());
+
+                  const matchedValue = historyMap.get(dateKey) ?? historyMap.get(dayNumLabel) ?? 0.0;
+
+                  paddedData.push({
+                    label: dayNumLabel,
+                    value: matchedValue,
+                    date: dateKey,
+                  });
+                }
+
+                setCrashRateData(paddedData);
+              } else {
+                setCrashRateData([]);
               }
             } else {
-              // Escenario 3: Si el documento no existe o viene en 0
-              setTotalCrashesValue(0);
-              setAffectedUsersValue(0);
               setCrashRateData([]);
             }
+            
+            setLoading(false);
           },
           (err) => {
             console.warn('[AdminReportsScreen] Error al obtener estabilidad:', err);
+            if (isMounted) {
+              setQueryError(t('reports.errorLoad'));
+              setLoading(false);
+            }
           }
         );
 
@@ -318,9 +361,12 @@ export default function AdminReportsScreen() {
       };
     } catch (e) {
       console.error(e);
+      if (isMounted) {
+        setLoading(false);
+      }
     }
-  }, [selectedReportType, userUid, userRole, authLoading]);
-     
+    // 3. Array de dependencias alineado exclusivamente con variables primitivas
+  }, [selectedReportType, selectedPeriod, userUid, userRole, authLoading, t]);
   // Helper to extract timestamp millis from varied date formats
   const getRecordTimestamp = (record: SessionRecord): number | null => {
     const raw = record.fecha ?? record.tiempoInicio;
@@ -488,17 +534,19 @@ export default function AdminReportsScreen() {
     });
 
     return result;
-  }, [sessions, selectedPeriod, selectedReportType]);
+  }, [sessions, selectedPeriod, selectedReportType, crashRateData]);
 
     // Check if there is any data in the selected period (Acceptance Criteria Scenario 3)
-    const hasData = useMemo(() => {
-      if (selectedReportType === 'dau_mau') {
-        return dauMauData.length > 0 && dauMauData.some((d) => d.mau > 0 || d.dau > 0);
-      }
-      if (selectedReportType === 'crash_rate') return true; 
-      if (sessions.length === 0) return false;
-      return chartData.some((d) => d.value > 0);
-    }, [sessions, chartData, selectedReportType, dauMauData]);
+  const hasData = useMemo(() => {
+    if (selectedReportType === 'dau_mau') {
+      return dauMauData.length > 0 && dauMauData.some((d) => d.mau > 0 || d.dau > 0);
+    }
+    if (selectedReportType === 'crash_rate') {
+      return crashRateData.length > 0; // Se dibuja la línea incluso si los valores son 0
+    } 
+    if (sessions.length === 0) return false;
+    return chartData.some((d) => d.value > 0);
+  }, [sessions, chartData, selectedReportType, dauMauData, crashRateData]);
 
   // Actions: Print and Export PDF
   const handlePrint = useCallback(() => {

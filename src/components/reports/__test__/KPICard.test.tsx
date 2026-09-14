@@ -50,9 +50,8 @@ describe('KPICard Component', () => {
 
   it('renders small layout properly (tinyType = true) alongside default subLabels', () => {
     const { getByText, getByTestId } = render(
-      <KPICard {...defaultProps} tinyType={true} />
-    );
-
+      <KPICard {...defaultProps} tinyType={true} hasSubLabel={true} /> 
+    )
     expect(getByText('Total Active Users')).toBeTruthy();
     expect(getByTestId('kpi-value-id').props.children).toEqual('1,240');
     
@@ -62,17 +61,23 @@ describe('KPICard Component', () => {
 
   it('applies standard text styles to subLabel when accentSubLabel is false', () => {
     const { getByText } = render(
-      <KPICard {...defaultProps} tinyType={true} subLabel="Last 30 days" accentSubLabel={false} />
+      <KPICard 
+        {...defaultProps} 
+        tinyType={true} 
+        hasSubLabel={true} 
+        subLabel="Last 30 days" 
+        accentSubLabel={false} 
+      />
     );
 
     const subLabelText = getByText('Last 30 days');
-    // Verifies it falls back to standard typography (font weight isn't modified to 700)
+    // Verifies it falls back to standard typography
     expect(subLabelText.props.style.fontWeight).toBeUndefined();
   });
 
   it('applies positive highlighted styles when accentSubLabel is active', () => {
     const { getByText } = render(
-      <KPICard {...defaultProps} tinyType={true} subLabel="+12% growth" accentSubLabel={true} />
+      <KPICard {...defaultProps} tinyType={true} subLabel="+12% growth" accentSubLabel={true} hasSubLabel={true} />
     );
 
     const subLabelText = getByText('+12% growth');

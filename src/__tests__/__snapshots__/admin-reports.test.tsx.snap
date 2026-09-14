@@ -220,6 +220,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               "marginBottom": 20,
             }
           }
+          testID="kpi-cards-container"
         >
           <View
             style={
@@ -245,6 +246,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
                   "alignItems": "center",
                   "backgroundColor": "#ffffff",
                   "borderRadius": 12,
+                  "flex": 1,
                   "flexDirection": "row",
                   "gap": 10,
                   "padding": 12,
@@ -347,6 +349,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
                   "alignItems": "center",
                   "backgroundColor": "#ffffff",
                   "borderRadius": 12,
+                  "flex": 1,
                   "flexDirection": "row",
                   "gap": 10,
                   "padding": 12,
