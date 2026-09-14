@@ -4,28 +4,24 @@ appId: com.proyect1.ATIDental
 
 # Esperar a que la app inicie y se quite la pantalla de carga (splash screen)
 - extendedWaitUntil:
-    visible: ".*"
-    timeout: 5000
+    visible:
+      id: "email-input"
+    timeout: 60000
 
-# --- Inicio de Sesión Condicional ---
-- runFlow:
-    when:
-      visible:
-        id: "email-input"
-    commands:
-      - tapOn:
-          id: "email-input"
-      - inputText: "carloscaoucv2022@gmail.com"
-      - tapOn:
-          id: "password-input"
-      - inputText: "Cao1234"
-      - hideKeyboard
-      - tapOn:
-          id: "login-button"
-      - extendedWaitUntil:
-          visible:
-            id: "welcome-header"
-          timeout: 10000
+# --- Inicio de Sesión ---
+- tapOn:
+    id: "email-input"
+- inputText: "carloscaoucv2022@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Cao1234"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+- extendedWaitUntil:
+    visible:
+        id: "welcome-header"
+    timeout: 10000
 # -----------------------------------
 
 # Esperamos a que la app inicie (pantalla principal) y aparezca la barra de navegación
@@ -74,12 +70,103 @@ appId: com.proyect1.ATIDental
     element: ".*(Actividad en Redes Sociales|Social Media Activity).*"
     direction: DOWN
 
+# -----------------------------------
 # Probar la pulsación del botón de Email y validar el flujo alternativo
 # Presiona el botón de contacto por Email
 - tapOn:
     id: "btn-contact-email"
+
+# Email app in device
+- runFlow:
+    when: 
+        notVisible: ".*Contacto por Email.*"
+    commands:
+        # Conditional no email app configured for ATI-Dental
+        - runFlow:
+            when:
+                visible: ".*(Abrir con|Open with).*"
+            commands:
+                - tapOn: "(Solo una vez|Just once)"
+
+        - assertVisible: "Consulta desde el sitio web"
+        - hideKeyboard
+        - back
+
+# No email app in device branch
 # Verifica que se muestre la alerta con la opción de copiar al portapapeles
-- assertVisible: ".*Contacto por Email.*"
-- assertVisible: ".*(Copiar al Portapapeles|COPIAR AL PORTAPAPELES).*"
-# Presiona el botón para cerrar la alerta y regresar a la pantalla de contacto
-- tapOn: "(Cerrar|CERRAR)"
+- runFlow:
+    when:
+        visible: ".*Contacto por Email.*"
+    commands:
+        - assertVisible: ".*(Copiar al Portapapeles|COPIAR AL PORTAPAPELES).*"
+        # Presiona el botón para cerrar la alerta y regresar a la pantalla de contacto
+        - tapOn: "(Cerrar|CERRAR)"
+
+# -----------------------------------
+# Probar la pulsación del botón de Llamada y validar el flujo alternativo
+# Presiona el botón de contacto por Llamada
+- tapOn:
+    id: "btn-contact-phone"
+
+# Phone app in device
+- runFlow:
+    when: 
+        notVisible: ".*Llamada Telefónica.*"
+    commands:
+        # Conditional no phone app configured for ATI-Dental
+        - runFlow:
+            when:
+                visible: ".*(Abrir con|Open with).*"
+            commands:
+                - tapOn: "(Solo una vez|Just once)"
+
+        - assertVisible: "\\+58.*"
+        - back
+        - back
+
+# No phone app in device branch
+# Verifica que se muestre la alerta con la opción de copiar al portapapeles
+- runFlow:
+    when:
+        visible: ".*Llamada Telefónica.*"
+    commands:
+        - assertVisible: ".*(Copiar al Portapapeles|COPIAR AL PORTAPAPELES).*"
+        # Presiona el botón para cerrar la alerta y regresar a la pantalla de contacto
+        - tapOn: "(Cerrar|CERRAR)"
+
+
+# -----------------------------------
+# Probar la pulsación del botón de whatsapp y validar el flujo alternativo
+# Presiona el botón de contacto por whatsapp
+- tapOn:
+    id: "btn-contact-whatsapp"
+
+# Email app in device
+- runFlow:
+    when: 
+        notVisible: ".*(Error|ERROR).*"
+    commands:
+        - assertVisible: ".*Hola.*"
+        - back
+
+        - runFlow:
+            when:
+                notVisible: ".*(Open app|Abrir app).*"
+            commands:
+                - back
+
+# No whatsapp app in device branch
+- runFlow:
+    when:
+        visible: ".*(Error|ERROR).*"
+    commands:
+        - assertVisible: ".*(No se pudo abrir la aplicación de WhatsApp ni el navegador).*"
+        # Presiona el botón para cerrar la alerta y regresar a la pantalla de contacto
+        - tapOn: "(Cerrar|CERRAR)"
+
+# -----------------------------------
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"
