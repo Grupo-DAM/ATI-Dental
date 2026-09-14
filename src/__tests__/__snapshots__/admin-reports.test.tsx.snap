@@ -4,7 +4,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
 <View
   style={
     {
-      "backgroundColor": "#FAFAFB",
+      "backgroundColor": "#F7F6F8",
       "flex": 1,
     }
   }
@@ -124,7 +124,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               {
                 "color": "#374151",
                 "fontFamily": "Open Sans",
-                "fontSize": 13,
+                "fontSize": 14,
                 "fontWeight": "600",
                 "marginBottom": 6,
               }
@@ -163,7 +163,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FFFFFF",
+                "backgroundColor": "#ffffff",
                 "borderColor": "#D1D5DB",
                 "borderRadius": 8,
                 "borderWidth": 1,
@@ -180,7 +180,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               numberOfLines={1}
               style={
                 {
-                  "color": "#1F2937",
+                  "color": "#4A4A4A",
                   "flex": 1,
                   "fontFamily": "Open Sans",
                   "fontSize": 14,
@@ -190,25 +190,11 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               Visualizar tiempo de uso por usuario
             </Text>
             <Text
-              allowFontScaling={false}
-              selectable={false}
-              style={
-                [
-                  {
-                    "color": "#6B7280",
-                    "fontSize": 18,
-                  },
-                  undefined,
-                  {
-                    "fontFamily": "ionicons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
-              }
+              color="#6B7280"
+              name="chevron-down"
+              size={18}
             >
-              
+              chevron-down
             </Text>
           </View>
         </View>
@@ -220,20 +206,16 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               "marginBottom": 20,
             }
           }
+          testID="kpi-cards-container"
         >
           <View
             style={
               {
-                "alignItems": "center",
-                "backgroundColor": "#FFFFFF",
-                "borderColor": "#5B2D8B",
+                "backgroundColor": "#5B2D8B",
                 "borderRadius": 12,
-                "borderWidth": 1.5,
                 "elevation": 2,
                 "flex": 1,
-                "flexDirection": "row",
-                "gap": 10,
-                "padding": 12,
+                "paddingTop": 8,
                 "shadowColor": "#000",
                 "shadowOffset": {
                   "height": 1,
@@ -243,91 +225,86 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
                 "shadowRadius": 2,
               }
             }
-            testID="kpi-total-access"
           >
             <View
               style={
                 {
                   "alignItems": "center",
-                  "backgroundColor": "#F3E8FF",
-                  "borderRadius": 22,
-                  "height": 44,
-                  "justifyContent": "center",
-                  "width": 44,
-                }
-              }
-            >
-              <Text
-                allowFontScaling={false}
-                selectable={false}
-                style={
-                  [
-                    {
-                      "color": "#5B2D8B",
-                      "fontSize": 24,
-                    },
-                    undefined,
-                    {
-                      "fontFamily": "ionicons",
-                      "fontStyle": "normal",
-                      "fontWeight": "normal",
-                    },
-                    {},
-                  ]
-                }
-              >
-                
-              </Text>
-            </View>
-            <View
-              style={
-                {
+                  "backgroundColor": "#ffffff",
+                  "borderRadius": 12,
                   "flex": 1,
+                  "flexDirection": "row",
+                  "gap": 10,
+                  "padding": 12,
                 }
               }
+              testID="kpi-total-access"
             >
-              <Text
+              <View
                 style={
                   {
-                    "color": "#718096",
-                    "fontFamily": "Open Sans",
-                    "fontSize": 9.5,
-                    "fontWeight": "700",
-                    "letterSpacing": 0.4,
-                    "marginBottom": 2,
+                    "alignItems": "center",
+                    "backgroundColor": "#F3E8FF",
+                    "borderRadius": 22,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
                   }
                 }
               >
-                TOTAL ACCESOS (HOY)
-              </Text>
-              <Text
+                <Text
+                  color="#5B2D8B"
+                  name="log-in-outline"
+                  size={24}
+                >
+                  log-in-outline
+                </Text>
+              </View>
+              <View
                 style={
                   {
-                    "color": "#1F2937",
-                    "fontFamily": "Open Sans",
-                    "fontSize": 20,
-                    "fontWeight": "800",
+                    "flex": 1,
                   }
                 }
-                testID="kpi-total-access-val"
               >
-                0
-              </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#9CA3AF",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 10,
+                      "fontWeight": "400",
+                      "letterSpacing": 0.4,
+                      "marginBottom": 2,
+                    }
+                  }
+                >
+                  TOTAL ACCESOS (HOY)
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#111827",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                    }
+                  }
+                  testID="kpi-total-access-val"
+                >
+                  0
+                </Text>
+              </View>
             </View>
           </View>
           <View
             style={
               {
-                "alignItems": "center",
-                "backgroundColor": "#FFFFFF",
-                "borderColor": "#5B2D8B",
+                "backgroundColor": "#5B2D8B",
                 "borderRadius": 12,
-                "borderWidth": 1.5,
                 "elevation": 2,
                 "flex": 1,
-                "flexDirection": "row",
-                "gap": 10,
-                "padding": 12,
+                "paddingTop": 8,
                 "shadowColor": "#000",
                 "shadowOffset": {
                   "height": 1,
@@ -337,84 +314,84 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
                 "shadowRadius": 2,
               }
             }
-            testID="kpi-active-users"
           >
             <View
               style={
                 {
                   "alignItems": "center",
-                  "backgroundColor": "#F3E8FF",
-                  "borderRadius": 22,
-                  "height": 44,
-                  "justifyContent": "center",
-                  "width": 44,
-                }
-              }
-            >
-              <Text
-                allowFontScaling={false}
-                selectable={false}
-                style={
-                  [
-                    {
-                      "color": "#5B2D8B",
-                      "fontSize": 24,
-                    },
-                    undefined,
-                    {
-                      "fontFamily": "ionicons",
-                      "fontStyle": "normal",
-                      "fontWeight": "normal",
-                    },
-                    {},
-                  ]
-                }
-              >
-                
-              </Text>
-            </View>
-            <View
-              style={
-                {
+                  "backgroundColor": "#ffffff",
+                  "borderRadius": 12,
                   "flex": 1,
+                  "flexDirection": "row",
+                  "gap": 10,
+                  "padding": 12,
                 }
               }
+              testID="kpi-active-users"
             >
-              <Text
+              <View
                 style={
                   {
-                    "color": "#718096",
-                    "fontFamily": "Open Sans",
-                    "fontSize": 9.5,
-                    "fontWeight": "700",
-                    "letterSpacing": 0.4,
-                    "marginBottom": 2,
+                    "alignItems": "center",
+                    "backgroundColor": "#F3E8FF",
+                    "borderRadius": 22,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
                   }
                 }
               >
-                USUARIOS ACTIVOS
-              </Text>
-              <Text
+                <Text
+                  color="#5B2D8B"
+                  name="people"
+                  size={24}
+                >
+                  people
+                </Text>
+              </View>
+              <View
                 style={
                   {
-                    "color": "#1F2937",
-                    "fontFamily": "Open Sans",
-                    "fontSize": 20,
-                    "fontWeight": "800",
+                    "flex": 1,
                   }
                 }
-                testID="kpi-active-users-val"
               >
-                0
-              </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#9CA3AF",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 10,
+                      "fontWeight": "400",
+                      "letterSpacing": 0.4,
+                      "marginBottom": 2,
+                    }
+                  }
+                >
+                  USUARIOS ACTIVOS
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#111827",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                    }
+                  }
+                  testID="kpi-active-users-val"
+                >
+                  0
+                </Text>
+              </View>
             </View>
           </View>
         </View>
         <View
           style={
             {
-              "backgroundColor": "#FFFFFF",
-              "borderColor": "#E2E8F0",
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
               "borderRadius": 12,
               "borderWidth": 1,
               "elevation": 2,
@@ -485,8 +462,8 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               style={
                 {
                   "alignItems": "center",
-                  "backgroundColor": "#F7FAFC",
-                  "borderColor": "#E2E8F0",
+                  "backgroundColor": "#F9FAFB",
+                  "borderColor": "#D1D5DB",
                   "borderRadius": 6,
                   "borderWidth": 1,
                   "flexDirection": "row",
@@ -500,7 +477,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               <Text
                 style={
                   {
-                    "color": "#718096",
+                    "color": "#6B7280",
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
                     "fontWeight": "500",
@@ -510,27 +487,16 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
                 Últimos 30 días
               </Text>
               <Text
-                allowFontScaling={false}
-                selectable={false}
+                color="#6B7280"
+                name="filter"
+                size={14}
                 style={
-                  [
-                    {
-                      "color": "#718096",
-                      "fontSize": 14,
-                    },
-                    {
-                      "marginLeft": 4,
-                    },
-                    {
-                      "fontFamily": "ionicons",
-                      "fontStyle": "normal",
-                      "fontWeight": "normal",
-                    },
-                    {},
-                  ]
+                  {
+                    "marginLeft": 4,
+                  }
                 }
               >
-                
+                filter
               </Text>
             </View>
           </View>
@@ -549,8 +515,8 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               style={
                 {
                   "alignItems": "center",
-                  "backgroundColor": "#F7FAFC",
-                  "borderColor": "#EDF2F7",
+                  "backgroundColor": "#F9FAFB",
+                  "borderColor": "#E2E8F0",
                   "borderRadius": 32,
                   "borderWidth": 1,
                   "height": 64,
@@ -561,31 +527,17 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               }
             >
               <Text
-                allowFontScaling={false}
-                selectable={false}
-                style={
-                  [
-                    {
-                      "color": "#A0AEC0",
-                      "fontSize": 36,
-                    },
-                    undefined,
-                    {
-                      "fontFamily": "ionicons",
-                      "fontStyle": "normal",
-                      "fontWeight": "normal",
-                    },
-                    {},
-                  ]
-                }
+                color="#A0AEC0"
+                name="analytics-outline"
+                size={36}
               >
-                
+                analytics-outline
               </Text>
             </View>
             <Text
               style={
                 {
-                  "color": "#718096",
+                  "color": "#9CA3AF",
                   "fontFamily": "Open Sans",
                   "fontSize": 14,
                   "lineHeight": 20,
@@ -639,7 +591,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FFFFFF",
+                "backgroundColor": "#ffffff",
                 "borderColor": "#D1D5DB",
                 "borderRadius": 8,
                 "borderWidth": 1,
@@ -660,25 +612,11 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
             testID="print-btn"
           >
             <Text
-              allowFontScaling={false}
-              selectable={false}
-              style={
-                [
-                  {
-                    "color": "#374151",
-                    "fontSize": 20,
-                  },
-                  undefined,
-                  {
-                    "fontFamily": "ionicons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
-              }
+              color="#374151"
+              name="print-outline"
+              size={20}
             >
-              
+              print-outline
             </Text>
           </View>
           <View
@@ -733,32 +671,21 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
             testID="export-pdf-btn"
           >
             <Text
-              allowFontScaling={false}
-              selectable={false}
+              color="#ffffff"
+              name="document-text"
+              size={16}
               style={
-                [
-                  {
-                    "color": "#FFFFFF",
-                    "fontSize": 16,
-                  },
-                  {
-                    "marginRight": 4,
-                  },
-                  {
-                    "fontFamily": "ionicons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
+                {
+                  "marginRight": 4,
+                }
               }
             >
-              
+              document-text
             </Text>
             <Text
               style={
                 {
-                  "color": "#FFFFFF",
+                  "color": "#ffffff",
                   "fontSize": 13,
                   "fontWeight": "700",
                   "letterSpacing": 0.5,

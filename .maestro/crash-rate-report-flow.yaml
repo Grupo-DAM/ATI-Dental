@@ -2,12 +2,11 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
-# 1. Esperamos a que la app termine de arrancar y muestre la pantalla de Login
 - extendedWaitUntil:
-    visible: "Iniciar sesión"
-    timeout: 30000
+    visible:
+      id: "email-input"
+    timeout: 50000
 
-# 2. Llenamos las credenciales y hacemos Login
 - tapOn:
     id: "email-input"
 - inputText: "jesusecova73@gmail.com"
@@ -69,14 +68,14 @@ appId: com.proyect1.ATIDental
 - tapOn:
     id: "report-type-select"
 
-# 9. Seleccionar DAU/MAU
+# 9. Seleccionar CrashRate
 - extendedWaitUntil:
     visible:
-      id: "type-option-dau-mau"
+      id: "type-option-crash-rate"
     timeout: 10000
 
 - tapOn:
-    id: "type-option-dau-mau"
+    id: "type-option-crash-rate"
 
 # 10. Validar componentes de US-27
 - extendedWaitUntil:
@@ -85,13 +84,13 @@ appId: com.proyect1.ATIDental
     timeout: 10000
 
 - assertVisible:
-    id: "kpi-card-ratio"
+    id: "kpi-crash-rate"
 - assertVisible:
-    id: "kpi-card-dau"
+    id: "kpi-total-crashes"
 - assertVisible:
-    id: "kpi-card-mau"
+    id: "kpi-affected-users"
 - assertVisible:
-    id: "reports-dau-mau-chart"
+    id: "reports-usage-chart"
 
 - tapOn:
     id: "menu-btn"

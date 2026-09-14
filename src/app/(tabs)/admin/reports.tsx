@@ -8,7 +8,6 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
-  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -16,10 +15,13 @@ import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
+import { ModalOptionList, ModalOptionProp } from '@/components/ui/modal-option-list';
+import { KPICard, KPICardProp } from '@/components/reports/KPICard';
 import { UsageLineChart, ChartDataPoint } from '@/components/reports/usage-line-chart';
 import { DauMauLineChart, DauMauDataPoint } from '@/components/reports/dau-mau-line-chart';
-import { Colors, BottomTabInset, MaxContentWidth } from '@/constants/theme';
+import { BottomTabInset, MaxContentWidth } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
+import { useTheme } from '@/hooks/use-theme';
 import { isAdminUser } from '@/constants/user-roles';
 import { firestore } from '@/config/firebase';
 
@@ -36,32 +38,60 @@ export interface SessionRecord {
 }
 
 type PeriodOption = 7 | 15 | 30;
+const AVAILABLE_PERIODS: PeriodOption[] = [7, 15, 30];
+
+export function generatePeriodOptions(t: (key: string) => string): ModalOptionProp[] {
+  return AVAILABLE_PERIODS.map((days) => ({
+    name: days,
+    testID: `period-option-${days}`,
+    label: t(`reports.period${days}Days`), 
+  }));
+}
+
 const DAU_MAU_TARGET_RATIO = 50;
+const CRASH_RATE_TOLERANCE_LIMIT = 0.1;
+
 // Calcula la relación porcentual entre DAU y MAU (Stickiness).
 // Protege la division entre 0.
 export function calculateDauMauRatio(dau: number, mau: number): number {
   return mau > 0 ? Math.round((dau / mau) * 100) : 0;
 }
 
+export function calculateCrashRatePercentage(totalCrashes: number, totalSessions: number): string {
+  if (!totalSessions || totalSessions === 0 || !totalCrashes || totalCrashes === 0) {
+    return '0.00%'; // returns 0.00% if 0 crashes (scenario 3)
+  }
+  const rate = (totalCrashes / totalSessions) * 100;
+  return `${rate.toFixed(2)}%`;
+}
+
 export default function AdminReportsScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = createStyle(theme);
   const { user, loading: authLoading } = useAuth();
 
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>(30);
-  const [selectedReportType, setSelectedReportType] = useState<'usage' | 'access' | 'dau_mau'>('usage');
+  const [selectedReportType, setSelectedReportType] = useState<'usage' | 'access' | 'dau_mau' | 'crash_rate'>('usage');
 
-    // Estados DAU / MAU
-    const [dauValue, setDauValue] = useState<number>(0);
-    const [mauValue, setMauValue] = useState<number>(0);
-    const [dauMauRatio, setDauMauRatio] = useState<number>(0);
-    const [dauMauData, setDauMauData] = useState<DauMauDataPoint[]>([
-      { label: 'Abr', mau: 0, dau: 0 },
-      { label: 'May', mau: 0, dau: 0 },
-      { label: 'Jun', mau: 0, dau: 0 },
-      { label: 'Jul', mau: 0, dau: 0 },
-      { label: 'Ago', mau: 0, dau: 0 },
-      { label: 'Sep', mau: 0, dau: 0 },
-    ]);
+  // Estados DAU / MAU
+  const [dauValue, setDauValue] = useState<number>(0);
+  const [mauValue, setMauValue] = useState<number>(0);
+  const [dauMauRatio, setDauMauRatio] = useState<number>(0);
+  const [dauMauData, setDauMauData] = useState<DauMauDataPoint[]>([
+    { label: 'Abr', mau: 0, dau: 0 },
+    { label: 'May', mau: 0, dau: 0 },
+    { label: 'Jun', mau: 0, dau: 0 },
+    { label: 'Jul', mau: 0, dau: 0 },
+    { label: 'Ago', mau: 0, dau: 0 },
+    { label: 'Sep', mau: 0, dau: 0 },
+  ]);
+
+  // Crash Rate States
+  const [totalCrashesValue, setTotalCrashesValue] = useState<number>(0);
+  const [affectedUsersValue, setAffectedUsersValue] = useState<number>(0);
+  const [crashRateData, setCrashRateData] = useState<ChartDataPoint[]>([]);
+
   const [showPeriodModal, setShowPeriodModal] = useState(false);
   const [showReportTypeModal, setShowReportTypeModal] = useState(false);
 
@@ -72,6 +102,15 @@ export default function AdminReportsScreen() {
 
   const userUid = user?.uid;
   const userRole = user?.rol;
+
+  const reportTypeOptions: ModalOptionProp[] = [
+    { name: 'usage', testID: 'type-option-usage', label: t('reports.reportTypeLabel') },
+    { name: 'dau_mau', testID: 'type-option-dau-mau', label: t('reports.reportTypeDauMau') },
+    { name: 'access', testID: 'type-option-access', label: t('reports.chartTitle') },
+    { name: 'crash_rate', testID: 'type-option-crash-rate', label: t('reports.reportTypeCrashRate') },
+  ]
+
+  const periodOptions: ModalOptionProp [] = generatePeriodOptions(t);
 
   // 1. Role validation (Admin only)
   useEffect(() => {
@@ -234,6 +273,112 @@ export default function AdminReportsScreen() {
          loadFallback();
        }
      }, [selectedReportType, userUid, userRole, authLoading]);
+
+  // Helper to Build history lookup map from raw array
+  const buildHistoryMap = (historico: any[]): Map<string, number> => {
+    const historyMap = new Map<string, number>();
+
+    for (const item of historico) {
+      const rawVal = typeof item.value === 'number' ? item.value : (Number(item.tasa) || 0);
+      const key = item.date || item.fecha || item.label;
+
+      if (key) {
+        historyMap.set(String(key), rawVal);
+      }
+    }
+
+    return historyMap;
+  };
+
+  // Helper to Generate padded time-series chart data
+  const generatePaddedChartData = (historyMap: Map<string, number>, periodDays: number): ChartDataPoint[] => {
+    const paddedData: ChartDataPoint[] = [];
+    const now = new Date();
+
+    for (let i = periodDays - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(now.getDate() - i);
+
+      const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const dayNumLabel = String(d.getDate());
+      const matchedValue = historyMap.get(dateKey) ?? historyMap.get(dayNumLabel) ?? 0.0;
+
+      paddedData.push({
+        label: dayNumLabel,
+        value: matchedValue,
+        date: dateKey,
+      });
+    }
+
+    return paddedData;
+  };
+    
+  // 5. Reactive Firestore Crashrate/Stability
+  useEffect(() => {
+    if (authLoading || !user || !isAdminUser(user)) return;
+    if (selectedReportType !== 'crash_rate') return;
+
+    let isMounted = true;
+    setLoading(true);
+    setQueryError(null);
+
+    try {
+      const unsubscribe = firestore()
+        .collection('metricas_estabilidad')
+        .doc('actual')
+        .onSnapshot(
+          (docSnapshot) => {
+            if (!isMounted) return;
+
+            const exists = typeof docSnapshot?.exists === 'function'
+              ? docSnapshot.exists()
+              : Boolean(docSnapshot?.exists);
+
+            if (!docSnapshot || !exists) {
+              setCrashRateData([]);
+              setLoading(false);
+              return;
+            }
+
+            const data = typeof docSnapshot.data === 'function' 
+              ? docSnapshot.data() || {} 
+              : (docSnapshot.data || {});
+
+            // Inyección de valores numéricos para KPIs
+            setTotalCrashesValue(typeof data.totalCrashes === 'number' ? data.totalCrashes : 0);
+            setAffectedUsersValue(typeof data.affectedUsers === 'number' ? data.affectedUsers : 0);
+
+            // Procesamiento de datos del gráfico mediante auxiliares
+            if (Array.isArray(data.historico)) {
+              const historyMap = buildHistoryMap(data.historico);
+              setCrashRateData(generatePaddedChartData(historyMap, selectedPeriod));
+            } else {
+              setCrashRateData([]);
+            }
+
+            setLoading(false);
+          },
+          (err) => {
+            console.warn('[AdminReportsScreen] Error al obtener estabilidad:', err);
+            if (isMounted) {
+              setQueryError(t('reports.errorLoad'));
+              setLoading(false);
+            }
+          }
+        );
+
+      return () => {
+        isMounted = false;
+        if (typeof unsubscribe === 'function') unsubscribe();
+      };
+    } catch (e) {
+      console.error(e);
+      if (isMounted) {
+        setLoading(false);
+      }
+    }
+    // 3. Array de dependencias alineado exclusivamente con variables primitivas
+  }, [selectedReportType, selectedPeriod, userUid, userRole, authLoading, t]);
   // Helper to extract timestamp millis from varied date formats
   const getRecordTimestamp = (record: SessionRecord): number | null => {
     const raw = record.fecha ?? record.tiempoInicio;
@@ -311,8 +456,47 @@ export default function AdminReportsScreen() {
     return activeUsersCount;
   }, [systemActiveUsersCount, activeUsersCount]);
 
+  //dynamic KPI card generator (so the code doesn't suck as much)
+  const calculatedCrashRateString = useMemo(() => {
+    return calculateCrashRatePercentage(totalCrashesValue, sessions.length);
+  }, [totalCrashesValue, sessions.length]);
+
+  // Generador Dinámico de la estructura de las tarjetas KPI en base al tipo de reporte activo
+  const currentKPICards = useMemo<KPICardProp[]>(() => {
+    if (selectedReportType === 'dau_mau') {
+      return [
+        { tinyType: true, label: t('reports.kpiRatio'), value: `${dauMauRatio}%`, iconName: 'trending-up', 
+          valueTestID: 'kpi-ratio-value', cardTestID: 'kpi-card-ratio', hasSubLabel: true, accentSubLabel: true, subLabel: `Meta: ${DAU_MAU_TARGET_RATIO}%` },
+        { tinyType: true, label: t('reports.kpiDau'), value: dauValue, iconName: 'person-outline', 
+          valueTestID: 'kpi-dau-value', cardTestID: 'kpi-card-dau', hasSubLabel: true, subLabel: t('reports.kpiDailyAvg') },
+        { tinyType: true, label: t('reports.kpiMau'), value: mauValue, iconName: 'people-outline', 
+          valueTestID: 'kpi-mau-value', cardTestID: 'kpi-card-mau', hasSubLabel: true, subLabel: t('reports.kpiThisMonth') }
+      ];
+    }
+
+    if (selectedReportType === 'crash_rate') {
+      return [
+        { tinyType: true, label: t('reports.crashRateToday'), value: calculatedCrashRateString, iconName: 'shield-checkmark-outline', 
+          valueTestID: 'kpi-crash-rate-val', cardTestID: 'kpi-crash-rate'},
+        { tinyType: true, label: t('reports.totalCrashesToday'), value: totalCrashesValue, iconName: 'bug-outline', 
+          valueTestID: 'kpi-total-crashes-val', cardTestID: 'kpi-total-crashes' },
+        { tinyType: true, label: true ? t('reports.affectedUsers') : 'Users', value: affectedUsersValue, iconName: 'sad-outline', 
+          valueTestID: 'kpi-affected-users-val', cardTestID: 'kpi-affected-users' }
+      ];
+    }
+    
+    return [
+      { tinyType: false, label: t('reports.totalAccessToday'), value: totalAccessToday, iconName: 'log-in-outline', 
+        valueTestID: 'kpi-total-access-val', cardTestID: 'kpi-total-access' },
+      { tinyType: false, label: t('reports.activeUsers'), value: displayedActiveUsers, iconName: 'people', 
+        valueTestID: 'kpi-active-users-val', cardTestID: 'kpi-active-users' }
+    ];
+  }, [selectedReportType, dauMauRatio, dauValue, mauValue, calculatedCrashRateString, totalCrashesValue, affectedUsersValue, totalAccessToday, displayedActiveUsers, t]);
+
   // 4. Aggregate data for the chart by day in selected period
   const chartData = useMemo<ChartDataPoint[]>(() => {
+    if (selectedReportType === 'crash_rate') return crashRateData;
+    
     const days = selectedPeriod;
     const now = new Date();
     const result: ChartDataPoint[] = [];
@@ -362,16 +546,19 @@ export default function AdminReportsScreen() {
     });
 
     return result;
-  }, [sessions, selectedPeriod, selectedReportType]);
+  }, [sessions, selectedPeriod, selectedReportType, crashRateData]);
 
     // Check if there is any data in the selected period (Acceptance Criteria Scenario 3)
-    const hasData = useMemo(() => {
-      if (selectedReportType === 'dau_mau') {
-        return dauMauData.length > 0 && dauMauData.some((d) => d.mau > 0 || d.dau > 0);
-      }
-      if (sessions.length === 0) return false;
-      return chartData.some((d) => d.value > 0);
-    }, [sessions, chartData, selectedReportType, dauMauData]);
+  const hasData = useMemo(() => {
+    if (selectedReportType === 'dau_mau') {
+      return dauMauData.length > 0 && dauMauData.some((d) => d.mau > 0 || d.dau > 0);
+    }
+    if (selectedReportType === 'crash_rate') {
+      return crashRateData.length > 0; // Se dibuja la línea incluso si los valores son 0
+    } 
+    if (sessions.length === 0) return false;
+    return chartData.some((d) => d.value > 0);
+  }, [sessions, chartData, selectedReportType, dauMauData, crashRateData]);
 
   // Actions: Print and Export PDF
   const handlePrint = useCallback(() => {
@@ -404,10 +591,37 @@ export default function AdminReportsScreen() {
     if (selectedReportType === 'dau_mau') {
         return t('reports.reportTypeDauMau');
       }
+    if (selectedReportType === 'crash_rate') {
+        return t('reports.reportTypeCrashRate');
+      }
     return selectedReportType === 'usage'
       ? t('reports.reportTypeUsage')
       : t('reports.chartTitle');
   }, [selectedReportType, t]);
+
+  const getChartTitle = (reportType: string): string => {
+    switch (reportType) {
+      case 'dau_mau':
+        return t('reports.dauMauChartTitle');
+      case 'usage':
+        return t('reports.chartTitleUsage');
+      case 'crash_rate':
+        return t('reports.chartTitleCrashRate');
+      default:
+        return t('reports.chartTitle');
+    }
+  };
+
+  const getChartUnit = (reportType: string): string => {
+  switch (reportType) {
+    case 'usage':
+      return 'min';
+    case 'crash_rate':
+      return '%';
+    default:
+      return 'acc';
+  }
+};
 
   return (
     <View style={styles.screen} testID="admin-reports-screen">
@@ -442,81 +656,34 @@ export default function AdminReportsScreen() {
               <Text style={styles.selectButtonText} numberOfLines={1}>
                 {reportTypeLabel}
               </Text>
-              <Ionicons name="chevron-down" size={18} color="#6B7280" />
+              <Ionicons name="chevron-down" size={18} color={theme.pageSubtitle} />
             </TouchableOpacity>
           </View>
 
           {/* KPI Summary Cards */}
-          {selectedReportType === 'dau_mau' ? (
-            /* 3 Tarjetas KPI específicas del Wireframe de DAU/MAU */
-            <View style={styles.kpiRowThree} testID="kpi-dau-mau-container">
-              {/* Card 1: RATIO */}
-              <View style={styles.kpiCardThree} testID="kpi-card-ratio">
-              <View style={styles.kpiHeaderSmall}>
-                <Ionicons name="trending-up" size={16} color={Colors.light.main} />
-                <Text style={styles.kpiLabelSmall}>{t('reports.kpiRatio')}</Text>
-              </View>
-              <Text style={styles.kpiValueSmall} testID="kpi-ratio-value">{dauMauRatio}%</Text>
-              <Text style={styles.kpiSubSmallPositive}>{`Meta: ${DAU_MAU_TARGET_RATIO}%`}</Text>
-            </View>
-              {/* Card 2: DAU */}
-              <View style={styles.kpiCardThree} testID="kpi-card-dau">
-                <View style={styles.kpiHeaderSmall}>
-                  <Ionicons name="person-outline" size={16} color={Colors.light.main} />
-                  <Text style={styles.kpiLabelSmall}>{t('reports.kpiDau')}</Text>
-                </View>
-                <Text style={styles.kpiValueSmall} testID="kpi-dau-value">{dauValue}</Text>
-                <Text style={styles.kpiSubSmall}>{t('reports.kpiDailyAvg')}</Text>
-              </View>
-              {/* Card 3: MAU */}
-              <View style={styles.kpiCardThree} testID="kpi-card-mau">
-                <View style={styles.kpiHeaderSmall}>
-                  <Ionicons name="people-outline" size={16} color={Colors.light.main} />
-                  <Text style={styles.kpiLabelSmall}>{t('reports.kpiMau')}</Text>
-                </View>
-                <Text style={styles.kpiValueSmall} testID="kpi-mau-value">{mauValue}</Text>
-                <Text style={styles.kpiSubSmall}>{t('reports.kpiThisMonth')}</Text>
-              </View>
-            </View>
-          ) : (
-          <View style={styles.kpiRow}>
-            {/* Card 1: TOTAL ACCESOS (HOY) */}
-            <View style={styles.kpiCard} testID="kpi-total-access">
-              <View style={styles.kpiIconWrapper}>
-                <Ionicons name="log-in-outline" size={24} color={Colors.light.main} />
-              </View>
-              <View style={styles.kpiTextWrapper}>
-                <Text style={styles.kpiLabel}>{t('reports.totalAccessToday')}</Text>
-                <Text style={styles.kpiValue} testID="kpi-total-access-val">
-                  {loading ? '...' : totalAccessToday}
-                </Text>
-              </View>
-            </View>
-
-            {/* Card 2: USUARIOS ACTIVOS */}
-            <View style={styles.kpiCard} testID="kpi-active-users">
-              <View style={styles.kpiIconWrapper}>
-                <Ionicons name="people" size={24} color={Colors.light.main} />
-              </View>
-              <View style={styles.kpiTextWrapper}>
-                <Text style={styles.kpiLabel}>{t('reports.activeUsers')}</Text>
-                <Text style={styles.kpiValue} testID="kpi-active-users-val">
-                  {loading ? '...' : displayedActiveUsers}
-                </Text>
-              </View>
-            </View>
+          <View style={selectedReportType === 'usage' ? styles.kpiRow : styles.kpiRowThree} testID="kpi-cards-container">
+            {currentKPICards.map((cardProps, index) => (
+              <KPICard
+                key={cardProps.cardTestID || index}
+                tinyType={cardProps.tinyType}
+                label={cardProps.label}
+                value={cardProps.value}
+                iconName={cardProps.iconName}
+                valueTestID={cardProps.valueTestID}
+                cardTestID={cardProps.cardTestID}
+                hasSubLabel={cardProps.hasSubLabel}
+                accentSubLabel={cardProps.accentSubLabel}
+                subLabel={cardProps.subLabel}
+                loading={loading}
+              />
+            ))}
           </View>
-            )}
           {/* Main Chart Card */}
           <View style={styles.chartCard} testID="chart-card">
             {/* Header: Title and Period Filter */}
             <View style={styles.chartHeader}>
               <Text style={styles.chartTitle} testID="chart-title">
-                {selectedReportType === 'dau_mau'
-                ? t('reports.dauMauChartTitle')
-                : selectedReportType === 'usage'
-                ? t('reports.chartTitleUsage')
-                : t('reports.chartTitle')}
+                {getChartTitle(selectedReportType)}
               </Text>
               <TouchableOpacity
                 style={styles.periodFilterBtn}
@@ -525,7 +692,7 @@ export default function AdminReportsScreen() {
                 testID="period-filter-btn"
               >
                 <Text style={styles.periodFilterText}>{periodLabel}</Text>
-                <Ionicons name="filter" size={14} color="#718096" style={styles.filterIcon} />
+                <Ionicons name="filter" size={14} color={theme.pageSubtitle} style={styles.filterIcon} />
               </TouchableOpacity>
             </View>
 
@@ -540,15 +707,15 @@ export default function AdminReportsScreen() {
               </View>
             ) : loading ? (
               <View style={styles.stateContainer} testID="chart-loading">
-                <ActivityIndicator size="large" color={Colors.light.main} />
+                <ActivityIndicator size="large" color={theme.main} />
                 <Text style={styles.stateText}>{t('reports.loading')}</Text>
               </View>
             ) : queryError ? (
               <View style={styles.emptyContainer} testID="chart-error-state">
                 <View style={styles.emptyIconCircle}>
-                  <Ionicons name="shield-outline" size={36} color={Colors.light.error} />
+                  <Ionicons name="shield-outline" size={36} color={theme.error} />
                 </View>
-                <Text style={[styles.emptyText, { color: Colors.light.error, fontWeight: '600' }]}>
+                <Text style={[styles.emptyText, { color: theme.error, fontWeight: '600' }]}>
                   {queryError}
                 </Text>
               </View>
@@ -556,7 +723,7 @@ export default function AdminReportsScreen() {
               /* Scenario 3: Empty state para el reporte de tiempo de uso */
               <View style={styles.emptyContainer} testID="chart-empty-state">
                 <View style={styles.emptyIconCircle}>
-                  <Ionicons name="analytics-outline" size={36} color="#A0AEC0" />
+                  <Ionicons name="analytics-outline" size={36} color={theme.chartLegendText} />
                 </View>
                 <Text style={styles.emptyText}>{t('reports.emptyState')}</Text>
               </View>
@@ -565,8 +732,8 @@ export default function AdminReportsScreen() {
                 <UsageLineChart
                   data={chartData}
                   height={230}
-                  unit={selectedReportType === 'usage' ? 'min' : 'acc'}
-                  lineColor={Colors.light.main}
+                  unit={getChartUnit(selectedReportType)}
+                  lineColor={theme.main}
                   testID="reports-usage-chart"
                 />
               </View>
@@ -583,7 +750,7 @@ export default function AdminReportsScreen() {
               testID="print-btn"
               accessibilityLabel={t('reports.print')}
             >
-              <Ionicons name="print-outline" size={20} color="#374151" />
+              <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
             </TouchableOpacity>
 
             {/* PDF Export Button */}
@@ -594,7 +761,7 @@ export default function AdminReportsScreen() {
               testID="export-pdf-btn"
               accessibilityLabel={t('reports.exportPdf')}
             >
-              <Ionicons name="document-text" size={16} color="#FFFFFF" style={{ marginRight: 4 }} />
+              <Ionicons name="document-text" size={16} color={theme.overMain} style={{ marginRight: 4 }} />
               <Text style={styles.pdfBtnText}>PDF</Text>
             </TouchableOpacity>
           </View>
@@ -602,148 +769,32 @@ export default function AdminReportsScreen() {
       </ScrollView>
 
       {/* Period Selection Modal */}
-      <Modal
-        visible={showPeriodModal}
-        transparent
-        animationType="fade"
+      <ModalOptionList
+        visible = {showPeriodModal}
         onRequestClose={() => setShowPeriodModal(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowPeriodModal(false)}
-        >
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{t('reports.reportTypeLabel')}</Text>
-            {[7, 15, 30].map((p) => (
-              <TouchableOpacity
-                key={p}
-                style={[
-                  styles.modalOption,
-                  selectedPeriod === p && styles.modalOptionSelected,
-                ]}
-                onPress={() => {
-                  setSelectedPeriod(p as PeriodOption);
-                  setShowPeriodModal(false);
-                }}
-                testID={`period-option-${p}`}
-              >
-                <Text
-                  style={[
-                    styles.modalOptionText,
-                    selectedPeriod === p && styles.modalOptionTextSelected,
-                  ]}
-                >
-                  {p === 7
-                    ? t('reports.period7Days')
-                    : p === 15
-                    ? t('reports.period15Days')
-                    : t('reports.period30Days')}
-                </Text>
-                {selectedPeriod === p && (
-                  <Ionicons name="checkmark" size={18} color={Colors.light.main} />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </TouchableOpacity>
-      </Modal>
+        title={t('reports.reportTypeLabel')}
+        options={periodOptions}
+        selectedOption={selectedPeriod}
+        onSelectOption={setSelectedPeriod}
+      />
 
       {/* Report Type Modal */}
-      <Modal
-        visible={showReportTypeModal}
-        transparent
-        animationType="fade"
+      <ModalOptionList
+        visible = {showReportTypeModal}
         onRequestClose={() => setShowReportTypeModal(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowReportTypeModal(false)}
-        >
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{t('reports.reportTypeLabel')}</Text>
-            <TouchableOpacity
-              style={[
-                styles.modalOption,
-                selectedReportType === 'usage' && styles.modalOptionSelected,
-              ]}
-              onPress={() => {
-                setSelectedReportType('usage');
-                setShowReportTypeModal(false);
-              }}
-              testID="type-option-usage"
-            >
-              <Text
-                style={[
-                  styles.modalOptionText,
-                  selectedReportType === 'usage' && styles.modalOptionTextSelected,
-                ]}
-              >
-                {t('reports.reportTypeUsage')}
-              </Text>
-              {selectedReportType === 'usage' && (
-                <Ionicons name="checkmark" size={18} color={Colors.light.main} />
-              )}
-            </TouchableOpacity>
-            {/* Opción DAU / MAU */}
-            <TouchableOpacity
-              style={[
-                styles.modalOption,
-                selectedReportType === 'dau_mau' && styles.modalOptionSelected,
-              ]}
-              onPress={() => {
-                setSelectedReportType('dau_mau');
-                setShowReportTypeModal(false);
-              }}
-              testID="type-option-dau-mau"
-            >
-              <Text
-                style={[
-                  styles.modalOptionText,
-                  selectedReportType === 'dau_mau' && styles.modalOptionTextSelected,
-                ]}
-              >
-                {t('reports.reportTypeDauMau')}
-              </Text>
-              {selectedReportType === 'dau_mau' && (
-                <Ionicons name="checkmark" size={18} color={Colors.light.main} />
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.modalOption,
-                selectedReportType === 'access' && styles.modalOptionSelected,
-              ]}
-              onPress={() => {
-                setSelectedReportType('access');
-                setShowReportTypeModal(false);
-              }}
-              testID="type-option-access"
-            >
-              <Text
-                style={[
-                  styles.modalOptionText,
-                  selectedReportType === 'access' && styles.modalOptionTextSelected,
-                ]}
-              >
-                {t('reports.chartTitle')}
-              </Text>
-              {selectedReportType === 'access' && (
-                <Ionicons name="checkmark" size={18} color={Colors.light.main} />
-              )}
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+        title={t('reports.reportTypeLabel')}
+        options={reportTypeOptions}
+        selectedOption={selectedReportType}
+        onSelectOption={setSelectedReportType}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyle = (theme:any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#FAFAFB',
+    backgroundColor: theme.background,
   },
   scrollView: {
     flex: 1,
@@ -760,13 +811,13 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1F2937',
+    color: theme.pageTitle,
     fontFamily: 'Open Sans',
     marginBottom: 6,
   },
   screenSubtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: theme.pageSubtitle,
     fontFamily: 'Open Sans',
     lineHeight: 20,
     marginBottom: 20,
@@ -775,9 +826,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   fieldLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
+    color: theme.fieldLabel,
     fontFamily: 'Open Sans',
     marginBottom: 6,
   },
@@ -785,16 +836,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.backgroundElement,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: theme.cardSeparator,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
   selectButtonText: {
     fontSize: 14,
-    color: '#1F2937',
+    color: theme.textNames,
     fontFamily: 'Open Sans',
     flex: 1,
   },
@@ -804,51 +855,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   kpiCard: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: Colors.light.main,
+    backgroundColor: theme.backgroundElement,
     borderRadius: 12,
     padding: 12,
     gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  kpiIconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F3E8FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  kpiTextWrapper: {
-    flex: 1,
-  },
-  kpiLabel: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: '#718096',
-    letterSpacing: 0.4,
-    fontFamily: 'Open Sans',
-    marginBottom: 2,
-  },
-  kpiValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
   },
   chartCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.backgroundElement,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: theme.cardSeparator,
     padding: 16,
     marginBottom: 20,
     shadowColor: '#000',
@@ -866,7 +884,7 @@ const styles = StyleSheet.create({
   chartTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.light.main,
+    color: theme.main,
     fontFamily: 'Open Sans',
   },
   periodFilterBtn: {
@@ -875,13 +893,13 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 6,
-    backgroundColor: '#F7FAFC',
+    backgroundColor: theme.backgroundSecondary,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: theme.cardSeparator,
   },
   periodFilterText: {
     fontSize: 12,
-    color: '#718096',
+    color: theme.pageSubtitle,
     fontFamily: 'Open Sans',
     fontWeight: '500',
   },
@@ -896,7 +914,7 @@ const styles = StyleSheet.create({
   },
   stateText: {
     fontSize: 13,
-    color: '#718096',
+    color: theme.pageSubtitle,
     fontFamily: 'Open Sans',
   },
   emptyContainer: {
@@ -909,16 +927,16 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#F7FAFC',
+    backgroundColor: theme.backgroundSecondary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#EDF2F7',
+    borderColor: theme.tooltipLegend,
   },
   emptyText: {
     fontSize: 14,
-    color: '#718096',
+    color: theme.breadcrumbSeparator,
     textAlign: 'center',
     fontFamily: 'Open Sans',
     lineHeight: 20,
@@ -934,8 +952,8 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
-    backgroundColor: '#FFFFFF',
+    borderColor: theme.cardSeparator,
+    backgroundColor: theme.backgroundElement,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -949,113 +967,24 @@ const styles = StyleSheet.create({
     height: 38,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: Colors.light.main,
+    backgroundColor: theme.main,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.light.main,
+    shadowColor: theme.main,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 2,
   },
   pdfBtnText: {
-    color: '#FFFFFF',
+    color: theme.overMain,
     fontWeight: '700',
     fontSize: 13,
     letterSpacing: 0.5,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1F2937',
-    marginBottom: 12,
-    fontFamily: 'Open Sans',
-  },
-  modalOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-  },
-  modalOptionSelected: {
-    backgroundColor: '#F3E8FF',
-  },
-  modalOptionText: {
-    fontSize: 14,
-    color: '#374151',
-    fontFamily: 'Open Sans',
-  },
-  modalOptionTextSelected: {
-    color: Colors.light.main,
-    fontWeight: '600',
   },
   kpiRowThree: {
     flexDirection: 'row',
     gap: 8,
     marginBottom: 20,
-  },
-  kpiCardThree: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  kpiHeaderSmall: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 6,
-  },
-  kpiLabelSmall: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#4B5563',
-    fontFamily: 'Open Sans',
-  },
-  kpiValueSmall: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#111827',
-    fontFamily: 'Open Sans',
-    marginBottom: 2,
-  },
-  kpiSubSmall: {
-    fontSize: 11,
-    color: '#9CA3AF',
-    fontFamily: 'Open Sans',
-  },
-  kpiSubSmallPositive: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#10B981',
-    fontFamily: 'Open Sans',
   },
 });

@@ -179,7 +179,12 @@
     "kpiDailyAvg": "Prom. diario",
     "kpiThisMonth": "Este mes",
     "mauLegend": "MAU (Activos Mensuales)",
-    "dauLegend": "DAU (Diarios)"
+    "dauLegend": "DAU (Diarios)",
+    "reportTypeCrashRate": "Porcentaje de Fallos",
+    "crashRateToday": "PORCENTAJE DE FALLAS (HOY)",
+    "totalCrashesToday": "TOTAL FALLAS (HOY)",
+    "affectedUsers": "USUARIOS AFECTADOS",
+    "chartTitleCrashRate": "Porcentaje de fallos"
   },
   "admin": {
     "path": "Administración"

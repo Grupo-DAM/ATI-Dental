@@ -48,7 +48,8 @@
       "expo-image",
       "expo-localization",
       "./scripts/withAndroidQueries.js",
-      "expo-asset"
+      "expo-asset",
+      "@react-native-firebase/crashlytics"
     ],
     "experiments": {
       "typedRoutes": true,
