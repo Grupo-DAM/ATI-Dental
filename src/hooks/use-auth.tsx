@@ -74,6 +74,16 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
           (docSnapshot) => {
             if (docSnapshot.exists()) {
               const data = docSnapshot.data() || {};
+              const userState = data?.estado ? String(data.estado).toLowerCase().trim() : '';
+              console.log('[useAuth] onSnapshot perfil recibido:', { exists: docSnapshot?.exists?.(), estado: data.estado, fromCache: docSnapshot?.metadata?.fromCache });
+              if (userState === 'inactivo') {
+                console.log('[useAuth] onSnapshot detectó usuario inactivo. Expulsando sesión...');
+                auth().signOut().catch(() => {});
+                removeSessionToken().catch(() => {});
+                setUser(null);
+                setLoading(false);
+                return;
+              }
               setUser({
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
@@ -116,18 +126,91 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     try {
       const credential = await auth().signInWithEmailAndPassword(email, password);
       if (credential?.user?.uid) {
+        // Verificar si la cuenta del usuario está desactivada en Firestore
+        try {
+          console.log('[useAuth] Verificando estado en Firestore para UID:', credential.user.uid, 'email:', credential.user.email);
+          let userDoc: any;
           try {
-            await firestore().collection('sesiones').add({
-              userId: credential.user.uid,
-              email: credential.user.email,
-              fecha: new Date(),
-              tiempoInicio: new Date(),
-              tiempoUso: INITIAL_SESSION_DURATION_MINUTES,
-            });
-          } catch (sessionErr) {
-            console.warn('[useAuth] Error al registrar sesión en Firestore:', sessionErr);
+            userDoc = await firestore()
+              .collection('usuarios')
+              .doc(credential.user.uid)
+              .get({ source: 'server' });
+          } catch (serverErr) {
+            console.warn('[useAuth] No se pudo obtener doc desde el servidor, usando get por defecto:', serverErr);
+            userDoc = await firestore()
+              .collection('usuarios')
+              .doc(credential.user.uid)
+              .get();
           }
+
+          let docExists = typeof userDoc?.exists === 'function' ? userDoc.exists() : Boolean(userDoc?.exists);
+          let userData = typeof userDoc?.data === 'function' ? userDoc.data() : userDoc;
+
+          // Si el documento no existe por UID, buscar por email como fallback
+          if ((!docExists || !userData?.estado) && credential.user.email) {
+            console.log('[useAuth] UID no encontrado o sin estado. Intentando fallback por email...');
+            try {
+              let querySnap = await firestore()
+                .collection('usuarios')
+                .where('email', '==', credential.user.email.toLowerCase().trim())
+                .limit(1)
+                .get({ source: 'server' });
+
+              if ((!querySnap || querySnap.empty) && credential.user.email) {
+                querySnap = await firestore()
+                  .collection('usuarios')
+                  .where('email', '==', credential.user.email.trim())
+                  .limit(1)
+                  .get({ source: 'server' });
+              }
+
+              if (querySnap && !querySnap.empty && querySnap.docs && querySnap.docs.length > 0) {
+                userDoc = querySnap.docs[0];
+                docExists = true;
+                userData = typeof userDoc.data === 'function' ? userDoc.data() : userDoc;
+                console.log('[useAuth] Documento encontrado por email con doc.id:', userDoc.id);
+              }
+            } catch (queryErr) {
+              console.warn('[useAuth] Fallback query por email falló:', queryErr);
+            }
+          }
+
+          const userState = userData?.estado ? String(userData.estado).toLowerCase().trim() : '';
+          console.log('[useAuth] Verificación de estado completada:', { 
+            docExists, 
+            userState, 
+            fromCache: userDoc?.metadata?.fromCache,
+            rawEstado: userData?.estado 
+          });
+
+          if (docExists && userState === 'inactivo') {
+            console.log('[useAuth] Cuenta desactivada. Expulsando usuario y bloqueando login...');
+            await auth().signOut();
+            await removeSessionToken();
+            setUser(null);
+            const deactivatedErr: any = new Error('ACCOUNT_DEACTIVATED');
+            deactivatedErr.code = 'auth/account-deactivated';
+            throw deactivatedErr;
+          }
+        } catch (checkErr: any) {
+          if (checkErr?.message === 'ACCOUNT_DEACTIVATED' || checkErr?.code === 'auth/account-deactivated') {
+            throw checkErr;
+          }
+          console.warn('[useAuth] Error al verificar estado del usuario en Firestore:', checkErr);
         }
+
+        try {
+          await firestore().collection('sesiones').add({
+            userId: credential.user.uid,
+            email: credential.user.email,
+            fecha: new Date(),
+            tiempoInicio: new Date(),
+            tiempoUso: INITIAL_SESSION_DURATION_MINUTES,
+          });
+        } catch (sessionErr) {
+          console.warn('[useAuth] Error al registrar sesión en Firestore:', sessionErr);
+        }
+      }
       return credential;
     } catch (err: any) {
       setError(err.message);

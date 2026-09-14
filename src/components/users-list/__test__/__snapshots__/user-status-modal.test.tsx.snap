@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserStatusModal Component matches snapshot for activation mode 1`] = `null`;
+
+exports[`UserStatusModal Component matches snapshot for deactivation mode 1`] = `null`;

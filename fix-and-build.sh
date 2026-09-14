@@ -24,11 +24,32 @@ echo ""
 echo "Limpiando caché de CMake (.cxx) y builds anteriores para evitar GLOB mismatch..."
 rm -rf app/.cxx app/build build .gradle
 
-# -Pandroid.overrideNumberOfProcessors=2 limita el número de núcleos que Gradle y Ninja 
-# usarán para compilar. Esto evita que tu Ubuntu se congele o se quede sin RAM (OOM),
-# pero sin romper la configuración de CMake.
-echo "Limpiando y compilando (limitado a 2 núcleos para evitar crash de RAM)..."
+# Limitar a 1 núcleo y compilar únicamente para arm64-v8a (Redmi Note 11 Pro).
+# Esto evita que Ninja/Clang saturen la memoria RAM y disparen el OOM Killer.
+echo "Compilando para arm64-v8a (1 núcleo para evitar crash de RAM)..."
 ./gradlew clean app:assembleDebug -x lint -x test --no-daemon \
-  -Pandroid.overrideNumberOfProcessors=2 \
+  -Dorg.gradle.parallel=false \
+  -Pandroid.overrideNumberOfProcessors=1 \
   -PreactNativeDevServerPort=8081 \
-  -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+  -PreactNativeArchitectures=arm64-v8a
+
+APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+if [ -f "$APK_PATH" ]; then
+  echo ""
+  echo "========================================="
+  echo " ¡Compilación completada exitosamente!"
+  echo " APK generado en: android/$APK_PATH"
+  echo "========================================="
+  
+  if command -v adb >/dev/null 2>&1 && [ $(adb devices | grep -v "List of" | grep -c "device$") -gt 0 ]; then
+    echo "Dispositivo detectado por ADB. ¿Instalar automáticamente? (s/n)"
+    read -r -t 10 respuesta
+    if [[ "$respuesta" =~ ^[sS]$ ]]; then
+      adb install -r "$APK_PATH"
+    fi
+  else
+    echo "Para instalar en tu teléfono (con depuración USB activa):"
+    echo "  adb install -r android/$APK_PATH"
+  fi
+fi
+

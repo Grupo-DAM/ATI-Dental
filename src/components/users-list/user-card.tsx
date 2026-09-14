@@ -51,6 +51,7 @@ type GeneralUserData = {
     role?: string;
     lastVisit?: never;
     nextVisit?: never;
+    switchTestID?: string;
 };
 
 type UserCardProps = {
@@ -59,6 +60,7 @@ type UserCardProps = {
     email?: string;
     imgSrc?: string;
     type?: 'general';
+    testID?: string;
 } & (PatientData | GeneralUserData);
 
 export function UserCard({
@@ -71,8 +73,10 @@ export function UserCard({
         nextVisit='-',
         status=true,
         switchStatus,
-        role='User'
-    }: UserCardProps) {
+        role='User',
+        switchTestID,
+        testID,
+    }: UserCardProps & { switchTestID?: string; testID?: string }) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
@@ -118,6 +122,7 @@ export function UserCard({
                         <Switch
                             value = {status}
                             onSwitch = {switchStatus}
+                            testID = {switchTestID || (name ? `switch-${name}` : 'switch-pressable')}
                         />
                      )}
                     </View>

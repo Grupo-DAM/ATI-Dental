@@ -96,6 +96,31 @@ describe('Login Flow (TDD)', () => {
         expect(rawBackendError).toBeNull();
     });
 
+    it('Escenario 3: deniega acceso y muestra mensaje de cuenta desactivada si el usuario está inactivo', async () => {
+        const deactivatedError: any = new Error('ACCOUNT_DEACTIVATED');
+        deactivatedError.code = 'auth/account-deactivated';
+        mockLoginFn.mockRejectedValueOnce(deactivatedError);
+
+        const { getByTestId, findByText } = render(<LoginScreen />);
+
+        const emailInput = getByTestId('email-input');
+        const passwordInput = getByTestId('password-input');
+        const loginButton = getByTestId('login-button');
+
+        fireEvent.changeText(emailInput, 'inactive-admin@example.com');
+        fireEvent.changeText(passwordInput, 'Password123!');
+        fireEvent.press(loginButton);
+
+        await waitFor(() => {
+            expect(mockLoginFn).toHaveBeenCalledWith('inactive-admin@example.com', 'Password123!');
+        });
+
+        expect(mockReplace).not.toHaveBeenCalled();
+
+        const deactivatedMessage = await findByText('login.errors.accountDeactivated');
+        expect(deactivatedMessage).toBeTruthy();
+    });
+
     it('should block API request and set visual warning if input fields are empty', async () => {
         const { getByTestId, findByText } = render(<LoginScreen />);
 
