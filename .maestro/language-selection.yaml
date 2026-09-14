@@ -1,27 +1,27 @@
 appId: com.proyect1.ATIDental
 ---
 - launchApp
-# --- Inicio de Sesión Condicional ---
-# Si la app no tiene sesión (vemos el email-input), iniciamos sesión.
-# Si ya tiene sesión iniciada, se salta este paso automáticamente.
-- runFlow:
-    when:
-      visible:
-        id: "email-input"
-    commands:
-      - tapOn:
-          id: "email-input"
-      - inputText: "carloscaoucv2022@gmail.com"
-      - tapOn:
-          id: "password-input"
-      - inputText: "Cao1234"
-      - hideKeyboard
-      - tapOn:
-          id: "login-button"
-      - extendedWaitUntil:
-          visible:
-            id: "welcome-header"
-          timeout: 10000
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
+# --- Inicio de Sesión ---
+- tapOn:
+    id: "email-input"
+- inputText: "carloscaoucv2022@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Cao1234"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+- extendedWaitUntil:
+    visible:
+        id: "welcome-header"
+    timeout: 10000
+
 # -----------------------------------
 
 # Usamos el ID seguro en lugar del texto
@@ -75,3 +75,10 @@ appId: com.proyect1.ATIDental
     visible: "OK"
     timeout: 10000
 - tapOn: "OK"
+
+# -----------------------------------
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"
