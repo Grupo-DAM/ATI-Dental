@@ -55,6 +55,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           {
             backgroundColor: colors.backgroundElement,
             paddingBottom: dynamicPaddingBottom,
+            borderTopColor: colors.pageSeparator,
           }
     ]}>
       {/* 1. HOME TAB */}
@@ -154,7 +155,6 @@ const styles = StyleSheet.create({
     minHeight: Platform.OS === 'ios' ? 76 : 64,
     paddingTop: 12,
     borderTopWidth: 0.5,
-    borderTopColor: '#E2E8F0',
     alignItems: 'center',
     justifyContent: 'space-around',
   },

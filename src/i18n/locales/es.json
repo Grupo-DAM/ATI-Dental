@@ -189,7 +189,13 @@
   "admin": {
     "path": "Administración"
   },
+  "patients": {
+    "path": "Pacientes"
+  },
   "patients-list": {
+    "title": "Listado de Pacientes",
+    "subtitle": "Gestiona y consulta el historial de todos tus pacientes.",
+    "path": "Listado",
     "searchPatients": "Buscar Paciente",
     "orderByLastVisit": "Última visita",
     "orderByNextVisit": "Próxima visita",

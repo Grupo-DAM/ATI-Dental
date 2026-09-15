@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import auth from '@react-native-firebase/auth';
 import { useTranslation } from 'react-i18next';
 import NetInfo, { useNetInfo } from '@react-native-community/netinfo';
@@ -251,15 +250,15 @@ export default function AdminUserList() {
     return (
         <ThemedView style={styles.container}>
             <AppHeader />
-            <Breadcrumb parent={t('admin.path')} current={t('admin-users.path')} />
+            <Breadcrumb parent={t('patients.path')} current={t('patients-list.path')} />
             <ScrollView contentContainerStyle={styles.scrollContent}>
 
 
               {/* Title Section */}
               <View style={styles.titleSection}>
-                <ThemedText style={styles.mainTitle}>{t('admin-users.title')}</ThemedText>
+                <ThemedText style={styles.mainTitle}>{t('patients-list.title')}</ThemedText>
                 <ThemedText style={styles.subtitle}>
-                  {t('admin-users.subtitle')}
+                  {t('patients-list.subtitle')}
                 </ThemedText>
               </View>
 
@@ -292,7 +291,7 @@ export default function AdminUserList() {
 
               {/* Filter section */}
               <SearchFilter
-                general={true}
+                general={false}
                 value={searchQuery}
                 onChangeText={(text) => {
                     setSearchQuery(text);
@@ -312,7 +311,7 @@ export default function AdminUserList() {
                           ID="#P-0042"
                           name={user.nombre}
                           email= {user.email}
-                          type='general'
+                          type='patient'
                           status={user.estado === 'activo'}
                           switchStatus = {()=>handleInitiateStatusChange(user)}
                           role= {user.rol}
