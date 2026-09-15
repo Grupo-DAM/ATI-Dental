@@ -88,8 +88,12 @@ appId: com.proyect1.ATIDental
             commands:
                 - tapOn: "(Solo una vez|Just once)"
 
-        - assertVisible: "Consulta desde el sitio web"
-        - hideKeyboard
+        - runFlow:
+            when:
+                notVisible: ".*Welcome to Gmail.*"
+            commands:
+                - assertVisible: "Consulta desde el sitio web"
+                - hideKeyboard
         - back
 
 # No email app in device branch
@@ -151,7 +155,8 @@ appId: com.proyect1.ATIDental
 
         - runFlow:
             when:
-                notVisible: ".*(Open app|Abrir app).*"
+                notVisible: 
+                    id: "btn-contact-whatsapp"
             commands:
                 - back
 
