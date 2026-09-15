@@ -92,7 +92,7 @@ export default function LoginScreen() {
 
             <ThemedView style={styles.titleContainer}>
                 <HorizontalLogo/>
-                <ThemedText style={styles.title}>
+                <ThemedText testID='login-title' style={styles.title}>
                     {t('login.title')}
                 </ThemedText>
                 <ThemedText style={styles.subtitle}>

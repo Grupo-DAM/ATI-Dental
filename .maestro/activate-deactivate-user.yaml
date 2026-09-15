@@ -2,6 +2,11 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
 - tapOn:
     id: "email-input"
 - inputText: "soamaia03@gmail.com"
@@ -72,6 +77,9 @@ appId: com.proyect1.ATIDental
     notVisible:
       id: "user-status-modal"
     timeout: 5000
+
+# tap on confirm btn
+- tapOn: "OK"
 
 - tapOn:
     id: "menu-btn"
