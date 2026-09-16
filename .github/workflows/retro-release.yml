@@ -15,7 +15,7 @@ jobs:
   build-and-release-past:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Requerido para publicar el Release sobre el Tag
+      contents: write
 
     steps:
       - name: Checkout en el Tag existente 🕰️
@@ -37,25 +37,25 @@ jobs:
             ./node_modules/.bin/patch-package
           fi
 
-      # NUEVO: Inyectar la configuración de Firebase QA tal como lo hace el pipeline original
       - name: Inject QA Firebase Configuration
         env:
           FIREBASE_QA_BASE64: ${{ secrets.ANDROID_FIREBASE_QA_JSON_BASE64 }}
         run: |
           if [ -z "$FIREBASE_QA_BASE64" ]; then
-            echo "::error::El secreto ANDROID_FIREBASE_QA_JSON_BASE64 no está configurado en GitHub."
+            echo "::error::El secreto ANDROID_FIREBASE_QA_JSON_BASE64 no está configurado."
             exit 1
           else
             echo "Decodificando e inyectando configuración de Firebase para QA..."
             echo "$FIREBASE_QA_BASE64" | base64 --decode > ./google-services.json
           fi
 
-      - name: Configurar Expo y EAS CLI
-        uses: expo/expo-github-action@v8
-        with:
-          expo-version: latest
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+      # ==========================================
+      # SOLUCIÓN AL ERROR DE YARN: Instalación nativa con NPM
+      # ==========================================
+      - name: Instalar EAS CLI de forma nativa con NPM 🛠️
+        run: |
+          echo "Instalando la herramienta oficial de Expo de forma global usando npm..."
+          npm install -g eas-cli --ignore-scripts
 
       - name: Compilar APK en Expo Cloud ☁️
         id: eas_build
