@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@/hooks/use-theme';
 import { KPICard } from '@/components/reports/KPICard';
 import { DauMauLineChart } from '@/components/reports/dau-mau-line-chart';
 import { DAU_MAU_TARGET_RATIO } from '../types';
 import { useDauMauMetrics } from '../hooks/useDauMauMetrics';
 import { createReportsStyles } from '../styles/reports.styles';
+import { useTheme } from '@/hooks/use-theme';
+import { ReportChartCard } from '../components/ReportChartCard';
 
 interface DauMauReportViewProps {
   user: any;
@@ -40,7 +40,6 @@ export function DauMauReportView({
 
   return (
     <>
-      {/* KPIs DAU / MAU (Líneas 466-475 de reports.tsx) */}
       <View style={styles.kpiRowThree} testID="kpi-cards-container">
         <KPICard
           tinyType
@@ -75,26 +74,14 @@ export function DauMauReportView({
         />
       </View>
 
-      {/* Gráfico DAU / MAU (Líneas 682-707 de reports.tsx) */}
-      <View style={styles.chartCard} testID="chart-card">
-        <View style={styles.chartHeader}>
-          <Text style={styles.chartTitle} testID="chart-title">
-            {t('reports.dauMauChartTitle')}
-          </Text>
-          <TouchableOpacity
-            style={styles.periodFilterBtn}
-            onPress={onOpenPeriodModal}
-            testID="period-filter-btn"
-          >
-            <Text style={styles.periodFilterText}>{periodLabel}</Text>
-            <Ionicons name="filter" size={14} color={theme.pageSubtitle} style={styles.filterIcon} />
-          </TouchableOpacity>
-        </View>
-
-        <View testID="chart-active-container">
-          <DauMauLineChart data={dauMauData} height={230} testID="reports-dau-mau-chart" />
-        </View>
-      </View>
+      <ReportChartCard
+        title={t('reports.dauMauChartTitle')}
+        periodLabel={periodLabel}
+        onOpenPeriodModal={onOpenPeriodModal}
+        hasData={true}
+      >
+        <DauMauLineChart data={dauMauData} height={230} testID="reports-dau-mau-chart" />
+      </ReportChartCard>
     </>
   );
 }
