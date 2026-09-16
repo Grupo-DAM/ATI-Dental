@@ -2,7 +2,7 @@
   "expo": {
     "name": "ATI-Dental",
     "slug": "ATI-Dental",
-    "version": "1.0.1",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "atidental",
