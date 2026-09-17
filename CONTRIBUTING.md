@@ -1,5 +1,23 @@
 # Guía de contribución — ATI-Dental
 
+
+## Versionamiento automatizado
+
+Para simplificar el proceso y evitar errores manuales, el proyecto cuenta con un workflow de GitHub Actions llamado **`auto-versioning`**. Este flujo calcula automáticamente el siguiente número de versión, actualiza los archivos del proyecto, genera el bloque correspondiente en el Changelog y publica el Git Tag de forma segura.
+
+#### Cómo usar la automatización:
+
+1. Ve a la pestaña **Actions** en el repositorio de GitHub.
+2. En la barra lateral izquierda, selecciona el workflow **"Automatización de Versionamiento y Tags"**.
+3. Haz clic en el botón desplegable **Run workflow** a la derecha.
+4. Configura las opciones del formulario:
+   - **Branch:** Asegúrate de seleccionar la rama principal acordada (por ejemplo, `main`).
+   - **Tipo de incremento:** Selecciona entre `patch`, `minor` o `major` según la naturaleza de tus cambios (Ver la sección Versionamiento Semántico para más información).
+   - **Descripción breve de los cambios:** Escribe un resumen conciso de lo que incluye la versión. Este texto se inyectará automáticamente en el formato oficial de tu **`CHANGELOG.md`**. Si lo dejas vacío, el sistema usará una descripción genérica basada en el tipo de incremento.
+5. Haz clic en el botón verde **Run workflow**.
+
+El sistema se encargará de realizar los commits de actualización, sincronizar las ramas correspondientes (como el entorno de `qa`) y generar el Git Tag oficial para disparar el pipeline de CI/CD.
+
 ## Versionamiento semántico (SemVer)
 
 Usamos el formato **`MAJOR.MINOR.PATCH`** (por ejemplo `1.2.3`), alineado con [semver.org](https://semver.org/lang/es/).
