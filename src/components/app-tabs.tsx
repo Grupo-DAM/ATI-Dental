@@ -32,6 +32,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const activeRouteName = state.routes[state.index].name;
+  const isPatientsSection = activeRouteName === 'explore' || activeRouteName === 'register-patient';
 
   const handleNavigate = (routeName: string) => {
     navigation.navigate(routeName);
@@ -84,12 +85,12 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         <Image
           source={require('@/assets/expo.icon/Assets/lista.svg')}
           style={styles.icon}
-          tintColor={activeRouteName === 'explore' ? colors.main : colors.textSecondary}
+          tintColor={isPatientsSection ? colors.main : colors.textSecondary}
         />
         <Text
           style={[
             styles.label,
-            { color: activeRouteName === 'explore' ? colors.main : colors.textSecondary },
+            { color: isPatientsSection ? colors.main : colors.textSecondary },
           ]}>
           {t('tabs.explore')}
         </Text>
@@ -100,15 +101,13 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           testID = 'center-btn'
           activeOpacity={0.8}
           style={[styles.floatingButton, { backgroundColor: colors.main }]}
-          onPress={() => {
-            console.log("Central Floating Button pressed");
-          }}
+          onPress={() => handleNavigate('register-patient')}
         >
           <Image
             source={require('@/assets/expo.icon/Assets/plus-solid.svg')}
             style={styles.plusIcon}
             contentFit="contain"
-            tintColor="white"
+            tintColor={colors.overMain}
           />
         </TouchableOpacity>
       </View>
