@@ -36,7 +36,7 @@ jobs:
           if [ -d "./node_modules/patch-package" ] || [ -f "./node_modules/.bin/patch-package" ]; then
             ./node_modules/.bin/patch-package
           fi
-
+          
       - name: Inject QA Firebase Configuration
         env:
           FIREBASE_QA_BASE64: ${{ secrets.ANDROID_FIREBASE_QA_JSON_BASE64 }}
@@ -48,65 +48,40 @@ jobs:
             echo "Decodificando e inyectando configuración de Firebase para QA..."
             echo "$FIREBASE_QA_BASE64" | base64 --decode > ./google-services.json
             
-            # Escribimos tu .easignore real completo de forma dinámica en el runner
-            # Esto parcha el pasado y garantiza que EAS CLI vea el archivo de Firebase
             echo "Escribiendo .easignore real optimizado para el build histórico..."
-            cat << 'EOF' > .easignore
-            # dependencies
-            node_modules/
-
-            # Expo
-            .expo/
-            dist/
-            web-build/
-            expo-env.d.ts
-
-            # Native
-            .kotlin/
-            *.orig.*
-            *.jks
-            *.p8
-            *.p12
-            *.key
-            *.mobileprovision
-
-            # Metro
-            .metro-health-check*
-
-            # debug
-            npm-debug.*
-            yarn-debug.*
-            yarn-error.*
-
-            # macOS
-            .DS_Store
-            *.pem
-
-            # local env files
-            .env*.local
-
-            # typescript
-            *.tsbuildinfo
-
-            app-example
-
-            # generated native folders
-            /ios
-            /android
-
-            # Testing
-            coverage/
-            .reassure/
-
-            # IDE Android studio
-            .idea/
-
-            # REGLA ADICIONAL DE INCLUSIÓN:
-            !google-services.json
-            EOF
+            # Usamos printf para escribir todo el bloque sin importar las sangrías de Bash
+            printf "%s\n" \
+              "node_modules/" \
+              ".expo/" \
+              "dist/" \
+              "web-build/" \
+              "expo-env.d.ts" \
+              ".kotlin/" \
+              "*.orig.*" \
+              "*.jks" \
+              "*.p8" \
+              "*.p12" \
+              "*.key" \
+              "*.mobileprovision" \
+              ".metro-health-check*" \
+              "npm-debug.*" \
+              "yarn-debug.*" \
+              "yarn-error.*" \
+              ".DS_Store" \
+              "*.pem" \
+              ".env*.local" \
+              "*.tsbuildinfo" \
+              "app-example" \
+              "/ios" \
+              "/android" \
+              "coverage/" \
+              ".reassure/" \
+              ".idea/" \
+              "!google-services.json" > .easignore
             
             echo "✓ .easignore histórico reconstruido y listo."
           fi
+
 
       # ==========================================
       # SOLUCIÓN AL ERROR DE YARN: Instalación nativa con NPM
