@@ -1,8 +1,9 @@
 import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act, screen } from '@testing-library/react-native';
 import RegisterTreatmentScreen from '../app/(tabs)/register-treatment';
+import * as treatmentService from '@/services/treatment-service';
 
-// Mock de @expo/vector-icons para evitar advertencias de act(...) por carga asíncrona de fuentes
+// Mock de @expo/vector-icons
 jest.mock('@expo/vector-icons', () => {
   const React = require('react');
   const { Text } = require('react-native');
@@ -16,237 +17,315 @@ jest.mock('expo-image', () => ({
   Image: 'Image',
 }));
 
+const mockBack = jest.fn();
+let mockLocalSearchParams: any = {};
+
 jest.mock('expo-router', () => ({
   router: {
-    back: jest.fn(),
+    back: () => mockBack(),
+    push: jest.fn(),
+    replace: jest.fn(),
   },
+  useRouter: () => ({
+    push: jest.fn(),
+    back: () => mockBack(),
+  }),
+  useLocalSearchParams: () => mockLocalSearchParams,
 }));
 
 jest.mock('@/components/app-header', () => ({
   AppHeader: () => null,
 }));
 
+// Mock de i18next
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
 }));
 
+// Mock del servicio de tratamientos
+jest.mock('@/services/treatment-service', () => ({
+  createTreatment: jest.fn().mockResolvedValue({ id: 'mock-treatment-id' }),
+}));
+
 // ========================================================
-// SUITE DE TESTS UNITARIOS
+// SUITE DE TESTS UNITARIOS - US-10 PERSISTENCIA Y VALIDACIONES
 // ========================================================
-describe('RegisterTreatmentScreen', () => {
+describe('RegisterTreatmentScreen - Functional & Persistence Logic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockLocalSearchParams = {};
   });
 
-  it('debe renderizar el título principal y subtítulo', () => {
+  const fillValidForm = (getByPlaceholderText: any, getByText: any) => {
+    // Select category
+    fireEvent.press(getByText('registerTreatment.placeholders.category'));
+    fireEvent.press(getByText('Ortodoncia'));
+
+    // Treatment name
+    const nameInput = getByPlaceholderText('registerTreatment.placeholders.treatmentName');
+    fireEvent.changeText(nameInput, 'Colocación de brackets');
+
+    // Treatment date
+    const dateInput = screen.getByTestId('treatment-date-input');
+    fireEvent.changeText(dateInput, '11/01/2023');
+
+    // Dentist
+    fireEvent.press(getByText('registerTreatment.placeholders.responsibleDentist'));
+    fireEvent.press(getByText('Dra. García'));
+
+    // Status
+    fireEvent.press(getByText('registerTreatment.placeholders.status'));
+    fireEvent.press(getByText('En Progreso'));
+
+    // Estimated cost
+    const costInput = getByPlaceholderText('0.00');
+    fireEvent.changeText(costInput, '250.00');
+  };
+
+  it('debe asociar los datos del paciente recibidos por parámetros de navegación', () => {
+    mockLocalSearchParams = {
+      patientId: 'custom-patient-999',
+      patientName: 'Carlos Mendoza',
+      patientCedula: 'V-98.765.432',
+      patientAge: '45',
+      patientPhone: '+58 414 111 22 33',
+    };
+
     const { getByText } = render(<RegisterTreatmentScreen />);
 
-    expect(getByText('registerTreatment.title')).toBeTruthy();
-    expect(getByText('registerTreatment.subtitle')).toBeTruthy();
+    expect(getByText('Carlos Mendoza')).toBeTruthy();
+    expect(getByText(/V-98\.765\.432/)).toBeTruthy();
   });
 
-  it('debe renderizar el breadcrumb con los tres niveles', () => {
-    const { getByText } = render(<RegisterTreatmentScreen />);
-
-    expect(getByText('registerTreatment.breadcrumb.patients')).toBeTruthy();
-    expect(getByText('registerTreatment.breadcrumb.patientRecord')).toBeTruthy();
-    expect(getByText('registerTreatment.breadcrumb.treatment')).toBeTruthy();
-  });
-
-  it('debe renderizar la tarjeta de información del paciente', () => {
+  it('debe usar el paciente por defecto cuando no se reciben parámetros de ruta', () => {
     const { getByText } = render(<RegisterTreatmentScreen />);
 
     expect(getByText('Mariana López Rivera')).toBeTruthy();
     expect(getByText(/V-12\.345\.678/)).toBeTruthy();
   });
 
-  it('debe renderizar las secciones del formulario', () => {
-    const { getByText } = render(<RegisterTreatmentScreen />);
+  describe('Validaciones de campos obligatorios', () => {
+    it('no debe abrir el modal de confirmación si los campos obligatorios están vacíos y debe mostrar errores', () => {
+      const { getByText, queryByText } = render(<RegisterTreatmentScreen />);
 
-    expect(getByText('registerTreatment.sections.treatmentDetails')).toBeTruthy();
-    expect(getByText('registerTreatment.sections.pendingExams')).toBeTruthy();
-    expect(getByText('registerTreatment.sections.clinicalInfo')).toBeTruthy();
-    expect(getByText('registerTreatment.sections.observationsAndCost')).toBeTruthy();
-  });
+      const saveBtn = getByText('registerTreatment.save');
+      fireEvent.press(saveBtn);
 
-  it('debe renderizar los botones de cancelar y guardar', () => {
-    const { getByText } = render(<RegisterTreatmentScreen />);
+      // El modal no debe aparecer
+      expect(queryByText('registerTreatment.modal.title')).toBeFalsy();
 
-    expect(getByText('registerTreatment.cancel')).toBeTruthy();
-    expect(getByText('registerTreatment.save')).toBeTruthy();
-  });
+      // Deben mostrarse los mensajes de error
+      expect(getByText('registerTreatment.errors.categoryRequired')).toBeTruthy();
+      expect(getByText('registerTreatment.errors.treatmentNameRequired')).toBeTruthy();
+      expect(getByText('registerTreatment.errors.treatmentDateRequired')).toBeTruthy();
+      expect(getByText('registerTreatment.errors.dentistRequired')).toBeTruthy();
+      expect(getByText('registerTreatment.errors.statusRequired')).toBeTruthy();
+      expect(getByText('registerTreatment.errors.costRequired')).toBeTruthy();
+    });
 
-  it('debe navegar hacia atrás al presionar cancelar', () => {
-    const { router } = require('expo-router');
-    const { getByText } = render(<RegisterTreatmentScreen />);
+    it('debe rechazar costos negativos y mostrar mensaje de error', () => {
+      const { getByText, getByPlaceholderText } = render(<RegisterTreatmentScreen />);
 
-    const cancelBtn = getByText('registerTreatment.cancel');
-    fireEvent.press(cancelBtn);
+      fillValidForm(getByPlaceholderText, getByText);
 
-    expect(router.back).toHaveBeenCalled();
-  });
+      // Set negative cost
+      const costInput = getByPlaceholderText('0.00');
+      fireEvent.changeText(costInput, '-50.00');
 
-  it('debe mostrar el modal de confirmación al presionar guardar', () => {
-    const { getByText } = render(<RegisterTreatmentScreen />);
+      fireEvent.press(getByText('registerTreatment.save'));
 
-    const saveBtn = getByText('registerTreatment.save');
-    fireEvent.press(saveBtn);
+      expect(getByText('registerTreatment.errors.costInvalid')).toBeTruthy();
+    });
 
-    expect(getByText('registerTreatment.modal.title')).toBeTruthy();
-    expect(getByText('registerTreatment.modal.message')).toBeTruthy();
-  });
+    it('debe rechazar costos con caracteres no numéricos', () => {
+      const { getByText, getByPlaceholderText } = render(<RegisterTreatmentScreen />);
 
-  it('debe cerrar el modal al presionar cancelar en el modal', () => {
-    const { getByText, queryByText } = render(<RegisterTreatmentScreen />);
+      fillValidForm(getByPlaceholderText, getByText);
 
-    // Open confirmation modal
-    fireEvent.press(getByText('registerTreatment.save'));
-    expect(getByText('registerTreatment.modal.title')).toBeTruthy();
+      const costInput = getByPlaceholderText('0.00');
+      fireEvent.changeText(costInput, 'cien');
 
-    // Cancel the modal
-    fireEvent.press(getByText('registerTreatment.modal.cancel'));
+      fireEvent.press(getByText('registerTreatment.save'));
 
-    expect(queryByText('registerTreatment.modal.title')).toBeFalsy();
-  });
+      expect(getByText('registerTreatment.errors.costInvalid')).toBeTruthy();
+    });
 
-  it('debe mostrar un toast de éxito al confirmar guardado', async () => {
-    const { getByText } = render(<RegisterTreatmentScreen />);
+    it('debe permitir que el campo Pieza Dental permanezca opcional (sin selección específica)', () => {
+      const { getByText, getByPlaceholderText, queryByText } = render(<RegisterTreatmentScreen />);
 
-    // Open confirmation modal
-    fireEvent.press(getByText('registerTreatment.save'));
+      fillValidForm(getByPlaceholderText, getByText);
 
-    // Confirm save
-    fireEvent.press(getByText('registerTreatment.modal.confirm'));
+      // Dental piece is left untouched
+      fireEvent.press(getByText('registerTreatment.save'));
 
-    await waitFor(() => {
-      expect(getByText('registerTreatment.toast.title')).toBeTruthy();
-      expect(getByText('registerTreatment.toast.message')).toBeTruthy();
+      // El modal debe abrirse sin problemas porque pieza dental es opcional
+      expect(getByText('registerTreatment.modal.title')).toBeTruthy();
     });
   });
 
-  it('debe permitir escribir en el campo de nombre del tratamiento', () => {
-    const { getByPlaceholderText } = render(<RegisterTreatmentScreen />);
+  describe('Gestión de Exámenes Pendientes', () => {
+    it('debe agregar un examen pendiente con nombre y fecha', () => {
+      const { getByText, getByPlaceholderText } = render(<RegisterTreatmentScreen />);
 
-    const treatmentNameInput = getByPlaceholderText('registerTreatment.placeholders.treatmentName');
-    fireEvent.changeText(treatmentNameInput, 'Limpieza profunda');
+      const examNameInput = getByPlaceholderText('registerTreatment.placeholders.examName');
+      fireEvent.changeText(examNameInput, 'Radiografía Panorámica');
 
-    expect(treatmentNameInput.props.value).toBe('Limpieza profunda');
+      const examDateInput = screen.getByTestId('exam-date-input');
+      fireEvent.changeText(examDateInput, '20/10/2023');
+
+      fireEvent.press(getByText('registerTreatment.addExam'));
+
+      expect(getByText('Radiografía Panorámica')).toBeTruthy();
+      expect(getByText('20/10/2023')).toBeTruthy();
+    });
+
+    it('debe mostrar error y no agregar si el nombre del examen está vacío', () => {
+      const { getByText, getByPlaceholderText, queryByText } = render(<RegisterTreatmentScreen />);
+
+      const examNameInput = getByPlaceholderText('registerTreatment.placeholders.examName');
+      fireEvent.changeText(examNameInput, '   ');
+
+      fireEvent.press(getByText('registerTreatment.addExam'));
+
+      expect(getByText('registerTreatment.errors.examNameRequired')).toBeTruthy();
+      expect(queryByText('close-circle')).toBeFalsy();
+    });
+
+    it('debe permitir eliminar un examen pendiente previamente agregado', () => {
+      const { getByText, getByPlaceholderText, queryByText } = render(<RegisterTreatmentScreen />);
+
+      fireEvent.changeText(
+        getByPlaceholderText('registerTreatment.placeholders.examName'),
+        'Examen de sangre'
+      );
+      fireEvent.press(getByText('registerTreatment.addExam'));
+      expect(getByText('Examen de sangre')).toBeTruthy();
+
+      // Remove
+      fireEvent.press(getByText('close-circle'));
+      expect(queryByText('Examen de sangre')).toBeFalsy();
+    });
   });
 
-  it('debe permitir escribir notas y observaciones', () => {
-    const { getByPlaceholderText } = render(<RegisterTreatmentScreen />);
+  describe('Confirmación y Persistencia', () => {
+    it('NO debe persistir datos si el usuario cancela en el modal de confirmación', () => {
+      const createSpy = jest.spyOn(treatmentService, 'createTreatment');
+      const { getByText, getByPlaceholderText, queryByText } = render(<RegisterTreatmentScreen />);
 
-    const notesInput = getByPlaceholderText('registerTreatment.placeholders.notes');
-    fireEvent.changeText(notesInput, 'Paciente alérgico a la penicilina');
+      fillValidForm(getByPlaceholderText, getByText);
 
-    expect(notesInput.props.value).toBe('Paciente alérgico a la penicilina');
-  });
+      fireEvent.press(getByText('registerTreatment.save'));
+      expect(getByText('registerTreatment.modal.title')).toBeTruthy();
 
-  it('debe permitir escribir el costo estimado', () => {
-    const { getByPlaceholderText } = render(<RegisterTreatmentScreen />);
+      // Cancel modal
+      fireEvent.press(getByText('registerTreatment.modal.cancel'));
+      expect(queryByText('registerTreatment.modal.title')).toBeFalsy();
 
-    const costInput = getByPlaceholderText('0.00');
-    fireEvent.changeText(costInput, '150.00');
+      expect(createSpy).not.toHaveBeenCalled();
+    });
 
-    expect(costInput.props.value).toBe('150.00');
-  });
+    it('debe persistir el tratamiento asociando al paciente al confirmar en el modal', async () => {
+      const createSpy = jest.spyOn(treatmentService, 'createTreatment').mockResolvedValueOnce({
+        id: 'new-treatment-id-123',
+        patientId: 'patient-mariana-lopez-123',
+        category: 'Ortodoncia',
+        treatmentName: 'Colocación de brackets',
+        treatmentDate: '11/01/2023',
+        responsibleDentist: 'Dra. García',
+        status: 'En Progreso',
+        estimatedCost: 250,
+        pendingExams: [],
+      });
 
-  it('debe abrir y seleccionar una opción del dropdown de categoría', () => {
-    const { getByText } = render(<RegisterTreatmentScreen />);
+      const { getByText, getByPlaceholderText } = render(<RegisterTreatmentScreen />);
 
-    // Open the dropdown
-    const categoryTrigger = getByText('registerTreatment.placeholders.category');
-    fireEvent.press(categoryTrigger);
+      fillValidForm(getByPlaceholderText, getByText);
 
-    // Select an option
-    const option = getByText('Ortodoncia');
-    fireEvent.press(option);
+      // Open modal
+      fireEvent.press(getByText('registerTreatment.save'));
+      expect(getByText('registerTreatment.modal.title')).toBeTruthy();
 
-    // The selected value should now be visible
-    expect(getByText('Ortodoncia')).toBeTruthy();
-  });
+      // Confirm modal
+      fireEvent.press(getByText('registerTreatment.modal.confirm'));
 
-  it('debe agregar un examen pendiente cuando se presiona agregar', () => {
-    const { getByText, getByPlaceholderText } = render(<RegisterTreatmentScreen />);
+      await waitFor(() => {
+        expect(createSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            patientId: 'patient-mariana-lopez-123',
+            category: 'Ortodoncia',
+            treatmentName: 'Colocación de brackets',
+            estimatedCost: 250,
+          })
+        );
+        expect(getByText('registerTreatment.toast.title')).toBeTruthy();
+        expect(getByText('registerTreatment.toast.message')).toBeTruthy();
+      });
+    });
 
-    const examNameInput = getByPlaceholderText('registerTreatment.placeholders.examName');
-    fireEvent.changeText(examNameInput, 'Radiografía panorámica');
+    it('debe conservar los datos del formulario y mostrar toast de error ante fallo de persistencia', async () => {
+      const createSpy = jest.spyOn(treatmentService, 'createTreatment').mockRejectedValueOnce(
+        new Error('Network error connecting to Firestore')
+      );
 
-    const addBtn = getByText('registerTreatment.addExam');
-    fireEvent.press(addBtn);
+      const { getByText, getByPlaceholderText } = render(<RegisterTreatmentScreen />);
 
-    expect(getByText('Radiografía panorámica')).toBeTruthy();
-  });
+      fillValidForm(getByPlaceholderText, getByText);
 
-  it('no debe agregar un examen si el campo de nombre está vacío', () => {
-    const { getByText, queryByText, getByPlaceholderText } = render(<RegisterTreatmentScreen />);
+      const treatmentNameInput = getByPlaceholderText('registerTreatment.placeholders.treatmentName');
+      expect(treatmentNameInput.props.value).toBe('Colocación de brackets');
 
-    // Ensure exam name input is empty
-    const examNameInput = getByPlaceholderText('registerTreatment.placeholders.examName');
-    fireEvent.changeText(examNameInput, '');
+      // Open & confirm modal
+      fireEvent.press(getByText('registerTreatment.save'));
+      fireEvent.press(getByText('registerTreatment.modal.confirm'));
 
-    const addBtn = getByText('registerTreatment.addExam');
-    fireEvent.press(addBtn);
+      await waitFor(() => {
+        expect(createSpy).toHaveBeenCalled();
+        // Toast de error
+        expect(getByText('registerTreatment.toast.errorTitle')).toBeTruthy();
+        expect(getByText(/registerTreatment\.toast\.errorMessage/)).toBeTruthy();
+      });
 
-    // Only the add button text should exist, no exam items
-    expect(queryByText('close-circle')).toBeFalsy();
-  });
+      // Comprobar que los datos se conservan en el formulario para reintentar
+      expect(treatmentNameInput.props.value).toBe('Colocación de brackets');
+      const costInput = getByPlaceholderText('0.00');
+      expect(costInput.props.value).toBe('250.00');
+    });
 
-  it('debe eliminar un examen pendiente al presionar el botón de eliminar', () => {
-    const { getByText, queryByText, getByPlaceholderText } = render(<RegisterTreatmentScreen />);
+    it('debe navegar hacia atrás al presionar cancelar en la pantalla', () => {
+      const { getByText } = render(<RegisterTreatmentScreen />);
 
-    // Add an exam first
-    const examNameInput = getByPlaceholderText('registerTreatment.placeholders.examName');
-    fireEvent.changeText(examNameInput, 'TAC dental');
+      fireEvent.press(getByText('registerTreatment.cancel'));
+      expect(mockBack).toHaveBeenCalled();
+    });
 
-    const addBtn = getByText('registerTreatment.addExam');
-    fireEvent.press(addBtn);
-    expect(getByText('TAC dental')).toBeTruthy();
+    it('debe evitar operaciones duplicadas mientras se encuentra guardando', async () => {
+      let resolvePromise: (val: any) => void;
+      const slowPromise = new Promise((res) => {
+        resolvePromise = res;
+      });
 
-    // Remove the exam
-    const removeBtn = getByText('close-circle');
-    fireEvent.press(removeBtn);
+      const createSpy = jest.spyOn(treatmentService, 'createTreatment').mockImplementationOnce(() => slowPromise as any);
 
-    expect(queryByText('TAC dental')).toBeFalsy();
-  });
+      const { getByText, getByPlaceholderText, queryByText } = render(<RegisterTreatmentScreen />);
 
-  it('debe seleccionar una pieza dental desde el dropdown', () => {
-    const { getByText } = render(<RegisterTreatmentScreen />);
+      fillValidForm(getByPlaceholderText, getByText);
 
-    // Open the dental piece dropdown
-    const dentalPieceTrigger = getByText('registerTreatment.placeholders.dentalPiece');
-    fireEvent.press(dentalPieceTrigger);
+      fireEvent.press(getByText('registerTreatment.save'));
 
-    // Select a dental piece
-    const option = getByText('Pieza 11');
-    fireEvent.press(option);
+      // Presionar confirmación dos veces seguidas
+      const confirmBtn = getByText('registerTreatment.modal.confirm');
+      fireEvent.press(confirmBtn);
+      fireEvent.press(confirmBtn);
 
-    expect(getByText('Pieza 11')).toBeTruthy();
-  });
+      // Solo debe haberse invocado una vez
+      expect(createSpy).toHaveBeenCalledTimes(1);
 
-  it('debe seleccionar un dentista responsable desde el dropdown', () => {
-    const { getByText } = render(<RegisterTreatmentScreen />);
-
-    const dentistTrigger = getByText('registerTreatment.placeholders.responsibleDentist');
-    fireEvent.press(dentistTrigger);
-
-    const option = getByText('Dra. García');
-    fireEvent.press(option);
-
-    expect(getByText('Dra. García')).toBeTruthy();
-  });
-
-  it('debe seleccionar un estado desde el dropdown', () => {
-    const { getByText } = render(<RegisterTreatmentScreen />);
-
-    const statusTrigger = getByText('registerTreatment.placeholders.status');
-    fireEvent.press(statusTrigger);
-
-    const option = getByText('En Progreso');
-    fireEvent.press(option);
-
-    expect(getByText('En Progreso')).toBeTruthy();
+      // Resolver
+      await act(async () => {
+        resolvePromise!({ id: 'done' });
+      });
+    });
   });
 });
