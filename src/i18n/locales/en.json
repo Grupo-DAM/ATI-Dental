@@ -197,7 +197,8 @@
     "retentionDay7Sub": "7 days",
     "retentionDay30Sub": "30 days",
     "retentionCohortUsers": "Cohort users",
-    "retentionErrorLoad": "An error occurred while fetching retention metrics."
+    "retentionErrorLoad": "An error occurred while fetching retention metrics.",
+    "retentionPermissionError": "You do not have permission in Firestore to query retention metrics."
   },
   "admin": {
     "path": "Administration"

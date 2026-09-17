@@ -65,7 +65,14 @@ export function useRetentionMetrics({
           (err: any) => {
             console.warn('[useRetentionMetrics] Error al obtener retención:', err);
             if (isMounted) {
-              setQueryError(t('reports.retentionErrorLoad') || t('reports.errorLoad'));
+              const isPerm =
+                err?.code === 'firestore/permission-denied' ||
+                String(err?.message || err).includes('permission-denied');
+              setQueryError(
+                isPerm
+                  ? (t('reports.retentionPermissionError') || t('reports.permissionError'))
+                  : (t('reports.retentionErrorLoad') || t('reports.errorLoad'))
+              );
               setLoading(false);
             }
           }

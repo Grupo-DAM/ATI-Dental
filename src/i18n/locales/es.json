@@ -197,7 +197,8 @@
     "retentionDay7Sub": "7 días",
     "retentionDay30Sub": "30 días",
     "retentionCohortUsers": "Usuarios en cohorte",
-    "retentionErrorLoad": "Ocurrió un error al consultar las métricas de retención."
+    "retentionErrorLoad": "Ocurrió un error al consultar las métricas de retención.",
+    "retentionPermissionError": "No tienes permisos en Firestore para consultar las métricas de retención."
   },
   "admin": {
     "path": "Administración"
