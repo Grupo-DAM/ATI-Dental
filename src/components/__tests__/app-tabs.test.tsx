@@ -154,13 +154,21 @@ describe('AppTabs Component & CustomTabBar', () => {
   });
 
   it('should register the press event of the central button (+)', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const mockNavigate = jest.fn();
+
+    mockTabs.mockImplementationOnce(({ tabBar }: any) =>
+      tabBar({
+        state: { routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }], index: 0 },
+        descriptors: {},
+        navigation: { navigate: mockNavigate }
+      })
+    );
+
     const { getByTestId } = render(<AppTabs />);
 
     const floatingButton = getByTestId('center-btn');
     fireEvent.press(floatingButton);
 
-    expect(consoleSpy).toHaveBeenCalledWith("Central Floating Button pressed");
-    consoleSpy.mockRestore();
+    expect(mockNavigate).toHaveBeenCalledWith('register-treatment');
   });
 });
