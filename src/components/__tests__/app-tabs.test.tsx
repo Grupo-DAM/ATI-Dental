@@ -154,7 +154,24 @@ describe('AppTabs Component & CustomTabBar', () => {
     expect(StyleSheet.flatten(tabBarContainer?.props.style)).toMatchObject({ paddingBottom: 20 });
   });
 
-  it('should navigate to register-patient when pressing the central button', () => {
+  it('should navigate to explore when pressing the patients tab', () => {
+    const mockNavigate = jest.fn();
+
+    mockTabs.mockImplementationOnce(({ tabBar }: any) =>
+      tabBar({
+        state: { routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }], index: 0 },
+        descriptors: {},
+        navigation: { navigate: mockNavigate },
+      }),
+    );
+
+    const { getByTestId } = render(<AppTabs />);
+    fireEvent.press(getByTestId('explore-tab'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('explore');
+  });
+
+  it('should navigate to register-treatment when pressing the central button', () => {
     const mockNavigate = jest.fn();
 
     mockTabs.mockImplementationOnce(({ tabBar }: any) =>
@@ -168,6 +185,6 @@ describe('AppTabs Component & CustomTabBar', () => {
     const { getByTestId } = render(<AppTabs />);
     fireEvent.press(getByTestId('center-btn'));
 
-    expect(mockNavigate).toHaveBeenCalledWith('register-patient');
+    expect(mockNavigate).toHaveBeenCalledWith('register-treatment');
   });
 });

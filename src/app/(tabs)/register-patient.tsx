@@ -450,7 +450,7 @@ export default function RegisterPatientScreen() {
                 <Text style={styles.primaryButtonText}>{t('registerPatient.confirmDate')}</Text>
               </TouchableOpacity>
             </View>
-          </View>
+      </View>
         </Modal>
       ) : null}
     </View>
@@ -459,12 +459,12 @@ export default function RegisterPatientScreen() {
 
 const createStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
+  container: {
+    flex: 1,
       backgroundColor: theme.backgroundSecondary,
-    },
+  },
     scroll: {
-      flex: 1,
+    flex: 1,
     },
     titleSection: {
       paddingHorizontal: 20,
@@ -472,12 +472,12 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
     },
     mainTitle: {
       fontSize: 26,
-      fontWeight: '700',
+    fontWeight: '700',
       color: theme.pageTitle,
-      marginBottom: 8,
-    },
-    subtitle: {
-      fontSize: 14,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
       color: theme.pageSubtitle,
       lineHeight: 20,
     },
@@ -625,5 +625,5 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       color: theme.pageTitle,
       marginBottom: 8,
       fontFamily: 'Open Sans',
-    },
-  });
+  },
+});

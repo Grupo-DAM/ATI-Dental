@@ -289,5 +289,55 @@
   "user-card": {
     "lastVisitLabel": "LAST VISIT:",
     "nextVisitLabel": "NEXT VISIT:"
+  },
+  "registerTreatment": {
+    "title": "Register Treatment",
+    "subtitle": "Complete the procedure details for the patient's clinical record.",
+    "years": "years",
+    "breadcrumb": {
+      "patients": "Patients",
+      "patientRecord": "Patient Record",
+      "treatment": "Treatment"
+    },
+    "sections": {
+      "treatmentDetails": "Treatment Details",
+      "pendingExams": "Pending Exams",
+      "clinicalInfo": "Clinical Information",
+      "observationsAndCost": "Observations and Cost"
+    },
+    "fields": {
+      "category": "Category",
+      "treatmentName": "Treatment Name",
+      "dentalPiece": "Dental Piece (Optional)",
+      "examName": "Exam Name",
+      "date": "Date",
+      "treatmentDate": "Treatment Date",
+      "responsibleDentist": "Responsible Dentist",
+      "status": "Status",
+      "notes": "Notes / Observations",
+      "estimatedCost": "Estimated Cost"
+    },
+    "placeholders": {
+      "category": "Select a category...",
+      "treatmentName": "E.g. Deep Cleaning",
+      "dentalPiece": "Entire mouth",
+      "examName": "E.g. Deep Cleaning",
+      "responsibleDentist": "Dr. Smith",
+      "status": "Completed",
+      "notes": "Additional details about the procedure..."
+    },
+    "addExam": "Add",
+    "cancel": "Cancel",
+    "save": "Save Treatment",
+    "modal": {
+      "title": "Save Treatment",
+      "message": "Are you sure you want to save this treatment?",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "title": "Registration Successful",
+      "message": "Treatment registered successfully."
+    }
   }
 }
