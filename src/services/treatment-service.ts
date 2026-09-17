@@ -28,34 +28,52 @@ export interface Treatment extends TreatmentInput {
 
 export const TREATMENTS_COLLECTION = 'tratamientos';
 
+function getServerTimestamp() {
+  try {
+    if (typeof (firestore as any)?.FieldValue?.serverTimestamp === 'function') {
+      return (firestore as any).FieldValue.serverTimestamp();
+    }
+  } catch (e) {
+    console.warn('[treatment-service] FieldValue.serverTimestamp unavailable, using Date fallback:', e);
+  }
+  return new Date();
+}
+
 /**
  * Creates and persists a new treatment associated with a patient in Firestore.
  */
 export async function createTreatment(input: TreatmentInput): Promise<Treatment> {
-  const collectionRef = firestore().collection(TREATMENTS_COLLECTION);
-  
-  const treatmentDocument = {
-    patientId: input.patientId,
-    patientName: input.patientName || '',
-    category: input.category,
-    treatmentName: input.treatmentName,
-    dentalPiece: input.dentalPiece || 'Toda la boca',
-    treatmentDate: input.treatmentDate,
-    responsibleDentist: input.responsibleDentist,
-    status: input.status,
-    notes: input.notes || '',
-    estimatedCost: Number(input.estimatedCost),
-    pendingExams: input.pendingExams || [],
-    createdAt: firestore.FieldValue.serverTimestamp(),
-    updatedAt: firestore.FieldValue.serverTimestamp(),
-  };
+  try {
+    const db = firestore();
+    const collectionRef = db.collection(TREATMENTS_COLLECTION);
+    const timestamp = getServerTimestamp();
+    
+    const treatmentDocument = {
+      patientId: input.patientId,
+      patientName: input.patientName || '',
+      category: input.category,
+      treatmentName: input.treatmentName,
+      dentalPiece: input.dentalPiece || 'Toda la boca',
+      treatmentDate: input.treatmentDate,
+      responsibleDentist: input.responsibleDentist,
+      status: input.status,
+      notes: input.notes || '',
+      estimatedCost: Number(input.estimatedCost),
+      pendingExams: input.pendingExams || [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
 
-  const docRef = await collectionRef.add(treatmentDocument);
+    const docRef = await collectionRef.add(treatmentDocument);
 
-  return {
-    id: docRef.id,
-    ...treatmentDocument,
-  };
+    return {
+      id: docRef.id,
+      ...treatmentDocument,
+    };
+  } catch (error) {
+    console.error('[treatment-service] createTreatment failed:', error);
+    throw error;
+  }
 }
 
 /**

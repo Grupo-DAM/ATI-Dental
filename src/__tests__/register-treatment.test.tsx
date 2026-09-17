@@ -272,7 +272,7 @@ describe('RegisterTreatmentScreen - Functional & Persistence Logic', () => {
         expect(createSpy).toHaveBeenCalled();
         // Toast de error
         expect(getByText('registerTreatment.toast.errorTitle')).toBeTruthy();
-        expect(getByText('registerTreatment.toast.errorMessage')).toBeTruthy();
+        expect(getByText(/registerTreatment\.toast\.errorMessage/)).toBeTruthy();
       });
 
       // Comprobar que los datos se conservan en el formulario para reintentar

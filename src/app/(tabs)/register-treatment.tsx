@@ -860,14 +860,16 @@ export default function RegisterTreatmentScreen() {
         title: t('registerTreatment.toast.title'),
         message: t('registerTreatment.toast.message'),
       });
-    } catch (err) {
+    } catch (err: any) {
+      console.error('[RegisterTreatment] Error saving treatment:', err);
       // In case of network or Firestore error, preserve form data and permit retry
       setShowConfirmModal(false);
+      const detail = err?.message || err?.code || '';
       setToastConfig({
         visible: true,
         type: 'error',
         title: t('registerTreatment.toast.errorTitle'),
-        message: t('registerTreatment.toast.errorMessage'),
+        message: detail ? `${t('registerTreatment.toast.errorMessage')} (${detail})` : t('registerTreatment.toast.errorMessage'),
       });
     } finally {
       setIsSubmitting(false);
