@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act, screen } from '@testing-library/react-native';
 import RegisterTreatmentScreen from '../app/(tabs)/register-treatment';
 import * as treatmentService from '@/services/treatment-service';
 
@@ -23,7 +23,13 @@ let mockLocalSearchParams: any = {};
 jest.mock('expo-router', () => ({
   router: {
     back: () => mockBack(),
+    push: jest.fn(),
+    replace: jest.fn(),
   },
+  useRouter: () => ({
+    push: jest.fn(),
+    back: () => mockBack(),
+  }),
   useLocalSearchParams: () => mockLocalSearchParams,
 }));
 
@@ -31,10 +37,16 @@ jest.mock('@/components/app-header', () => ({
   AppHeader: () => null,
 }));
 
+// Mock de i18next
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
+}));
+
+// Mock del servicio de tratamientos
+jest.mock('@/services/treatment-service', () => ({
+  createTreatment: jest.fn().mockResolvedValue({ id: 'mock-treatment-id' }),
 }));
 
 // ========================================================
@@ -56,7 +68,7 @@ describe('RegisterTreatmentScreen - Functional & Persistence Logic', () => {
     fireEvent.changeText(nameInput, 'Colocación de brackets');
 
     // Treatment date
-    const dateInput = getByPlaceholderText('10/25/2023');
+    const dateInput = screen.getByTestId('treatment-date-input');
     fireEvent.changeText(dateInput, '11/01/2023');
 
     // Dentist
@@ -160,7 +172,7 @@ describe('RegisterTreatmentScreen - Functional & Persistence Logic', () => {
       const examNameInput = getByPlaceholderText('registerTreatment.placeholders.examName');
       fireEvent.changeText(examNameInput, 'Radiografía Panorámica');
 
-      const examDateInput = getByPlaceholderText('dd/mm/yyyy');
+      const examDateInput = screen.getByTestId('exam-date-input');
       fireEvent.changeText(examDateInput, '20/10/2023');
 
       fireEvent.press(getByText('registerTreatment.addExam'));

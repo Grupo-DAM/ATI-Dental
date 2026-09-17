@@ -1003,12 +1003,12 @@ export default function RegisterTreatmentScreen() {
               title={t('registerTreatment.sections.clinicalInfo')}
             />
 
-            <InputField
+            <DateField
               testID="treatment-date-input"
               label={t('registerTreatment.fields.treatmentDate')}
               value={form.treatmentDate}
               onChangeText={(val) => updateForm('treatmentDate', val)}
-              placeholder="10/25/2023"
+              placeholder="dd/mm/yyyy"
               error={errors.treatmentDate ? t(`registerTreatment.${errors.treatmentDate}`) : undefined}
             />
 
