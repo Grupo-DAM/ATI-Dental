@@ -1,9 +1,9 @@
-// Listener Firestore de métricas de retención de usuarios
 import { useState, useEffect, useMemo } from 'react';
 import { firestore } from '@/config/firebase';
 import { RetentionDataPoint } from '../types';
 import { parseRetentionData, formatRetentionPercentage } from '../utils/reports-utils';
 import { isAdminUser } from '@/constants/user-roles';
+import { fetchRetentionMetrics } from '@/services/retention-service';
 
 interface UseRetentionMetricsProps {
   user: any;
@@ -30,6 +30,35 @@ export function useRetentionMetrics({
     let isMounted = true;
     setLoading(true);
     setQueryError(null);
+
+    // 1. Alternativa 2 (Spike #100): Consultar endpoint serverless del Worker
+    fetchRetentionMetrics()
+      .then((result) => {
+        if (!isMounted) return;
+        if (result.success && result.data) {
+          const rawD1 = result.data.dia1 ?? result.data.day1;
+          const rawD7 = result.data.dia7 ?? result.data.day7;
+          const rawD30 = result.data.dia30 ?? result.data.day30;
+
+          if (rawD1 !== undefined || rawD7 !== undefined || rawD30 !== undefined) {
+            const parsed = parseRetentionData(result.data, t);
+            const total =
+              typeof result.data.totalUsuariosCohorte === 'number'
+                ? result.data.totalUsuariosCohorte
+                : Number(result.data.totalCohortUsers) || 0;
+
+            setRetentionData((prev) => {
+              const hasExisting = prev.some((p) => p.percentage > 0);
+              return hasExisting ? prev : parsed;
+            });
+            setTotalCohortUsers((prev) => (prev > 0 ? prev : total));
+            setLoading(false);
+          }
+        }
+      })
+      .catch(() => {
+        // En caso de error de red o timeout, se delega al listener reactivo
+      });
 
     try {
       const unsubscribe = firestore()
