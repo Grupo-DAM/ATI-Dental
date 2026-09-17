@@ -278,6 +278,7 @@
     "addExam": "Añadir",
     "cancel": "Cancelar",
     "save": "Guardar Tratamiento",
+    "saving": "Guardando...",
     "modal": {
       "title": "Guardar Tratamiento",
       "message": "¿Estás seguro de que deseas guardar este tratamiento?",
@@ -286,7 +287,20 @@
     },
     "toast": {
       "title": "Registro Exitoso",
-      "message": "Tratamiento registrado con éxito."
+      "message": "Tratamiento registrado con éxito.",
+      "errorTitle": "Error al Guardar",
+      "errorMessage": "No se pudo registrar el tratamiento. Inténtelo nuevamente."
+    },
+    "errors": {
+      "patientRequired": "Debe seleccionarse un paciente válido.",
+      "categoryRequired": "La categoría es obligatoria.",
+      "treatmentNameRequired": "El nombre del tratamiento es obligatorio.",
+      "treatmentDateRequired": "La fecha del tratamiento es obligatoria.",
+      "dentistRequired": "Debe seleccionar un odontólogo responsable.",
+      "statusRequired": "El estado es obligatorio.",
+      "costRequired": "El costo estimado es obligatorio.",
+      "costInvalid": "El costo debe ser un valor numérico válido y no negativo.",
+      "examNameRequired": "El nombre del examen no puede estar vacío."
     }
   }
 }

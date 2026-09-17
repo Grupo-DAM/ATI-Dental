@@ -11,23 +11,20 @@ import {
   Modal,
   Animated as RNAnimated,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/app-header';
 import { Colors } from '@/constants/theme';
+import { createTreatment, PendingExam } from '@/services/treatment-service';
+import { validateTreatmentForm, ValidationErrors } from '@/utils/treatment-validation';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface PendingExam {
-  id: string;
-  name: string;
-  date: string;
-}
-
-interface TreatmentForm {
+export interface TreatmentForm {
   category: string;
   treatmentName: string;
   dentalPiece: string;
@@ -38,19 +35,30 @@ interface TreatmentForm {
   estimatedCost: string;
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
+export interface PatientInfo {
+  id: string;
+  name: string;
+  cedula: string;
+  gender: string;
+  age: number;
+  phone: string;
+  imageUrl: string | null;
+}
+
+// ─── Mock / Default Data ──────────────────────────────────────────────────────
 const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
 
-const MOCK_PATIENT = {
+export const DEFAULT_PATIENT: PatientInfo = {
+  id: 'patient-mariana-lopez-123',
   name: 'Mariana López Rivera',
   cedula: 'V-12.345.678',
   gender: 'Mujer',
   age: 32,
   phone: '+58 422 321 98 74',
-  imageUrl: null as string | null,
+  imageUrl: null,
 };
 
-const CATEGORIES = [
+export const CATEGORIES = [
   'Odontología General',
   'Ortodoncia',
   'Endodoncia',
@@ -61,7 +69,7 @@ const CATEGORIES = [
   'Odontopediatría',
 ];
 
-const DENTAL_PIECES = [
+export const DENTAL_PIECES = [
   'Toda la boca',
   'Pieza 11', 'Pieza 12', 'Pieza 13', 'Pieza 14', 'Pieza 15',
   'Pieza 21', 'Pieza 22', 'Pieza 23', 'Pieza 24', 'Pieza 25',
@@ -69,14 +77,14 @@ const DENTAL_PIECES = [
   'Pieza 41', 'Pieza 42', 'Pieza 43', 'Pieza 44', 'Pieza 45',
 ];
 
-const DENTISTS = [
+export const DENTISTS = [
   'Dr. Smith',
   'Dra. García',
   'Dr. Martínez',
   'Dra. López',
 ];
 
-const STATUSES = [
+export const STATUSES = [
   'Completado',
   'En Progreso',
   'Pendiente',
@@ -126,9 +134,9 @@ const breadcrumbStyles = StyleSheet.create({
 });
 
 /** Patient info card with gradient-style background */
-function PatientInfoCard({ patient, t }: { patient: typeof MOCK_PATIENT; t: (k: string) => string }) {
+function PatientInfoCard({ patient, t }: { patient: PatientInfo; t: (k: string) => string }) {
   return (
-    <View style={patientCardStyles.card}>
+    <View style={patientCardStyles.card} testID="patient-info-card">
       <Image
         source={patient.imageUrl ? { uri: patient.imageUrl } : avatarFallback}
         style={patientCardStyles.avatar}
@@ -221,12 +229,16 @@ function SelectField({
   placeholder,
   options,
   onSelect,
+  error,
+  testID,
 }: {
   label: string;
   value: string;
   placeholder: string;
   options: string[];
   onSelect: (val: string) => void;
+  error?: string;
+  testID?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -234,7 +246,11 @@ function SelectField({
     <View style={inputStyles.fieldGroup}>
       <Text style={inputStyles.label}>{label}</Text>
       <TouchableOpacity
-        style={inputStyles.selectTrigger}
+        testID={testID}
+        style={[
+          inputStyles.selectTrigger,
+          error ? inputStyles.errorBorder : null,
+        ]}
         onPress={() => setOpen(!open)}
         activeOpacity={0.7}
       >
@@ -243,6 +259,11 @@ function SelectField({
         </Text>
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color="#6B7280" />
       </TouchableOpacity>
+      {error ? (
+        <Text style={inputStyles.errorText} testID={testID ? `${testID}-error` : undefined}>
+          {error}
+        </Text>
+      ) : null}
       {open && (
         <View style={inputStyles.optionsList}>
           <ScrollView nestedScrollEnabled style={{ maxHeight: 180 }}>
@@ -288,6 +309,8 @@ function InputField({
   multiline = false,
   numberOfLines = 1,
   prefix,
+  error,
+  testID,
 }: {
   label: string;
   value: string;
@@ -297,6 +320,8 @@ function InputField({
   multiline?: boolean;
   numberOfLines?: number;
   prefix?: string;
+  error?: string;
+  testID?: string;
 }) {
   return (
     <View style={inputStyles.fieldGroup}>
@@ -304,9 +329,11 @@ function InputField({
       <View style={[
         inputStyles.inputContainer,
         multiline && { height: 80, alignItems: 'flex-start' },
+        error ? inputStyles.errorBorder : null,
       ]}>
         {prefix && <Text style={inputStyles.prefix}>{prefix}</Text>}
         <TextInput
+          testID={testID}
           style={[
             inputStyles.input,
             multiline && { textAlignVertical: 'top', paddingTop: 10 },
@@ -320,6 +347,11 @@ function InputField({
           numberOfLines={numberOfLines}
         />
       </View>
+      {error ? (
+        <Text style={inputStyles.errorText} testID={testID ? `${testID}-error` : undefined}>
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -330,17 +362,25 @@ function DateField({
   value,
   onChangeText,
   placeholder,
+  error,
+  testID,
 }: {
   label: string;
   value: string;
   onChangeText: (text: string) => void;
   placeholder: string;
+  error?: string;
+  testID?: string;
 }) {
   return (
     <View style={inputStyles.fieldGroup}>
       <Text style={inputStyles.label}>{label}</Text>
-      <View style={inputStyles.inputContainer}>
+      <View style={[
+        inputStyles.inputContainer,
+        error ? inputStyles.errorBorder : null,
+      ]}>
         <TextInput
+          testID={testID}
           style={inputStyles.input}
           value={value}
           onChangeText={onChangeText}
@@ -349,6 +389,11 @@ function DateField({
         />
         <Ionicons name="calendar-outline" size={20} color="#6B7280" style={{ marginRight: 4 }} />
       </View>
+      {error ? (
+        <Text style={inputStyles.errorText} testID={testID ? `${testID}-error` : undefined}>
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -436,16 +481,27 @@ const inputStyles = StyleSheet.create({
     color: Colors.light.main,
     fontWeight: '600',
   },
+  errorBorder: {
+    borderColor: '#EF4444',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#EF4444',
+    fontFamily: 'Open Sans',
+    marginTop: 4,
+  },
 });
 
-/** Success toast notification */
-function SuccessToast({
+/** Success or Error toast notification */
+function NotificationToast({
   visible,
+  type = 'success',
   message,
   title,
   onDismiss,
 }: {
   visible: boolean;
+  type?: 'success' | 'error';
   message: string;
   title: string;
   onDismiss: () => void;
@@ -466,7 +522,7 @@ function SuccessToast({
           duration: 300,
           useNativeDriver: true,
         }).start(() => onDismiss());
-      }, 3000);
+      }, 3500);
 
       return () => clearTimeout(timer);
     }
@@ -474,21 +530,26 @@ function SuccessToast({
 
   if (!visible) return null;
 
+  const isSuccess = type === 'success';
+  const accentColor = isSuccess ? '#10B981' : '#EF4444';
+  const iconName = isSuccess ? 'checkmark-circle' : 'alert-circle';
+
   return (
     <RNAnimated.View
+      testID="notification-toast"
       style={[
         toastStyles.container,
-        { transform: [{ translateY }] },
+        { transform: [{ translateY }], borderLeftColor: accentColor },
       ]}
     >
       <View style={toastStyles.iconCircle}>
-        <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+        <Ionicons name={iconName} size={24} color={accentColor} />
       </View>
       <View style={toastStyles.textContainer}>
         <Text style={toastStyles.title}>{title}</Text>
         <Text style={toastStyles.message}>{message}</Text>
       </View>
-      <TouchableOpacity onPress={onDismiss} style={toastStyles.closeBtn}>
+      <TouchableOpacity onPress={onDismiss} style={toastStyles.closeBtn} testID="btn-dismiss-toast">
         <Ionicons name="close" size={20} color="#6B7280" />
       </TouchableOpacity>
     </RNAnimated.View>
@@ -513,7 +574,6 @@ const toastStyles = StyleSheet.create({
     elevation: 8,
     zIndex: 999,
     borderLeftWidth: 4,
-    borderLeftColor: '#10B981',
   },
   iconCircle: { marginRight: 12 },
   textContainer: { flex: 1 },
@@ -537,11 +597,13 @@ function ConfirmationModal({
   visible,
   onConfirm,
   onCancel,
+  isSubmitting = false,
   t,
 }: {
   visible: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  isSubmitting?: boolean;
   t: (k: string) => string;
 }) {
   return (
@@ -549,9 +611,9 @@ function ConfirmationModal({
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={onCancel}
+      onRequestClose={isSubmitting ? undefined : onCancel}
     >
-      <Pressable style={modalStyles.overlay} onPress={onCancel}>
+      <Pressable style={modalStyles.overlay} onPress={isSubmitting ? undefined : onCancel}>
         <View style={modalStyles.sheet}>
           <View style={modalStyles.handle} />
 
@@ -563,16 +625,24 @@ function ConfirmationModal({
           <Text style={modalStyles.message}>{t('registerTreatment.modal.message')}</Text>
 
           <TouchableOpacity
-            style={modalStyles.confirmBtn}
+            testID="modal-confirm-btn"
+            style={[modalStyles.confirmBtn, isSubmitting && { opacity: 0.7 }]}
             onPress={onConfirm}
+            disabled={isSubmitting}
             activeOpacity={0.8}
           >
-            <Text style={modalStyles.confirmText}>{t('registerTreatment.modal.confirm')}</Text>
+            {isSubmitting ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={modalStyles.confirmText}>{t('registerTreatment.modal.confirm')}</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
+            testID="modal-cancel-btn"
             style={modalStyles.cancelBtn}
             onPress={onCancel}
+            disabled={isSubmitting}
             activeOpacity={0.7}
           >
             <Text style={modalStyles.cancelText}>{t('registerTreatment.modal.cancel')}</Text>
@@ -665,6 +735,26 @@ const modalStyles = StyleSheet.create({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function RegisterTreatmentScreen() {
   const { t } = useTranslation();
+  const params = useLocalSearchParams<{
+    patientId?: string;
+    patientName?: string;
+    patientCedula?: string;
+    patientGender?: string;
+    patientAge?: string;
+    patientPhone?: string;
+    patientImageUrl?: string;
+  }>();
+
+  // Dynamic or fallback patient
+  const patient: PatientInfo = {
+    id: params.patientId || DEFAULT_PATIENT.id,
+    name: params.patientName || DEFAULT_PATIENT.name,
+    cedula: params.patientCedula || DEFAULT_PATIENT.cedula,
+    gender: params.patientGender || DEFAULT_PATIENT.gender,
+    age: params.patientAge ? Number(params.patientAge) : DEFAULT_PATIENT.age,
+    phone: params.patientPhone || DEFAULT_PATIENT.phone,
+    imageUrl: params.patientImageUrl || DEFAULT_PATIENT.imageUrl,
+  };
 
   // Form state
   const [form, setForm] = useState<TreatmentForm>({
@@ -678,43 +768,110 @@ export default function RegisterTreatmentScreen() {
     estimatedCost: '',
   });
 
+  // Validation errors & submitting guard
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Pending exams
   const [pendingExams, setPendingExams] = useState<PendingExam[]>([]);
   const [newExamName, setNewExamName] = useState('');
   const [newExamDate, setNewExamDate] = useState('');
+  const [examError, setExamError] = useState('');
 
-  // Modal & toast
+  // Modal & notification toast
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastConfig, setToastConfig] = useState<{
+    visible: boolean;
+    type: 'success' | 'error';
+    title: string;
+    message: string;
+  }>({
+    visible: false,
+    type: 'success',
+    title: '',
+    message: '',
+  });
 
   const updateForm = useCallback((field: keyof TreatmentForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => {
+      if (prev[field]) {
+        const copy = { ...prev };
+        delete copy[field];
+        return copy;
+      }
+      return prev;
+    });
   }, []);
 
   const handleAddExam = useCallback(() => {
-    if (!newExamName.trim()) return;
+    if (!newExamName.trim()) {
+      setExamError(t('registerTreatment.errors.examNameRequired'));
+      return;
+    }
     const exam: PendingExam = {
       id: Date.now().toString(),
       name: newExamName.trim(),
-      date: newExamDate,
+      date: newExamDate.trim(),
     };
     setPendingExams((prev) => [...prev, exam]);
     setNewExamName('');
     setNewExamDate('');
-  }, [newExamName, newExamDate]);
+    setExamError('');
+  }, [newExamName, newExamDate, t]);
 
   const handleRemoveExam = useCallback((id: string) => {
     setPendingExams((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
   const handleSavePress = () => {
+    const result = validateTreatmentForm(form, patient.id);
+    if (!result.isValid) {
+      setErrors(result.errors);
+      return;
+    }
+    setErrors({});
     setShowConfirmModal(true);
   };
 
-  const handleConfirmSave = () => {
-    setShowConfirmModal(false);
-    // UI-only: show success toast
-    setShowSuccessToast(true);
+  const handleConfirmSave = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await createTreatment({
+        patientId: patient.id,
+        patientName: patient.name,
+        category: form.category,
+        treatmentName: form.treatmentName.trim(),
+        dentalPiece: form.dentalPiece?.trim() || 'Toda la boca',
+        treatmentDate: form.treatmentDate.trim(),
+        responsibleDentist: form.responsibleDentist.trim(),
+        status: form.status.trim(),
+        notes: form.notes?.trim() || '',
+        estimatedCost: Number(form.estimatedCost),
+        pendingExams,
+      });
+
+      setShowConfirmModal(false);
+      setToastConfig({
+        visible: true,
+        type: 'success',
+        title: t('registerTreatment.toast.title'),
+        message: t('registerTreatment.toast.message'),
+      });
+    } catch (err) {
+      // In case of network or Firestore error, preserve form data and permit retry
+      setShowConfirmModal(false);
+      setToastConfig({
+        visible: true,
+        type: 'error',
+        title: t('registerTreatment.toast.errorTitle'),
+        message: t('registerTreatment.toast.errorMessage'),
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -741,7 +898,7 @@ export default function RegisterTreatmentScreen() {
           </View>
 
           {/* Patient Info Card */}
-          <PatientInfoCard patient={MOCK_PATIENT} t={t} />
+          <PatientInfoCard patient={patient} t={t} />
 
           {/* ── Section 1: Detalles del Tratamiento ── */}
           <View style={styles.card}>
@@ -751,21 +908,26 @@ export default function RegisterTreatmentScreen() {
             />
 
             <SelectField
+              testID="category-select"
               label={t('registerTreatment.fields.category')}
               value={form.category}
               placeholder={t('registerTreatment.placeholders.category')}
               options={CATEGORIES}
               onSelect={(val) => updateForm('category', val)}
+              error={errors.category ? t(`registerTreatment.${errors.category}`) : undefined}
             />
 
             <InputField
+              testID="treatment-name-input"
               label={t('registerTreatment.fields.treatmentName')}
               value={form.treatmentName}
               onChangeText={(val) => updateForm('treatmentName', val)}
               placeholder={t('registerTreatment.placeholders.treatmentName')}
+              error={errors.treatmentName ? t(`registerTreatment.${errors.treatmentName}`) : undefined}
             />
 
             <SelectField
+              testID="dental-piece-select"
               label={t('registerTreatment.fields.dentalPiece')}
               value={form.dentalPiece}
               placeholder={t('registerTreatment.placeholders.dentalPiece')}
@@ -790,20 +952,29 @@ export default function RegisterTreatmentScreen() {
                     <Text style={styles.examDate}>{exam.date}</Text>
                   ) : null}
                 </View>
-                <TouchableOpacity onPress={() => handleRemoveExam(exam.id)}>
+                <TouchableOpacity
+                  testID={`remove-exam-${exam.id}`}
+                  onPress={() => handleRemoveExam(exam.id)}
+                >
                   <Ionicons name="close-circle" size={20} color="#EF4444" />
                 </TouchableOpacity>
               </View>
             ))}
 
             <InputField
+              testID="exam-name-input"
               label={t('registerTreatment.fields.examName')}
               value={newExamName}
-              onChangeText={setNewExamName}
+              onChangeText={(val) => {
+                setNewExamName(val);
+                if (examError) setExamError('');
+              }}
               placeholder={t('registerTreatment.placeholders.examName')}
+              error={examError}
             />
 
             <DateField
+              testID="exam-date-input"
               label={t('registerTreatment.fields.date')}
               value={newExamDate}
               onChangeText={setNewExamDate}
@@ -812,6 +983,7 @@ export default function RegisterTreatmentScreen() {
 
             <View style={{ alignItems: 'center', marginTop: 4 }}>
               <TouchableOpacity
+                testID="add-exam-btn"
                 style={styles.addBtn}
                 onPress={handleAddExam}
                 activeOpacity={0.7}
@@ -830,26 +1002,32 @@ export default function RegisterTreatmentScreen() {
             />
 
             <InputField
+              testID="treatment-date-input"
               label={t('registerTreatment.fields.treatmentDate')}
               value={form.treatmentDate}
               onChangeText={(val) => updateForm('treatmentDate', val)}
               placeholder="10/25/2023"
+              error={errors.treatmentDate ? t(`registerTreatment.${errors.treatmentDate}`) : undefined}
             />
 
             <SelectField
+              testID="dentist-select"
               label={t('registerTreatment.fields.responsibleDentist')}
               value={form.responsibleDentist}
               placeholder={t('registerTreatment.placeholders.responsibleDentist')}
               options={DENTISTS}
               onSelect={(val) => updateForm('responsibleDentist', val)}
+              error={errors.responsibleDentist ? t(`registerTreatment.${errors.responsibleDentist}`) : undefined}
             />
 
             <SelectField
+              testID="status-select"
               label={t('registerTreatment.fields.status')}
               value={form.status}
               placeholder={t('registerTreatment.placeholders.status')}
               options={STATUSES}
               onSelect={(val) => updateForm('status', val)}
+              error={errors.status ? t(`registerTreatment.${errors.status}`) : undefined}
             />
           </View>
 
@@ -861,6 +1039,7 @@ export default function RegisterTreatmentScreen() {
             />
 
             <InputField
+              testID="treatment-notes-input"
               label={t('registerTreatment.fields.notes')}
               value={form.notes}
               onChangeText={(val) => updateForm('notes', val)}
@@ -870,51 +1049,65 @@ export default function RegisterTreatmentScreen() {
             />
 
             <InputField
+              testID="estimated-cost-input"
               label={t('registerTreatment.fields.estimatedCost')}
               value={form.estimatedCost}
               onChangeText={(val) => updateForm('estimatedCost', val)}
               placeholder="0.00"
               keyboardType="decimal-pad"
               prefix="$"
+              error={errors.estimatedCost ? t(`registerTreatment.${errors.estimatedCost}`) : undefined}
             />
           </View>
 
           {/* ── Action Buttons ── */}
           <View style={styles.buttonRow}>
             <TouchableOpacity
+              testID="cancel-treatment-btn"
               style={[styles.btn, styles.btnCancel]}
               onPress={handleCancel}
               activeOpacity={0.7}
+              disabled={isSubmitting}
             >
               <Text style={styles.btnCancelText}>{t('registerTreatment.cancel')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.btn, styles.btnSave]}
+              testID="save-treatment-btn"
+              style={[styles.btn, styles.btnSave, isSubmitting && { opacity: 0.7 }]}
               onPress={handleSavePress}
               activeOpacity={0.8}
+              disabled={isSubmitting}
             >
-              <Ionicons name="save-outline" size={18} color="white" style={{ marginRight: 8 }} />
-              <Text style={styles.btnSaveText}>{t('registerTreatment.save')}</Text>
+              {isSubmitting ? (
+                <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 8 }} />
+              ) : (
+                <Ionicons name="save-outline" size={18} color="white" style={{ marginRight: 8 }} />
+              )}
+              <Text style={styles.btnSaveText}>
+                {isSubmitting ? t('registerTreatment.saving') : t('registerTreatment.save')}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Confirmation Modal (Wireframe 3) */}
+      {/* Confirmation Modal */}
       <ConfirmationModal
         visible={showConfirmModal}
         onConfirm={handleConfirmSave}
         onCancel={() => setShowConfirmModal(false)}
+        isSubmitting={isSubmitting}
         t={t}
       />
 
-      {/* Success Toast (Wireframe 2) */}
-      <SuccessToast
-        visible={showSuccessToast}
-        title={t('registerTreatment.toast.title')}
-        message={t('registerTreatment.toast.message')}
-        onDismiss={() => setShowSuccessToast(false)}
+      {/* Notification Toast (Success or Error) */}
+      <NotificationToast
+        visible={toastConfig.visible}
+        type={toastConfig.type}
+        title={toastConfig.title}
+        message={toastConfig.message}
+        onDismiss={() => setToastConfig((prev) => ({ ...prev, visible: false }))}
       />
     </View>
   );

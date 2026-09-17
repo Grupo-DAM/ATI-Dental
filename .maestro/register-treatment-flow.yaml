@@ -1,0 +1,194 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+# Esperar a que la app inicie y cargue el login o la vista inicial
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
+# --- Inicio de Sesión ---
+- tapOn:
+    id: "email-input"
+- inputText: "carloscaoucv2022@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Cao1234"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "tabBar"
+    timeout: 15000
+
+# =======================================================
+# NAVEGACIÓN A REGISTRO DE TRATAMIENTOS
+# =======================================================
+- tapOn:
+    id: "center-btn"
+
+- extendedWaitUntil:
+    visible: ".*(Registrar Tratamiento|Register Treatment).*"
+    timeout: 10000
+
+# Verificamos tarjeta de información del paciente
+- assertVisible:
+    id: "patient-info-card"
+
+# =======================================================
+# ESCENARIO 1: VALIDACIÓN DE CAMPOS OBLIGATORIOS VACÍOS
+# =======================================================
+- scrollUntilVisible:
+    element:
+      id: "save-treatment-btn"
+    direction: DOWN
+
+- tapOn:
+    id: "save-treatment-btn"
+
+# El modal no debe aparecer y deben mostrarse los mensajes de error
+- assertNotVisible: ".*(¿Estás seguro de que deseas guardar este tratamiento?|Are you sure you want to save this treatment?).*"
+
+# =======================================================
+# ESCENARIO 2: GESTIÓN DE EXÁMENES PENDIENTES
+# =======================================================
+- scrollUntilVisible:
+    element:
+      id: "exam-name-input"
+    direction: UP
+
+- tapOn:
+    id: "exam-name-input"
+- inputText: "Radiografía periapical"
+- hideKeyboard
+
+- tapOn:
+    id: "exam-date-input"
+- inputText: "25/10/2023"
+- hideKeyboard
+
+- tapOn:
+    id: "add-exam-btn"
+
+# El examen agregado debe ser visible
+- assertVisible: "Radiografía periapical"
+
+# =======================================================
+# ESCENARIO 3: VALIDACIÓN DE COSTO NEGATIVO
+# =======================================================
+- scrollUntilVisible:
+    element:
+      id: "estimated-cost-input"
+    direction: DOWN
+
+- tapOn:
+    id: "estimated-cost-input"
+- inputText: "-150.00"
+- hideKeyboard
+
+- tapOn:
+    id: "save-treatment-btn"
+
+# No debe abrirse el modal por costo inválido
+- assertNotVisible: ".*(¿Estás seguro de que deseas guardar este tratamiento?|Are you sure you want to save this treatment?).*"
+
+# =======================================================
+# ESCENARIO 4: COMPLETAR FORMULARIO Y CANCELAR EN MODAL
+# =======================================================
+# Corregir costo con valor válido y no negativo
+- tapOn:
+    id: "estimated-cost-input"
+- eraseText
+- inputText: "150.00"
+- hideKeyboard
+
+# Llenar nombre de tratamiento
+- scrollUntilVisible:
+    element:
+      id: "treatment-name-input"
+    direction: UP
+
+- tapOn:
+    id: "treatment-name-input"
+- inputText: "Tratamiento de conducto"
+- hideKeyboard
+
+# Llenar fecha de tratamiento
+- scrollUntilVisible:
+    element:
+      id: "treatment-date-input"
+    direction: DOWN
+
+- tapOn:
+    id: "treatment-date-input"
+- inputText: "25/10/2023"
+- hideKeyboard
+
+# Seleccionar Categoría
+- scrollUntilVisible:
+    element:
+      id: "category-select"
+    direction: UP
+- tapOn:
+    id: "category-select"
+- tapOn: "Endodoncia"
+
+# Seleccionar Odontólogo
+- scrollUntilVisible:
+    element:
+      id: "dentist-select"
+    direction: DOWN
+- tapOn:
+    id: "dentist-select"
+- tapOn: "Dr. Smith"
+
+# Seleccionar Estado
+- tapOn:
+    id: "status-select"
+- tapOn: "En Progreso"
+
+# Pulsar Guardar Tratamiento
+- scrollUntilVisible:
+    element:
+      id: "save-treatment-btn"
+    direction: DOWN
+- tapOn:
+    id: "save-treatment-btn"
+
+# Comprobar que el modal de confirmación se abre
+- extendedWaitUntil:
+    visible: ".*(¿Estás seguro de que deseas guardar este tratamiento?|Are you sure you want to save this treatment?).*"
+    timeout: 5000
+
+# Cancelar en el modal
+- tapOn:
+    id: "modal-cancel-btn"
+
+# El modal se cierra sin persistir
+- assertNotVisible: ".*(¿Estás seguro de que deseas guardar este tratamiento?|Are you sure you want to save this treatment?).*"
+
+# =======================================================
+# ESCENARIO 5: CONFIRMACIÓN Y PERSISTENCIA EXITOSA
+# =======================================================
+- tapOn:
+    id: "save-treatment-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "modal-confirm-btn"
+    timeout: 5000
+
+# Confirmar guardado
+- tapOn:
+    id: "modal-confirm-btn"
+
+# Verificar notificación de éxito
+- extendedWaitUntil:
+    visible:
+      id: "notification-toast"
+    timeout: 10000
+
+- assertVisible: ".*(Registro Exitoso|Registration Successful).*"
