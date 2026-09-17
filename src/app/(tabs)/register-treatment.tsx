@@ -18,7 +18,6 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/app-header';
-import { Breadcrumb } from '@/components/breadcrumb';
 import { Colors } from '@/constants/theme';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -471,7 +470,7 @@ function SuccessToast({
 
       return () => clearTimeout(timer);
     }
-  }, [visible]);
+  }, [visible, translateY, onDismiss]);
 
   if (!visible) return null;
 
