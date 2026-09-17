@@ -21,7 +21,22 @@ import { useTheme } from '@/hooks/use-theme';
 const AVATAR_FALLBACK = require('@/assets/expo.icon/Assets/avatar.png');
 const MAX_PHOTO_BYTES = 1024 * 1024;
 const MIN_BIRTH_DATE = new Date(1900, 0, 1);
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidPatientEmail(value: string): boolean {
+  const trimmed = value.trim();
+  const atIndex = trimmed.indexOf('@');
+  if (atIndex <= 0 || atIndex !== trimmed.lastIndexOf('@')) {
+    return false;
+  }
+
+  const domain = trimmed.slice(atIndex + 1);
+  const dotIndex = domain.lastIndexOf('.');
+  if (dotIndex <= 0 || dotIndex === domain.length - 1) {
+    return false;
+  }
+
+  return !trimmed.includes(' ');
+}
 
 function formatBirthDate(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
@@ -169,7 +184,7 @@ export default function RegisterPatientScreen() {
       nextErrors.fullName = t('registerPatient.alerts.emptyName');
     }
 
-    if (email.trim() && !EMAIL_PATTERN.test(email.trim())) {
+    if (email.trim() && !isValidPatientEmail(email)) {
       nextErrors.email = t('registerPatient.alerts.invalidEmail');
     }
 
