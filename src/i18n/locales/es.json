@@ -238,5 +238,55 @@
   "user-card": {
     "lastVisitLabel": "ÚLTIMA VISITA:",
     "nextVisitLabel": "PRÓXIMA CITA:"
+  },
+  "registerTreatment": {
+    "title": "Registrar Tratamiento",
+    "subtitle": "Complete los detalles del procedimiento para el historial clínico del paciente.",
+    "years": "años",
+    "breadcrumb": {
+      "patients": "Pacientes",
+      "patientRecord": "Ficha del paciente",
+      "treatment": "Tratamiento"
+    },
+    "sections": {
+      "treatmentDetails": "Detalles del Tratamiento",
+      "pendingExams": "Exámenes pendientes",
+      "clinicalInfo": "Información Clínica",
+      "observationsAndCost": "Observaciones y Costo"
+    },
+    "fields": {
+      "category": "Categoría",
+      "treatmentName": "Nombre del Tratamiento",
+      "dentalPiece": "Pieza Dental (Opcional)",
+      "examName": "Nombre del Examen",
+      "date": "Fecha",
+      "treatmentDate": "Fecha del Tratamiento",
+      "responsibleDentist": "Odontólogo Responsable",
+      "status": "Estado",
+      "notes": "Notas / Observaciones",
+      "estimatedCost": "Costo Estimado"
+    },
+    "placeholders": {
+      "category": "Seleccione una categoría...",
+      "treatmentName": "Ej. Limpieza Profunda",
+      "dentalPiece": "Toda la boca",
+      "examName": "Ej. Limpieza Profunda",
+      "responsibleDentist": "Dr. Smith",
+      "status": "Completado",
+      "notes": "Detalles adicionales sobre el procedimiento..."
+    },
+    "addExam": "Añadir",
+    "cancel": "Cancelar",
+    "save": "Guardar Tratamiento",
+    "modal": {
+      "title": "Guardar Tratamiento",
+      "message": "¿Estás seguro de que deseas guardar este tratamiento?",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar"
+    },
+    "toast": {
+      "title": "Registro Exitoso",
+      "message": "Tratamiento registrado con éxito."
+    }
   }
 }
