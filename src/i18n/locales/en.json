@@ -184,7 +184,20 @@
     "crashRateToday": "CRASHRATE (TODAY)",
     "totalCrashesToday": "TOTAL CRASHES (TODAY)",
     "affectedUsers": "AFFECTED USERS",
-    "chartTitleCrashRate": "Crash percentage"
+    "chartTitleCrashRate": "Crash percentage",
+    "reportTypeRetentionRate": "User retention rate",
+    "chartTitleRetentionRate": "Cohort Retention Rate",
+    "retentionDay1": "Day 1",
+    "retentionDay7": "Day 7",
+    "retentionDay30": "Day 30",
+    "retentionKpiDay1": "RETENTION DAY 1",
+    "retentionKpiDay7": "RETENTION DAY 7",
+    "retentionKpiDay30": "RETENTION DAY 30",
+    "retentionDay1Sub": "24 hours",
+    "retentionDay7Sub": "7 days",
+    "retentionDay30Sub": "30 days",
+    "retentionCohortUsers": "Cohort users",
+    "retentionErrorLoad": "An error occurred while fetching retention metrics."
   },
   "admin": {
     "path": "Administration"

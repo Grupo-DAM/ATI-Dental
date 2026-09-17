@@ -25,6 +25,33 @@ export function calculateCrashRatePercentage(totalCrashes: number, totalSessions
     return `${rate.toFixed(2)}%`;
 }
 
+export function formatRetentionPercentage(value: number | undefined | null): string {
+    if (value === undefined || value === null || isNaN(value) || value < 0) {
+        return '0%';
+    }
+    const cleanNum = Number(value);
+    return Number.isInteger(cleanNum) ? `${cleanNum}%` : `${cleanNum.toFixed(1)}%`;
+}
+
+export function parseRetentionData(
+    docData: any,
+    t: (key: string) => string
+): { cohort: string; label: string; percentage: number }[] {
+    const rawDia1 = docData?.dia1 ?? docData?.day1;
+    const rawDia7 = docData?.dia7 ?? docData?.day7;
+    const rawDia30 = docData?.dia30 ?? docData?.day30;
+
+    const dia1 = typeof rawDia1 === 'number' && !isNaN(rawDia1) && rawDia1 >= 0 ? rawDia1 : 0;
+    const dia7 = typeof rawDia7 === 'number' && !isNaN(rawDia7) && rawDia7 >= 0 ? rawDia7 : 0;
+    const dia30 = typeof rawDia30 === 'number' && !isNaN(rawDia30) && rawDia30 >= 0 ? rawDia30 : 0;
+
+    return [
+        { cohort: t('reports.retentionDay1') || 'Día 1', label: 'D1', percentage: dia1 },
+        { cohort: t('reports.retentionDay7') || 'Día 7', label: 'D7', percentage: dia7 },
+        { cohort: t('reports.retentionDay30') || 'Día 30', label: 'D30', percentage: dia30 },
+    ];
+}
+
 // Helper to extract timestamp millis from varied date formats
 export const getRecordTimestamp = (record: SessionRecord): number | null => {
     const raw = record.fecha ?? record.tiempoInicio;
