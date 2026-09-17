@@ -47,6 +47,13 @@ jobs:
           else
             echo "Decodificando e inyectando configuración de Firebase para QA..."
             echo "$FIREBASE_QA_BASE64" | base64 --decode > ./google-services.json
+            
+            # SOLUCIÓN AQUÍ: Fuerza a Git a rastrear el archivo temporalmente en el runner
+            # Esto NO hará push a main ni romperá nada, solo se lo muestra a EAS CLI
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@://github.com"
+            git add -f ./google-services.json
+            echo "✓ Archivo Firebase forzado en el índice de Git para EAS Build."
           fi
 
       # ==========================================
