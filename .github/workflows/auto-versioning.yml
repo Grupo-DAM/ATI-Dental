@@ -1,0 +1,125 @@
+name: Automatización de Versionamiento y Tags
+
+on:
+  workflow_dispatch:
+    inputs:
+      increment_type:
+        description: 'Tipo de incremento para la versión'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      release_notes:
+        description: 'Descripción breve de los cambios (Opcional - Changelog)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+          token: ${{ secrets.VERSIONING_PAT }}
+
+      - name: Configurar Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Obtener última versión (Tag)
+        id: get_current_version
+        run: |
+          CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          CURRENT_VERSION=${CURRENT_TAG#v}
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_ENV
+
+      - name: Calcular y Actualizar Versiones, JSONs y Changelog (Nativo)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const currentVersion = process.env.current_version;
+            const increment = "${{ github.event.inputs.increment_type }}";
+            let inputNotes = `${{ github.event.inputs.release_notes }}`.trim();
+            
+            let [major, minor, patch] = currentVersion.split('.').map(Number);
+            if (increment === 'major') { major += 1; minor = 0; patch = 0; }
+            else if (increment === 'minor') { minor += 1; patch = 0; }
+            else if (increment === 'patch') { patch += 1; }
+            
+            const newVersion = `${major}.${minor}.${patch}`;
+            const newTag = `v${newVersion}`;
+            
+            core.exportVariable('new_version', newVersion);
+            core.exportVariable('new_tag', newTag);
+            
+            if (fs.existsSync('package.json')) {
+              const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+              packageJson.version = newVersion;
+              fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
+            }
+            
+            if (fs.existsSync('app.json')) {
+              const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+              if (appJson.expo) {
+                appJson.expo.version = newVersion;
+                fs.writeFileSync('app.json', JSON.stringify(appJson, null, 2) + '\n');
+              }
+            }
+            
+            if (!inputNotes) {
+              inputNotes = `Nuevas características y correcciones correspondientes al incremento de tipo ${increment}.`;
+            }
+            
+            if (fs.existsSync('CHANGELOG.md')) {
+              let changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+              const today = new Date().toISOString().split('T');
+              const newEntry = `## [${newVersion}] - ${today}\n\n**${newTag}** — ${inputNotes}\n\n---\n\n`;
+              
+              if (changelog.includes('## [')) {
+                changelog = changelog.replace('## [', `${newEntry}## [`);
+              } else {
+                changelog += `\n\n${newEntry}`;
+              }
+              fs.writeFileSync('CHANGELOG.md', changelog);
+            }
+
+      - name: Verificar si el Tag ya existe
+        run: |
+          if git rev-parse "${{ env.new_tag }}" >/dev/null 2>&1; then
+            echo "Error: El tag ${{ env.new_tag }} ya existe."
+            exit 1
+          fi
+
+      - name: Confirmar Cambios en los Archivos del Proyecto
+        run:  |
+          # Si se modificó package.json, app.json o CHANGELOG.md
+          if [ -n "$(git status --porcelain)" ]; then
+            git add package.json app.json CHANGELOG.md
+            git commit -m "chore(release): bump version to ${{ env.new_version }} and update changelog [skip ci]"
+            
+            # 1. Subir la nueva versión de manera limpia a main
+            git push origin ${{ github.ref_name }}
+            
+            # 2. Sincronizar QA desde Main usando push forzado
+            # Esto toma el commit actual de main y lo clona directamente encima de la rama remota qa
+            echo "Forzando actualización de la rama qa desde ${{ github.ref_name }}..."
+            git push origin HEAD:refs/heads/qa --force
+          else
+            echo "No se detectaron cambios en los archivos de configuración."
+          fi
+
+      - name: Crear y Publicar Git Tag
+        run: |
+          git tag -a ${{ env.new_tag }} -m "Release version ${{ env.new_version }}"
+          git push origin ${{ env.new_tag }}
