@@ -278,6 +278,7 @@
     "addExam": "Add",
     "cancel": "Cancel",
     "save": "Save Treatment",
+    "saving": "Saving...",
     "modal": {
       "title": "Save Treatment",
       "message": "Are you sure you want to save this treatment?",
@@ -286,7 +287,20 @@
     },
     "toast": {
       "title": "Registration Successful",
-      "message": "Treatment registered successfully."
+      "message": "Treatment registered successfully.",
+      "errorTitle": "Error Saving",
+      "errorMessage": "Could not register treatment. Please try again."
+    },
+    "errors": {
+      "patientRequired": "A valid patient must be selected.",
+      "categoryRequired": "Category is required.",
+      "treatmentNameRequired": "Treatment name is required.",
+      "treatmentDateRequired": "Treatment date is required.",
+      "dentistRequired": "A responsible dentist must be selected.",
+      "statusRequired": "Status is required.",
+      "costRequired": "Estimated cost is required.",
+      "costInvalid": "Cost must be a valid, non-negative numeric value.",
+      "examNameRequired": "Exam name cannot be empty."
     }
   }
 }
