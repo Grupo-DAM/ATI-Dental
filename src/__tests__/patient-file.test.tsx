@@ -170,4 +170,91 @@ describe('PatientFileScreen', () => {
 
     expect(toJSON()).toMatchSnapshot();
   });
+
+  describe('Formatting and Edge Cases', () => {
+    it('handles various date formats and fallbacks gracefully', async () => {
+      const edgeCasePatient = {
+        ...mockPatient,
+        birthDate: '1990-05-15', // string date
+        gender: undefined, // missing gender
+        phone: '', // missing phone
+        nextAppointment: { toDate: () => new Date('2024-10-12T10:00:00Z') }, // firebase timestamp
+        photoUri: 'https://example.com/photo.jpg',
+      };
+
+      const edgeCaseTreatments = [
+        { id: 't1', status: 'En Progreso', category: 'General', treatmentDate: 'invalid-date' },
+        { id: 't2', status: 'Pendiente', category: '', treatmentDate: '10/05/2023' },
+        { id: 't3', status: 'Cancelado', category: 'Ortodoncia', treatmentDate: '2023-01-01T00:00:00Z' },
+        { id: 't4', status: 'Preventivo', category: 'Limpieza', treatmentDate: null },
+        { id: 't5', status: 'Desconocido', category: 'Cirugía', treatmentDate: undefined },
+      ];
+
+      (getPatientById as jest.Mock).mockResolvedValue(edgeCasePatient);
+      (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(edgeCaseTreatments);
+
+      render(<PatientFileScreen />);
+
+      await waitFor(() => {
+        expect(screen.queryByText('patientFile.loading')).toBeNull();
+      });
+
+      // Verify PatientCard missing values handling
+      expect(screen.getAllByText(/—/)).toBeTruthy(); // fallback for gender
+
+      // Verify AppointmentBadges (Next Appointment format)
+      expect(screen.getByText(/Oct/)).toBeTruthy();
+
+      // Verify treatments status badges and date formats
+      expect(screen.getByText('En Progreso')).toBeTruthy();
+      expect(screen.getByText('Pendiente')).toBeTruthy();
+      expect(screen.getByText('Cancelado')).toBeTruthy();
+      expect(screen.getByText('Preventivo')).toBeTruthy();
+      expect(screen.getByText('Desconocido')).toBeTruthy();
+
+      expect(screen.getByText('invalid-date')).toBeTruthy(); // fallback on invalid date
+    });
+
+    it('renders medical history properly formatted', async () => {
+      const patientWithMedical = {
+        ...mockPatient,
+        medicalHistory: ['hipertension_arterial', 'diabetes_tipo_2'],
+        knownAllergies: ['penicilina'],
+      };
+
+      (getPatientById as jest.Mock).mockResolvedValue(patientWithMedical);
+      (getTreatmentsByPatientId as jest.Mock).mockResolvedValue([]);
+
+      render(<PatientFileScreen />);
+
+      await waitFor(() => {
+        expect(screen.queryByText('patientFile.loading')).toBeNull();
+      });
+
+      // Expand the medical background accordion
+      fireEvent.press(screen.getByText('patientFile.medicalBackground'));
+
+      // FormatAntecedente should remove underscores and capitalize
+      // Verify text exists in the document somewhere
+      await waitFor(() => {
+        expect(screen.getByText(/Hipertension Arterial/i)).toBeTruthy();
+      });
+      expect(screen.getByText(/Diabetes Tipo 2/i)).toBeTruthy();
+      expect(screen.getByText(/Penicilina/i)).toBeTruthy();
+    });
+
+    it('handles ActionBar rendering', async () => {
+      (getPatientById as jest.Mock).mockResolvedValue(mockPatient);
+      (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+
+      render(<PatientFileScreen />);
+
+      await waitFor(() => {
+        expect(screen.queryByText('patientFile.loading')).toBeNull();
+      });
+
+      // Check for elements rendered by ActionBar / PatientCard
+      expect(screen.getByTestId('patient-info-card')).toBeTruthy();
+    });
+  });
 });

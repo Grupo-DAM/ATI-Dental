@@ -138,4 +138,52 @@ describe('Patient Service (Persistence Layer)', () => {
       await expect(getPatientById('doc-error')).rejects.toThrow('Read error');
     });
   });
+
+  describe('getPatientByEmail', () => {
+    it('obtiene paciente por correo exitosamente', async () => {
+      (mockFirestoreInstance.where as jest.Mock).mockReturnValueOnce(mockFirestoreInstance);
+      (mockFirestoreInstance.limit as jest.Mock).mockReturnValueOnce(mockFirestoreInstance);
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'doc-email-123',
+            data: () => ({
+              fullName: 'Maria Gomez',
+              email: 'maria@example.com',
+            }),
+          },
+        ],
+      });
+
+      const { getPatientByEmail } = require('@/services/patient-service');
+      const result = await getPatientByEmail('maria@example.com');
+      
+      expect(result.id).toBe('doc-email-123');
+      expect(result.fullName).toBe('Maria Gomez');
+      expect(result.email).toBe('maria@example.com');
+      expect(mockFirestoreInstance.collection).toHaveBeenCalledWith(PATIENTS_COLLECTION);
+      expect(mockFirestoreInstance.where).toHaveBeenCalledWith('email', '==', 'maria@example.com');
+    });
+
+    it('lanza error si no existe el paciente con ese correo', async () => {
+      (mockFirestoreInstance.where as jest.Mock).mockReturnValueOnce(mockFirestoreInstance);
+      (mockFirestoreInstance.limit as jest.Mock).mockReturnValueOnce(mockFirestoreInstance);
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
+        empty: true,
+      });
+
+      const { getPatientByEmail } = require('@/services/patient-service');
+      await expect(getPatientByEmail('no-existe@example.com')).rejects.toThrow('PATIENT_NOT_FOUND');
+    });
+
+    it('propaga error si ocurre falla de red', async () => {
+      (mockFirestoreInstance.where as jest.Mock).mockReturnValueOnce(mockFirestoreInstance);
+      (mockFirestoreInstance.limit as jest.Mock).mockReturnValueOnce(mockFirestoreInstance);
+      (mockFirestoreInstance.get as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+
+      const { getPatientByEmail } = require('@/services/patient-service');
+      await expect(getPatientByEmail('error@example.com')).rejects.toThrow('Network error');
+    });
+  });
 });
