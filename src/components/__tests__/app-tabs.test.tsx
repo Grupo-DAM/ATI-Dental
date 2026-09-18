@@ -29,6 +29,7 @@ const mockColors = {
   main: '#4F46E5',
   textSecondary: '#6B7280',
   background: '#FFFFFF',
+  overMain: '#ffffff',
 };
 jest.mock('@/hooks/use-theme', () => ({
   useTheme: () => mockColors,
@@ -153,21 +154,36 @@ describe('AppTabs Component & CustomTabBar', () => {
     expect(StyleSheet.flatten(tabBarContainer?.props.style)).toMatchObject({ paddingBottom: 20 });
   });
 
-  it('should register the press event of the central button (+)', () => {
+  it('should navigate to explore when pressing the patients tab', () => {
     const mockNavigate = jest.fn();
 
     mockTabs.mockImplementationOnce(({ tabBar }: any) =>
       tabBar({
         state: { routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }], index: 0 },
         descriptors: {},
-        navigation: { navigate: mockNavigate }
-      })
+        navigation: { navigate: mockNavigate },
+      }),
     );
 
     const { getByTestId } = render(<AppTabs />);
+    fireEvent.press(getByTestId('explore-tab'));
 
-    const floatingButton = getByTestId('center-btn');
-    fireEvent.press(floatingButton);
+    expect(mockNavigate).toHaveBeenCalledWith('explore');
+  });
+
+  it('should navigate to register-treatment when pressing the central button', () => {
+    const mockNavigate = jest.fn();
+
+    mockTabs.mockImplementationOnce(({ tabBar }: any) =>
+      tabBar({
+        state: { routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }], index: 0 },
+        descriptors: {},
+        navigation: { navigate: mockNavigate },
+      }),
+    );
+
+    const { getByTestId } = render(<AppTabs />);
+    fireEvent.press(getByTestId('center-btn'));
 
     expect(mockNavigate).toHaveBeenCalledWith('register-treatment');
   });

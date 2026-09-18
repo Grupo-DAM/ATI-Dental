@@ -1,12 +1,16 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import React from 'react';
-import { useColorScheme } from 'react-native';
+import { LogBox, useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
 import firestoreModule from '@react-native-firebase/firestore';
 import { firestore } from '@/config/firebase';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { AuthProvider } from '@/hooks/use-auth';
 import '@/i18n';
+
+LogBox.ignoreLogs([
+  'This method is deprecated (as well as all React Native Firebase namespaced API)',
+]);
 
 // -------------------------------------------------------------
 // CAPTURADOR GLOBAL DE ERRORES (Optimizado y No Bloqueante)

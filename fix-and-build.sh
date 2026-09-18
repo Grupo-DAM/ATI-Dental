@@ -34,14 +34,14 @@ echo "Compilando para arm64-v8a (1 núcleo para evitar crash de RAM)..."
   -PreactNativeArchitectures=arm64-v8a
 
 APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
-if [ -f "$APK_PATH" ]; then
+if [[ -f "$APK_PATH" ]]; then
   echo ""
   echo "========================================="
   echo " ¡Compilación completada exitosamente!"
   echo " APK generado en: android/$APK_PATH"
   echo "========================================="
   
-  if command -v adb >/dev/null 2>&1 && [ $(adb devices | grep -v "List of" | grep -c "device$") -gt 0 ]; then
+  if command -v adb >/dev/null 2>&1 && [[ $(adb devices | grep -v "List of" | grep -c "device$") -gt 0 ]]; then
     echo "Dispositivo detectado por ADB. ¿Instalar automáticamente? (s/n)"
     read -r -t 10 respuesta
     if [[ "$respuesta" =~ ^[sS]$ ]]; then
