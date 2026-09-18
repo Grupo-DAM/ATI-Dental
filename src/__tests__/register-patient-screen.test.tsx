@@ -336,6 +336,9 @@ describe('RegisterPatientScreen', () => {
   });
 
     it('cierra el estado de carga al confirmar el alert', async () => {
+      const { createPatient } = require('@/services/patient-service');
+      (createPatient as jest.Mock).mockRejectedValueOnce(new Error('Test error'));
+
       const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
         buttons?.[0]?.onPress?.();
       });
