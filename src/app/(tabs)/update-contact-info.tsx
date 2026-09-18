@@ -524,9 +524,9 @@ export default function UpdateContactInfoScreen() {
 
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (authLoading || dataLoading) {
-    return (
-      <View style={styles.container}>
-        <AppHeader />
+  return (
+    <View style={styles.container}>
+      <AppHeader />
         <Breadcrumb parent="Administración" current="Contacto" />
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors.light.main} />
@@ -644,7 +644,7 @@ export default function UpdateContactInfoScreen() {
               </>
             )}
           </TouchableOpacity>
-        </View>
+    </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

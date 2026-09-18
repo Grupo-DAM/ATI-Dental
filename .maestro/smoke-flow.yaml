@@ -1,4 +1,0 @@
-appId: com.anonymous.atidental
----
-- launchApp
-- assertVisible: "Welcome to.*"

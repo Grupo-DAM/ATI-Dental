@@ -2,6 +2,12 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
+# 1. Esperamos a que la app termine de arrancar y muestre la pantalla de Login
+- extendedWaitUntil:
+    visible:
+      id: "login-title"
+    timeout: 60000
+
 - tapOn:
     id: "email-input"
 - inputText: "soamaia03@gmail.com"
@@ -204,4 +210,8 @@ appId: com.proyect1.ATIDental
 - assertVisible: "Tu perfil y correo se han verificado y actualizado con éxito."
 - tapOn: "OK"
 
+- tapOn:
+    id: "menu-btn"
 
+- tapOn:
+    id: "nav-item-logout"

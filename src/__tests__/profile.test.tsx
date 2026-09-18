@@ -287,9 +287,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     fireEvent.changeText(getByTestId('input-email'), 'nuevo@atidental.com');
     fireEvent.press(getByTestId('btn-save'));
     
-    await waitFor(() => {
-      expect(getByTestId('modal-verification')).toBeTruthy();
-    });
+    await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
   });
 
   it('Caso Borde 3.4: Falla validación síncrona si el correo está vacío', async () => {
@@ -460,12 +458,12 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     const modal = getByTestId('modal-verification');
     await fireEvent(modal, 'close');
 
-    await waitFor(() => {
+    await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith(
         'profile.alerts.updatedTitle',
         'profile.alerts.updatedVerifiedMessage'
-      );
-    });
+      )
+    );
   });
 
   it('Verificación pendiente si user.email no coincide en modal', async () => {

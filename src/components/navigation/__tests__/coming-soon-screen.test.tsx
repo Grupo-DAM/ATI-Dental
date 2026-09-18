@@ -2,8 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react-native';
 
 import { ComingSoonScreen } from '@/components/navigation/coming-soon-screen';
-import AdminUsersScreen from '@/app/(tabs)/admin/users';
-import RegisterPatientScreen from '@/app/(tabs)/register-patient';
 
 jest.mock('@/components/app-header', () => ({
   AppHeader: () => null,
@@ -21,17 +19,5 @@ describe('ComingSoonScreen', () => {
     expect(screen.getByTestId('coming-soon-screen')).toBeTruthy();
     expect(screen.getByText('navigation.registerPatient')).toBeTruthy();
     expect(screen.getByText('navigation.comingSoon')).toBeTruthy();
-  });
-
-  it('reutiliza la pantalla en las rutas placeholder', () => {
-    const screens = [
-      [RegisterPatientScreen, 'navigation.registerPatient'],
-    ] as const;
-
-    screens.forEach(([Screen, titleKey]) => {
-      const { unmount } = render(<Screen />);
-      expect(screen.getByText(titleKey)).toBeTruthy();
-      unmount();
-    });
   });
 });

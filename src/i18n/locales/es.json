@@ -192,6 +192,58 @@
   "patients": {
     "path": "Pacientes"
   },
+  "registerPatient": {
+    "breadcrumb": "Nuevo Paciente",
+    "title": "Nuevo Paciente",
+    "subtitle": "Complete el formulario para registrar un nuevo paciente en el sistema.",
+    "personalData": "Datos Personales",
+    "clinicalInfo": "Información Clínica Básica",
+    "profilePicture": "Foto de Perfil",
+    "changePhoto": "Cambiar",
+    "removePhoto": "Eliminar",
+    "photoHelp": "JPG, GIF o PNG. Max 1MB.",
+    "fullName": "Nombre Completo",
+    "fullNamePlaceholder": "Ej. Juan Pérez",
+    "documentId": "DNI / Pasaporte",
+    "documentPlaceholder": "Ej. 123456789",
+    "birthDate": "Fecha de Nacimiento",
+    "birthDatePlaceholder": "dd/mm/yyyy",
+    "gender": "Género",
+    "selectPlaceholder": "Seleccionar...",
+    "phone": "Teléfono",
+    "phonePlaceholder": "(555) 000-0000",
+    "email": "Correo Electrónico",
+    "emailPlaceholder": "correo@ejemplo.com",
+    "address": "Dirección de Residencia",
+    "addressPlaceholder": "Calle, Número, Ciudad",
+    "bloodType": "Tipo de Sangre",
+    "allergies": "Alergias Conocidas",
+    "allergiesPlaceholder": "Listar medicamentos, alimentos o materiales (ej. Penicilina, Látex)...",
+    "conditions": "Condiciones Médicas Previas",
+    "conditionsPlaceholder": "Diabetes, Hipertensión, Cirugías previas...",
+    "notes": "Notas Adicionales",
+    "notesPlaceholder": "",
+    "cancel": "Cancelar",
+    "submit": "Registrar Paciente",
+    "confirmDate": "Listo",
+    "genders": {
+      "female": "Femenino",
+      "male": "Masculino",
+      "other": "Otro"
+    },
+    "alerts": {
+      "errorTitle": "Error",
+      "emptyName": "El nombre completo no puede estar vacío.",
+      "invalidEmail": "Formato de correo inválido.",
+      "photoPermission": "Se necesita permiso para acceder a la galería y elegir la foto del paciente.",
+      "photoTooLarge": "La imagen supera 1MB. Elige un archivo más liviano.",
+      "photoPickerUnavailable": "La galería requiere reconstruir la app (npx expo run:android) para cargar el módulo nativo.",
+      "datePickerUnavailable": "El calendario requiere reconstruir la app (npx expo run:android) para cargar el módulo nativo.",
+      "successTitle": "Paciente registrado",
+      "successMessage": "Los datos del paciente se han capturado. El guardado en el sistema se conectará más adelante.",
+      "saveError": "Ocurrió un error al guardar el paciente. Por favor verifique su conexión e intente nuevamente."
+    }
+  },
   "patients-list": {
     "title": "Listado de Pacientes",
     "subtitle": "Gestiona y consulta el historial de todos tus pacientes.",
@@ -247,5 +299,69 @@
   "user-card": {
     "lastVisitLabel": "ÚLTIMA VISITA:",
     "nextVisitLabel": "PRÓXIMA CITA:"
+  },
+  "registerTreatment": {
+    "title": "Registrar Tratamiento",
+    "subtitle": "Complete los detalles del procedimiento para el historial clínico del paciente.",
+    "years": "años",
+    "breadcrumb": {
+      "patients": "Pacientes",
+      "patientRecord": "Ficha del paciente",
+      "treatment": "Tratamiento"
+    },
+    "sections": {
+      "treatmentDetails": "Detalles del Tratamiento",
+      "pendingExams": "Exámenes pendientes",
+      "clinicalInfo": "Información Clínica",
+      "observationsAndCost": "Observaciones y Costo"
+    },
+    "fields": {
+      "category": "Categoría",
+      "treatmentName": "Nombre del Tratamiento",
+      "dentalPiece": "Pieza Dental (Opcional)",
+      "examName": "Nombre del Examen",
+      "date": "Fecha",
+      "treatmentDate": "Fecha del Tratamiento",
+      "responsibleDentist": "Odontólogo Responsable",
+      "status": "Estado",
+      "notes": "Notas / Observaciones",
+      "estimatedCost": "Costo Estimado"
+    },
+    "placeholders": {
+      "category": "Seleccione una categoría...",
+      "treatmentName": "Ej. Limpieza Profunda",
+      "dentalPiece": "Toda la boca",
+      "examName": "Ej. Limpieza Profunda",
+      "responsibleDentist": "Dr. Smith",
+      "status": "Completado",
+      "notes": "Detalles adicionales sobre el procedimiento..."
+    },
+    "addExam": "Añadir",
+    "cancel": "Cancelar",
+    "save": "Guardar Tratamiento",
+    "saving": "Guardando...",
+    "modal": {
+      "title": "Guardar Tratamiento",
+      "message": "¿Estás seguro de que deseas guardar este tratamiento?",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar"
+    },
+    "toast": {
+      "title": "Registro Exitoso",
+      "message": "Tratamiento registrado con éxito.",
+      "errorTitle": "Error al Guardar",
+      "errorMessage": "No se pudo registrar el tratamiento. Inténtelo nuevamente."
+    },
+    "errors": {
+      "patientRequired": "Debe seleccionarse un paciente válido.",
+      "categoryRequired": "La categoría es obligatoria.",
+      "treatmentNameRequired": "El nombre del tratamiento es obligatorio.",
+      "treatmentDateRequired": "La fecha del tratamiento es obligatoria.",
+      "dentistRequired": "Debe seleccionar un odontólogo responsable.",
+      "statusRequired": "El estado es obligatorio.",
+      "costRequired": "El costo estimado es obligatorio.",
+      "costInvalid": "El costo debe ser un valor numérico válido y no negativo.",
+      "examNameRequired": "El nombre del examen no puede estar vacío."
+    }
   }
 }
