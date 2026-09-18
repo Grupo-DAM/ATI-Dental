@@ -24,6 +24,7 @@ export default function AppTabs() {
       <Tabs.Screen name="admin/reports" options={{ href: null, title: 'Admin Reportes' }} />
       <Tabs.Screen name="update-contact-info" options={{ href: null, title: 'Actualizar contacto' }} />
       <Tabs.Screen name="register-treatment" options={{ href: null, title: 'Registrar Tratamiento' }} />
+      <Tabs.Screen name="patient-file" options={{ href: null, title: 'Ficha del Paciente' }} />
     </Tabs>
   );
 }
@@ -102,7 +103,12 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           activeOpacity={0.8}
           style={[styles.floatingButton, { backgroundColor: colors.main }]}
           onPress={() => {
-            handleNavigate('register-treatment');
+            import('expo-router').then(({ router }) => {
+              router.push({ 
+                pathname: '/(tabs)/patient-file', 
+                params: { email: 'carlos.cova@email.com' } 
+              });
+            });
           }}
         >
           <Image

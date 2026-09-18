@@ -13,6 +13,7 @@ export interface TreatmentInput {
   treatmentName: string;
   dentalPiece?: string;
   treatmentDate: string;
+  duration?: string;
   responsibleDentist: string;
   status: string;
   notes?: string;
@@ -143,4 +144,27 @@ export async function getTreatmentById(treatmentId: string): Promise<Treatment |
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   };
+}
+
+/**
+ * Updates an existing treatment document.
+ */
+export async function updateTreatment(treatmentId: string, updates: Partial<TreatmentInput>): Promise<void> {
+  await firestore()
+    .collection(TREATMENTS_COLLECTION)
+    .doc(treatmentId)
+    .update({
+      ...updates,
+      updatedAt: firestore.FieldValue.serverTimestamp(),
+    });
+}
+
+/**
+ * Deletes a treatment document.
+ */
+export async function deleteTreatment(treatmentId: string): Promise<void> {
+  await firestore()
+    .collection(TREATMENTS_COLLECTION)
+    .doc(treatmentId)
+    .delete();
 }
