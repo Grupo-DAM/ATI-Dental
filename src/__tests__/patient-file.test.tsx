@@ -83,7 +83,7 @@ describe('PatientFileScreen', () => {
     {
       id: 't1',
       treatmentName: 'Limpieza',
-      treatmentDate: '2023-09-20',
+      treatmentDate: '2023-09-20T12:00:00',
       cost: '50',
       status: 'Completado',
       category: 'General',

@@ -1138,7 +1138,7 @@ exports[`PatientFileScreen matches snapshot 1`] = `
                     }
                   }
                 >
-                  19 Sep 2023
+                  20 Sep 2023
                 </Text>
                 <View
                   style={
