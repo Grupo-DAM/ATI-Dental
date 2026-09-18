@@ -58,8 +58,10 @@ jest.mock('@/config/firebase', () => ({
 // -------------------------------------------------------------
 // 3. MOCKS DE HOOKS Y NAVEGACIÓN
 // -------------------------------------------------------------
+let mockThemeOverride: any = null;
+
 jest.mock('@/hooks/use-theme', () => ({
-  useTheme: () => ({
+  useTheme: () => (mockThemeOverride || {
     main: '#0A84FF',
     backgroundElement: '#FFFFFF',
     reportValueText: '#111827',
@@ -321,11 +323,41 @@ describe('RetentionBarChart Component', () => {
     );
     expect(getByTestId('extreme-chart')).toBeTruthy();
   });
+
+  it('maneja array vacío y elementos sin cohort o label', () => {
+    const { getByTestId } = render(
+      <RetentionBarChart data={[]} testID="empty-chart" />
+    );
+    expect(getByTestId('empty-chart')).toBeTruthy();
+
+    const missingKeysData: any[] = [
+      { percentage: 50, label: 'D1' }, // Sin cohort
+      { percentage: 20 }, // Sin cohort ni label
+    ];
+
+    const { getByTestId: getByTestId2 } = render(
+      <RetentionBarChart data={missingKeysData} testID="fallback-keys-chart" />
+    );
+    expect(getByTestId2('fallback-keys-chart')).toBeTruthy();
+  });
+
+  it('renderiza con valores de props por defecto y tema sin colores opcionales', () => {
+    mockThemeOverride = { main: '#0A84FF' }; // Sin accentBackground, reportValueText, pageSubtitle, chartLegendText
+
+    const { getByTestId } = render(
+      <RetentionBarChart data={[{ cohort: 'D1', label: 'D1', percentage: 50 }]} />
+    );
+
+    expect(getByTestId('retention-bar-chart')).toBeTruthy();
+    mockThemeOverride = null;
+  });
 });
 
 // -------------------------------------------------------------
 // 6. PRUEBAS DEL HOOK useRetentionMetrics
 // -------------------------------------------------------------
+import * as retentionService from '@/services/retention-service';
+
 describe('useRetentionMetrics hook', () => {
   it('no se suscribe si enabled es false o usuario no es admin', () => {
     const { result } = renderHook(() =>
@@ -339,6 +371,26 @@ describe('useRetentionMetrics hook', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.retentionData).toEqual([]);
+
+    const { result: resDisabled } = renderHook(() =>
+      useRetentionMetrics({
+        user: { uid: 'admin_1', rol: 'admin' },
+        authLoading: false,
+        enabled: false,
+        t: mockT,
+      })
+    );
+    expect(resDisabled.current.loading).toBe(false);
+
+    const { result: resAuthLoading } = renderHook(() =>
+      useRetentionMetrics({
+        user: { uid: 'admin_1', rol: 'admin' },
+        authLoading: true,
+        enabled: true,
+        t: mockT,
+      })
+    );
+    expect(resAuthLoading.current.loading).toBe(false);
   });
 
   it('limpia la suscripción al desmontar', () => {
@@ -358,5 +410,163 @@ describe('useRetentionMetrics hook', () => {
 
     unmount();
     expect(mockUnsub).toHaveBeenCalled();
+  });
+
+  it('procesa correctamente datos exitosos del Worker de retención', async () => {
+    mockDoc.mockReturnValueOnce({
+      onSnapshot: jest.fn(() => jest.fn()),
+    });
+
+    jest.spyOn(retentionService, 'fetchRetentionMetrics').mockResolvedValueOnce({
+      success: true,
+      data: {
+        dia1: 85,
+        dia7: 65,
+        dia30: 45,
+        totalUsuariosCohorte: 120,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useRetentionMetrics({
+        user: { uid: 'adm', rol: 'admin' },
+        authLoading: false,
+        enabled: true,
+        t: mockT,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.totalCohortUsers).toBe(120);
+    });
+
+    expect(result.current.day1).toBe(85);
+    expect(result.current.day7).toBe(65);
+    expect(result.current.day30).toBe(45);
+    expect(result.current.day1String).toBe('85%');
+    expect(result.current.day7String).toBe('65%');
+    expect(result.current.day30String).toBe('45%');
+  });
+
+  it('procesa datos alternativos en inglés con totalCohortUsers desde Worker', async () => {
+    mockDoc.mockReturnValueOnce({
+      onSnapshot: jest.fn(() => jest.fn()),
+    });
+
+    jest.spyOn(retentionService, 'fetchRetentionMetrics').mockResolvedValueOnce({
+      success: true,
+      data: {
+        day1: 72,
+        day7: 52,
+        day30: 32,
+        totalCohortUsers: 95,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useRetentionMetrics({
+        user: { uid: 'adm', rol: 'admin' },
+        authLoading: false,
+        enabled: true,
+        t: mockT,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.totalCohortUsers).toBe(95);
+    });
+
+    expect(result.current.day1).toBe(72);
+  });
+
+  it('ignora respuestas del worker que no contengan campos de retención', async () => {
+    jest.spyOn(retentionService, 'fetchRetentionMetrics').mockResolvedValueOnce({
+      success: true,
+      data: {
+        status: 'ok',
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useRetentionMetrics({
+        user: { uid: 'adm', rol: 'admin' },
+        authLoading: false,
+        enabled: true,
+        t: mockT,
+      })
+    );
+
+    expect(result.current.day1).toBe(75); // mantiene los datos del mock inicial de Firestore
+  });
+
+  it('maneja rechazo de red en fetchRetentionMetrics sin fallar', async () => {
+    jest.spyOn(retentionService, 'fetchRetentionMetrics').mockRejectedValueOnce(new Error('Network error'));
+
+    const { result } = renderHook(() =>
+      useRetentionMetrics({
+        user: { uid: 'adm', rol: 'admin' },
+        authLoading: false,
+        enabled: true,
+        t: mockT,
+      })
+    );
+
+    expect(result.current.queryError).toBeNull();
+  });
+
+  it('maneja docSnapshot con propiedad booleana exists y data como objeto', async () => {
+    let capturedSnapshotCallback: any;
+    mockDoc.mockReturnValueOnce({
+      onSnapshot: jest.fn((cb) => {
+        capturedSnapshotCallback = cb;
+        return jest.fn();
+      }),
+    });
+
+    const { result } = renderHook(() =>
+      useRetentionMetrics({
+        user: { uid: 'adm', rol: 'admin' },
+        authLoading: false,
+        enabled: true,
+        t: mockT,
+      })
+    );
+
+    await act(async () => {
+      capturedSnapshotCallback({
+        exists: true, // booleano primitivo
+        data: { dia1: 90, dia7: 80, dia30: 70, totalUsuariosCohorte: 200 }, // objeto directo
+      });
+    });
+
+    expect(result.current.day1).toBe(90);
+    expect(result.current.totalCohortUsers).toBe(200);
+
+    // Y con exists = false primitivo
+    await act(async () => {
+      capturedSnapshotCallback({
+        exists: false,
+        data: {},
+      });
+    });
+    expect(result.current.day1).toBe(0);
+    expect(result.current.totalCohortUsers).toBe(0);
+  });
+
+  it('captura excepciones lanzadas al inicializar el listener de Firestore', () => {
+    mockDoc.mockImplementationOnce(() => {
+      throw new Error('Firestore crash');
+    });
+
+    const { result } = renderHook(() =>
+      useRetentionMetrics({
+        user: { uid: 'adm', rol: 'admin' },
+        authLoading: false,
+        enabled: true,
+        t: mockT,
+      })
+    );
+
+    expect(result.current.loading).toBe(false);
   });
 });

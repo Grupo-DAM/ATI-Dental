@@ -90,3 +90,221 @@ describe('Retention Calculator (Cloudflare Worker logic)', () => {
     expect(result.totalCohortUsers).toBe(0);
   });
 });
+
+import { getRetentionMetrics } from '../../workers/retention-worker/src/retention-calculator';
+
+describe('getRetentionMetrics (Firestore REST integration & fallback)', () => {
+  const originalFetch = globalThis.fetch;
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+    jest.restoreAllMocks();
+  });
+
+  it('reads precalculated metrics from metricas_retencion/actual when available (integerValue)', async () => {
+    globalThis.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.includes('metricas_retencion/actual')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              fields: {
+                dia1: { integerValue: '80' },
+                dia7: { integerValue: '50' },
+                dia30: { integerValue: '30' },
+                totalUsuariosCohorte: { integerValue: '120' },
+              },
+            }),
+        });
+      }
+      return Promise.resolve({ ok: false });
+    });
+
+    const result = await getRetentionMetrics({
+      FIREBASE_PROJECT_ID: 'ati-dental',
+      FIREBASE_API_KEY: 'test-key',
+    });
+
+    expect(result.status).toBe('success');
+    expect(result.source).toBe('firestore-live');
+    expect(result.dia1).toBe(80);
+    expect(result.dia7).toBe(50);
+    expect(result.dia30).toBe(30);
+    expect(result.overallRetentionRate).toBe(53);
+    expect(result.totalCohortUsers).toBe(120);
+  });
+
+  it('reads precalculated metrics with doubleValue and totalCohortUsers', async () => {
+    globalThis.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.includes('metricas_retencion/actual')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              fields: {
+                dia1: { doubleValue: 60.5 },
+                dia7: { doubleValue: 40.2 },
+                dia30: { doubleValue: 20.1 },
+                totalCohortUsers: { integerValue: '90' },
+              },
+            }),
+        });
+      }
+      return Promise.resolve({ ok: false });
+    });
+
+    const result = await getRetentionMetrics({});
+
+    expect(result.status).toBe('success');
+    expect(result.source).toBe('firestore-live');
+    expect(result.dia1).toBe(60.5);
+    expect(result.totalCohortUsers).toBe(90);
+  });
+
+  it('computes cohort from usuarios and sesiones REST API when precalculated doc is 404', async () => {
+    const NOW_ISO = new Date().toISOString();
+    const D35_AGO = new Date(Date.now() - 35 * 24 * 3600 * 1000).toISOString();
+    const D1_SESSION = new Date(Date.now() - 35 * 24 * 3600 * 1000 + 24 * 3600 * 1000).toISOString();
+
+    globalThis.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.includes('metricas_retencion/actual')) {
+        return Promise.resolve({ ok: false, status: 404 });
+      }
+      if (url.includes('/usuarios')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              documents: [
+                {
+                  name: 'projects/p/databases/d/documents/usuarios/u1',
+                  createTime: D35_AGO,
+                  fields: {
+                    fechaCreacion: { timestampValue: D35_AGO },
+                    estado: { stringValue: 'activo' },
+                  },
+                },
+                {
+                  name: 'projects/p/databases/d/documents/usuarios/u2',
+                  createTime: D35_AGO,
+                  fields: {
+                    fechaCreacion: { stringValue: 'invalid-date' },
+                  },
+                },
+              ],
+            }),
+        });
+      }
+      if (url.includes('/sesiones')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              documents: [
+                {
+                  name: 'projects/p/databases/d/documents/sesiones/s1',
+                  fields: {
+                    userId: { stringValue: 'u1' },
+                    fecha: { timestampValue: D1_SESSION },
+                  },
+                },
+                {
+                  name: 'projects/p/databases/d/documents/sesiones/s2',
+                  fields: {
+                    usuarioId: { stringValue: 'u2' },
+                    tiempoInicio: { stringValue: D35_AGO },
+                  },
+                },
+              ],
+            }),
+        });
+      }
+      return Promise.resolve({ ok: false });
+    });
+
+    const result = await getRetentionMetrics({
+      FIREBASE_PROJECT_ID: 'ati-dental',
+      FIREBASE_API_KEY: 'abc',
+    });
+
+    expect(result.status).toBe('success');
+    expect(result.source).toBe('computed-cohort');
+    expect(result.totalCohortUsers).toBe(2);
+  });
+
+  it('returns cached-metrics fallback when firestore REST calls reject', async () => {
+    globalThis.fetch = jest.fn().mockRejectedValue(new Error('Network offline'));
+
+    const result = await getRetentionMetrics({});
+
+    expect(result.status).toBe('success');
+    expect(result.source).toBe('cached-metrics');
+    expect(result.dia1).toBe(75);
+    expect(result.dia7).toBe(45);
+    expect(result.dia30).toBe(20);
+    expect(result.overallRetentionRate).toBe(47);
+  });
+
+  it('returns cached-metrics fallback when usuarios array is empty', async () => {
+    globalThis.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.includes('metricas_retencion/actual')) {
+        return Promise.resolve({ ok: false });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ documents: [] }),
+      });
+    });
+
+    const result = await getRetentionMetrics({});
+
+    expect(result.status).toBe('success');
+    expect(result.source).toBe('cached-metrics');
+  });
+
+  it('handles documents with missing name and fallback fields (uid, createTime)', async () => {
+    const NOW_ISO = new Date().toISOString();
+
+    globalThis.fetch = jest.fn().mockImplementation((url: string) => {
+      if (url.includes('metricas_retencion/actual')) {
+        return Promise.resolve({ ok: false, status: 404 });
+      }
+      if (url.includes('/usuarios')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              documents: [
+                {
+                  // Sin name, sin createTime, sin fields
+                },
+              ],
+            }),
+        });
+      }
+      if (url.includes('/sesiones')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              documents: [
+                {
+                  // Sin name, usa createTime y uid
+                  createTime: NOW_ISO,
+                  fields: {
+                    uid: { stringValue: 'user-uid' },
+                  },
+                },
+              ],
+            }),
+        });
+      }
+      return Promise.resolve({ ok: false });
+    });
+
+    const result = await getRetentionMetrics({});
+
+    expect(result.status).toBe('success');
+    expect(result.source).toBe('computed-cohort');
+  });
+});

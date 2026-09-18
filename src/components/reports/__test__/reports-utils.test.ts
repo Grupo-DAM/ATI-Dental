@@ -99,6 +99,14 @@ describe('reports-utils unit tests', () => {
       expect(dataInvalid[1].percentage).toBe(0);
       expect(dataInvalid[2].percentage).toBe(0);
     });
+
+    it('utiliza fallbacks de texto por defecto si t() devuelve cadena vacía', () => {
+      const mockEmptyT = () => '';
+      const data = parseRetentionData({ dia1: 50 }, mockEmptyT);
+      expect(data[0].cohort).toBe('Día 1');
+      expect(data[1].cohort).toBe('Día 7');
+      expect(data[2].cohort).toBe('Día 30');
+    });
   });
 
   describe('getRecordTimestamp', () => {

@@ -55,6 +55,15 @@ describe('Retention Service (Mobile App client)', () => {
     expect(result.error).toBe('Network disconnected');
   });
 
+  it('handles error when rejection has no message property', async () => {
+    globalThis.fetch = jest.fn().mockRejectedValue('Simple string error');
+
+    const result = await fetchRetentionMetrics('https://mock-worker.dev/metrics/retention');
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Error de conexión con el Worker de retención');
+  });
+
   it('uses default retention endpoint from Config when none provided', async () => {
     globalThis.fetch = jest.fn().mockResolvedValue({
       ok: true,
