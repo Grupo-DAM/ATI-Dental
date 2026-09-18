@@ -40,7 +40,10 @@
       "emptyEmail": "El correo electrónico no puede estar vacío",
       "invalidEmail": "Formato de correo inválido",
       "emailInUse": "Este correo ya está registrado en otra cuenta.",
-      "updateError": "Ocurrió un error al intentar actualizar el correo."
+      "updateError": "Ocurrió un error al intentar actualizar el correo.",
+      "verificationPendingTitle": "Verificación Pendiente",
+      "verificationPendingMessage": "No hemos detectado la verificación de tu nuevo correo electrónico.",
+      "keepWaiting": "Seguir Esperando"
     }
   },
   "tabs": {
@@ -204,7 +207,8 @@
     "genderFemale": "Femenino",
     "genderMale": "Masculino",
     "genderUnspecified": "No especificado",
-    "genderTotal": "Total"
+    "genderTotal": "Total",
+    "averageAgeUnavailable": "—"
   },
   "admin": {
     "path": "Administración"

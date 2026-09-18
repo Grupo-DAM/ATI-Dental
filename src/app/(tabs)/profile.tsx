@@ -242,10 +242,10 @@ export default function ProfileScreen() {
 
         if (user.email !== email) {
           Alert.alert(
-            'Verificación Pendiente',
-            'No hemos detectado la verificación de tu nuevo correo electrónico.',
+            t('profile.alerts.verificationPendingTitle'),
+            t('profile.alerts.verificationPendingMessage'),
             [
-              { text: 'Seguir Esperando', style: 'cancel' },
+              { text: t('profile.alerts.keepWaiting'), style: 'cancel' },
               { text: t('profile.cancel'), style: 'destructive', onPress: () => setShowModal(false) },
             ]
           );
@@ -294,7 +294,7 @@ export default function ProfileScreen() {
     <View style={styles.screen}>
       <AppHeader />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        <Breadcrumb parent="Pacientes" current={t('profile.title')} />
+        <Breadcrumb parent={t('tabs.explore')} current={t('profile.title')} />
 
         <View style={styles.titleSection}>
           <Text style={styles.mainTitle}>{t('profile.title')}</Text>

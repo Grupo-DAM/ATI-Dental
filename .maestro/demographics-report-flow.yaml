@@ -1,0 +1,98 @@
+appId: com.proyect1.ATIDental
+---
+# stopApp: false evita matar Expo (pantalla en blanco sin Metro).
+- launchApp:
+    stopApp: false
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
+- tapOn:
+    id: "email-input"
+- inputText: "jesusecova73@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "123456"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-header"
+    timeout: 15000
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-tab"
+    timeout: 10000
+
+- tapOn:
+    id: "profile-tab"
+
+- extendedWaitUntil:
+    visible:
+      id: "menu-btn"
+    timeout: 10000
+
+- tapOn:
+    id: "menu-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-toggle"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-toggle"
+
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-reports"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-reports"
+
+- extendedWaitUntil:
+    visible:
+      id: "report-type-select"
+    timeout: 15000
+
+- tapOn:
+    id: "report-type-select"
+
+- extendedWaitUntil:
+    visible:
+      id: "type-option-demographics"
+    timeout: 10000
+
+- tapOn:
+    id: "type-option-demographics"
+
+- extendedWaitUntil:
+    visible:
+      id: "kpi-cards-container"
+    timeout: 10000
+
+- assertVisible:
+    id: "kpi-total-users"
+- assertVisible:
+    id: "kpi-average-age"
+- assertVisible:
+    id: "reports-age-bar-chart"
+- assertVisible:
+    id: "reports-gender-donut-chart"
+
+- assertVisible:
+    id: "print-btn"
+- assertVisible:
+    id: "export-pdf-btn"
+
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

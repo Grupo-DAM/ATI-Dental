@@ -137,4 +137,21 @@ describe('AdminReportsScreen demografía de usuarios', () => {
   it('reexporta el agregador de demografía', () => {
     expect(aggregateUserDemographics([]).totalUsers).toBe(0);
   });
+
+  it('genera snapshot del layout de demografía', async () => {
+    const { getByTestId, toJSON } = render(<AdminReportsScreen />);
+
+    await act(async () => {
+      fireEvent.press(getByTestId('report-type-select'));
+    });
+    await act(async () => {
+      fireEvent.press(getByTestId('type-option-demographics'));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('reports-age-bar-chart')).toBeTruthy();
+    });
+
+    expect(toJSON()).toMatchSnapshot();
+  });
 });

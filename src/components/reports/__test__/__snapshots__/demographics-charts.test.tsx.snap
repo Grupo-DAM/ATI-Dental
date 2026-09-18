@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`gráficos de demografía genera snapshot de barras y dona sin regresiones de layout 1`] = `null`;
+
+exports[`gráficos de demografía genera snapshot de barras y dona sin regresiones de layout 2`] = `null`;

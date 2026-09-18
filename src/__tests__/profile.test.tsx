@@ -519,14 +519,14 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
 
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
-        'Verificación Pendiente',
-        'No hemos detectado la verificación de tu nuevo correo electrónico.',
+        'profile.alerts.verificationPendingTitle',
+        'profile.alerts.verificationPendingMessage',
         expect.anything()
       );
     });
     
     const alertCalls = (Alert.alert as jest.Mock).mock.calls;
-    const pendingAlertCall = alertCalls.find(call => call[0] === 'Verificación Pendiente');
+    const pendingAlertCall = alertCalls.find(call => call[0] === 'profile.alerts.verificationPendingTitle');
     const buttons = pendingAlertCall[2];
     const cancelButton = buttons.find((b: any) => b.style === 'destructive');
     cancelButton.onPress();

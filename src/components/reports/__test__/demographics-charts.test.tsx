@@ -1,4 +1,5 @@
 import React from 'react';
+import renderer from 'react-test-renderer';
 import { render } from '@testing-library/react-native';
 import { AgeBarChart } from '@/components/reports/age-bar-chart';
 import { GenderDonutChart, describeDonutSlice } from '@/components/reports/gender-donut-chart';
@@ -49,5 +50,36 @@ describe('gráficos de demografía', () => {
     expect(getByTestId('gender-donut-total').props.children).toBe(10);
     expect(describeDonutSlice(80, 80, 60, 40, 0, 360)).toContain('A');
     expect(describeDonutSlice(80, 80, 60, 40, 10, 10)).toBe('');
+  });
+
+  it('genera snapshot de barras y dona sin regresiones de layout', () => {
+    const ageTree = renderer
+      .create(
+        <AgeBarChart
+          data={[
+            { key: '18_25', count: 2 },
+            { key: '26_35', count: 5 },
+            { key: '36_50', count: 1 },
+            { key: '50_plus', count: 0 },
+            { key: 'unspecified', count: 1 },
+          ]}
+        />,
+      )
+      .toJSON();
+    const genderTree = renderer
+      .create(
+        <GenderDonutChart
+          total={10}
+          data={[
+            { key: 'female', count: 6, percent: 60 },
+            { key: 'male', count: 3, percent: 30 },
+            { key: 'unspecified', count: 1, percent: 10 },
+          ]}
+        />,
+      )
+      .toJSON();
+
+    expect(ageTree).toMatchSnapshot();
+    expect(genderTree).toMatchSnapshot();
   });
 });

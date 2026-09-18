@@ -40,7 +40,10 @@
       "emptyEmail": "Email cannot be empty",
       "invalidEmail": "Invalid email format",
       "emailInUse": "This email is already registered to another account.",
-      "updateError": "An error occurred while trying to update the email."
+      "updateError": "An error occurred while trying to update the email.",
+      "verificationPendingTitle": "Verification pending",
+      "verificationPendingMessage": "We have not detected verification of your new email address.",
+      "keepWaiting": "Keep waiting"
     }
   },
   "tabs": {
@@ -204,7 +207,8 @@
     "genderFemale": "Female",
     "genderMale": "Male",
     "genderUnspecified": "Unspecified",
-    "genderTotal": "Total"
+    "genderTotal": "Total",
+    "averageAgeUnavailable": "—"
   },
   "admin": {
     "path": "Administration"

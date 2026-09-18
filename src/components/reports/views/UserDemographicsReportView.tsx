@@ -58,7 +58,7 @@ export function UserDemographicsReportView({
         <KPICard
           tinyType={false}
           label={t('reports.kpiAverageAge')}
-          value={averageAge ?? '—'}
+          value={averageAge ?? t('reports.averageAgeUnavailable')}
           iconName="calendar-outline"
           valueTestID="kpi-average-age-val"
           cardTestID="kpi-average-age"
