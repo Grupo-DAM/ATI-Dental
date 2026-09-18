@@ -70,12 +70,11 @@ describe('PatientFileScreen', () => {
 
   const mockPatient = {
     id: '123',
-    nombre: 'Juan',
-    apellido: 'Perez',
-    dni: 'V-12345678',
-    telefono: '04141234567',
-    antecedentesMedicos: [],
-    alergiasConocidas: [],
+    fullName: 'Juan Perez',
+    documentId: 'V-12345678',
+    phone: '04141234567',
+    conditions: '',
+    allergies: '',
   };
 
   const mockTreatments = [

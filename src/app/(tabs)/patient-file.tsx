@@ -172,25 +172,25 @@ const actionBarStyles = StyleSheet.create({
 
 /** Patient info card with gradient-style background */
 function PatientCard({ patient, t }: { patient: Patient; t: (k: string) => string }) {
-  const age = calculateAge(patient.fechaNacimiento);
-  const fullName = `${patient.nombre} ${patient.apellido}`.trim();
-  const gender = patient.genero || '—';
+  const age = calculateAge(patient.birthDate || '');
+  const fullName = patient.fullName?.trim() || '—';
+  const gender = patient.gender || '—';
 
   return (
     <View style={patientCardStyles.card} testID="patient-info-card">
       <Image
-        source={patient.imageUrl ? { uri: patient.imageUrl } : avatarFallback}
+        source={patient.photoUri ? { uri: patient.photoUri } : avatarFallback}
         style={patientCardStyles.avatar}
         contentFit="cover"
       />
       <View style={patientCardStyles.info}>
         <Text style={patientCardStyles.name}>{fullName}</Text>
         <Text style={patientCardStyles.details}>
-          {patient.dni}  •  {gender}  •  {age !== null ? `${age} ${t('patientFile.years')}` : '—'}
+          {patient.documentId || '—'}  •  {gender}  •  {age !== null ? `${age} ${t('patientFile.years')}` : '—'}
         </Text>
         <View style={patientCardStyles.phoneRow}>
           <Ionicons name="call" size={14} color="#FFFFFF" style={{ marginRight: 6 }} />
-          <Text style={patientCardStyles.phone}>{patient.telefono || '—'}</Text>
+          <Text style={patientCardStyles.phone}>{patient.phone || '—'}</Text>
         </View>
       </View>
     </View>
@@ -713,9 +713,9 @@ export default function PatientFileScreen() {
       pathname: '/(tabs)/register-treatment',
       params: {
         patientId: patient.id,
-        patientName: `${patient.nombre} ${patient.apellido}`.trim(),
-        patientCedula: patient.dni,
-        patientPhone: patient.telefono,
+        patientName: patient.fullName,
+        patientCedula: patient.documentId,
+        patientPhone: patient.phone,
       },
     });
   };
@@ -726,9 +726,9 @@ export default function PatientFileScreen() {
       pathname: '/(tabs)/register-treatment',
       params: {
         patientId: patient.id,
-        patientName: `${patient.nombre} ${patient.apellido}`.trim(),
-        patientCedula: patient.dni,
-        patientPhone: patient.telefono,
+        patientName: patient.fullName,
+        patientCedula: patient.documentId,
+        patientPhone: patient.phone,
         treatmentId,
       },
     });
@@ -838,10 +838,10 @@ export default function PatientFileScreen() {
           icon="person-outline"
           defaultOpen={false}
         >
-          <DetailRow label={t('patientFile.email')} value={patient.email} />
-          <DetailRow label={t('patientFile.address')} value={patient.direccion || '—'} />
-          <DetailRow label={t('patientFile.birthDate')} value={formatDate(patient.fechaNacimiento)} />
-          <DetailRow label={t('patientFile.phone')} value={patient.telefono} />
+          <DetailRow label={t('patientFile.email')} value={patient.email || ''} />
+          <DetailRow label={t('patientFile.address')} value={patient.address || '—'} />
+          <DetailRow label={t('patientFile.birthDate')} value={formatDate(patient.birthDate)} />
+          <DetailRow label={t('patientFile.phone')} value={patient.phone || ''} />
         </CollapsibleSection>
 
         {/* Antecedentes Médicos */}
@@ -857,7 +857,7 @@ export default function PatientFileScreen() {
             </View>
             <View style={medicalRowStyles.textContainer}>
               <Text style={medicalRowStyles.label}>{t('patientFile.bloodType')}</Text>
-              <Text style={medicalRowStyles.value}>{patient.tipoSangre || '—'}</Text>
+              <Text style={medicalRowStyles.value}>{patient.bloodType || '—'}</Text>
             </View>
           </View>
 
@@ -869,9 +869,7 @@ export default function PatientFileScreen() {
             <View style={medicalRowStyles.textContainer}>
               <Text style={medicalRowStyles.label}>{t('patientFile.knownAllergies')}</Text>
               <Text style={medicalRowStyles.value}>
-                {(patient.alergiasConocidas && patient.alergiasConocidas.length > 0)
-                  ? patient.alergiasConocidas.map(formatAntecedente).join(', ')
-                  : '—'}
+                {patient.allergies ? patient.allergies : '—'}
               </Text>
             </View>
           </View>
@@ -884,9 +882,7 @@ export default function PatientFileScreen() {
             <View style={medicalRowStyles.textContainer}>
               <Text style={medicalRowStyles.label}>{t('patientFile.medicalConditions')}</Text>
               <Text style={medicalRowStyles.value}>
-                {patient.antecedentesMedicos.length > 0
-                  ? patient.antecedentesMedicos.map(formatAntecedente).join(', ')
-                  : '—'}
+                {patient.conditions ? patient.conditions : '—'}
               </Text>
             </View>
           </View>
@@ -899,7 +895,7 @@ export default function PatientFileScreen() {
             <View style={medicalRowStyles.textContainer}>
               <Text style={medicalRowStyles.label}>{t('patientFile.additionalNotes')}</Text>
               <Text style={medicalRowStyles.noteText}>
-                {patient.notasAdicionales || '—'}
+                {patient.notes || '—'}
               </Text>
             </View>
           </View>

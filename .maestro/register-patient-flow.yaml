@@ -1,0 +1,137 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+# 1. Esperar a que cargue la pantalla de login
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
+# 2. Inicio de Sesión
+- tapOn:
+    id: "email-input"
+- inputText: "carloscaoucv2022@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Cao1234"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+
+# 3. Esperar a que la app inicie en Home
+- extendedWaitUntil:
+    visible:
+      id: "welcome-header"
+    timeout: 20000
+
+# 4. Navegar a la pestaña de Perfil (donde se ubica la cabecera con el menú lateral)
+- extendedWaitUntil:
+    visible:
+      id: "profile-tab"
+    timeout: 10000
+
+- tapOn:
+    id: "profile-tab"
+
+# 5. Abrir el menú lateral
+- extendedWaitUntil:
+    visible:
+      id: "menu-btn"
+    timeout: 10000
+
+- tapOn:
+    id: "menu-btn"
+
+# 6. Tocar en la opción "Registrar Paciente" del menú lateral
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-register-patient"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-register-patient"
+
+# 7. Esperar a que cargue el formulario de Registro de Paciente
+- extendedWaitUntil:
+    visible:
+      id: "register-patient-screen"
+    timeout: 15000
+
+# =======================================================
+# ESCENARIO 1: VALIDACIÓN DE CAMPOS OBLIGATORIOS VACÍOS
+# =======================================================
+- scrollUntilVisible:
+    element:
+      id: "btn-submit-patient"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "btn-submit-patient"
+
+# Subir nuevamente porque el error aparece arriba bajo el nombre
+- scrollUntilVisible:
+    element:
+      id: "input-full-name"
+    direction: UP
+    timeout: 10000
+
+# Ahora que está visible en pantalla, verificar el mensaje de validación
+- assertVisible: ".*(El nombre completo no puede estar vacío|Full name cannot be empty).*"
+
+# =======================================================
+# ESCENARIO 2: COMPLETAR EL FORMULARIO
+# =======================================================
+# Ya estamos arriba en el input-full-name
+- tapOn:
+    id: "input-full-name"
+- inputText: "Eccelsa Ciccolella"
+- hideKeyboard
+
+- tapOn:
+    id: "input-document"
+- inputText: "V-20123456"
+- hideKeyboard
+
+- tapOn:
+    id: "input-phone"
+- inputText: "+584141234567"
+- hideKeyboard
+
+- tapOn:
+    id: "input-email"
+- inputText: "eccelsa@ejemplo.com"
+- hideKeyboard
+
+# Scroll hacia abajo para los datos clínicos
+- scrollUntilVisible:
+    element:
+      id: "input-allergies"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "input-allergies"
+- inputText: "Penicilina"
+- hideKeyboard
+
+# =======================================================
+# ESCENARIO 3: PERSISTENCIA Y FEEDBACK EXITOSO
+# =======================================================
+- scrollUntilVisible:
+    element:
+      id: "btn-submit-patient"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "btn-submit-patient"
+
+# Esperar el Alert nativo de éxito de Firestore
+- extendedWaitUntil:
+    visible: ".*(Paciente registrado|Patient Registered).*"
+    timeout: 15000
+
+# Confirmar el modal de éxito
+- tapOn: ".*(Listo|LISTO|Done|DONE|OK).*"

@@ -24,7 +24,6 @@ export default function AppTabs() {
       <Tabs.Screen name="admin/reports" options={{ href: null, title: 'Admin Reportes' }} />
       <Tabs.Screen name="update-contact-info" options={{ href: null, title: 'Actualizar contacto' }} />
       <Tabs.Screen name="register-treatment" options={{ href: null, title: 'Registrar Tratamiento' }} />
-      <Tabs.Screen name="patient-file" options={{ href: null, title: 'Ficha del Paciente' }} />
     </Tabs>
   );
 }
@@ -34,6 +33,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const activeRouteName = state.routes[state.index].name;
+  const isPatientsSection = activeRouteName === 'explore' || activeRouteName === 'register-patient';
 
   const handleNavigate = (routeName: string) => {
     navigation.navigate(routeName);
@@ -81,17 +81,18 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
       {/* 2. EXPLORE (PACIENTES) TAB */}
       <TouchableOpacity
+        testID="explore-tab"
         onPress={() => handleNavigate('explore')}
         style={styles.tabItem}>
         <Image
           source={require('@/assets/expo.icon/Assets/lista.svg')}
           style={styles.icon}
-          tintColor={activeRouteName === 'explore' ? colors.main : colors.textSecondary}
+          tintColor={isPatientsSection ? colors.main : colors.textSecondary}
         />
         <Text
           style={[
             styles.label,
-            { color: activeRouteName === 'explore' ? colors.main : colors.textSecondary },
+            { color: isPatientsSection ? colors.main : colors.textSecondary },
           ]}>
           {t('tabs.explore')}
         </Text>
@@ -102,20 +103,13 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           testID = 'center-btn'
           activeOpacity={0.8}
           style={[styles.floatingButton, { backgroundColor: colors.main }]}
-          onPress={() => {
-            import('expo-router').then(({ router }) => {
-              router.push({ 
-                pathname: '/(tabs)/patient-file', 
-                params: { email: 'carlos.cova@email.com' } 
-              });
-            });
-          }}
+          onPress={() => handleNavigate('register-treatment')}
         >
           <Image
             source={require('@/assets/expo.icon/Assets/plus-solid.svg')}
             style={styles.plusIcon}
             contentFit="contain"
-            tintColor="white"
+            tintColor={colors.overMain}
           />
         </TouchableOpacity>
       </View>

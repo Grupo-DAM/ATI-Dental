@@ -1,38 +1,128 @@
 import { firestore } from '@/config/firebase';
+import { PatientGender, PatientBloodType } from '@/constants/patient';
 
-/**
- * Represents a patient record stored in the 'pacientes' Firestore collection.
- * Fields marked as optional may not yet exist in the database but are
- * included so the UI can display placeholders and be ready when they are added.
- */
-export interface Patient {
+export interface PatientInput {
+  patientCode?: string;
+  fullName: string;
+  documentId?: string;
+  birthDate?: string;
+  gender?: PatientGender | string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  photoUri?: string | null;
+  bloodType?: PatientBloodType | string;
+  allergies?: string;
+  conditions?: string;
+  notes?: string;
+}
+
+export interface Patient extends PatientInput {
   id: string;
-  nombre: string;
-  apellido: string;
-  dni: string;
-  email: string;
-  telefono: string;
-  fechaNacimiento: string;
-  antecedentesMedicos: string[];
-  fechaCreacion: string;
-  // Optional fields — not yet present in Firestore
-  genero?: string;
-  imageUrl?: string;
-  direccion?: string;
-  tipoSangre?: string;
-  alergiasConocidas?: string[];
-  condicionesMedicas?: string[];
-  notasAdicionales?: string;
+  patientCode: string;
+  status: 'activo' | 'inactivo';
+  createdAt?: any;
+  updatedAt?: any;
+  // Fallbacks for the UI to prevent complete breakage
   proximaCita?: string;
   ultimaVisita?: string;
 }
 
 export const PATIENTS_COLLECTION = 'pacientes';
 
-/**
- * Retrieves a single patient by their Firestore document ID.
- * Throws if the document does not exist or there is a network/permissions error.
- */
+function getServerTimestamp() {
+  try {
+    if (typeof (firestore as any)?.FieldValue?.serverTimestamp === 'function') {
+      return (firestore as any).FieldValue.serverTimestamp();
+    }
+  } catch (e) {
+    console.warn('[patient-service] FieldValue.serverTimestamp unavailable, using Date fallback:', e);
+  }
+  return new Date();
+}
+
+// Registra y persiste un nuevo paciente en Firestore.
+export async function createPatient(input: PatientInput): Promise<Patient> {
+  try {
+    const db = firestore();
+    const collectionRef = db.collection(PATIENTS_COLLECTION);
+    const timestamp = getServerTimestamp();
+
+    const snapshot = await collectionRef.get();
+    const nextNumber = snapshot.size + 1;
+    const patientCode = `#P-${String(nextNumber).padStart(4, '0')}`;
+
+    const patientDocument = {
+      patientCode,
+      fullName: input.fullName.trim(),
+      documentId: input.documentId?.trim() || '',
+      birthDate: input.birthDate?.trim() || '',
+      gender: input.gender || '',
+      phone: input.phone?.trim() || '',
+      email: input.email?.trim().toLowerCase() || '',
+      address: input.address?.trim() || '',
+      photoUri: input.photoUri || null,
+      bloodType: input.bloodType || '',
+      allergies: input.allergies?.trim() || '',
+      conditions: input.conditions?.trim() || '',
+      notes: input.notes?.trim() || '',
+      status: 'activo' as const,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+
+    const docRef = await collectionRef.add(patientDocument);
+
+    return {
+      id: docRef.id,
+      ...patientDocument,
+    };
+  } catch (error) {
+    console.error('[patient-service] createPatient failed:', error);
+    throw error;
+  }
+}
+
+// Obtiene la lista completa de pacientes activos para su visualización.
+export async function getPatients(): Promise<Patient[]> {
+  try {
+    const snapshot = await firestore()
+      .collection(PATIENTS_COLLECTION)
+      .get();
+
+    if (snapshot.empty) {
+      return [];
+    }
+
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        patientCode: data.patientCode || `#P-${doc.id.slice(0, 4).toUpperCase()}`,
+        fullName: data.fullName,
+        documentId: data.documentId,
+        birthDate: data.birthDate,
+        gender: data.gender,
+        phone: data.phone,
+        email: data.email,
+        address: data.address,
+        photoUri: data.photoUri,
+        bloodType: data.bloodType,
+        allergies: data.allergies,
+        conditions: data.conditions,
+        notes: data.notes,
+        status: data.status || 'activo',
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      };
+    });
+  } catch (error) {
+    console.error('[patient-service] getPatients failed:', error);
+    throw error;
+  }
+}
+
+// Obtiene un paciente por su ID.
 export async function getPatientById(patientId: string): Promise<Patient> {
   try {
     const docRef = await firestore()
@@ -40,35 +130,31 @@ export async function getPatientById(patientId: string): Promise<Patient> {
       .doc(patientId)
       .get();
 
-    const exists = typeof docRef.exists === 'function' ? docRef.exists() : docRef.exists;
-
-    if (!exists) {
+    if (!docRef.exists) {
       throw new Error('PATIENT_NOT_FOUND');
     }
 
     const data = docRef.data();
-    if (!data) {
-      throw new Error('PATIENT_NOT_FOUND');
-    }
+    if (!data) throw new Error('PATIENT_NOT_FOUND');
 
     return {
       id: docRef.id,
-      nombre: data.nombre ?? '',
-      apellido: data.apellido ?? '',
-      dni: data.dni ?? '',
-      email: data.email ?? '',
-      telefono: data.telefono ?? '',
-      fechaNacimiento: data.fechaNacimiento ?? '',
-      antecedentesMedicos: data.antecedentesMedicos ?? [],
-      fechaCreacion: data.fechaCreacion ?? '',
-      // Optional fields
-      genero: data.genero,
-      imageUrl: data.imageUrl,
-      direccion: data.direccion,
-      tipoSangre: data.tipoSangre,
-      alergiasConocidas: data.alergiasConocidas ?? [],
-      condicionesMedicas: data.condicionesMedicas ?? [],
-      notasAdicionales: data.notasAdicionales,
+      patientCode: data.patientCode || `#P-${docRef.id.slice(0, 4).toUpperCase()}`,
+      fullName: data.fullName || data.nombre || '',
+      documentId: data.documentId || data.dni || '',
+      birthDate: data.birthDate || data.fechaNacimiento || '',
+      gender: data.gender || data.genero || '',
+      phone: data.phone || data.telefono || '',
+      email: data.email || '',
+      address: data.address || data.direccion || '',
+      photoUri: data.photoUri || data.imageUrl || null,
+      bloodType: data.bloodType || data.tipoSangre || '',
+      allergies: data.allergies || (data.alergiasConocidas ? data.alergiasConocidas.join(', ') : ''),
+      conditions: data.conditions || (data.antecedentesMedicos ? data.antecedentesMedicos.join(', ') : ''),
+      notes: data.notes || data.notasAdicionales || '',
+      status: data.status || 'activo',
+      createdAt: data.createdAt || data.fechaCreacion,
+      updatedAt: data.updatedAt,
       proximaCita: data.proximaCita,
       ultimaVisita: data.ultimaVisita,
     };
@@ -78,10 +164,7 @@ export async function getPatientById(patientId: string): Promise<Patient> {
   }
 }
 
-/**
- * Retrieves a single patient by their email.
- * Throws if the document does not exist or there is a network/permissions error.
- */
+// Obtiene un paciente por su correo electrónico.
 export async function getPatientByEmail(email: string): Promise<Patient> {
   try {
     const querySnapshot = await firestore()
@@ -99,22 +182,22 @@ export async function getPatientByEmail(email: string): Promise<Patient> {
 
     return {
       id: docRef.id,
-      nombre: data.nombre ?? '',
-      apellido: data.apellido ?? '',
-      dni: data.dni ?? '',
-      email: data.email ?? '',
-      telefono: data.telefono ?? '',
-      fechaNacimiento: data.fechaNacimiento ?? '',
-      antecedentesMedicos: data.antecedentesMedicos ?? [],
-      fechaCreacion: data.fechaCreacion ?? '',
-      // Optional fields
-      genero: data.genero,
-      imageUrl: data.imageUrl,
-      direccion: data.direccion,
-      tipoSangre: data.tipoSangre,
-      alergiasConocidas: data.alergiasConocidas ?? [],
-      condicionesMedicas: data.condicionesMedicas ?? [],
-      notasAdicionales: data.notasAdicionales,
+      patientCode: data.patientCode || `#P-${docRef.id.slice(0, 4).toUpperCase()}`,
+      fullName: data.fullName || data.nombre || '',
+      documentId: data.documentId || data.dni || '',
+      birthDate: data.birthDate || data.fechaNacimiento || '',
+      gender: data.gender || data.genero || '',
+      phone: data.phone || data.telefono || '',
+      email: data.email || '',
+      address: data.address || data.direccion || '',
+      photoUri: data.photoUri || data.imageUrl || null,
+      bloodType: data.bloodType || data.tipoSangre || '',
+      allergies: data.allergies || (data.alergiasConocidas ? data.alergiasConocidas.join(', ') : ''),
+      conditions: data.conditions || (data.antecedentesMedicos ? data.antecedentesMedicos.join(', ') : ''),
+      notes: data.notes || data.notasAdicionales || '',
+      status: data.status || 'activo',
+      createdAt: data.createdAt || data.fechaCreacion,
+      updatedAt: data.updatedAt,
       proximaCita: data.proximaCita,
       ultimaVisita: data.ultimaVisita,
     };
