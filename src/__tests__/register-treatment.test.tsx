@@ -47,6 +47,8 @@ jest.mock('react-i18next', () => ({
 // Mock del servicio de tratamientos
 jest.mock('@/services/treatment-service', () => ({
   createTreatment: jest.fn().mockResolvedValue({ id: 'mock-treatment-id' }),
+  updateTreatment: jest.fn().mockResolvedValue(undefined),
+  getTreatmentById: jest.fn().mockResolvedValue(null),
 }));
 
 // ========================================================
@@ -330,6 +332,71 @@ describe('RegisterTreatmentScreen - Functional & Persistence Logic', () => {
       await act(async () => {
         resolvePromise!({ id: 'done' });
       });
+    });
+  });
+
+  describe('Edición de tratamiento y validaciones adicionales', () => {
+    it('debe cargar datos del tratamiento si se pasa treatmentId y actualizar el tratamiento', async () => {
+      mockLocalSearchParams = { patientId: 'pat-123', treatmentId: 't-123' };
+      const { getTreatmentById, updateTreatment } = require('@/services/treatment-service');
+      (getTreatmentById as jest.Mock).mockResolvedValueOnce({
+        patientId: 'pat-123',
+        category: 'Endodoncia',
+        treatmentName: 'Tratamiento de conducto',
+        dentalPiece: '21',
+        treatmentDate: '10/10/2023',
+        responsibleDentist: 'Dr. Perez',
+        status: 'Pendiente',
+        notes: 'Notas previas',
+        estimatedCost: 150,
+        pendingExams: [],
+      });
+
+      const { getByText, getByDisplayValue } = render(<RegisterTreatmentScreen />);
+
+      await waitFor(() => {
+        expect(getByDisplayValue('Tratamiento de conducto')).toBeTruthy();
+      });
+
+      fireEvent.press(getByText('registerTreatment.save'));
+
+      const confirmBtn = getByText('registerTreatment.modal.confirm');
+      fireEvent.press(confirmBtn);
+
+      await waitFor(() => {
+        expect(updateTreatment).toHaveBeenCalledWith('t-123', expect.any(Object));
+      });
+    });
+
+    it('debe limpiar error de validación cuando se modifica el campo', async () => {
+      mockLocalSearchParams = {};
+      const { getByText, getByPlaceholderText, queryByText } = render(<RegisterTreatmentScreen />);
+
+      // Enviar sin llenar para provocar error
+      fireEvent.press(getByText('registerTreatment.save'));
+
+      await waitFor(() => {
+        expect(getByText('registerTreatment.errors.treatmentNameRequired')).toBeTruthy();
+      });
+
+      // Llenar el campo para que se limpie el error
+      fireEvent.changeText(getByPlaceholderText('registerTreatment.placeholders.treatmentName'), 'Nueva limpieza');
+
+      await waitFor(() => {
+        expect(queryByText('registerTreatment.errors.treatmentNameRequired')).toBeNull();
+      });
+    });
+
+    it('debe navegar hacia atrás al usar breadcrumb', () => {
+      mockLocalSearchParams = { patientId: 'pat-123' };
+      const { router } = require('expo-router');
+      const { getByText } = render(<RegisterTreatmentScreen />);
+
+      fireEvent.press(getByText('registerTreatment.breadcrumb.patients'));
+      expect(router.push).toHaveBeenCalledWith('/(tabs)/explore');
+
+      fireEvent.press(getByText('registerTreatment.breadcrumb.patientRecord'));
+      expect(router.push).toHaveBeenCalledWith({ pathname: '/(tabs)/patient-file', params: { patientId: 'pat-123' } });
     });
   });
 });
