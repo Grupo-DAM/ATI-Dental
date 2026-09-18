@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { View, Text, Platform, StyleSheet, TextInput, Pressable} from 'react-native';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { router } from 'expo-router';
 
 const SearchIcon = require('@/assets/expo.icon/Assets/li_search.svg');
 const NewUserIcon = require('@/assets/expo.icon/Assets/register-patient.svg');
@@ -15,6 +16,13 @@ export function NoResultSearch ({general = true}: ListType) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
+
+    const handleRegisterNew = () => {
+        if (!general) {
+            router.replace('/(tabs)/patients/register-patient');
+        }
+    };
+
     return (
           <View style = {styles.container}>
             <Image
@@ -28,7 +36,9 @@ export function NoResultSearch ({general = true}: ListType) {
             <Text style = {[styles.text, {marginTop: 32}]}>
                 {general? t('admin-users.noResultsQuestion'):t('patients-list.noResultsQuestion')}
             </Text>
-            <Pressable style = {styles.newUserBtn}>
+            <Pressable style = {styles.newUserBtn}
+                onPress = {handleRegisterNew}
+                testID = 'no-result-search-users'>
                 <Image
                   source={NewUserIcon}
                   contentFit="contain"

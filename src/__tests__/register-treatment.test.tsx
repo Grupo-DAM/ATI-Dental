@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act, screen } from '@testing-library/react-native';
-import RegisterTreatmentScreen from '../app/(tabs)/register-treatment';
+import RegisterTreatmentScreen from '../app/(tabs)/patients/register-treatment';
 import * as treatmentService from '@/services/treatment-service';
 
 // Mock de @expo/vector-icons
