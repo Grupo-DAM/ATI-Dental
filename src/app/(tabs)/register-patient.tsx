@@ -89,17 +89,17 @@ export default function RegisterPatientScreen() {
     // Función que toma los datos del paciente y rellena los campos del formulario
     const populateFormWithPatient = (data: any) => {
       if (!data) return;
-      if (data.fullName || data.nombre) setFullName(data.fullName || data.nombre);
-      if (data.documentId || data.cedula) setDocumentId(data.documentId || data.cedula);
-      if (data.birthDate || data.fechaNacimiento) setBirthDate(data.birthDate || data.fechaNacimiento);
-      if (data.gender || data.genero) setGender(data.gender || data.genero);
-      if (data.phone || data.telefono) setPhone(data.phone || data.telefono);
-      if (data.email) setEmail(data.email);
-      if (data.address || data.direccion) setAddress(data.address || data.direccion);
-      if (data.bloodType || data.tipoSangre) setBloodType(data.bloodType || data.tipoSangre);
-      if (data.allergies || data.alergias) setAllergies(data.allergies || data.alergias);
-      if (data.conditions || data.condiciones) setConditions(data.conditions || data.condiciones);
-      if (data.notes || data.notas) setNotes(data.notes || data.notas);
+      setFullName(data.fullName ?? data.nombre ?? '');
+      setDocumentId(data.documentId ?? data.cedula ?? '');
+      setBirthDate(data.birthDate ?? data.fechaNacimiento ?? '');
+      setGender(data.gender ?? data.genero ?? '');
+      setPhone(data.phone ?? data.telefono ?? '');
+      setEmail(data.email ?? '');
+      setAddress(data.address ?? data.direccion ?? '');
+      setBloodType(data.bloodType ?? data.tipoSangre ?? '');
+      setAllergies(data.allergies ?? data.alergias ?? '');
+      setConditions(data.conditions ?? data.condiciones ?? '');
+      setNotes(data.notes ?? data.notas ?? '');
       if (data.photoUri) setPhotoUri(data.photoUri);
     };
 

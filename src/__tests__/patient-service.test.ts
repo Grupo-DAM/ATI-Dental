@@ -18,6 +18,7 @@ describe('Patient Service (Persistence Layer)', () => {
     it('persiste un nuevo paciente con todos los campos y retorna el ID generado', async () => {
       const mockDocId = 'paciente-doc-123';
       (mockFirestoreInstance.add as jest.Mock).mockResolvedValueOnce({ id: mockDocId });
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({ size: 0, docs: [] });
 
       const input: PatientInput = {
         fullName: 'Mariana López',
@@ -52,6 +53,7 @@ describe('Patient Service (Persistence Layer)', () => {
     });
 
     it('propaga error si la conexión con Firestore falla', async () => {
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({ size: 0, docs: [] });
       (mockFirestoreInstance.add as jest.Mock).mockRejectedValueOnce(
         new Error('Network connection timeout')
       );
@@ -84,6 +86,57 @@ describe('Patient Service (Persistence Layer)', () => {
       expect(patients).toHaveLength(1);
       expect(patients[0].id).toBe('p-1');
       expect(patients[0].fullName).toBe('Paciente 1');
+    });
+
+    it('retorna array vacío si no hay pacientes', async () => {
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
+        empty: true,
+        docs: [],
+      });
+      const result = await getPatients();
+      expect(result).toEqual([]);
+    });
+
+    it('propaga error si getPatients falla', async () => {
+      (mockFirestoreInstance.get as jest.Mock).mockRejectedValueOnce(
+        new Error('Firestore read error')
+      );
+      await expect(getPatients()).rejects.toThrow('Firestore read error');
+    });
+  });
+
+  describe('getPatientById', () => {
+    it('retorna el paciente cuando existe el documento', async () => {
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
+        exists: () => true,
+        id: 'doc-123',
+        data: () => ({
+          fullName: 'Juan Pérez',
+          patientCode: '#P-0001',
+          documentId: 'V-123',
+        }),
+      });
+
+      const result = await getPatientById('doc-123');
+      expect(result?.id).toBe('doc-123');
+      expect(result?.fullName).toBe('Juan Pérez');
+      expect(result?.patientCode).toBe('#P-0001');
+    });
+
+    it('retorna null si el documento no existe', async () => {
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
+        exists: () => false,
+      });
+
+      const result = await getPatientById('doc-no-existe');
+      expect(result).toBeNull();
+    });
+
+    it('propaga error si falla la consulta getPatientById', async () => {
+      (mockFirestoreInstance.get as jest.Mock).mockRejectedValueOnce(
+        new Error('Read error')
+      );
+      await expect(getPatientById('doc-error')).rejects.toThrow('Read error');
     });
   });
 });

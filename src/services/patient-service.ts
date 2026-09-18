@@ -136,6 +136,7 @@ export async function getPatientById(patientId: string): Promise<Patient | null>
 
     return {
       id: docRef.id,
+      patientCode: data.patientCode || `#P-${docRef.id.slice(0, 4).toUpperCase()}`,
       fullName: data.fullName,
       documentId: data.documentId,
       birthDate: data.birthDate,

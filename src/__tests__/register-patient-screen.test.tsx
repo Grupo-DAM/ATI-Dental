@@ -94,6 +94,15 @@ jest.mock('@/hooks/use-theme', () => ({
 
 jest.mock('@/services/patient-service', () => ({
   createPatient: jest.fn(() => Promise.resolve({ id: 'mock-id' })),
+  getPatientById: jest.fn(() =>
+    Promise.resolve({
+      id: 'mock-p1',
+      fullName: 'Carlos Ramos',
+      email: 'carlos@test.com',
+      documentId: 'V-999',
+      phone: '12345',
+    })
+  ),
 }));
 
 describe('RegisterPatientScreen', () => {
@@ -473,6 +482,58 @@ describe('RegisterPatientScreen', () => {
     // Se verifica que la información no se eliminó
     expect(screen.getByTestId('input-full-name').props.value).toBe('Juan Pérez');
     expect(screen.getByTestId('input-document').props.value).toBe('123456789');
+    alertSpy.mockRestore();
+  });
+
+  it('rellena el formulario cuando se pasa patientData por params', () => {
+    const mockData = JSON.stringify({
+      fullName: 'Paciente Param',
+      email: 'param@test.com',
+      documentId: '12345',
+    });
+    jest.spyOn(require('expo-router'), 'useLocalSearchParams').mockReturnValueOnce({
+      patientData: mockData,
+    });
+
+    render(<RegisterPatientScreen />);
+    expect(screen.getByTestId('input-full-name').props.value).toBe('Paciente Param');
+    expect(screen.getByTestId('input-email').props.value).toBe('param@test.com');
+  });
+
+  it('maneja error si patientData es un JSON inválido', () => {
+    jest.spyOn(require('expo-router'), 'useLocalSearchParams').mockReturnValueOnce({
+      patientData: '{invalido',
+    });
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    render(<RegisterPatientScreen />);
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it('carga paciente por patientId desde Firebase', async () => {
+    jest.spyOn(require('expo-router'), 'useLocalSearchParams').mockReturnValueOnce({
+      patientId: 'mock-p1',
+    });
+
+    render(<RegisterPatientScreen />);
+    await waitFor(() => {
+      expect(screen.getByTestId('input-full-name').props.value).toBe('Carlos Ramos');
+    });
+  });
+
+  it('navega con router.replace si canGoBack es falso al confirmar éxito', async () => {
+    mockCanGoBack.mockReturnValueOnce(false);
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
+      buttons?.[0]?.onPress?.();
+    });
+
+    render(<RegisterPatientScreen />);
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Juan');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)/explore');
+    });
     alertSpy.mockRestore();
   });
 });
