@@ -68,7 +68,7 @@ const MAIN_MENU_ITEMS: MenuItem[] = [
   },
   {
     testID: 'nav-item-register-patient',
-    route: '/(tabs)/register-patient',
+    route: '/(tabs)/patients/register-patient',
     segment: 'register-patient',
     iconKey: 'register',
     icon: require('@/assets/expo.icon/Assets/register-patient.svg'),
