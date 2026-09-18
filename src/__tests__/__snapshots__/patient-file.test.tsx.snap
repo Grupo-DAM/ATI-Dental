@@ -1,0 +1,1429 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PatientFileScreen matches snapshot 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "#F7F6F8",
+      "flex": 1,
+    }
+  }
+>
+  <View
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#52287D",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "paddingBottom": 16,
+          "paddingHorizontal": 24,
+        },
+        {
+          "paddingTop": 12,
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        contentFit="contain"
+        source={1}
+        style={
+          {
+            "height": 28,
+            "width": 28,
+          }
+        }
+        tintColor="white"
+      />
+      <Text
+        style={
+          {
+            "color": "white",
+            "fontSize": 20,
+            "fontWeight": "700",
+            "letterSpacing": 0.5,
+          }
+        }
+      >
+        ATI Dental
+      </Text>
+    </View>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "opacity": 1,
+          "padding": 4,
+        }
+      }
+      testID="menu-btn"
+    >
+      <Text
+        allowFontScaling={false}
+        selectable={false}
+        style={
+          [
+            {
+              "color": "white",
+              "fontSize": 36,
+            },
+            undefined,
+            {
+              "fontFamily": "ionicons",
+              "fontStyle": "normal",
+              "fontWeight": "normal",
+            },
+            {},
+          ]
+        }
+      >
+        
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#ffffff",
+        "borderBottomColor": "#EDF2F7",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "paddingHorizontal": 20,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <Text
+      style={
+        {
+          "color": "#6B7280",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+        }
+      }
+    >
+      tabs.explore
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#9CA3AF",
+          "fontSize": 14,
+        }
+      }
+    >
+         ›   
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#52287D",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+    >
+      patientFile.title
+    </Text>
+  </View>
+  <RCTScrollView
+    contentContainerStyle={
+      {
+        "paddingBottom": 100,
+      }
+    }
+  >
+    <View>
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "justifyContent": "flex-end",
+            "paddingHorizontal": 16,
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 8,
+            }
+          }
+        >
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={false}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#F3E8FF",
+                "borderRadius": 8,
+                "height": 40,
+                "justifyContent": "center",
+                "opacity": 1,
+                "width": 40,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 20,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+          </View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={false}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#F3E8FF",
+                "borderRadius": 8,
+                "height": 40,
+                "justifyContent": "center",
+                "opacity": 1,
+                "width": 40,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 20,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#52287D",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "marginBottom": 16,
+            "marginHorizontal": 16,
+            "padding": 16,
+          }
+        }
+        testID="patient-info-card"
+      >
+        <View
+          contentFit="cover"
+          source={1}
+          style={
+            {
+              "backgroundColor": "#F3F4F6",
+              "borderColor": "rgba(255,255,255,0.3)",
+              "borderRadius": 36,
+              "borderWidth": 2,
+              "height": 72,
+              "marginRight": 14,
+              "width": 72,
+            }
+          }
+        />
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#FFFFFF",
+                "fontFamily": "Open Sans",
+                "fontSize": 18,
+                "fontWeight": "700",
+                "marginBottom": 2,
+              }
+            }
+          >
+            Juan Perez
+          </Text>
+          <Text
+            style={
+              {
+                "color": "rgba(255,255,255,0.85)",
+                "fontFamily": "Open Sans",
+                "fontSize": 12,
+                "marginBottom": 6,
+              }
+            }
+          >
+            V-12345678
+              •  
+            —
+              •  
+            —
+          </Text>
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#FFFFFF",
+                    "fontSize": 14,
+                  },
+                  {
+                    "marginRight": 6,
+                  },
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "rgba(255,255,255,0.9)",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 13,
+                }
+              }
+            >
+              04141234567
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+            "marginBottom": 16,
+            "paddingHorizontal": 16,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#E5E7EB",
+              "borderRadius": 10,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "paddingHorizontal": 14,
+              "paddingVertical": 12,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#5B2D8B",
+                  "fontSize": 16,
+                },
+                {
+                  "marginRight": 6,
+                },
+                {
+                  "fontFamily": "ionicons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+          <View>
+            <Text
+              style={
+                {
+                  "color": "#6B7280",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 11,
+                  "fontWeight": "500",
+                }
+              }
+            >
+              patientFile.nextAppointment
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#1F2937",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                }
+              }
+            >
+              —
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#E5E7EB",
+              "borderRadius": 10,
+              "borderWidth": 1,
+              "flex": 1,
+              "flexDirection": "row",
+              "paddingHorizontal": 14,
+              "paddingVertical": 12,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#5B2D8B",
+                  "fontSize": 16,
+                },
+                {
+                  "marginRight": 6,
+                },
+                {
+                  "fontFamily": "ionicons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+          <View>
+            <Text
+              style={
+                {
+                  "color": "#6B7280",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 11,
+                  "fontWeight": "500",
+                }
+              }
+            >
+              patientFile.lastVisit
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#1F2937",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                }
+              }
+            >
+              —
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "backgroundColor": "#FFFFFF",
+            "borderColor": "#E5E7EB",
+            "borderRadius": 10,
+            "borderWidth": 1,
+            "marginBottom": 12,
+            "marginHorizontal": 16,
+            "overflow": "hidden",
+          }
+        }
+      >
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "opacity": 1,
+              "padding": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 20,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#1F2937",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 15,
+                  "fontWeight": "600",
+                }
+              }
+            >
+              patientFile.personalInfo
+            </Text>
+          </View>
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#9CA3AF",
+                  "fontSize": 18,
+                },
+                undefined,
+                {
+                  "fontFamily": "ionicons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "backgroundColor": "#FFFFFF",
+            "borderColor": "#E5E7EB",
+            "borderRadius": 10,
+            "borderWidth": 1,
+            "marginBottom": 12,
+            "marginHorizontal": 16,
+            "overflow": "hidden",
+          }
+        }
+      >
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "opacity": 1,
+              "padding": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 20,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#1F2937",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 15,
+                  "fontWeight": "600",
+                }
+              }
+            >
+              patientFile.medicalBackground
+            </Text>
+          </View>
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#9CA3AF",
+                  "fontSize": 18,
+                },
+                undefined,
+                {
+                  "fontFamily": "ionicons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "backgroundColor": "#FFFFFF",
+            "borderColor": "#E5E7EB",
+            "borderRadius": 10,
+            "borderWidth": 1,
+            "marginBottom": 12,
+            "marginHorizontal": 16,
+            "overflow": "hidden",
+          }
+        }
+      >
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "opacity": 1,
+              "padding": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "gap": 8,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 20,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#1F2937",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 15,
+                  "fontWeight": "600",
+                }
+              }
+            >
+              patientFile.pendingExams (0)
+            </Text>
+          </View>
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#9CA3AF",
+                  "fontSize": 18,
+                },
+                undefined,
+                {
+                  "fontFamily": "ionicons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "backgroundColor": "#FFFFFF",
+            "borderColor": "#E5E7EB",
+            "borderRadius": 10,
+            "borderWidth": 1,
+            "marginBottom": 16,
+            "marginHorizontal": 16,
+            "padding": 16,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#1F2937",
+                "fontFamily": "Open Sans",
+                "fontSize": 15,
+                "fontWeight": "600",
+              }
+            }
+          >
+            patientFile.treatmentHistory
+          </Text>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#F3E8FF",
+                "borderRadius": 8,
+                "flexDirection": "row",
+                "gap": 4,
+                "opacity": 1,
+                "paddingHorizontal": 12,
+                "paddingVertical": 6,
+              }
+            }
+            testID="add-treatment-btn"
+          >
+            <Text
+              style={
+                {
+                  "color": "#5B2D8B",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                }
+              }
+            >
+              patientFile.addTreatment
+            </Text>
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 16,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+          </View>
+        </View>
+        <View>
+          <View
+            style={
+              {
+                "flexDirection": "row",
+                "marginBottom": 4,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "marginRight": 12,
+                  "width": 32,
+                }
+              }
+            >
+              <View
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "borderRadius": 12,
+                      "borderWidth": 2,
+                      "height": 24,
+                      "justifyContent": "center",
+                      "marginTop": 4,
+                      "width": 24,
+                    },
+                    {
+                      "backgroundColor": "#5B2D8B",
+                      "borderColor": "#5B2D8B",
+                    },
+                  ]
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  selectable={false}
+                  style={
+                    [
+                      {
+                        "color": "#FFF",
+                        "fontSize": 14,
+                      },
+                      undefined,
+                      {
+                        "fontFamily": "ionicons",
+                        "fontStyle": "normal",
+                        "fontWeight": "normal",
+                      },
+                      {},
+                    ]
+                  }
+                >
+                  
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "backgroundColor": "#E5E7EB",
+                    "flex": 1,
+                    "marginTop": 4,
+                    "width": 2,
+                  }
+                }
+              />
+            </View>
+            <View
+              style={
+                {
+                  "backgroundColor": "#FFFFFF",
+                  "borderColor": "#E5E7EB",
+                  "borderRadius": 10,
+                  "borderWidth": 1,
+                  "flex": 1,
+                  "marginBottom": 12,
+                  "padding": 14,
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "flexWrap": "wrap",
+                    "gap": 4,
+                    "justifyContent": "space-between",
+                    "marginBottom": 6,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#5B2D8B",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 12,
+                      "fontWeight": "600",
+                    }
+                  }
+                >
+                  19 Sep 2023
+                </Text>
+                <View
+                  style={
+                    {
+                      "flexDirection": "row",
+                      "gap": 6,
+                    }
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 10,
+                          "paddingHorizontal": 8,
+                          "paddingVertical": 3,
+                        },
+                        {
+                          "backgroundColor": "#E8F5E9",
+                        },
+                      ]
+                    }
+                  >
+                    <Text
+                      style={
+                        [
+                          {
+                            "fontFamily": "Open Sans",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                          },
+                          {
+                            "color": "#2E7D32",
+                          },
+                        ]
+                      }
+                    >
+                      Completado
+                    </Text>
+                  </View>
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 10,
+                          "paddingHorizontal": 8,
+                          "paddingVertical": 3,
+                        },
+                        {
+                          "backgroundColor": "#F3E8FF",
+                        },
+                      ]
+                    }
+                  >
+                    <Text
+                      style={
+                        [
+                          {
+                            "fontFamily": "Open Sans",
+                            "fontSize": 10,
+                            "fontWeight": "600",
+                          },
+                          {
+                            "color": "#6B21A8",
+                          },
+                        ]
+                      }
+                    >
+                      General
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <Text
+                style={
+                  {
+                    "color": "#1F2937",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 15,
+                    "fontWeight": "700",
+                    "marginBottom": 4,
+                  }
+                }
+              >
+                Limpieza
+              </Text>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 4,
+                    "marginBottom": 10,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  selectable={false}
+                  style={
+                    [
+                      {
+                        "color": "#6B7280",
+                        "fontSize": 13,
+                      },
+                      undefined,
+                      {
+                        "fontFamily": "ionicons",
+                        "fontStyle": "normal",
+                        "fontWeight": "normal",
+                      },
+                      {},
+                    ]
+                  }
+                >
+                  
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#6B7280",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 12,
+                    }
+                  }
+                />
+              </View>
+              <View
+                style={
+                  {
+                    "borderTopColor": "#F3F4F6",
+                    "borderTopWidth": 1,
+                    "flexDirection": "row",
+                    "gap": 16,
+                    "justifyContent": "flex-end",
+                    "paddingTop": 10,
+                  }
+                }
+              >
+                <View
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onClick={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "gap": 4,
+                      "opacity": 1,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    selectable={false}
+                    style={
+                      [
+                        {
+                          "color": "#6B7280",
+                          "fontSize": 14,
+                        },
+                        undefined,
+                        {
+                          "fontFamily": "ionicons",
+                          "fontStyle": "normal",
+                          "fontWeight": "normal",
+                        },
+                        {},
+                      ]
+                    }
+                  >
+                    
+                  </Text>
+                  <Text
+                    style={
+                      {
+                        "color": "#6B7280",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 12,
+                      }
+                    }
+                  >
+                    patientFile.modify
+                  </Text>
+                </View>
+                <View
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onClick={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "gap": 4,
+                      "opacity": 1,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    selectable={false}
+                    style={
+                      [
+                        {
+                          "color": "#6B7280",
+                          "fontSize": 14,
+                        },
+                        undefined,
+                        {
+                          "fontFamily": "ionicons",
+                          "fontStyle": "normal",
+                          "fontWeight": "normal",
+                        },
+                        {},
+                      ]
+                    }
+                  >
+                    
+                  </Text>
+                  <Text
+                    style={
+                      {
+                        "color": "#6B7280",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 12,
+                      }
+                    }
+                  >
+                    patientFile.delete
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;
