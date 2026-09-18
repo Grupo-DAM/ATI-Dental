@@ -297,7 +297,11 @@ describe('RegisterTreatmentScreen - Functional & Persistence Logic', () => {
       const { getByText } = render(<RegisterTreatmentScreen />);
 
       fireEvent.press(getByText('registerTreatment.cancel'));
-      expect(mockBack).toHaveBeenCalled();
+      const { router } = require('expo-router');
+      expect(router.push).toHaveBeenCalledWith({
+        pathname: '/(tabs)/patient-file',
+        params: { patientId: 'patient-mariana-lopez-123' },
+      });
     });
 
     it('debe evitar operaciones duplicadas mientras se encuentra guardando', async () => {

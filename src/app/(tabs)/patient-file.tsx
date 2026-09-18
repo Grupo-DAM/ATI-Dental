@@ -172,8 +172,7 @@ const actionBarStyles = StyleSheet.create({
 
 /** Patient info card with gradient-style background */
 function PatientCard({ patient, t }: { patient: Patient; t: (k: string) => string }) {
-  const age = calculateAge(patient.birthDate || '');
-  const fullName = patient.fullName?.trim() || '—';
+  const age = calculateAge(patient.birthDate);
   const gender = patient.gender || '—';
 
   return (
@@ -184,9 +183,9 @@ function PatientCard({ patient, t }: { patient: Patient; t: (k: string) => strin
         contentFit="cover"
       />
       <View style={patientCardStyles.info}>
-        <Text style={patientCardStyles.name}>{fullName}</Text>
+        <Text style={patientCardStyles.name}>{patient.fullName}</Text>
         <Text style={patientCardStyles.details}>
-          {patient.documentId || '—'}  •  {gender}  •  {age !== null ? `${age} ${t('patientFile.years')}` : '—'}
+          {patient.documentId}  •  {gender}  •  {age !== null ? `${age} ${t('patientFile.years')}` : '—'}
         </Text>
         <View style={patientCardStyles.phoneRow}>
           <Ionicons name="call" size={14} color="#FFFFFF" style={{ marginRight: 6 }} />
@@ -247,7 +246,7 @@ function AppointmentBadges({ patient, t }: { patient: Patient; t: (k: string) =>
         <View>
           <Text style={badgeStyles.badgeLabel}>{t('patientFile.nextAppointment')}</Text>
           <Text style={badgeStyles.badgeValue}>
-            {patient.proximaCita ? formatDate(patient.proximaCita) : '—'}
+            {patient.nextAppointment ? formatDate(patient.nextAppointment) : '—'}
           </Text>
         </View>
       </View>
@@ -256,7 +255,7 @@ function AppointmentBadges({ patient, t }: { patient: Patient; t: (k: string) =>
         <View>
           <Text style={badgeStyles.badgeLabel}>{t('patientFile.lastVisit')}</Text>
           <Text style={badgeStyles.badgeValue}>
-            {patient.ultimaVisita ? formatDate(patient.ultimaVisita) : '—'}
+            {patient.lastVisit ? formatDate(patient.lastVisit) : '—'}
           </Text>
         </View>
       </View>
@@ -838,10 +837,10 @@ export default function PatientFileScreen() {
           icon="person-outline"
           defaultOpen={false}
         >
-          <DetailRow label={t('patientFile.email')} value={patient.email || ''} />
+          <DetailRow label={t('patientFile.email')} value={patient.email} />
           <DetailRow label={t('patientFile.address')} value={patient.address || '—'} />
           <DetailRow label={t('patientFile.birthDate')} value={formatDate(patient.birthDate)} />
-          <DetailRow label={t('patientFile.phone')} value={patient.phone || ''} />
+          <DetailRow label={t('patientFile.phone')} value={patient.phone} />
         </CollapsibleSection>
 
         {/* Antecedentes Médicos */}
@@ -869,7 +868,9 @@ export default function PatientFileScreen() {
             <View style={medicalRowStyles.textContainer}>
               <Text style={medicalRowStyles.label}>{t('patientFile.knownAllergies')}</Text>
               <Text style={medicalRowStyles.value}>
-                {patient.allergies ? patient.allergies : '—'}
+                {(patient.knownAllergies && patient.knownAllergies.length > 0)
+                  ? patient.knownAllergies.map(formatAntecedente).join(', ')
+                  : '—'}
               </Text>
             </View>
           </View>
@@ -882,7 +883,9 @@ export default function PatientFileScreen() {
             <View style={medicalRowStyles.textContainer}>
               <Text style={medicalRowStyles.label}>{t('patientFile.medicalConditions')}</Text>
               <Text style={medicalRowStyles.value}>
-                {patient.conditions ? patient.conditions : '—'}
+                {(patient.medicalHistory && patient.medicalHistory.length > 0)
+                  ? patient.medicalHistory.map(formatAntecedente).join(', ')
+                  : '—'}
               </Text>
             </View>
           </View>

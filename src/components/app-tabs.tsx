@@ -24,6 +24,7 @@ export default function AppTabs() {
       <Tabs.Screen name="admin/reports" options={{ href: null, title: 'Admin Reportes' }} />
       <Tabs.Screen name="update-contact-info" options={{ href: null, title: 'Actualizar contacto' }} />
       <Tabs.Screen name="register-treatment" options={{ href: null, title: 'Registrar Tratamiento' }} />
+      <Tabs.Screen name="patient-file" options={{ href: null, title: 'Ficha de Paciente' }} />
     </Tabs>
   );
 }
@@ -33,7 +34,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const activeRouteName = state.routes[state.index].name;
-  const isPatientsSection = activeRouteName === 'explore' || activeRouteName === 'register-patient';
+  const isPatientsSection = activeRouteName === 'explore' || activeRouteName === 'register-patient' || activeRouteName === 'patient-file';
 
   const handleNavigate = (routeName: string) => {
     navigation.navigate(routeName);
@@ -103,7 +104,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           testID = 'center-btn'
           activeOpacity={0.8}
           style={[styles.floatingButton, { backgroundColor: colors.main }]}
-          onPress={() => handleNavigate('register-treatment')}
+          onPress={() => navigation.navigate('patient-file', { patientId: 'paciente_cova_123' })}
         >
           <Image
             source={require('@/assets/expo.icon/Assets/plus-solid.svg')}

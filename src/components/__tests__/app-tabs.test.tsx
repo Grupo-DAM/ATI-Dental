@@ -185,6 +185,6 @@ describe('AppTabs Component & CustomTabBar', () => {
     const { getByTestId } = render(<AppTabs />);
     fireEvent.press(getByTestId('center-btn'));
 
-    expect(mockNavigate).toHaveBeenCalledWith('register-treatment');
+    expect(mockNavigate).toHaveBeenCalledWith('patient-file', { patientId: 'paciente_cova_123' });
   });
 });

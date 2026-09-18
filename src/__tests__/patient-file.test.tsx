@@ -73,8 +73,10 @@ describe('PatientFileScreen', () => {
     fullName: 'Juan Perez',
     documentId: 'V-12345678',
     phone: '04141234567',
-    conditions: '',
-    allergies: '',
+    medicalHistory: [],
+    knownAllergies: [],
+    patientCode: '#P-0001',
+    status: 'activo' as const,
   };
 
   const mockTreatments = [

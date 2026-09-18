@@ -123,13 +123,12 @@ describe('Patient Service (Persistence Layer)', () => {
       expect(result?.patientCode).toBe('#P-0001');
     });
 
-    it('retorna null si el documento no existe', async () => {
+    it('lanza error si el documento no existe', async () => {
       (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
         exists: () => false,
       });
 
-      const result = await getPatientById('doc-no-existe');
-      expect(result).toBeNull();
+      await expect(getPatientById('doc-no-existe')).rejects.toThrow('PATIENT_NOT_FOUND');
     });
 
     it('propaga error si falla la consulta getPatientById', async () => {

@@ -1,6 +1,8 @@
 import { firestore } from '@/config/firebase';
 import { PatientGender, PatientBloodType } from '@/constants/patient';
 
+// ─── Unified Patient interfaces ───
+
 export interface PatientInput {
   patientCode?: string;
   fullName: string;
@@ -23,12 +25,16 @@ export interface Patient extends PatientInput {
   status: 'activo' | 'inactivo';
   createdAt?: any;
   updatedAt?: any;
-  // Fallbacks for the UI to prevent complete breakage
-  proximaCita?: string;
-  ultimaVisita?: string;
+  // Extra fields used by patient-file (not in PatientInput)
+  medicalHistory?: string[];
+  knownAllergies?: string[];
+  nextAppointment?: string;
+  lastVisit?: string;
 }
 
 export const PATIENTS_COLLECTION = 'pacientes';
+
+// ─── Helpers ───
 
 function getServerTimestamp() {
   try {
@@ -40,6 +46,44 @@ function getServerTimestamp() {
   }
   return new Date();
 }
+
+/**
+ * Maps raw Firestore data to a Patient object, handling both
+ * legacy (Spanish) and new (English) field names gracefully.
+ */
+function mapDocToPatient(id: string, data: any): Patient {
+  // Build fullName from legacy fields if needed
+  const fullName = data.fullName
+    || `${data.nombre ?? ''} ${data.apellido ?? ''}`.trim()
+    || '';
+
+  return {
+    id,
+    patientCode: data.patientCode || '',
+    fullName,
+    documentId: data.documentId ?? data.dni ?? '',
+    email: data.email ?? '',
+    phone: data.phone ?? data.telefono ?? '',
+    birthDate: data.birthDate ?? data.fechaNacimiento ?? '',
+    gender: data.gender ?? data.genero ?? '',
+    photoUri: data.photoUri ?? data.imageUrl ?? null,
+    address: data.address ?? data.direccion ?? '',
+    bloodType: data.bloodType ?? data.tipoSangre ?? '',
+    allergies: data.allergies ?? '',
+    conditions: data.conditions ?? '',
+    notes: data.notes ?? data.notasAdicionales ?? '',
+    status: data.status || 'activo',
+    createdAt: data.createdAt ?? data.fechaCreacion ?? '',
+    updatedAt: data.updatedAt ?? '',
+    // Extra clinical fields
+    medicalHistory: data.medicalHistory ?? data.antecedentesMedicos ?? [],
+    knownAllergies: data.knownAllergies ?? data.alergiasConocidas ?? [],
+    nextAppointment: data.nextAppointment ?? data.proximaCita,
+    lastVisit: data.lastVisit ?? data.ultimaVisita,
+  };
+}
+
+// ─── Create ───
 
 // Registra y persiste un nuevo paciente en Firestore.
 export async function createPatient(input: PatientInput): Promise<Patient> {
@@ -83,7 +127,9 @@ export async function createPatient(input: PatientInput): Promise<Patient> {
   }
 }
 
-// Obtiene la lista completa de pacientes activos para su visualización.
+// ─── Read ───
+
+// Obtiene la lista completa de pacientes para su visualización.
 export async function getPatients(): Promise<Patient[]> {
   try {
     const snapshot = await firestore()
@@ -94,35 +140,17 @@ export async function getPatients(): Promise<Patient[]> {
       return [];
     }
 
-    return snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        patientCode: data.patientCode || `#P-${doc.id.slice(0, 4).toUpperCase()}`,
-        fullName: data.fullName,
-        documentId: data.documentId,
-        birthDate: data.birthDate,
-        gender: data.gender,
-        phone: data.phone,
-        email: data.email,
-        address: data.address,
-        photoUri: data.photoUri,
-        bloodType: data.bloodType,
-        allergies: data.allergies,
-        conditions: data.conditions,
-        notes: data.notes,
-        status: data.status || 'activo',
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-      };
-    });
+    return snapshot.docs.map((doc) => mapDocToPatient(doc.id, doc.data()));
   } catch (error) {
     console.error('[patient-service] getPatients failed:', error);
     throw error;
   }
 }
 
-// Obtiene un paciente por su ID.
+/**
+ * Retrieves a single patient by their Firestore document ID.
+ * Throws if the document does not exist or there is a network/permissions error.
+ */
 export async function getPatientById(patientId: string): Promise<Patient> {
   try {
     const docRef = await firestore()
@@ -130,41 +158,28 @@ export async function getPatientById(patientId: string): Promise<Patient> {
       .doc(patientId)
       .get();
 
-    if (!docRef.exists) {
+    const exists = typeof docRef.exists === 'function' ? docRef.exists() : docRef.exists;
+
+    if (!exists) {
       throw new Error('PATIENT_NOT_FOUND');
     }
 
     const data = docRef.data();
-    if (!data) throw new Error('PATIENT_NOT_FOUND');
+    if (!data) {
+      throw new Error('PATIENT_NOT_FOUND');
+    }
 
-    return {
-      id: docRef.id,
-      patientCode: data.patientCode || `#P-${docRef.id.slice(0, 4).toUpperCase()}`,
-      fullName: data.fullName || data.nombre || '',
-      documentId: data.documentId || data.dni || '',
-      birthDate: data.birthDate || data.fechaNacimiento || '',
-      gender: data.gender || data.genero || '',
-      phone: data.phone || data.telefono || '',
-      email: data.email || '',
-      address: data.address || data.direccion || '',
-      photoUri: data.photoUri || data.imageUrl || null,
-      bloodType: data.bloodType || data.tipoSangre || '',
-      allergies: data.allergies || (data.alergiasConocidas ? data.alergiasConocidas.join(', ') : ''),
-      conditions: data.conditions || (data.antecedentesMedicos ? data.antecedentesMedicos.join(', ') : ''),
-      notes: data.notes || data.notasAdicionales || '',
-      status: data.status || 'activo',
-      createdAt: data.createdAt || data.fechaCreacion,
-      updatedAt: data.updatedAt,
-      proximaCita: data.proximaCita,
-      ultimaVisita: data.ultimaVisita,
-    };
+    return mapDocToPatient(docRef.id, data);
   } catch (error) {
     console.error('[patient-service] getPatientById failed:', error);
     throw error;
   }
 }
 
-// Obtiene un paciente por su correo electrónico.
+/**
+ * Retrieves a single patient by their email.
+ * Throws if the document does not exist or there is a network/permissions error.
+ */
 export async function getPatientByEmail(email: string): Promise<Patient> {
   try {
     const querySnapshot = await firestore()
@@ -180,27 +195,7 @@ export async function getPatientByEmail(email: string): Promise<Patient> {
     const docRef = querySnapshot.docs[0];
     const data = docRef.data();
 
-    return {
-      id: docRef.id,
-      patientCode: data.patientCode || `#P-${docRef.id.slice(0, 4).toUpperCase()}`,
-      fullName: data.fullName || data.nombre || '',
-      documentId: data.documentId || data.dni || '',
-      birthDate: data.birthDate || data.fechaNacimiento || '',
-      gender: data.gender || data.genero || '',
-      phone: data.phone || data.telefono || '',
-      email: data.email || '',
-      address: data.address || data.direccion || '',
-      photoUri: data.photoUri || data.imageUrl || null,
-      bloodType: data.bloodType || data.tipoSangre || '',
-      allergies: data.allergies || (data.alergiasConocidas ? data.alergiasConocidas.join(', ') : ''),
-      conditions: data.conditions || (data.antecedentesMedicos ? data.antecedentesMedicos.join(', ') : ''),
-      notes: data.notes || data.notasAdicionales || '',
-      status: data.status || 'activo',
-      createdAt: data.createdAt || data.fechaCreacion,
-      updatedAt: data.updatedAt,
-      proximaCita: data.proximaCita,
-      ultimaVisita: data.ultimaVisita,
-    };
+    return mapDocToPatient(docRef.id, data);
   } catch (error) {
     console.error('[patient-service] getPatientByEmail failed:', error);
     throw error;
