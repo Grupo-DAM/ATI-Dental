@@ -237,7 +237,8 @@
       "photoPickerUnavailable": "The gallery needs a native rebuild (npx expo run:android) to load the image picker module.",
       "datePickerUnavailable": "The calendar needs a native rebuild (npx expo run:android) to load the date picker module.",
       "successTitle": "Patient registered",
-      "successMessage": "Patient data has been captured. Saving to the system will be connected later."
+      "successMessage": "Patient data has been captured. Saving to the system will be connected later.",
+      "saveError": "An error occurred while saving the patient. Please check your connection and try again."
     }
   },
   "patients-list": {

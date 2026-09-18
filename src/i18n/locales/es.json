@@ -237,7 +237,8 @@
       "photoPickerUnavailable": "La galería requiere reconstruir la app (npx expo run:android) para cargar el módulo nativo.",
       "datePickerUnavailable": "El calendario requiere reconstruir la app (npx expo run:android) para cargar el módulo nativo.",
       "successTitle": "Paciente registrado",
-      "successMessage": "Los datos del paciente se han capturado. El guardado en el sistema se conectará más adelante."
+      "successMessage": "Los datos del paciente se han capturado. El guardado en el sistema se conectará más adelante.",
+      "saveError": "Ocurrió un error al guardar el paciente. Por favor verifique su conexión e intente nuevamente."
     }
   },
   "patients-list": {

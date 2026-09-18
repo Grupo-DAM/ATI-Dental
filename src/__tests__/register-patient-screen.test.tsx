@@ -5,6 +5,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import RegisterPatientScreen from '@/app/(tabs)/register-patient';
 import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
 
+import { createPatient } from '@/services/patient-service';
+
 type RegisterPatientI18n = { language: string };
 
 (globalThis as { __registerPatientI18n?: RegisterPatientI18n }).__registerPatientI18n = {
@@ -21,6 +23,7 @@ jest.mock('expo-router', () => ({
     replace: mockReplace,
     canGoBack: mockCanGoBack,
   }),
+  useLocalSearchParams: () => ({}),
 }));
 
 const mockLaunchLibrary = jest.fn();
@@ -89,6 +92,10 @@ jest.mock('@/hooks/use-theme', () => ({
   }),
 }));
 
+jest.mock('@/services/patient-service', () => ({
+  createPatient: jest.fn(() => Promise.resolve({ id: 'mock-id' })),
+}));
+
 describe('RegisterPatientScreen', () => {
   const originalOs = Platform.OS;
   const i18nState = { language: 'es' };
@@ -153,19 +160,21 @@ describe('RegisterPatientScreen', () => {
     expect(screen.getByText('registerPatient.alerts.invalidEmail')).toBeTruthy();
   });
 
-  it('registra cuando hay nombre', () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
-    render(<RegisterPatientScreen />);
-    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Juan Pérez');
-    fireEvent.press(screen.getByTestId('btn-submit-patient'));
-    expect(alertSpy).toHaveBeenCalledWith(
-      'registerPatient.alerts.successTitle',
-      'registerPatient.alerts.successMessage',
-      expect.any(Array),
-    );
-    expect(screen.getByTestId('btn-submit-patient-loading')).toBeTruthy();
-    alertSpy.mockRestore();
-  });
+    it('registra cuando hay nombre', async () => {
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+      render(<RegisterPatientScreen />);
+      fireEvent.changeText(screen.getByTestId('input-full-name'), 'Juan Pérez');
+      fireEvent.press(screen.getByTestId('btn-submit-patient'));
+
+      await waitFor(() => {
+        expect(alertSpy).toHaveBeenCalledWith(
+          'registerPatient.alerts.successTitle',
+          'registerPatient.alerts.successMessage',
+          expect.any(Array),
+        );
+      });
+      alertSpy.mockRestore();
+    });
 
   it('abre la galería para elegir foto de perfil', async () => {
     mockLaunchLibrary.mockResolvedValue({
@@ -272,19 +281,22 @@ describe('RegisterPatientScreen', () => {
     expect(screen.queryByText('registerPatient.alerts.invalidEmail')).toBeNull();
   });
 
-  it('acepta un correo válido al registrar', () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
-    render(<RegisterPatientScreen />);
-    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
-    fireEvent.changeText(screen.getByTestId('input-email'), 'ana@clinic.com');
-    fireEvent.press(screen.getByTestId('btn-submit-patient'));
-    expect(alertSpy).toHaveBeenCalledWith(
-      'registerPatient.alerts.successTitle',
-      'registerPatient.alerts.successMessage',
-      expect.any(Array),
-    );
-    alertSpy.mockRestore();
-  });
+    it('acepta un correo válido al registrar', async () => {
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+      render(<RegisterPatientScreen />);
+      fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+      fireEvent.changeText(screen.getByTestId('input-email'), 'ana@clinic.com');
+      fireEvent.press(screen.getByTestId('btn-submit-patient'));
+
+      await waitFor(() => {
+        expect(alertSpy).toHaveBeenCalledWith(
+          'registerPatient.alerts.successTitle',
+          'registerPatient.alerts.successMessage',
+          expect.any(Array),
+        );
+      });
+      alertSpy.mockRestore();
+    });
 
   it('rechaza correos sin dominio válido', () => {
     render(<RegisterPatientScreen />);
@@ -314,16 +326,19 @@ describe('RegisterPatientScreen', () => {
     expect(screen.getByTestId('input-allergies').props.value).toBe('Látex');
   });
 
-  it('cierra el estado de carga al confirmar el alert', () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
-      buttons?.[0]?.onPress?.();
+    it('cierra el estado de carga al confirmar el alert', async () => {
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
+        buttons?.[0]?.onPress?.();
+      });
+      render(<RegisterPatientScreen />);
+      fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+      fireEvent.press(screen.getByTestId('btn-submit-patient'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('btn-submit-patient-loading')).toBeNull();
+      }, { timeout: 3000 });
+      alertSpy.mockRestore();
     });
-    render(<RegisterPatientScreen />);
-    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
-    fireEvent.press(screen.getByTestId('btn-submit-patient'));
-    expect(screen.queryByTestId('btn-submit-patient-loading')).toBeNull();
-    alertSpy.mockRestore();
-  });
 
   it('avisa si el selector de fotos no está disponible', async () => {
     const imagePicker = require('expo-image-picker') as {
@@ -416,5 +431,48 @@ describe('RegisterPatientScreen', () => {
     fireEvent.changeText(screen.getByTestId('input-email'), 'ana@clinic');
     fireEvent.press(screen.getByTestId('btn-submit-patient'));
     expect(screen.getByText('registerPatient.alerts.invalidEmail')).toBeTruthy();
+  });
+
+  it('registra cuando hay nombre y llama a createPatient', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    render(<RegisterPatientScreen />);
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Juan Pérez');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+
+    await waitFor(() => {
+      expect(createPatient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fullName: 'Juan Pérez',
+        })
+      );
+      expect(alertSpy).toHaveBeenCalledWith(
+        'registerPatient.alerts.successTitle',
+        'registerPatient.alerts.successMessage',
+        expect.any(Array),
+      );
+    });
+    alertSpy.mockRestore();
+  });
+
+  it('muestra alerta de error y conserva los datos ingresados si createPatient falla', async () => {
+    (createPatient as jest.Mock).mockRejectedValueOnce(new Error('Firestore error'));
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+
+    render(<RegisterPatientScreen />);
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Juan Pérez');
+    fireEvent.changeText(screen.getByTestId('input-document'), '123456789');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'registerPatient.alerts.errorTitle',
+        expect.stringContaining('registerPatient.alerts.saveError')
+      );
+    });
+
+    // Se verifica que la información no se eliminó
+    expect(screen.getByTestId('input-full-name').props.value).toBe('Juan Pérez');
+    expect(screen.getByTestId('input-document').props.value).toBe('123456789');
+    alertSpy.mockRestore();
   });
 });
