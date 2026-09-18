@@ -25,7 +25,17 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function isValidEmail(email: string): boolean {
   if (!email || !email.trim()) return true;
-  return EMAIL_PATTERN.test(email.trim());
+  const trimmed = email.trim();
+  const atIndex = trimmed.indexOf('@');
+  if (atIndex <= 0 || atIndex !== trimmed.lastIndexOf('@')) {
+    return false;
+  }
+  const domain = trimmed.slice(atIndex + 1);
+  const dotIndex = domain.lastIndexOf('.');
+  if (dotIndex <= 0 || dotIndex === domain.length - 1) {
+    return false;
+  }
+  return !trimmed.includes(' ');
 }
 
 export function validatePatientForm(
@@ -39,9 +49,9 @@ export function validatePatientForm(
   }
 
   // Validación de formato de correo si hay
-  if (form.email && form.email.trim() && !EMAIL_PATTERN.test(form.email.trim())) {
-    errors.email = 'registerPatient.alerts.invalidEmail';
-  }
+    if (form.email && !isValidEmail(form.email)) {
+      errors.email = 'registerPatient.alerts.invalidEmail';
+    }
 
   return {
     isValid: Object.keys(errors).length === 0,
