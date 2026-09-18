@@ -709,7 +709,7 @@ export default function PatientFileScreen() {
   const handleAddTreatment = () => {
     if (!patient) return;
     router.push({
-      pathname: '/(tabs)/register-treatment',
+      pathname: '/(tabs)/patients/register-treatment',
       params: {
         patientId: patient.id,
         patientName: patient.fullName,
@@ -722,7 +722,7 @@ export default function PatientFileScreen() {
   const handleModifyTreatment = (treatmentId: string) => {
     if (!patient) return;
     router.push({
-      pathname: '/(tabs)/register-treatment',
+      pathname: '/(tabs)/patients/register-treatment',
       params: {
         patientId: patient.id,
         patientName: patient.fullName,

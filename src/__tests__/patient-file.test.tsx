@@ -148,7 +148,7 @@ describe('PatientFileScreen', () => {
 
     const { router } = require('expo-router');
     expect(router.push).toHaveBeenCalledWith({
-      pathname: '/(tabs)/register-treatment',
+      pathname: '/(tabs)/patients/register-treatment',
       params: {
         patientId: '123',
         patientName: 'Juan Perez',
