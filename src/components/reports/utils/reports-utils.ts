@@ -1,7 +1,16 @@
 // Cálculos matemáticos y manejo de fechas
 import { ModalOptionList, ModalOptionProp } from '@/components/ui/modal-option-list';
 import { ChartDataPoint } from '@/components/reports/usage-line-chart';
-import { AVAILABLE_PERIODS, PeriodOption, SessionRecord } from '../types';
+import {
+  AGE_BUCKET_ORDER,
+  AgeBucketKey,
+  AVAILABLE_PERIODS,
+  GenderBucket,
+  PeriodOption,
+  SessionRecord,
+  UserDemographicsMetrics,
+  UserDemographicsRecord,
+} from '../types';
 
 export function generatePeriodOptions(t: (key: string) => string): ModalOptionProp[] {
     return AVAILABLE_PERIODS.map((days) => ({
@@ -92,3 +101,128 @@ export const generatePaddedChartData = (historyMap: Map<string, number>, periodD
     }
     return paddedData;
 };
+
+export function parseFlexibleTimestamp(raw: unknown): number | null {
+    if (raw == null || raw === '') return null;
+    if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
+    if (raw instanceof Date) {
+        const time = raw.getTime();
+        return Number.isNaN(time) ? null : time;
+    }
+    if (typeof raw === 'object') {
+        const value = raw as { toMillis?: () => number; toDate?: () => Date; seconds?: number };
+        if (typeof value.toMillis === 'function') return value.toMillis();
+        if (typeof value.toDate === 'function') {
+            const date = value.toDate();
+            return date instanceof Date && !Number.isNaN(date.getTime()) ? date.getTime() : null;
+        }
+        if (typeof value.seconds === 'number') return value.seconds * 1000;
+    }
+    if (typeof raw === 'string') {
+        const trimmed = raw.trim();
+        const dmy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmed);
+        if (dmy) {
+            const date = new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+            return Number.isNaN(date.getTime()) ? null : date.getTime();
+        }
+        const parsed = Date.parse(trimmed);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+    return null;
+}
+
+export function parseUserAge(user: UserDemographicsRecord, now: Date = new Date()): number | null {
+    const numeric = user.edad ?? user.age;
+    if (typeof numeric === 'number' && Number.isFinite(numeric) && numeric > 0 && numeric < 130) {
+        return Math.round(numeric);
+    }
+    if (typeof numeric === 'string' && numeric.trim()) {
+        const parsed = Number(numeric);
+        if (Number.isFinite(parsed) && parsed > 0 && parsed < 130) {
+            return Math.round(parsed);
+        }
+    }
+
+    const birthMs = parseFlexibleTimestamp(
+        user.fechaNacimiento ?? user.birthDate ?? user.fecha_nacimiento,
+    );
+    if (birthMs === null) return null;
+
+    const birth = new Date(birthMs);
+    let age = now.getFullYear() - birth.getFullYear();
+    const monthDiff = now.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
+        age -= 1;
+    }
+    if (age < 0 || age > 129) return null;
+    return age;
+}
+
+export function normalizeUserGender(user: UserDemographicsRecord): GenderBucket {
+    const raw = String(user.genero ?? user.gender ?? user.sexo ?? '')
+        .trim()
+        .toLowerCase();
+    if (!raw) return 'unspecified';
+    if (['female', 'femenino', 'f', 'mujer', 'woman'].includes(raw)) return 'female';
+    if (['male', 'masculino', 'hombre', 'man', 'h'].includes(raw)) return 'male';
+    return 'unspecified';
+}
+
+export function getAgeBucketKey(age: number | null): AgeBucketKey {
+    if (age == null || age < 18) return 'unspecified';
+    if (age <= 25) return '18_25';
+    if (age <= 35) return '26_35';
+    if (age <= 50) return '36_50';
+    return '50_plus';
+}
+
+export function aggregateUserDemographics(
+    users: UserDemographicsRecord[],
+    now: Date = new Date(),
+): UserDemographicsMetrics {
+    const ageCounts: Record<AgeBucketKey, number> = {
+        '18_25': 0,
+        '26_35': 0,
+        '36_50': 0,
+        '50_plus': 0,
+        unspecified: 0,
+    };
+    const genderCounts: Record<GenderBucket, number> = {
+        female: 0,
+        male: 0,
+        unspecified: 0,
+    };
+
+    let ageSum = 0;
+    let knownAges = 0;
+
+    users.forEach((user) => {
+        const age = parseUserAge(user, now);
+        if (age != null) {
+            ageSum += age;
+            knownAges += 1;
+        }
+        ageCounts[getAgeBucketKey(age)] += 1;
+        genderCounts[normalizeUserGender(user)] += 1;
+    });
+
+    const totalUsers = users.length;
+    const genderSlices = (['female', 'male', 'unspecified'] as GenderBucket[]).map((key, index, keys) => {
+        const count = genderCounts[key];
+        if (totalUsers === 0) return { key, count, percent: 0 };
+        if (index < keys.length - 1) {
+            return { key, count, percent: Math.round((count / totalUsers) * 100) };
+        }
+        const assigned = keys.slice(0, -1).reduce((sum, current) => {
+            return sum + Math.round((genderCounts[current] / totalUsers) * 100);
+        }, 0);
+        return { key, count, percent: Math.max(0, 100 - assigned) };
+    });
+
+    return {
+        totalUsers,
+        averageAge: knownAges > 0 ? Math.round(ageSum / knownAges) : null,
+        ageBuckets: AGE_BUCKET_ORDER.map((key) => ({ key, count: ageCounts[key] })),
+        genderSlices,
+    };
+}

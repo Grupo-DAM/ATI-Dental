@@ -17,13 +17,36 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 jest.mock('@react-native-firebase/firestore', () => {
-  return jest.fn(() => ({
+  const createFirestore = () => ({
     collection: jest.fn(() => ({
       doc: jest.fn(() => ({
         update: jest.fn().mockResolvedValue(true),
+        get: jest.fn().mockResolvedValue({
+          exists: () => false,
+          data: () => ({}),
+        }),
       })),
     })),
-  }));
+  });
+  const mockFirestore = jest.fn(createFirestore);
+  mockFirestore.__create = createFirestore;
+  return mockFirestore;
+});
+
+jest.mock('@react-native-community/datetimepicker', () => {
+  const { Pressable, View } = require('react-native');
+  const DateTimePicker = (props: {
+    testID?: string;
+    onChange?: (event: { type?: string }, date?: Date) => void;
+  }) => (
+    <View testID={props.testID ?? 'profile-birth-date-picker'}>
+      <Pressable
+        testID="confirm-birth-date"
+        onPress={() => props.onChange?.({ type: 'set' }, new Date(1990, 4, 15))}
+      />
+    </View>
+  );
+  return { __esModule: true, default: DateTimePicker };
 });
 
 jest.mock('react-i18next', () => ({
@@ -57,6 +80,19 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: true });
     mockVerifyBeforeUpdateEmail.mockResolvedValue(true);
+    const firestoreMock = require('@react-native-firebase/firestore');
+    firestoreMock.mockImplementation(firestoreMock.__create);
+    (auth as jest.Mock).mockImplementation(() => ({
+      currentUser: {
+        email: 'dr.smith@atidental.com',
+        displayName: 'Valeria Smith',
+        verifyBeforeUpdateEmail: mockVerifyBeforeUpdateEmail,
+        updateProfile: jest.fn().mockResolvedValue(true),
+        reload: jest.fn().mockResolvedValue(true),
+        getIdToken: jest.fn().mockResolvedValue('token'),
+        uid: '123',
+      },
+    }));
   });
 
   // ========================================================
@@ -354,6 +390,10 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
       collection: () => ({
         doc: () => ({
           update: jest.fn().mockRejectedValue(new Error('Firestore error')),
+          get: jest.fn().mockResolvedValue({
+            exists: () => false,
+            data: () => ({}),
+          }),
         }),
       }),
     }));
@@ -385,7 +425,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     await fireEvent(modal, 'close');
 
     await waitFor(() => {
-      const firestoreErrors = consoleSpy.mock.calls.filter(call => call[0] === 'Error al sincronizar idioma en Firestore');
+       const firestoreErrors = consoleSpy.mock.calls.filter(call => call[0] === 'Error al sincronizar perfil en Firestore');
       expect(firestoreErrors.length).toBe(2);
     });
 
@@ -518,6 +558,23 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
       expect(consoleSpy).toHaveBeenCalledWith('Error al guardar el token:', expect.any(Error));
     });
     consoleSpy.mockRestore();
+  });
+
+  it('guarda género y fecha de nacimiento en Firestore', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+
+    fireEvent.press(getByTestId('select-gender'));
+    fireEvent.press(getByTestId('profile-gender-option-female'));
+    fireEvent.press(getByTestId('select-birth-date'));
+    fireEvent.press(getByTestId('confirm-birth-date'));
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage',
+      );
+    });
   });
 
 });
