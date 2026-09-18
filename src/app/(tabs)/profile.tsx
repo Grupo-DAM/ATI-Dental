@@ -2,27 +2,63 @@ import { Ionicons } from '@expo/vector-icons';
 import NetInfo from '@react-native-community/netinfo';
 import { auth, firestore } from '@/config/firebase';
 import * as SecureStore from 'expo-secure-store';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Image } from 'expo-image';
 import { VerificationLinkModal } from '@/components/OTPModal';
-import { Colors } from '@/constants/theme';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
+import { BirthDatePicker, formatBirthDate } from '@/components/ui/birth-date-picker';
+import { FormSelectField } from '@/components/ui/form-field';
+import { ModalOptionList } from '@/components/ui/modal-option-list';
+import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
+import { getPatientGenderLabelKey, isPatientGender, PATIENT_GENDER_VALUES } from '@/constants/patient';
+import { parseFlexibleTimestamp } from '@/components/reports/utils/reports-utils';
+import { useTheme } from '@/hooks/use-theme';
+import { BottomTabInset } from '@/constants/theme';
 
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
+  const styles = createStyles(theme);
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('+34 600 000 000');
   const [bio, setBio] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [birthDateObj, setBirthDateObj] = useState(new Date(2000, 0, 1));
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [gender, setGender] = useState('');
+  const [genderModalVisible, setGenderModalVisible] = useState(false);
 
   const [errors, setErrors] = useState<{ name?: string; lastName?: string; email?: string }>({});
   const [showModal, setShowModal] = useState(false);
   const [language, setLanguage] = useState(i18n.language || 'es');
+
+  const genderOptions = useMemo(
+    () =>
+      PATIENT_GENDER_VALUES.map((value) => ({
+        name: value,
+        label: t(getPatientGenderLabelKey(value)),
+        testID: `profile-gender-option-${value}`,
+      })),
+    [t],
+  );
+
+  const genderLabel = isPatientGender(gender)
+    ? t(getPatientGenderLabelKey(gender))
+    : t('profile.genderPlaceholder');
+
+  const persistProfileFields = (uid: string) =>
+    firestore().collection('usuarios').doc(uid).update({
+      idiomaPreferencia: language,
+      nombre: `${name.trim()} ${lastName.trim()}`,
+      genero: gender || null,
+      fechaNacimiento: birthDate ? birthDateObj : null,
+    });
 
   useEffect(() => {
     setLanguage(i18n.language || 'es');
@@ -38,6 +74,27 @@ export default function ProfileScreen() {
       setName(nameParts[0] || 'Usuario');
       setLastName(nameParts.slice(1).join(' ') || 'Dental');
       setEmail(user.email || '');
+
+      firestore()
+        .collection('usuarios')
+        .doc(user.uid)
+        .get()
+        .then((docSnapshot) => {
+          const exists =
+            typeof docSnapshot?.exists === 'function' ? docSnapshot.exists() : Boolean(docSnapshot?.exists);
+          if (!exists) return;
+          const data = typeof docSnapshot.data === 'function' ? docSnapshot.data() || {} : {};
+          if (typeof data.genero === 'string') {
+            setGender(data.genero);
+          }
+          const birthMs = parseFlexibleTimestamp(data.fechaNacimiento);
+          if (birthMs != null) {
+            const parsed = new Date(birthMs);
+            setBirthDateObj(parsed);
+            setBirthDate(formatBirthDate(parsed));
+          }
+        })
+        .catch((err) => console.error('Error al cargar perfil demográfico', err));
     } else {
       console.log('ProfileScreen: No hay sesión activa de Firebase. Cargando mock para pruebas.');
       setName('Valeria');
@@ -115,9 +172,9 @@ export default function ProfileScreen() {
         await user.updateProfile({ displayName: `${name.trim()} ${lastName.trim()}` });
         
         // Sync language to Firestore in background
-        firestore().collection('usuarios').doc(user.uid).update({
-          idiomaPreferencia: language
-        }).catch(err => console.error('Error al sincronizar idioma en Firestore', err));
+        persistProfileFields(user.uid).catch((err) =>
+          console.error('Error al sincronizar perfil en Firestore', err),
+        );
 
         Alert.alert(t('profile.alerts.updatedTitle'), t('profile.alerts.updatedMessage'));
         return;
@@ -178,10 +235,10 @@ export default function ProfileScreen() {
 
         if (user.email !== email) {
           Alert.alert(
-            'Verificación Pendiente',
-            'No hemos detectado la verificación de tu nuevo correo electrónico.',
+            t('profile.alerts.verificationPendingTitle'),
+            t('profile.alerts.verificationPendingMessage'),
             [
-              { text: 'Seguir Esperando', style: 'cancel' },
+              { text: t('profile.alerts.keepWaiting'), style: 'cancel' },
               { text: t('profile.cancel'), style: 'destructive', onPress: () => setShowModal(false) },
             ]
           );
@@ -193,9 +250,9 @@ export default function ProfileScreen() {
         token = (await user.getIdToken(true)) || token;
         
         // Sync language to Firestore in background
-        firestore().collection('usuarios').doc(user.uid).update({
-          idiomaPreferencia: language
-        }).catch(err => console.error('Error al sincronizar idioma en Firestore', err));
+        persistProfileFields(user.uid).catch((err) =>
+          console.error('Error al sincronizar perfil en Firestore', err),
+        );
       }
 
       await SecureStore.setItemAsync('userToken', token);
@@ -207,11 +264,19 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleOpenDatePicker = () => {
+    if (!isSystemDatePickerAvailable()) {
+      Alert.alert(t('profile.alerts.errorTitle'), t('profile.datePickerUnavailable'));
+      return;
+    }
+    setShowDatePicker(true);
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#F8F9FA' }}>
+    <View style={styles.screen}>
       <AppHeader />
-      <ScrollView style={{ flex: 1 }}>
-        <Breadcrumb parent="Pacientes" current={t('profile.title')} />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        <Breadcrumb parent={t('tabs.explore')} current={t('profile.title')} />
 
         <View style={styles.titleSection}>
           <Text style={styles.mainTitle}>{t('profile.title')}</Text>
@@ -222,7 +287,7 @@ export default function ProfileScreen() {
 
         <View style={styles.cardContainer}>
           <View style={styles.cardHeader}>
-            <Ionicons name="person" size={24} color={Colors.light.main} style={{ marginRight: 10 }} />
+            <Ionicons name="person" size={24} color={theme.main} style={styles.cardHeaderIcon} />
             <Text style={styles.cardHeaderTitle}>{t('profile.personalInfo')}</Text>
           </View>
 
@@ -230,10 +295,10 @@ export default function ProfileScreen() {
             <View style={styles.avatarRow}>
               <Image
                 source={require('@/assets/expo.icon/Assets/avatar.png')}
-                style={{ width: 80, height: 80, borderRadius: 40 }}
+                style={styles.avatar}
                 contentFit="cover"
               />
-              <View style={{ marginLeft: 16 }}>
+              <View style={styles.avatarActions}>
                 <Text style={styles.avatarLabel}>{t('profile.profilePicture')}</Text>
                 <View style={styles.avatarButtonsRow}>
                   <TouchableOpacity style={styles.btnCambiar}>
@@ -250,7 +315,8 @@ export default function ProfileScreen() {
             <Text style={styles.label}>{t('profile.firstName')}</Text>
             <TextInput
               testID="input-name"
-              style={[styles.input, errors.name ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}
+              style={[styles.input, errors.name ? styles.inputError : null]}
+              placeholderTextColor={theme.placeholderColor}
               value={name}
               onChangeText={setName}
             />
@@ -259,25 +325,50 @@ export default function ProfileScreen() {
             <Text style={styles.label}>{t('profile.lastName')}</Text>
             <TextInput
               testID="input-lastname"
-              style={[styles.input, errors.lastName ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}
+              style={[styles.input, errors.lastName ? styles.inputError : null]}
+              placeholderTextColor={theme.placeholderColor}
               value={lastName}
               onChangeText={setLastName}
             />
             {errors.lastName ? <Text style={styles.errorText}>{errors.lastName}</Text> : null}
 
+            <View style={styles.row}>
+              <View style={styles.rowItemWide}>
+                <FormSelectField
+                  testID="select-birth-date"
+                  label={t('profile.birthDate')}
+                  valueLabel={birthDate || t('profile.birthDatePlaceholder')}
+                  isPlaceholder={!birthDate}
+                  onPress={handleOpenDatePicker}
+                  iconName="calendar-outline"
+                />
+              </View>
+              <View style={styles.rowItem}>
+                <FormSelectField
+                  testID="select-gender"
+                  label={t('profile.gender')}
+                  valueLabel={genderLabel}
+                  isPlaceholder={!gender}
+                  onPress={() => setGenderModalVisible(true)}
+                  iconName="chevron-down"
+                />
+              </View>
+            </View>
+
             <Text style={styles.label}>{t('profile.email')}</Text>
-            <View style={[styles.inputWithIcon, errors.email ? { borderColor: '#E53E3E', borderWidth: 1.5 } : {}]}>
+            <View style={[styles.inputWithIcon, errors.email ? styles.inputError : null]}>
               <Image
                 source={require('@/assets/expo.icon/Assets/email.svg')}
-                style={{ width: 18, height: 18, marginRight: 10 }}
+                style={styles.emailIcon}
                 contentFit="contain"
-                tintColor="#A0AEC0"
+                tintColor={theme.placeholderColor}
               />
               <TextInput
                 testID="input-email"
                 value={email}
                 onChangeText={setEmail}
-                style={{ flex: 1, height: '100%', fontSize: 15, color: '#2D3748' }}
+                style={styles.emailInput}
+                placeholderTextColor={theme.placeholderColor}
                 autoCapitalize="none"
               />
             </View>
@@ -286,37 +377,40 @@ export default function ProfileScreen() {
             ) : null}
 
             <Text style={styles.label}>{t('profile.phone')}</Text>
-            <TextInput style={styles.input} value={phone} onChangeText={setPhone} />
+            <TextInput
+              style={styles.input}
+              value={phone}
+              onChangeText={setPhone}
+              placeholderTextColor={theme.placeholderColor}
+            />
 
             <Text style={styles.label}>{t('profile.bio')}</Text>
             <TextInput
-              style={[styles.input, { height: 90, textAlignVertical: 'top' }]}
+              style={[styles.input, styles.textArea]}
               value={bio}
               onChangeText={setBio}
               placeholder={t('profile.bioPlaceholder')}
-              placeholderTextColor="#A0AEC0"
+              placeholderTextColor={theme.placeholderColor}
               multiline
             />
           </View>
         </View>
-        <View style={[styles.cardContainer, { marginTop: 20 }]}>
+        <View style={[styles.cardContainer, styles.cardSpacing]}>
           <View style={styles.cardHeader}>
             <Image
               source={require('@/assets/expo.icon/Assets/language.svg')}
-              style={{ width: 24, height: 24, marginRight: 10 }}
+              style={styles.languageIcon}
               contentFit="contain"
-              tintColor={Colors.light.main}
+              tintColor={theme.main}
             />
             <Text style={styles.cardHeaderTitle}>{t('profile.interfaceLanguage')}</Text>
           </View>
           <View style={styles.cardBody}>
-            <Text style={{ fontSize: 14, color: '#718096', marginBottom: 20, lineHeight: 20 }}>
-              {t('profile.languageDesc')}
-            </Text>
+            <Text style={styles.languageDesc}>{t('profile.languageDesc')}</Text>
 
             <TouchableOpacity
               testID="btn-lang-es"
-              style={[styles.languageOption, language === 'es' && { borderColor: Colors.light.main, borderWidth: 2 }]}
+              style={[styles.languageOption, language === 'es' && styles.languageOptionSelected]}
               onPress={() => setLanguage('es')}
             >
               <View>
@@ -326,40 +420,40 @@ export default function ProfileScreen() {
               {language === 'es' && (
                 <Image
                   source={require('@/assets/expo.icon/Assets/check_circle.svg')}
-                  style={{ width: 24, height: 24 }}
+                  style={styles.checkIcon}
                   contentFit="contain"
-                  tintColor={Colors.light.main}
+                  tintColor={theme.main}
                 />
               )}
             </TouchableOpacity>
 
             <TouchableOpacity
               testID="btn-lang-en"
-              style={[styles.languageOption, language === 'en' && { borderColor: Colors.light.main, borderWidth: 2 }]}
+              style={[styles.languageOption, language === 'en' && styles.languageOptionSelected]}
               onPress={() => setLanguage('en')}
             >
               <View>
                 <Text style={styles.languageTitle}>{t('profile.english')}</Text>
                 <Text style={styles.languageSubtitle}>{t('profile.englishDesc')}</Text>
               </View>
-              {language === 'en' && <Ionicons name="checkmark-circle" size={24} color={Colors.light.header} />}
+              {language === 'en' && <Ionicons name="checkmark-circle" size={24} color={theme.main} />}
             </TouchableOpacity>
           </View>
         </View>
 
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 30, marginBottom: 20, paddingHorizontal: 20 }}>
-          <TouchableOpacity style={{ borderWidth: 1, borderColor: '#CBD5E0', borderRadius: 6, paddingVertical: 12, paddingHorizontal: 20, marginRight: 15, backgroundColor: 'white' }}>
-            <Text style={{ color: '#4A5568', fontWeight: '600', fontSize: 15 }}>{t('profile.cancel')}</Text>
+        <View style={styles.actionsRow}>
+          <TouchableOpacity style={styles.cancelBtn}>
+            <Text style={styles.cancelBtnText}>{t('profile.cancel')}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity testID="btn-save" onPress={handleSave} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.light.main, borderRadius: 6, paddingVertical: 12, paddingHorizontal: 20 }}>
+          <TouchableOpacity testID="btn-save" onPress={handleSave} style={styles.saveBtn}>
             <Image
               source={require('@/assets/expo.icon/Assets/save-icon.svg')}
-              style={{ width: 18, height: 18, marginRight: 8 }}
+              style={styles.saveIcon}
               contentFit="contain"
-              tintColor="white"
+              tintColor={theme.overMain}
             />
-            <Text style={{ color: 'white', fontWeight: '600', fontSize: 15 }}>{t('profile.saveChanges')}</Text>
+            <Text style={styles.saveBtnText}>{t('profile.saveChanges')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView >
@@ -370,102 +464,279 @@ export default function ProfileScreen() {
         onResend={handleResendLink}
         onClose={handleCloseModal}
       />
+
+      <ModalOptionList
+        visible={genderModalVisible}
+        onRequestClose={() => setGenderModalVisible(false)}
+        title={t('profile.gender')}
+        options={genderOptions}
+        selectedOption={gender}
+        onSelectOption={setGender}
+      />
+
+      <BirthDatePicker
+        visible={showDatePicker}
+        value={birthDateObj}
+        title={t('profile.birthDate')}
+        confirmLabel={t('profile.confirmDate')}
+        pickerTestID="profile-birth-date-picker"
+        locale={i18n.language === 'en' ? 'en-US' : 'es-ES'}
+        onClose={() => setShowDatePicker(false)}
+        onSelect={(date) => {
+          setBirthDateObj(date);
+          setBirthDate(formatBirthDate(date));
+        }}
+      />
     </View >
   );
 }
-const styles = StyleSheet.create({
 
-
-
-  titleSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  mainTitle: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#1A202C',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#718096',
-    lineHeight: 20,
-  },
-
-  cardContainer: {
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#EDF2F7',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EDF2F7',
-    backgroundColor: '#F9FAFB',
-  },
-  cardHeaderTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1A202C',
-  },
-  cardBody: {
-    padding: 20,
-  },
-
-  avatarRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 25 },
-  avatarCircle: {
-    width: 80, height: 80, borderRadius: 40,
-    backgroundColor: '#E2E8F0',
-    justifyContent: 'center', alignItems: 'center',
-  },
-  avatarLabel: { fontSize: 14, fontWeight: '600', color: '#2D3748', marginBottom: 8 },
-  avatarButtonsRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  btnCambiar: {
-    borderWidth: 1, borderColor: '#CBD5E0',
-    paddingHorizontal: 16, paddingVertical: 6, borderRadius: 6,
-    marginRight: 15,
-  },
-  btnCambiarText: { color: '#4A5568', fontSize: 14 },
-  btnEliminarText: { color: '#E53E3E', fontSize: 14 },
-  avatarHelpText: { fontSize: 12, color: '#A0AEC0' },
-
-  label: {
-    fontSize: 14, fontWeight: '600', color: '#4A5568',
-    marginTop: 15, marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1, borderColor: '#CBD5E0',
-    borderRadius: 6, paddingHorizontal: 12,
-    height: 46,
-    fontSize: 15, color: '#2D3748',
-  },
-  inputWithIcon: {
-    flexDirection: 'row', alignItems: 'center',
-    borderWidth: 1, borderColor: '#CBD5E0',
-    borderRadius: 6, paddingHorizontal: 12,
-    height: 46,
-  },
-
-  errorText: { color: '#E53E3E', fontSize: 12, marginTop: 4 },
-
-  saveButton: {
-    backgroundColor: Colors.light.header,
-    paddingVertical: 14, borderRadius: 8,
-    alignItems: 'center', marginTop: 30,
-  },
-  saveButtonText: { color: 'white', fontWeight: '700', fontSize: 16 },
-
-  languageOption: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    borderWidth: 1, borderColor: '#CBD5E0', borderRadius: 8,
-    padding: 15, marginBottom: 15,
-  },
-  languageTitle: { fontSize: 15, fontWeight: '600', color: '#1A202C', marginBottom: 4 },
-  languageSubtitle: { fontSize: 13, color: '#718096' },
-
-});
+const createStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    scroll: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingBottom: BottomTabInset + 20,
+    },
+    titleSection: {
+      paddingHorizontal: 20,
+      paddingVertical: 20,
+    },
+    mainTitle: {
+      fontSize: 26,
+      fontWeight: '700',
+      color: theme.pageTitle,
+      marginBottom: 8,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: theme.pageSubtitle,
+      lineHeight: 20,
+    },
+    cardContainer: {
+      backgroundColor: theme.backgroundElement,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: theme.pageSeparator,
+    },
+    cardSpacing: {
+      marginTop: 20,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.pageSeparator,
+      backgroundColor: theme.backgroundSecondary,
+    },
+    cardHeaderIcon: {
+      marginRight: 10,
+    },
+    cardHeaderTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.pageTitle,
+    },
+    cardBody: {
+      padding: 20,
+    },
+    avatarRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 25,
+    },
+    avatar: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: theme.backgroundSelected,
+    },
+    avatarActions: {
+      marginLeft: 16,
+      flex: 1,
+    },
+    avatarLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.textNames,
+      marginBottom: 8,
+    },
+    avatarButtonsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    btnCambiar: {
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      paddingHorizontal: 16,
+      paddingVertical: 6,
+      borderRadius: 6,
+      marginRight: 15,
+      backgroundColor: theme.backgroundElement,
+    },
+    btnCambiarText: {
+      color: theme.textNames,
+      fontSize: 14,
+    },
+    btnEliminarText: {
+      color: theme.error,
+      fontSize: 14,
+    },
+    avatarHelpText: {
+      fontSize: 12,
+      color: theme.placeholderColor,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.fieldLabel,
+      marginTop: 15,
+      marginBottom: 8,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      borderRadius: 6,
+      paddingHorizontal: 12,
+      height: 46,
+      fontSize: 15,
+      color: theme.fieldLabel,
+      backgroundColor: theme.backgroundElement,
+    },
+    inputError: {
+      borderColor: theme.error,
+      borderWidth: 1.5,
+    },
+    inputWithIcon: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      borderRadius: 6,
+      paddingHorizontal: 12,
+      height: 46,
+      backgroundColor: theme.backgroundElement,
+    },
+    emailIcon: {
+      width: 18,
+      height: 18,
+      marginRight: 10,
+    },
+    emailInput: {
+      flex: 1,
+      height: '100%',
+      fontSize: 15,
+      color: theme.fieldLabel,
+    },
+    textArea: {
+      height: 90,
+      textAlignVertical: 'top',
+    },
+    errorText: {
+      color: theme.error,
+      fontSize: 12,
+      marginTop: 4,
+    },
+    languageIcon: {
+      width: 24,
+      height: 24,
+      marginRight: 10,
+    },
+    languageDesc: {
+      fontSize: 14,
+      color: theme.pageSubtitle,
+      marginBottom: 20,
+      lineHeight: 20,
+    },
+    languageOption: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      borderRadius: 8,
+      padding: 15,
+      marginBottom: 15,
+      backgroundColor: theme.backgroundElement,
+    },
+    languageOptionSelected: {
+      borderColor: theme.main,
+      borderWidth: 2,
+    },
+    languageTitle: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: theme.pageTitle,
+      marginBottom: 4,
+    },
+    languageSubtitle: {
+      fontSize: 13,
+      color: theme.pageSubtitle,
+    },
+    checkIcon: {
+      width: 24,
+      height: 24,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      marginTop: 30,
+      marginBottom: 20,
+      paddingHorizontal: 20,
+    },
+    cancelBtn: {
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      borderRadius: 6,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      marginRight: 15,
+      backgroundColor: theme.backgroundElement,
+    },
+    cancelBtnText: {
+      color: theme.textNames,
+      fontWeight: '600',
+      fontSize: 15,
+    },
+    saveBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.main,
+      borderRadius: 6,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+    },
+    saveIcon: {
+      width: 18,
+      height: 18,
+      marginRight: 8,
+    },
+    saveBtnText: {
+      color: theme.overMain,
+      fontWeight: '600',
+      fontSize: 15,
+    },
+    row: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+    },
+    rowItem: {
+      flexGrow: 1,
+      flexBasis: 140,
+      minWidth: 140,
+    },
+    rowItemWide: {
+      flexGrow: 1.35,
+      flexBasis: 160,
+      minWidth: 160,
+    },
+  });

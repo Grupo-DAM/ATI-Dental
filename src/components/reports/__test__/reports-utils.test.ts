@@ -6,6 +6,11 @@ import {
   getRecordDurationMinutes,
   buildHistoryMap,
   generatePaddedChartData,
+  aggregateUserDemographics,
+  parseFlexibleTimestamp,
+  parseUserAge,
+  normalizeUserGender,
+  getAgeBucketKey,
 } from '../utils/reports-utils';
 
 describe('reports-utils unit tests', () => {
@@ -134,6 +139,57 @@ describe('reports-utils unit tests', () => {
       expect(chartData).toHaveLength(7);
       expect(chartData[0]).toHaveProperty('label');
       expect(chartData[0]).toHaveProperty('value');
+    });
+  });
+
+  describe('demografía de usuarios', () => {
+    const now = new Date(2026, 8, 17);
+
+    it('calcula totales, edad promedio, rangos y género', () => {
+      const metrics = aggregateUserDemographics(
+        [
+          { id: '1', genero: 'femenino', edad: 22 },
+          { id: '2', gender: 'male', fechaNacimiento: new Date(1991, 0, 1) },
+          { id: '3', sexo: 'mujer', birthDate: '10/10/1985' },
+          { id: '4' },
+          { id: '5', edad: '60', genero: 'otro' },
+        ],
+        now,
+      );
+
+      expect(metrics.totalUsers).toBe(5);
+      expect(metrics.averageAge).toBe(39);
+      expect(metrics.ageBuckets.find((bucket) => bucket.key === '18_25')?.count).toBe(1);
+      expect(metrics.ageBuckets.find((bucket) => bucket.key === '26_35')?.count).toBe(1);
+      expect(metrics.ageBuckets.find((bucket) => bucket.key === '36_50')?.count).toBe(1);
+      expect(metrics.ageBuckets.find((bucket) => bucket.key === '50_plus')?.count).toBe(1);
+      expect(metrics.ageBuckets.find((bucket) => bucket.key === 'unspecified')?.count).toBe(1);
+      expect(metrics.genderSlices.find((slice) => slice.key === 'female')?.count).toBe(2);
+      expect(metrics.genderSlices.find((slice) => slice.key === 'male')?.count).toBe(1);
+      expect(metrics.genderSlices.find((slice) => slice.key === 'unspecified')?.percent).toBe(40);
+    });
+
+    it('devuelve promedio nulo y porcentajes en 0 si no hay usuarios', () => {
+      const metrics = aggregateUserDemographics([]);
+      expect(metrics.totalUsers).toBe(0);
+      expect(metrics.averageAge).toBeNull();
+      expect(metrics.genderSlices.every((slice) => slice.percent === 0)).toBe(true);
+    });
+
+    it('parsea timestamps flexibles y descarta edades inválidas', () => {
+      expect(parseFlexibleTimestamp(123)).toBe(123);
+      expect(parseFlexibleTimestamp({ toMillis: () => 50 })).toBe(50);
+      expect(parseFlexibleTimestamp({ toDate: () => new Date(2020, 0, 1) })).toBe(
+        new Date(2020, 0, 1).getTime(),
+      );
+      expect(parseFlexibleTimestamp({ seconds: 2 })).toBe(2000);
+      expect(parseFlexibleTimestamp('no-date')).toBeNull();
+      expect(parseUserAge({ id: '1', edad: 200 })).toBeNull();
+      expect(parseUserAge({ id: '1', fechaNacimiento: '15/05/1990' }, now)).toBe(36);
+      expect(normalizeUserGender({ id: '1', genero: 'HOMBRE' })).toBe('male');
+      expect(getAgeBucketKey(17)).toBe('unspecified');
+      expect(getAgeBucketKey(50)).toBe('36_50');
+      expect(getAgeBucketKey(51)).toBe('50_plus');
     });
   });
 });

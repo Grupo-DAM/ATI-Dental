@@ -82,6 +82,18 @@ appId: com.proyect1.ATIDental
     id: "input-lastname"
 - inputText: "Smith"
 
+# Género
+- scrollUntilVisible:
+    element:
+      id: "select-gender"
+    direction: DOWN
+    timeout: 10000
+    speed: 40
+- tapOn:
+    id: "select-gender"
+- tapOn:
+    id: "profile-gender-option-female"
+
 # Validar Correo Vacío
 - tapOn:
     id: "input-email"

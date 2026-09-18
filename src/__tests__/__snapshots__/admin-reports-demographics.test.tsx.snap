@@ -1,0 +1,1317 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdminReportsScreen demografía de usuarios genera snapshot del layout de demografía 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "#fff",
+      "flex": 1,
+    }
+  }
+  testID="admin-reports-screen"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#fff",
+        "borderBottomColor": undefined,
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "paddingHorizontal": 20,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <Text
+      style={
+        {
+          "color": "#666",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+        }
+      }
+    >
+      reports.breadcrumbParent
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#999",
+          "fontSize": 14,
+        }
+      }
+    >
+         ›   
+    </Text>
+    <Text
+      style={
+        {
+          "color": undefined,
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+    >
+      reports.breadcrumbCurrent
+    </Text>
+  </View>
+  <RCTScrollView
+    contentContainerStyle={
+      [
+        {
+          "paddingHorizontal": 20,
+          "paddingTop": 20,
+        },
+        {
+          "paddingBottom": 90,
+        },
+      ]
+    }
+    showsVerticalScrollIndicator={false}
+    style={
+      {
+        "flex": 1,
+      }
+    }
+  >
+    <View>
+      <View
+        style={
+          {
+            "alignSelf": "center",
+            "maxWidth": 800,
+            "width": "100%",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#111",
+              "fontFamily": "Open Sans",
+              "fontSize": 24,
+              "fontWeight": "800",
+              "marginBottom": 6,
+            }
+          }
+        >
+          reports.title
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#666",
+              "fontFamily": "Open Sans",
+              "fontSize": 14,
+              "lineHeight": 20,
+              "marginBottom": 20,
+            }
+          }
+        >
+          reports.subtitle
+        </Text>
+        <View
+          style={
+            {
+              "marginBottom": 20,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#333",
+                "fontFamily": "Open Sans",
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginBottom": 6,
+              }
+            }
+          >
+            reports.reportTypeLabel
+          </Text>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#fff",
+                "borderColor": "#ddd",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "opacity": 1,
+                "paddingHorizontal": 14,
+                "paddingVertical": 12,
+              }
+            }
+            testID="report-type-select"
+          >
+            <Text
+              numberOfLines={1}
+              style={
+                {
+                  "color": "#333",
+                  "flex": 1,
+                  "fontFamily": "Open Sans",
+                  "fontSize": 14,
+                }
+              }
+            >
+              reports.reportTypeDemographics
+            </Text>
+            <Text
+              color="#666"
+              name="chevron-down"
+              size={18}
+            >
+              chevron-down
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 12,
+              "marginBottom": 20,
+            }
+          }
+          testID="kpi-cards-container"
+        >
+          <View
+            style={
+              {
+                "backgroundColor": "#5B2D8B",
+                "borderRadius": 12,
+                "elevation": 2,
+                "flex": 1,
+                "paddingTop": 8,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#fff",
+                  "borderRadius": 12,
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "gap": 10,
+                  "padding": 12,
+                }
+              }
+              testID="kpi-total-users"
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#F3E8FF",
+                    "borderRadius": 22,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
+                  }
+                }
+              >
+                <Text
+                  color="#5B2D8B"
+                  name="people-outline"
+                  size={24}
+                >
+                  people-outline
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#999",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 10,
+                      "fontWeight": "400",
+                      "letterSpacing": 0.4,
+                      "marginBottom": 2,
+                    }
+                  }
+                >
+                  reports.kpiTotalUsers
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#111",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                    }
+                  }
+                  testID="kpi-total-users-val"
+                >
+                  3
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "backgroundColor": "#5B2D8B",
+                "borderRadius": 12,
+                "elevation": 2,
+                "flex": 1,
+                "paddingTop": 8,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#fff",
+                  "borderRadius": 12,
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "gap": 10,
+                  "padding": 12,
+                }
+              }
+              testID="kpi-average-age"
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#F3E8FF",
+                    "borderRadius": 22,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
+                  }
+                }
+              >
+                <Text
+                  color="#5B2D8B"
+                  name="calendar-outline"
+                  size={24}
+                >
+                  calendar-outline
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#999",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 10,
+                      "fontWeight": "400",
+                      "letterSpacing": 0.4,
+                      "marginBottom": 2,
+                    }
+                  }
+                >
+                  reports.kpiAverageAge
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#111",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                    }
+                  }
+                  testID="kpi-average-age-val"
+                >
+                  28
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#fff",
+              "borderColor": "#ddd",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "elevation": 2,
+              "marginBottom": 20,
+              "padding": 16,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 2,
+                "width": 0,
+              },
+              "shadowOpacity": 0.04,
+              "shadowRadius": 4,
+            }
+          }
+          testID="chart-card"
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "marginBottom": 12,
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#5B2D8B",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                }
+              }
+              testID="chart-title"
+            >
+              reports.ageChartTitle
+            </Text>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#f5f5f5",
+                  "borderColor": "#ddd",
+                  "borderRadius": 6,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "opacity": 1,
+                  "paddingHorizontal": 8,
+                  "paddingVertical": 4,
+                }
+              }
+              testID="period-filter-btn"
+            >
+              <Text
+                style={
+                  {
+                    "color": "#666",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 12,
+                    "fontWeight": "500",
+                  }
+                }
+              >
+                reports.period30Days
+              </Text>
+              <Text
+                color="#666"
+                name="filter"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 4,
+                  }
+                }
+              >
+                filter
+              </Text>
+            </View>
+          </View>
+          <View
+            testID="chart-active-container"
+          >
+            <View
+              style={
+                {
+                  "gap": 12,
+                  "paddingVertical": 8,
+                }
+              }
+              testID="reports-age-bar-chart"
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 10,
+                  }
+                }
+                testID="age-bar-18_25"
+              >
+                <Text
+                  numberOfLines={1}
+                  style={
+                    {
+                      "color": "#666",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 12,
+                      "width": 92,
+                    }
+                  }
+                >
+                  reports.ageRange18_25
+                </Text>
+                <View
+                  style={
+                    {
+                      "backgroundColor": "#F3E8FF",
+                      "borderRadius": 9,
+                      "flex": 1,
+                      "height": 18,
+                      "overflow": "hidden",
+                    }
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 9,
+                          "height": "100%",
+                        },
+                        {
+                          "backgroundColor": "#C4B0DC",
+                          "width": "100%",
+                        },
+                      ]
+                    }
+                  />
+                </View>
+                <Text
+                  style={
+                    {
+                      "color": "#111",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 13,
+                      "fontWeight": "700",
+                      "textAlign": "right",
+                      "width": 28,
+                    }
+                  }
+                >
+                  1
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 10,
+                  }
+                }
+                testID="age-bar-26_35"
+              >
+                <Text
+                  numberOfLines={1}
+                  style={
+                    {
+                      "color": "#666",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 12,
+                      "width": 92,
+                    }
+                  }
+                >
+                  reports.ageRange26_35
+                </Text>
+                <View
+                  style={
+                    {
+                      "backgroundColor": "#F3E8FF",
+                      "borderRadius": 9,
+                      "flex": 1,
+                      "height": 18,
+                      "overflow": "hidden",
+                    }
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 9,
+                          "height": "100%",
+                        },
+                        {
+                          "backgroundColor": "#5B2D8B",
+                          "width": "100%",
+                        },
+                      ]
+                    }
+                  />
+                </View>
+                <Text
+                  style={
+                    {
+                      "color": "#111",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 13,
+                      "fontWeight": "700",
+                      "textAlign": "right",
+                      "width": 28,
+                    }
+                  }
+                >
+                  1
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 10,
+                  }
+                }
+                testID="age-bar-36_50"
+              >
+                <Text
+                  numberOfLines={1}
+                  style={
+                    {
+                      "color": "#666",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 12,
+                      "width": 92,
+                    }
+                  }
+                >
+                  reports.ageRange36_50
+                </Text>
+                <View
+                  style={
+                    {
+                      "backgroundColor": "#F3E8FF",
+                      "borderRadius": 9,
+                      "flex": 1,
+                      "height": 18,
+                      "overflow": "hidden",
+                    }
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 9,
+                          "height": "100%",
+                        },
+                        {
+                          "backgroundColor": "#9B7BB8",
+                          "width": "0%",
+                        },
+                      ]
+                    }
+                  />
+                </View>
+                <Text
+                  style={
+                    {
+                      "color": "#111",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 13,
+                      "fontWeight": "700",
+                      "textAlign": "right",
+                      "width": 28,
+                    }
+                  }
+                >
+                  0
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 10,
+                  }
+                }
+                testID="age-bar-50_plus"
+              >
+                <Text
+                  numberOfLines={1}
+                  style={
+                    {
+                      "color": "#666",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 12,
+                      "width": 92,
+                    }
+                  }
+                >
+                  reports.ageRange50Plus
+                </Text>
+                <View
+                  style={
+                    {
+                      "backgroundColor": "#F3E8FF",
+                      "borderRadius": 9,
+                      "flex": 1,
+                      "height": 18,
+                      "overflow": "hidden",
+                    }
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 9,
+                          "height": "100%",
+                        },
+                        {
+                          "backgroundColor": "#D4C4E8",
+                          "width": "0%",
+                        },
+                      ]
+                    }
+                  />
+                </View>
+                <Text
+                  style={
+                    {
+                      "color": "#111",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 13,
+                      "fontWeight": "700",
+                      "textAlign": "right",
+                      "width": 28,
+                    }
+                  }
+                >
+                  0
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 10,
+                  }
+                }
+                testID="age-bar-unspecified"
+              >
+                <Text
+                  numberOfLines={1}
+                  style={
+                    {
+                      "color": "#666",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 12,
+                      "width": 92,
+                    }
+                  }
+                >
+                  reports.ageRangeUnspecified
+                </Text>
+                <View
+                  style={
+                    {
+                      "backgroundColor": "#F3E8FF",
+                      "borderRadius": 9,
+                      "flex": 1,
+                      "height": 18,
+                      "overflow": "hidden",
+                    }
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 9,
+                          "height": "100%",
+                        },
+                        {
+                          "backgroundColor": "#EDE4F5",
+                          "width": "100%",
+                        },
+                      ]
+                    }
+                  />
+                </View>
+                <Text
+                  style={
+                    {
+                      "color": "#111",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 13,
+                      "fontWeight": "700",
+                      "textAlign": "right",
+                      "width": 28,
+                    }
+                  }
+                >
+                  1
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#fff",
+              "borderColor": "#ddd",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "elevation": 2,
+              "marginBottom": 20,
+              "padding": 16,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 2,
+                "width": 0,
+              },
+              "shadowOpacity": 0.04,
+              "shadowRadius": 4,
+            }
+          }
+          testID="chart-card"
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "marginBottom": 12,
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#5B2D8B",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                }
+              }
+              testID="chart-title"
+            >
+              reports.genderChartTitle
+            </Text>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#f5f5f5",
+                  "borderColor": "#ddd",
+                  "borderRadius": 6,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "opacity": 1,
+                  "paddingHorizontal": 8,
+                  "paddingVertical": 4,
+                }
+              }
+              testID="period-filter-btn"
+            >
+              <Text
+                style={
+                  {
+                    "color": "#666",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 12,
+                    "fontWeight": "500",
+                  }
+                }
+              >
+                reports.period30Days
+              </Text>
+              <Text
+                color="#666"
+                name="filter"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 4,
+                  }
+                }
+              >
+                filter
+              </Text>
+            </View>
+          </View>
+          <View
+            testID="chart-active-container"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "gap": 16,
+                  "paddingVertical": 8,
+                }
+              }
+              testID="reports-gender-donut-chart"
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "height": 168,
+                    "justifyContent": "center",
+                    "width": 168,
+                  }
+                }
+              >
+                <Svg
+                  height={168}
+                  viewBox="0 0 168 168"
+                  width={168}
+                >
+                  <Path
+                    d="M 84.00 16.00 A 68 68 0 0 1 142.89 118.00 L 120.37 105.00 A 42 42 0 0 0 84.00 42.00 Z"
+                    fill="#5B2D8B"
+                  />
+                  <Path
+                    d="M 142.89 118.00 A 68 68 0 0 1 25.11 118.00 L 47.63 105.00 A 42 42 0 0 0 120.37 105.00 Z"
+                    fill="#B39DDB"
+                  />
+                  <Path
+                    d="M 25.11 118.00 A 68 68 0 0 1 84.00 16.00 L 84.00 42.00 A 42 42 0 0 0 47.63 105.00 Z"
+                    fill="#EDE4F5"
+                  />
+                </Svg>
+                <View
+                  pointerEvents="none"
+                  style={
+                    {
+                      "alignItems": "center",
+                      "position": "absolute",
+                    }
+                  }
+                >
+                  <Text
+                    style={
+                      {
+                        "color": "#111",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 22,
+                        "fontWeight": "800",
+                      }
+                    }
+                    testID="gender-donut-total"
+                  >
+                    3
+                  </Text>
+                  <Text
+                    style={
+                      {
+                        "color": "#666",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 12,
+                      }
+                    }
+                  >
+                    reports.genderTotal
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                    "gap": 10,
+                  }
+                }
+              >
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "gap": 8,
+                    }
+                  }
+                  testID="gender-legend-female"
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 5,
+                          "height": 10,
+                          "width": 10,
+                        },
+                        {
+                          "backgroundColor": "#5B2D8B",
+                        },
+                      ]
+                    }
+                  />
+                  <Text
+                    style={
+                      {
+                        "color": "#666",
+                        "flex": 1,
+                        "fontFamily": "Open Sans",
+                        "fontSize": 12,
+                      }
+                    }
+                  >
+                    reports.genderFemale
+                     
+                    33
+                    % (
+                    1
+                    )
+                  </Text>
+                </View>
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "gap": 8,
+                    }
+                  }
+                  testID="gender-legend-male"
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 5,
+                          "height": 10,
+                          "width": 10,
+                        },
+                        {
+                          "backgroundColor": "#B39DDB",
+                        },
+                      ]
+                    }
+                  />
+                  <Text
+                    style={
+                      {
+                        "color": "#666",
+                        "flex": 1,
+                        "fontFamily": "Open Sans",
+                        "fontSize": 12,
+                      }
+                    }
+                  >
+                    reports.genderMale
+                     
+                    33
+                    % (
+                    1
+                    )
+                  </Text>
+                </View>
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "gap": 8,
+                    }
+                  }
+                  testID="gender-legend-unspecified"
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 5,
+                          "height": 10,
+                          "width": 10,
+                        },
+                        {
+                          "backgroundColor": "#EDE4F5",
+                        },
+                      ]
+                    }
+                  />
+                  <Text
+                    style={
+                      {
+                        "color": "#666",
+                        "flex": 1,
+                        "fontFamily": "Open Sans",
+                        "fontSize": 12,
+                      }
+                    }
+                  >
+                    reports.genderUnspecified
+                     
+                    34
+                    % (
+                    1
+                    )
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 12,
+              "justifyContent": "flex-end",
+              "marginBottom": 20,
+            }
+          }
+        >
+          <View
+            accessibilityLabel="reports.print"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#fff",
+                "borderColor": "#ddd",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "elevation": 1,
+                "height": 38,
+                "justifyContent": "center",
+                "opacity": 1,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+                "width": 44,
+              }
+            }
+            testID="print-btn"
+          >
+            <Text
+              color="#333"
+              name="print-outline"
+              size={20}
+            >
+              print-outline
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="reports.exportPdf"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#5B2D8B",
+                "borderRadius": 8,
+                "elevation": 2,
+                "flexDirection": "row",
+                "height": 38,
+                "justifyContent": "center",
+                "opacity": 1,
+                "paddingHorizontal": 16,
+                "shadowColor": "#5B2D8B",
+                "shadowOffset": {
+                  "height": 2,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.2,
+                "shadowRadius": 3,
+              }
+            }
+            testID="export-pdf-btn"
+          >
+            <Text
+              color="#fff"
+              name="document-text"
+              size={16}
+              style={
+                {
+                  "marginRight": 4,
+                }
+              }
+            >
+              document-text
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#fff",
+                  "fontSize": 13,
+                  "fontWeight": "700",
+                  "letterSpacing": 0.5,
+                }
+              }
+            >
+              PDF
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;
