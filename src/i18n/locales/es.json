@@ -201,7 +201,10 @@
     "orderByNextVisit": "Próxima visita",
     "noResults": "No hay fichas de pacientes que coincidan con la búsqueda.",
     "noResultsQuestion": "¿Nuevo paciente?",
-    "registerPatient": "Registrar Paciente"
+    "registerPatient": "Registrar Paciente",
+    "accessDeniedTitle": "Acceso Denegado",
+    "adminOnlyView": "No tienes permisos de administrador para acceder a esta pantalla.",
+    "adminOnlyViewAlert": "No tienes permisos de administrador para ver esta sección."
   },
   "admin-users": {
     "title": "Listado de Usuarios",

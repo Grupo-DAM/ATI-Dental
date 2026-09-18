@@ -17,6 +17,10 @@ export function isAdminUser(user: UserProfile | null | undefined): boolean {
   return user?.rol === USER_ROLES.ADMIN || user?.rol === LEGACY_ADMIN_ROLE;
 }
 
+export function isOdontologoUser(user: UserProfile | null | undefined): boolean {
+  return user?.rol === USER_ROLES.ODONTOLOGO;
+}
+
 export function getRoleLabelKey(rol: AppUserRole | undefined): string {
   switch (rol) {
     case USER_ROLES.ODONTOLOGO:

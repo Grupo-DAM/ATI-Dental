@@ -201,7 +201,10 @@
     "orderByNextVisit": "Next visit",
     "noResults": "No patient card matches the search query.",
     "noResultsQuestion": "New patient?",
-    "registerPatient": "Register Patient"
+    "registerPatient": "Register Patient",
+    "accessDeniedTitle": "Access Denied",
+    "odontologoOnlyView": "You don't have dentist's credentials to access the patients list.",
+    "odontologoOnlyViewAlert": "Only dental personnel have access to this section."
   },
   "admin-users": {
     "title": "List of Users",
@@ -239,7 +242,9 @@
     "confirmDeactivateBtn": "Deactivate",
     "successTitle": "Success",
     "errorTitle": "Error",
-    "accessDeniedTitle": "Access Denied"
+    "accessDeniedTitle": "Access Denied",
+    "adminOnlyView": "You don't have admin credentials to access this view.",
+    "adminOnlyViewAlert": "Only admin personnel have access to this section."
   },
   "user-card": {
     "lastVisitLabel": "LAST VISIT:",

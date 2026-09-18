@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useNetInfo } from '@react-native-community/netinfo';
-import React from 'react';
-import { View, ScrollView, Alert} from 'react-native';
+import React, { useEffect } from 'react';
+import { View, ScrollView, Alert, ActivityIndicator} from 'react-native';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { SearchFilter } from '@/components/users-list/search-filter-selector';
@@ -14,7 +14,9 @@ import { useTheme } from '@/hooks/use-theme';
 import { UserCard } from '@/components/users-list/user-card';
 import { usePatients } from '@/hooks/user-list/use-patients-list';
 import { usePatientFiltering } from '@/hooks/user-list/use-list-filtering';
-import { createListStyles } from '@/components/users-list/styles/users-list.styles'
+import { createListStyles } from '@/components/users-list/styles/users-list.styles';
+import { useAuth } from '@/hooks/use-auth';
+import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
 
 function GoToEditPatientCard(patient: any) {
     // add here the route to 'create patient card' but the information must be filled in
@@ -33,6 +35,19 @@ export default function AdminUserList() {
     const theme = useTheme();
     const styles = createListStyles(theme);
     const netInfo = useNetInfo();
+    const { user: authUser, loading: authLoading } = useAuth();
+
+    const isOdontologo = authUser ? isOdontologoUser(authUser) : false;
+    const isAdmin = authUser ? isAdminUser(authUser) : false;
+
+    useEffect(() => {
+        if (!authLoading && !(isOdontologo || isAdmin)) {
+            Alert.alert(
+                t('patients-list.accessDeniedTitle'),
+                t('patients-list.odontologoOnlyViewAlert')
+            );
+        }
+    }, [authLoading, isOdontologo, t]);
 
     const { patients, isRetrying, handleRetryConnection } = usePatients();
     const filter = usePatientFiltering(patients);
@@ -41,6 +56,32 @@ export default function AdminUserList() {
         Alert.alert("Opciones del paciente")
         console.log('open patient option')
         // add here the options Modal code
+    }
+
+    // 1. Loader visual mientras se valida la sesión con Firebase/Firestore
+    if (authLoading) {
+        return (
+            <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color={theme.main} />
+            </ThemedView>
+        );
+    }
+
+    // 2. Pantalla de bloqueo si el usuario no tiene el rol 'odontologo'
+    if (!isOdontologo && !isAdmin) {
+        return (
+            <ThemedView style={styles.container}>
+                <AppHeader />
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                    <ThemedText type="subtitle" style={{ textAlign: 'center', marginBottom: 8 }}>
+                        {t('patients-list.accessDeniedTitle')}
+                    </ThemedText>
+                    <ThemedText style={{ textAlign: 'center' }}>
+                        {t('patients-list.odontologoOnlyView')}
+                    </ThemedText>
+                </View>
+            </ThemedView>
+        );
     }
 
     return (

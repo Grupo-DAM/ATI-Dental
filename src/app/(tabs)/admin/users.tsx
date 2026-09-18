@@ -1,8 +1,7 @@
-import auth from '@react-native-firebase/auth';
 import { useTranslation } from 'react-i18next';
-import NetInfo, { useNetInfo } from '@react-native-community/netinfo';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, ScrollView, Alert } from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
+import React, { useEffect } from 'react';
+import { View, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { SearchFilter } from '@/components/users-list/search-filter-selector';
@@ -13,8 +12,7 @@ import { Breadcrumb } from '@/components/breadcrumb';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useTheme } from '@/hooks/use-theme';
 import { UserCard } from '@/components/users-list/user-card';
-import { firestore } from '@/config/firebase';
-import { USER_ROLES, LEGACY_ADMIN_ROLE, isAdminUser } from '@/constants/user-roles';
+import { isAdminUser } from '@/constants/user-roles';
 import { useAuth } from '@/hooks/use-auth';
 import { UserStatusModal } from '@/components/users-list/user-status-modal';
 import { createListStyles } from '@/components/users-list/styles/users-list.styles'
@@ -33,7 +31,18 @@ export default function AdminUserList() {
     const theme = useTheme();
     const styles = createListStyles(theme);
     const netInfo = useNetInfo();
-    const { user: authUser } = useAuth();
+    const { user: authUser, loading: authLoading } = useAuth();
+
+    const isAdmin = authUser ? isAdminUser(authUser) : false;
+
+    useEffect(() => {
+        if (!authLoading && !isAdmin) {
+            Alert.alert(
+                t('admin-users.accessDeniedTitle'),
+                t('admin-users.adminOnlyViewAlert')
+            );
+        }
+    }, [authLoading, isAdmin, t]);
 
     const {
         users,
@@ -48,6 +57,32 @@ export default function AdminUserList() {
     } = useUsers(authUser, t);
 
     const filter = useUserFiltering(users);
+
+    // 1. Mostrar pantalla o estado de carga mientras se verifica la autenticación
+    if (authLoading) {
+        return (
+            <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color={theme.main} />
+            </ThemedView>
+        );
+    }
+
+    // 2. Si no es administrador, renderizar mensaje de acceso denegado
+    if (!isAdmin) {
+        return (
+            <ThemedView style={styles.container}>
+                <AppHeader />
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                    <ThemedText type="subtitle" style={{ textAlign: 'center', marginBottom: 8 }}>
+                        {t('admin-users.accessDeniedTitle')}
+                    </ThemedText>
+                    <ThemedText style={{ textAlign: 'center' }}>
+                        {t('admin-users.adminOnlyView')}
+                    </ThemedText>
+                </View>
+            </ThemedView>
+        );
+    }
 
     return (
         <ThemedView style={styles.container}>
