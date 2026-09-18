@@ -441,6 +441,7 @@ export default function RegisterPatientScreen() {
 
       {Platform.OS === 'ios' ? (
         <Modal
+          testID="birth-date-modal"
           visible={showDatePicker}
           transparent
           animationType="fade"

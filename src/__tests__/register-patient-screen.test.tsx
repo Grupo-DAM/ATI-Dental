@@ -1,8 +1,15 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import RegisterPatientScreen from '@/app/(tabs)/register-patient';
+import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
+
+type RegisterPatientI18n = { language: string };
+
+(globalThis as { __registerPatientI18n?: RegisterPatientI18n }).__registerPatientI18n = {
+  language: 'es',
+};
 
 const mockBack = jest.fn();
 const mockReplace = jest.fn();
@@ -24,10 +31,27 @@ jest.mock('expo-image-picker', () => ({
   launchImageLibraryAsync: () => mockLaunchLibrary(),
 }));
 
+jest.mock('@/components/ui/system-date-picker', () => {
+  const actual = jest.requireActual('@/components/ui/system-date-picker');
+  return {
+    ...actual,
+    isSystemDatePickerAvailable: jest.fn(() => true),
+  };
+});
+
 jest.mock('@react-native-community/datetimepicker', () => {
-  const { View } = require('react-native');
-  const DateTimePicker = (props: { testID?: string }) => (
-    <View testID={props.testID ?? 'birth-date-picker'} />
+  const { Pressable, View } = require('react-native');
+  const DateTimePicker = (props: {
+    testID?: string;
+    onChange?: (event: { type?: string }, date?: Date) => void;
+  }) => (
+    <View testID={props.testID ?? 'birth-date-picker'}>
+      <Pressable
+        testID="confirm-birth-date"
+        onPress={() => props.onChange?.({ type: 'set' }, new Date(1990, 4, 15))}
+      />
+      <Pressable testID="dismiss-birth-date" onPress={() => props.onChange?.({ type: 'dismissed' })} />
+    </View>
   );
   return { __esModule: true, default: DateTimePicker };
 });
@@ -39,7 +63,7 @@ jest.mock('@/components/app-header', () => ({
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
-    i18n: { language: 'es' },
+    i18n: globalThis.__registerPatientI18n,
   }),
 }));
 
@@ -66,11 +90,22 @@ jest.mock('@/hooks/use-theme', () => ({
 }));
 
 describe('RegisterPatientScreen', () => {
+  const originalOs = Platform.OS;
+  const i18nState = { language: 'es' };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    globalThis.__registerPatientI18n = i18nState;
     mockCanGoBack.mockReturnValue(true);
+    i18nState.language = 'es';
+    Object.defineProperty(Platform, 'OS', { configurable: true, value: 'android' });
+    (isSystemDatePickerAvailable as jest.Mock).mockReturnValue(true);
     mockRequestPermission.mockResolvedValue({ granted: true });
     mockLaunchLibrary.mockResolvedValue({ canceled: true, assets: null });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(Platform, 'OS', { configurable: true, value: originalOs });
   });
 
   it('muestra el formulario de nuevo paciente', () => {
@@ -151,5 +186,235 @@ describe('RegisterPatientScreen', () => {
     render(<RegisterPatientScreen />);
     fireEvent.press(screen.getByTestId('select-birth-date'));
     expect(screen.getByTestId('birth-date-picker')).toBeTruthy();
+  });
+
+  it('guarda la fecha elegida en el calendario', () => {
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('select-birth-date'));
+    fireEvent.press(screen.getByTestId('confirm-birth-date'));
+    expect(screen.getByText('15/05/1990')).toBeTruthy();
+  });
+
+  it('ignora el calendario si se cancela', () => {
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('select-birth-date'));
+    fireEvent.press(screen.getByTestId('dismiss-birth-date'));
+    expect(screen.queryByText('15/05/1990')).toBeNull();
+  });
+
+  it('va a pacientes si no hay historial al cancelar', () => {
+    mockCanGoBack.mockReturnValue(false);
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('btn-cancel-patient'));
+    expect(mockReplace).toHaveBeenCalledWith('/(tabs)/explore');
+  });
+
+  it('avisa si se deniega el permiso de galería', async () => {
+    mockRequestPermission.mockResolvedValue({ granted: false });
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('btn-change-photo'));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'registerPatient.alerts.errorTitle',
+        'registerPatient.alerts.photoPermission',
+      );
+    });
+    alertSpy.mockRestore();
+  });
+
+  it('rechaza una foto mayor a 1MB', async () => {
+    mockLaunchLibrary.mockResolvedValue({
+      canceled: false,
+      assets: [{ uri: 'file://big.jpg', fileSize: 2 * 1024 * 1024 }],
+    });
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('btn-change-photo'));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'registerPatient.alerts.errorTitle',
+        'registerPatient.alerts.photoTooLarge',
+      );
+    });
+    alertSpy.mockRestore();
+  });
+
+  it('quita la foto de perfil', async () => {
+    mockLaunchLibrary.mockResolvedValue({
+      canceled: false,
+      assets: [{ uri: 'file://photo.jpg', fileSize: 1200 }],
+    });
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('btn-change-photo'));
+    await waitFor(() => expect(mockLaunchLibrary).toHaveBeenCalled());
+    fireEvent.press(screen.getByTestId('btn-remove-photo'));
+    expect(screen.getByTestId('btn-remove-photo')).toBeTruthy();
+  });
+
+  it('limpia el error de nombre al escribir', () => {
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+    expect(screen.getByText('registerPatient.alerts.emptyName')).toBeTruthy();
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+    expect(screen.queryByText('registerPatient.alerts.emptyName')).toBeNull();
+  });
+
+  it('limpia el error de correo al escribir', () => {
+    render(<RegisterPatientScreen />);
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+    fireEvent.changeText(screen.getByTestId('input-email'), 'malo');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+    expect(screen.getByText('registerPatient.alerts.invalidEmail')).toBeTruthy();
+    fireEvent.changeText(screen.getByTestId('input-email'), 'ana@clinic.com');
+    expect(screen.queryByText('registerPatient.alerts.invalidEmail')).toBeNull();
+  });
+
+  it('acepta un correo válido al registrar', () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    render(<RegisterPatientScreen />);
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+    fireEvent.changeText(screen.getByTestId('input-email'), 'ana@clinic.com');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+    expect(alertSpy).toHaveBeenCalledWith(
+      'registerPatient.alerts.successTitle',
+      'registerPatient.alerts.successMessage',
+      expect.any(Array),
+    );
+    alertSpy.mockRestore();
+  });
+
+  it('rechaza correos sin dominio válido', () => {
+    render(<RegisterPatientScreen />);
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+    fireEvent.changeText(screen.getByTestId('input-email'), 'ana@clinic.');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+    expect(screen.getByText('registerPatient.alerts.invalidEmail')).toBeTruthy();
+  });
+
+  it('abre género y tipo de sangre', () => {
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('select-gender'));
+    fireEvent.press(screen.getByTestId('gender-option-female'));
+    fireEvent.press(screen.getByTestId('select-blood-type'));
+    fireEvent.press(screen.getByTestId('blood-option-O+'));
+    expect(screen.getByTestId('select-gender')).toBeTruthy();
+    expect(screen.getByTestId('select-blood-type')).toBeTruthy();
+  });
+
+  it('rellena campos clínicos', () => {
+    render(<RegisterPatientScreen />);
+    fireEvent.changeText(screen.getByTestId('input-address'), 'Calle 1');
+    fireEvent.changeText(screen.getByTestId('input-allergies'), 'Látex');
+    fireEvent.changeText(screen.getByTestId('input-conditions'), 'Asma');
+    fireEvent.changeText(screen.getByTestId('input-notes'), 'Nota');
+    expect(screen.getByTestId('input-address').props.value).toBe('Calle 1');
+    expect(screen.getByTestId('input-allergies').props.value).toBe('Látex');
+  });
+
+  it('cierra el estado de carga al confirmar el alert', () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
+      buttons?.[0]?.onPress?.();
+    });
+    render(<RegisterPatientScreen />);
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+    expect(screen.queryByTestId('btn-submit-patient-loading')).toBeNull();
+    alertSpy.mockRestore();
+  });
+
+  it('avisa si el selector de fotos no está disponible', async () => {
+    const imagePicker = require('expo-image-picker') as {
+      requestMediaLibraryPermissionsAsync?: unknown;
+    };
+    const original = imagePicker.requestMediaLibraryPermissionsAsync;
+    delete imagePicker.requestMediaLibraryPermissionsAsync;
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('btn-change-photo'));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'registerPatient.alerts.errorTitle',
+        'registerPatient.alerts.photoPickerUnavailable',
+      );
+    });
+
+    imagePicker.requestMediaLibraryPermissionsAsync = original;
+    alertSpy.mockRestore();
+  });
+
+  it('no cambia la foto si no hay assets', async () => {
+    mockLaunchLibrary.mockResolvedValue({ canceled: false, assets: [] });
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('btn-change-photo'));
+    await waitFor(() => expect(mockLaunchLibrary).toHaveBeenCalled());
+    fireEvent.press(screen.getByTestId('btn-remove-photo'));
+  });
+
+  it('acepta una foto sin fileSize', async () => {
+    mockLaunchLibrary.mockResolvedValue({
+      canceled: false,
+      assets: [{ uri: 'file://photo.jpg' }],
+    });
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('btn-change-photo'));
+    await waitFor(() => expect(mockLaunchLibrary).toHaveBeenCalled());
+    fireEvent.press(screen.getByTestId('btn-remove-photo'));
+  });
+
+  it('avisa si el calendario nativo no está disponible', () => {
+    (isSystemDatePickerAvailable as jest.Mock).mockReturnValue(false);
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('select-birth-date'));
+    expect(alertSpy).toHaveBeenCalledWith(
+      'registerPatient.alerts.errorTitle',
+      'registerPatient.alerts.datePickerUnavailable',
+    );
+    alertSpy.mockRestore();
+  });
+
+  it('abre el calendario en iOS y confirma la fecha', () => {
+    Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('select-birth-date'));
+    expect(screen.getByTestId('birth-date-picker')).toBeTruthy();
+    fireEvent(screen.getByTestId('birth-date-modal'), 'requestClose');
+    fireEvent.press(screen.getByTestId('select-birth-date'));
+    fireEvent.press(screen.getByTestId('confirm-birth-date'));
+    fireEvent.press(screen.getByTestId('btn-confirm-birth-date'));
+    expect(screen.getByText('15/05/1990')).toBeTruthy();
+  });
+
+  it('usa locale en-US cuando el idioma es inglés', () => {
+    i18nState.language = 'en';
+    render(<RegisterPatientScreen />);
+    fireEvent.press(screen.getByTestId('select-birth-date'));
+    expect(screen.getByTestId('birth-date-picker')).toBeTruthy();
+  });
+
+  it('rechaza correos con espacios, sin usuario o con varios @', () => {
+    render(<RegisterPatientScreen />);
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+
+    fireEvent.changeText(screen.getByTestId('input-email'), 'ana @clinic.com');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+    expect(screen.getByText('registerPatient.alerts.invalidEmail')).toBeTruthy();
+
+    fireEvent.changeText(screen.getByTestId('input-email'), '@clinic.com');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+    expect(screen.getByText('registerPatient.alerts.invalidEmail')).toBeTruthy();
+
+    fireEvent.changeText(screen.getByTestId('input-email'), 'ana@cli@nic.com');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+    expect(screen.getByText('registerPatient.alerts.invalidEmail')).toBeTruthy();
+
+    fireEvent.changeText(screen.getByTestId('input-email'), 'ana@clinic');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+    expect(screen.getByText('registerPatient.alerts.invalidEmail')).toBeTruthy();
   });
 });

@@ -83,6 +83,96 @@ describe('FormField components', () => {
     expect(screen.getByTestId('btn-save-loading')).toBeTruthy();
   });
 
+  it('renderiza etiqueta sin asterisco y selector con error', () => {
+    render(<FormFieldLabel label="Notas" />);
+    expect(screen.queryByText('*')).toBeNull();
+
+    render(
+      <FormSelectField
+        testID="select-error"
+        label="Género"
+        required
+        errorMessage="Selecciona una opción"
+        valueLabel="Otro"
+        onPress={jest.fn()}
+        iconName="chevron-down"
+      />,
+    );
+    expect(screen.getByText('Selecciona una opción')).toBeTruthy();
+  });
+
+  it('dispara el botón secundario y el primario con icono', () => {
+    const onSecondary = jest.fn();
+    const onPrimary = jest.fn();
+    render(
+      <>
+        <FormActionButton
+          testID="btn-cancel"
+          variant="secondary"
+          label="Cancelar"
+          onPress={onSecondary}
+          disabled
+        />
+        <FormActionButton
+          testID="btn-ok"
+          label="Guardar"
+          onPress={onPrimary}
+          iconName="person-add-outline"
+        />
+      </>,
+    );
+
+    fireEvent.press(screen.getByTestId('btn-ok'));
+    expect(onPrimary).toHaveBeenCalled();
+    expect(onSecondary).not.toHaveBeenCalled();
+  });
+
+  it('dispara el botón secundario habilitado y muestra carga secundaria', () => {
+    const onSecondary = jest.fn();
+    render(
+      <>
+        <FormActionButton
+          testID="btn-cancel-ok"
+          variant="secondary"
+          label="Cancelar"
+          onPress={onSecondary}
+        />
+        <FormActionButton
+          testID="btn-cancel-icon"
+          variant="secondary"
+          label="Cancelar"
+          onPress={jest.fn()}
+          iconName="close-outline"
+        />
+        <FormActionButton
+          testID="btn-cancel-loading"
+          variant="secondary"
+          label="Cancelar"
+          onPress={jest.fn()}
+          loading
+        />
+      </>,
+    );
+
+    fireEvent.press(screen.getByTestId('btn-cancel-ok'));
+    expect(onSecondary).toHaveBeenCalled();
+    expect(screen.getByTestId('btn-cancel-loading-loading')).toBeTruthy();
+  });
+
+  it('renderiza un textarea con icono', () => {
+    render(
+      <FormTextField
+        testID="field-notes"
+        label="Notas"
+        multiline
+        leadingIcon={<></>}
+        value="ok"
+        onChangeText={jest.fn()}
+      />,
+    );
+    expect(screen.getByTestId('field-notes').props.value).toBe('ok');
+  });
+
   it('genera snapshot del campo con error', () => {
     const tree = renderer
       .create(
