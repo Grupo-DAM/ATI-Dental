@@ -1,0 +1,108 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- FUNCIONES AUXILIARES ---
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol;
+    }
+
+    function isAdminUser() {
+      return getUserRole() == 'admin' || getUserRole() == 'administrador';
+    }
+
+    // --- REGLAS POR COLECCIÓN ---
+
+    // 1. Colección de Usuarios (Perfiles)
+    match /usuarios/{uid} {
+      allow read: if isAuthenticated();
+      // Permitir editar el propio perfil (US-17) o si es administrador (US-21/22)
+      allow write: if isAuthenticated() && (request.auth.uid == uid || isAdminUser());
+    }
+
+    // 2. Colección de Pacientes
+    match /pacientes/{pacienteId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // 3. Colección de Historias Clínicas (Sensible)
+    match /historias_clinicas/{historiaId} {
+      allow read: if isAuthenticated();
+      // Solo odontólogos pueden crear/modificar historias clínicas (US-12)
+      allow write: if isAuthenticated() && getUserRole() == 'odontologo';
+    }
+
+    // 4. Colección de Odontogramas (Sensible)
+    match /odontogramas/{odontogramaId} {
+      allow read: if isAuthenticated();
+      // Solo odontólogos pueden registrar el estado dental (US-14)
+      allow write: if isAuthenticated() && getUserRole() == 'odontologo';
+    }
+
+    // 5. Colección de Citas (Agenda)
+    match /citas/{citaId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // 6. Colección de Archivos de Pacientes
+    match /archivos_pacientes/{archivoId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // 7. Colección de Contenido Multimedia ("Nuestro Producto")
+    match /contenido_multimedia/{contenidoId} {
+      // Lectura pública para la sección de catálogo
+      allow read: if true;
+      // Solo administradores pueden subir/reemplazar contenido (US-24/25)
+      allow write: if isAuthenticated() && isAdminUser();
+    }
+
+    // 8. Colección de Responsables del Sitio
+    match /responsibles/{responsibleId} {
+      // Lectura pública para cualquier usuario que visite Contactos
+      allow read: if true;
+      allow write: if isAuthenticated() && isAdminUser();
+    }
+
+    // 9. Configuración del Sitio (Contacto, etc.)
+    match /configuracion/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isAdminUser();
+    }
+
+    // 10. Colección de Sesiones (Tiempo de Uso - US-26)
+    match /sesiones/{sessionId} {
+      // Solo administradores pueden leer el historial y tiempo de uso
+      allow read: if isAuthenticated() && isAdminUser();
+      // Cualquier usuario autenticado puede registrar su tiempo de sesión
+      allow write: if isAuthenticated();
+    }
+
+    // 11. Colección de Métricas de Estabilidad (Crash Rate - US-29)
+    match /metricas_estabilidad/{docId} {
+      // Solo administradores ven los reportes de crash
+      allow read: if isAuthenticated() && isAdminUser();
+      // Permitir actualizar métricas desde cualquier cliente si ocurre un fallo fatal
+      allow write: if isAuthenticated();
+    }
+
+    // 12. Colección de Tratamientos (US-10)
+    match /tratamientos/{treatmentId} {
+      allow read: if isAuthenticated();
+      // Solo personal clínico (odontólogos) o administradores pueden registrar tratamientos
+      allow write: if isAuthenticated() && (getUserRole() == 'odontologo' || isAdminUser());
+    }
+
+    // 13. Colección de Métricas de Retención (US-49)
+    match /metricas_retencion/{docId} {
+      // Solo administradores pueden consultar métricas de retención
+      allow read: if isAuthenticated() && isAdminUser();
+      // Solo administradores o Cloud Functions pueden actualizar métricas de retención
+      allow write: if isAuthenticated() && isAdminUser();
+    }
+  }
+}

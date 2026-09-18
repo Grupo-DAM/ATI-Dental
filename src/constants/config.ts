@@ -11,4 +11,8 @@ export const Config = {
     instagram: 'https://instagram.com/ati_dental',
     facebook: 'https://facebook.com/ATIDentalOficial',
   },
+  serverless: {
+    proxyUrl: 'https://secure-proxy.ati-dental-retention.workers.dev',
+    retentionEndpoint: 'https://secure-proxy.ati-dental-retention.workers.dev/metrics/retention',
+  },
 } as const;

@@ -24,16 +24,20 @@ import { useAdminSessions } from '@/components/reports/hooks/useAdminSessions';
 import { UsageReportView } from '@/components/reports/views/UsageReportView';
 import { DauMauReportView } from '@/components/reports/views/DauMauReportView';
 import { CrashRateReportView } from '@/components/reports/views/CrashRateReportView';
+import { RetentionReportView } from '@/components/reports/views/RetentionReportView';
 import { UserDemographicsReportView } from '@/components/reports/views/UserDemographicsReportView';
+
 
 // 4. RE-EXPORTS (Crucial para no romper tests unitarios de Jest)
 export {
   calculateDauMauRatio,
   calculateCrashRatePercentage,
+  formatRetentionPercentage,
+  parseRetentionData,
   generatePeriodOptions,
   aggregateUserDemographics,
 } from '@/components/reports/utils/reports-utils';
-export type { SessionRecord } from '@/components/reports/types';
+export type { SessionRecord, RetentionDataPoint, RetentionMetricsDoc } from '@/components/reports/types';
 
 export default function AdminReportsScreen() {
   const { t } = useTranslation();
@@ -97,6 +101,9 @@ export default function AdminReportsScreen() {
     if (selectedReportType === 'crash_rate') {
       return t('reports.reportTypeCrashRate');
     }
+    if (selectedReportType === 'retention_rate') {
+      return t('reports.reportTypeRetentionRate');
+    }
     return selectedReportType === 'usage'
       ? t('reports.reportTypeUsage')
       : t('reports.chartTitle');
@@ -108,6 +115,7 @@ export default function AdminReportsScreen() {
     { name: 'dau_mau', testID: 'type-option-dau-mau', label: t('reports.reportTypeDauMau') },
     { name: 'access', testID: 'type-option-access', label: t('reports.chartTitle') },
     { name: 'crash_rate', testID: 'type-option-crash-rate', label: t('reports.reportTypeCrashRate') },
+    { name: 'retention_rate', testID: 'type-option-retention-rate', label: t('reports.reportTypeRetentionRate') },
   ];
 
   const handlePrint = useCallback(() => {
@@ -195,6 +203,13 @@ export default function AdminReportsScreen() {
               totalSessionsCount={sessions.length}
               periodLabel={periodLabel}
               onOpenPeriodModal={() => setShowPeriodModal(true)}
+            />
+          )}
+
+          {selectedReportType === 'retention_rate' && (
+            <RetentionReportView
+              user={user}
+              authLoading={authLoading}
             />
           )}
 

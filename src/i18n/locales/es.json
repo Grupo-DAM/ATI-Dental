@@ -194,6 +194,20 @@
     "totalCrashesToday": "TOTAL FALLAS (HOY)",
     "affectedUsers": "USUARIOS AFECTADOS",
     "chartTitleCrashRate": "Porcentaje de fallos",
+    "reportTypeRetentionRate": "Tasa de retención de usuarios",
+    "chartTitleRetentionRate": "Porcentaje de Retención por Cohorte",
+    "retentionDay1": "Día 1",
+    "retentionDay7": "Día 7",
+    "retentionDay30": "Día 30",
+    "retentionKpiDay1": "RETENCIÓN DÍA 1",
+    "retentionKpiDay7": "RETENCIÓN DÍA 7",
+    "retentionKpiDay30": "RETENCIÓN DÍA 30",
+    "retentionDay1Sub": "24 horas",
+    "retentionDay7Sub": "7 días",
+    "retentionDay30Sub": "30 días",
+    "retentionCohortUsers": "Usuarios en cohorte",
+    "retentionErrorLoad": "Ocurrió un error al consultar las métricas de retención.",
+    "retentionPermissionError": "No tienes permisos en Firestore para consultar las métricas de retención.",
     "reportTypeDemographics": "Demografía de usuarios",
     "kpiTotalUsers": "TOTAL USUARIOS",
     "kpiAverageAge": "EDAD PROMEDIO",
@@ -210,6 +224,7 @@
     "genderTotal": "Total",
     "averageAgeUnavailable": "—"
   },
+
   "admin": {
     "path": "Administración"
   },

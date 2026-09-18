@@ -7,8 +7,8 @@ import { createReportsStyles } from '../styles/reports.styles';
 
 interface ReportChartCardProps {
   title: string;
-  periodLabel: string;
-  onOpenPeriodModal: () => void;
+  periodLabel?: string;
+  onOpenPeriodModal?: () => void;
   loading?: boolean;
   queryError?: string | null;
   hasData?: boolean;
@@ -34,15 +34,17 @@ export function ReportChartCard({
         <Text style={styles.chartTitle} testID="chart-title">
           {title}
         </Text>
-        <TouchableOpacity
-          style={styles.periodFilterBtn}
-          onPress={onOpenPeriodModal}
-          activeOpacity={0.7}
-          testID="period-filter-btn"
-        >
-          <Text style={styles.periodFilterText}>{periodLabel}</Text>
-          <Ionicons name="filter" size={14} color={theme.pageSubtitle} style={styles.filterIcon} />
-        </TouchableOpacity>
+        {onOpenPeriodModal && (
+          <TouchableOpacity
+            style={styles.periodFilterBtn}
+            onPress={onOpenPeriodModal}
+            activeOpacity={0.7}
+            testID="period-filter-btn"
+          >
+            <Text style={styles.periodFilterText}>{periodLabel}</Text>
+            <Ionicons name="filter" size={14} color={theme.pageSubtitle} style={styles.filterIcon} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {loading ? (
