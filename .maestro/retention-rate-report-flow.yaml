@@ -86,14 +86,31 @@ appId: com.proyect1.ATIDental
 - assertVisible:
     id: "kpi-retention-day1"
 - assertVisible:
+    id: "kpi-retention-day1-val"
+- assertVisible:
     id: "kpi-retention-day7"
+- assertVisible:
+    id: "kpi-retention-day7-val"
 - assertVisible:
     id: "kpi-retention-day30"
 - assertVisible:
+    id: "kpi-retention-day30-val"
+- assertVisible:
     id: "reports-retention-chart"
+
+# 11. Cerrar sesión al finalizar
+- extendedWaitUntil:
+    visible:
+      id: "menu-btn"
+    timeout: 10000
 
 - tapOn:
     id: "menu-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-logout"
+    timeout: 10000
 
 - tapOn:
     id: "nav-item-logout"
