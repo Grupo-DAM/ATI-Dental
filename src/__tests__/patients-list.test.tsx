@@ -255,10 +255,10 @@ describe('Pruebas de cobertura adicional para AdminUserList', () => {
 
     // Disparar onPress
     cards[0].props.onPress();
-    expect(Alert.alert).toHaveBeenCalledWith(
-      'Ver ficha de paciente',
-      expect.stringContaining('Carlos Mendoza')
-    );
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/(tabs)/patient-file',
+      params: { patientId: 'p1' },
+    });
 
     // Limpiar spy antes del segundo evento
     (Alert.alert as jest.Mock).mockClear();
