@@ -1,0 +1,97 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
+- tapOn:
+    id: "email-input"
+- inputText: "soamaia03@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Robin123456"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-header"
+    timeout: 10000
+
+- tapOn:
+    id: "explore-tab"
+
+- tapOn:
+    id: "users-search-bar"
+
+- inputText: "......."
+- hideKeyboard
+
+- extendedWaitUntil:
+      visible:
+          id: "no-search-result-message"
+      timeout: 1000
+
+- tapOn:
+      id: "no-result-search-users"
+  
+- extendedWaitUntil:
+      visible:
+          id: "register-patient-screen"
+      timeout: 1000
+
+- tapOn:
+    id: "explore-tab"
+
+- tapOn:
+      id: "users-search-bar"
+- eraseText
+- hideKeyboard
+
+- tapOn:
+      id: "dropdown-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "dropdown-options"
+    timeout: 1000
+
+- tapOn:
+      id: "dropdown-btn"
+
+
+- extendedWaitUntil:
+      notVisible:
+          id: "dropdown-options"
+      timeout: 1000
+
+- scrollUntilVisible:
+      element:
+          id: "list-pages"
+      direction: DOWN
+      timeout: 10000
+      speed: 40
+
+- tapOn:
+    id: "profile-tab"
+
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-patients"
+
+- extendedWaitUntil:
+      visible:
+        id: "list-patients-screen"
+      timeout: 1000
+
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

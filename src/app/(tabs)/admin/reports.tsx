@@ -24,12 +24,14 @@ import { useAdminSessions } from '@/components/reports/hooks/useAdminSessions';
 import { UsageReportView } from '@/components/reports/views/UsageReportView';
 import { DauMauReportView } from '@/components/reports/views/DauMauReportView';
 import { CrashRateReportView } from '@/components/reports/views/CrashRateReportView';
+import { UserDemographicsReportView } from '@/components/reports/views/UserDemographicsReportView';
 
 // 4. RE-EXPORTS (Crucial para no romper tests unitarios de Jest)
 export {
   calculateDauMauRatio,
   calculateCrashRatePercentage,
   generatePeriodOptions,
+  aggregateUserDemographics,
 } from '@/components/reports/utils/reports-utils';
 export type { SessionRecord } from '@/components/reports/types';
 
@@ -86,6 +88,9 @@ export default function AdminReportsScreen() {
 
   // Etiqueta del tipo de reporte activo
   const reportTypeLabel = useMemo(() => {
+    if (selectedReportType === 'demographics') {
+      return t('reports.reportTypeDemographics');
+    }
     if (selectedReportType === 'dau_mau') {
       return t('reports.reportTypeDauMau');
     }
@@ -98,7 +103,8 @@ export default function AdminReportsScreen() {
   }, [selectedReportType, t]);
 
   const reportTypeOptions: ModalOptionProp[] = [
-    { name: 'usage', testID: 'type-option-usage', label: t('reports.reportTypeLabel') },
+    { name: 'demographics', testID: 'type-option-demographics', label: t('reports.reportTypeDemographics') },
+    { name: 'usage', testID: 'type-option-usage', label: t('reports.reportTypeUsage') },
     { name: 'dau_mau', testID: 'type-option-dau-mau', label: t('reports.reportTypeDauMau') },
     { name: 'access', testID: 'type-option-access', label: t('reports.chartTitle') },
     { name: 'crash_rate', testID: 'type-option-crash-rate', label: t('reports.reportTypeCrashRate') },
@@ -156,6 +162,15 @@ export default function AdminReportsScreen() {
               totalAccessToday={totalAccessToday}
               displayedActiveUsers={displayedActiveUsers}
               selectedPeriod={selectedPeriod}
+              periodLabel={periodLabel}
+              onOpenPeriodModal={() => setShowPeriodModal(true)}
+            />
+          )}
+
+          {selectedReportType === 'demographics' && (
+            <UserDemographicsReportView
+              user={user}
+              authLoading={authLoading}
               periodLabel={periodLabel}
               onOpenPeriodModal={() => setShowPeriodModal(true)}
             />

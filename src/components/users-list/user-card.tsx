@@ -1,12 +1,12 @@
 import React, { type ReactNode } from 'react';
 import { Image } from 'expo-image';
 import { View, StyleSheet, Text, Pressable, Alert } from 'react-native';
-import { Switch } from '@/components/ui/switch.tsx';
+import { Switch } from '@/components/ui/switch';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 
 import { useTranslation } from 'react-i18next';
-import { Color, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { getRoleLabelKey, type AppUserRole } from '@/constants/user-roles';
 
@@ -25,7 +25,7 @@ const getInitials = (name: string) => {
         .slice(0, 2);
 };
 
-const getStatusString = (status: boolean, t ) => {
+const getStatusString = (status: boolean, t: any) => {
     if (status) return t('admin-users.activeStatus');
     return t('admin-users.inactiveStatus');
 };
@@ -59,8 +59,11 @@ type UserCardProps = {
     name?: string;
     email?: string;
     imgSrc?: string;
-    type?: 'general';
+    type?: string;
     testID?: string;
+    onEdit?: () => void;
+    onPress?: () => void;
+    onLongPress?: () => void;
 } & (PatientData | GeneralUserData);
 
 export function UserCard({
@@ -76,22 +79,35 @@ export function UserCard({
         role='User',
         switchTestID,
         testID,
+        onEdit = () => {},
+        onPress,
+        onLongPress,
     }: UserCardProps & { switchTestID?: string; testID?: string }) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
 
+    const handlePress = () => {
+        if (onPress) {
+            onPress();
+        } else {
+            Alert.alert('Press', 'Card de paciente presionada');
+        }
+    };
+
+    const handleLongPress = () => {
+        if (onLongPress) {
+            onLongPress();
+        } else {
+            Alert.alert('Long Press', 'Card de paciente presionada por más tiempo');
+        }
+    };
+
     return (
         <Pressable
             style={styles.pressableContainer}
-            onPress={() => Alert.alert('Press', 'Card de paciente presionada', [
-                { text: 'Cancel' },
-                { text: 'OK' }
-            ])}
-            onLongPress={() => Alert.alert('Long Press', 'Card de paciente presionada por más tiempo', [
-                { text: 'Cancel' },
-                { text: 'OK' }
-            ])}
+            onPress={handlePress}
+            onLongPress={handleLongPress}
         >
         <ThemedView style={styles.patientCard}>
             <View style={styles.patientInfo}>
@@ -113,15 +129,19 @@ export function UserCard({
                             style = {styles.icon}
                         />
                     )}
-                        <Image
-                            source = {EditIcon}
-                            style = {[styles.icon, styles.editIcon]}
-                        />
+                        <Pressable
+                            onPress={onEdit}
+                            testID="edit-button">
+                            <Image
+                                source = {EditIcon}
+                                style = {[styles.icon, styles.editIcon]}
+                            />
+                        </Pressable>
 
                     {type === 'general' && (
                         <Switch
                             value = {status}
-                            onSwitch = {switchStatus}
+                            onSwitch = {() => switchStatus?.()}
                             testID = {switchTestID || (name ? `switch-${name}` : 'switch-pressable')}
                         />
                      )}

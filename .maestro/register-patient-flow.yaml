@@ -94,6 +94,12 @@ appId: com.proyect1.ATIDental
 - inputText: "V-20123456"
 - hideKeyboard
 
+- scrollUntilVisible:
+    element:
+      id: "input-phone"
+    direction: DOWN
+    timeout: 10000
+
 - tapOn:
     id: "input-phone"
 - inputText: "+584141234567"
@@ -135,3 +141,12 @@ appId: com.proyect1.ATIDental
 
 # Confirmar el modal de éxito
 - tapOn: ".*(Listo|LISTO|Done|DONE|OK).*"
+
+- tapOn:
+    id: "profile-tab"
+
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

@@ -12,3 +12,9 @@ export const Config = {
     facebook: 'https://facebook.com/ATIDentalOficial',
   },
 } as const;
+
+export const ListConfig = {
+  page: {
+    capacity: 5,
+  },
+} as const;

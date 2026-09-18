@@ -60,7 +60,7 @@ const SLIDE_OUT_MS = 220;
 const MAIN_MENU_ITEMS: MenuItem[] = [
   {
     testID: 'nav-item-patients',
-    route: '/(tabs)/explore',
+    route: '/(tabs)/patients/patients-list',
     segment: 'explore',
     iconKey: 'patients',
     icon: require('@/assets/expo.icon/Assets/patients.svg'),
@@ -68,7 +68,7 @@ const MAIN_MENU_ITEMS: MenuItem[] = [
   },
   {
     testID: 'nav-item-register-patient',
-    route: '/(tabs)/register-patient',
+    route: '/(tabs)/patients/register-patient',
     segment: 'register-patient',
     iconKey: 'register',
     icon: require('@/assets/expo.icon/Assets/register-patient.svg'),

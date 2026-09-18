@@ -2,7 +2,7 @@ import React from 'react';
 import { Alert, Platform } from 'react-native';
 import { fireEvent, render, screen, waitFor, act } from '@testing-library/react-native';
 
-import RegisterPatientScreen from '@/app/(tabs)/register-patient';
+import RegisterPatientScreen from '@/app/(tabs)/patients/register-patient';
 import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
 
 import { createPatient } from '@/services/patient-service';
