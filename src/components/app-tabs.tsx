@@ -16,7 +16,7 @@ export default function AppTabs() {
       tabBar={renderTabBar}
     >
       <Tabs.Screen name="home" options={{ title: 'Inicio' }} />
-      <Tabs.Screen name="explore" options={{ title: 'Pacientes' }} />
+      <Tabs.Screen name="patients/patients-list" options={{ title: 'Pacientes' }} />
       <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
       <Tabs.Screen name="contacts" options={{ href: null, title: 'Contacto' }} />
       <Tabs.Screen name="register-patient" options={{ href: null, title: 'Registrar Paciente' }} />
@@ -80,17 +80,17 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
       {/* 2. EXPLORE (PACIENTES) TAB */}
       <TouchableOpacity
-        onPress={() => handleNavigate('explore')}
+        onPress={() => handleNavigate('patients/patients-list')}
         style={styles.tabItem}>
         <Image
           source={require('@/assets/expo.icon/Assets/lista.svg')}
           style={styles.icon}
-          tintColor={activeRouteName === 'explore' ? colors.main : colors.textSecondary}
+          tintColor={activeRouteName === 'patients/patients-list' ? colors.main : colors.textSecondary}
         />
         <Text
           style={[
             styles.label,
-            { color: activeRouteName === 'explore' ? colors.main : colors.textSecondary },
+            { color: activeRouteName === 'patients/patients-list' ? colors.main : colors.textSecondary },
           ]}>
           {t('tabs.explore')}
         </Text>

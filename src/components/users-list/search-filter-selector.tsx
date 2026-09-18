@@ -1,11 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image } from 'expo-image';
 import { View, Text, Platform, StyleSheet, TextInput, Pressable} from 'react-native';
-import { ThemedView } from '@/components/themed-view';
-import { ThemedText } from '@/components/themed-text';
-import { DropdownSelector } from '@/components/ui/dropdown-selector.tsx';
-import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { DropdownSelector } from '@/components/ui/dropdown-selector';
+import { Colors, Fonts, Spacing, FontFamily } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { USER_ROLES, getRoleLabelKey, type AppUserRole } from '@/constants/user-roles';
 
@@ -75,18 +73,22 @@ type ListType = {
     value: string;
     onChangeText: (text: string) => void;
     onChangeOrder: (text: string) => void;
-    activeRoles: string[];
-    activeStatus: string[];
-    onToggleFilter: (categoryTitle: string, optionName: string) => void;
+    activeRoles?: string[];
+    activeStatus?: string[];
+    onToggleFilter?: (categoryTitle: string, optionName: string) => void;
 };
 
-export function SearchFilter({general= true, value='', onChangeText, onChangeOrder,
-    activeRoles = [], activeStatus = [], onToggleFilter}: ListType) {
+export function SearchFilter({
+    general= true, value='', 
+    onChangeText = () => {}, 
+    onChangeOrder = () => {},
+    activeRoles = [], activeStatus = [], 
+    onToggleFilter = () => {}}: ListType) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
 
-    const [option, setOption] = useState<int>(0);
+    const [option, setOption] = useState<number>(0);
     const [selectFilters, setSelectFilters] = useState<boolean>(false);
 
     const orderByOptions = useMemo(() => {
@@ -125,7 +127,7 @@ export function SearchFilter({general= true, value='', onChangeText, onChangeOrd
         }
     ]
 
-    const changeOrder = (indx: int) => {
+    const changeOrder = (indx: number) => {
         if (indx === 0) onChangeOrder('name')
         else if (indx === 1) onChangeOrder('lastname')
         else if (indx === 2) onChangeOrder('id')
@@ -165,17 +167,19 @@ export function SearchFilter({general= true, value='', onChangeText, onChangeOrd
                     onChangeOption = {changeOrder}
                   ></DropdownSelector>
               </View>
-              <Pressable
-                testID="filter-toggle-btn"
-                style = {({ pressed }) => [styles.filterBtn, pressed && styles.pressedFilterBtn,
-                  selectFilters && styles.filterBtnActive]}
-                onPress = {() => setSelectFilters(!selectFilters)}>
-                <Image
-                    source = {FilterIcon}
-                    contentFit="contain"
-                    style={[styles.filterIcon, selectFilters && {tintColor: Colors.dark.logo}]}
-                />
-              </Pressable>
+              {general && (
+                <Pressable
+                    testID="filter-toggle-btn"
+                    style = {({ pressed }) => [styles.filterBtn, pressed && styles.pressedFilterBtn,
+                    selectFilters && styles.filterBtnActive]}
+                    onPress = {() => setSelectFilters(!selectFilters)}>
+                    <Image
+                        source = {FilterIcon}
+                        contentFit="contain"
+                        style={[styles.filterIcon, selectFilters && {tintColor: Colors.dark.logo}]}
+                    />
+                </Pressable>
+              )}
           </View>
           {/* Expanded filter section should accommodate patient specific filters too*/}
           {selectFilters &&
@@ -227,7 +231,7 @@ const createStyles = (theme: any) => StyleSheet.create({
         height: 28,
     },
     searchContainer: {
-        width: '60%',
+        flex: 2
     },
     input: {
         flex: 1,
@@ -235,7 +239,7 @@ const createStyles = (theme: any) => StyleSheet.create({
         fontSize: 12,
         paddingVertical: 0,
         color: theme.text,
-        fontFamily: Fonts.regular || 'System'
+        fontFamily: FontFamily.regular || 'System'
     },
     icon: {
         margin: Spacing.two || 8,
@@ -246,7 +250,7 @@ const createStyles = (theme: any) => StyleSheet.create({
         width: 12
     },
     orderByContainer: {
-        width: '25%',
+        flex: 1
     },
     filterBtn: {
         width: 44,
