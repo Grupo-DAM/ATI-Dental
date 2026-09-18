@@ -3,13 +3,14 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
+import { BirthDatePicker, formatBirthDate } from '@/components/ui/birth-date-picker';
 import { FormActionButton, FormSelectField, FormTextField } from '@/components/ui/form-field';
 import { ModalOptionList } from '@/components/ui/modal-option-list';
-import { isSystemDatePickerAvailable, SystemDatePicker } from '@/components/ui/system-date-picker';
+import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
 import {
   getPatientGenderLabelKey,
   isPatientGender,
@@ -20,7 +21,6 @@ import { useTheme } from '@/hooks/use-theme';
 
 const AVATAR_FALLBACK = require('@/assets/expo.icon/Assets/avatar.png');
 const MAX_PHOTO_BYTES = 1024 * 1024;
-const MIN_BIRTH_DATE = new Date(1900, 0, 1);
 
 function isValidPatientEmail(value: string): boolean {
   const trimmed = value.trim();
@@ -36,12 +36,6 @@ function isValidPatientEmail(value: string): boolean {
   }
 
   return !trimmed.includes(' ');
-}
-
-function formatBirthDate(date: Date): string {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${day}/${month}/${date.getFullYear()}`;
 }
 
 function loadImagePicker() {
@@ -156,17 +150,6 @@ export default function RegisterPatientScreen() {
       return;
     }
     setShowDatePicker(true);
-  };
-
-  const handleBirthDateChange = (event: { type?: string }, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowDatePicker(false);
-    }
-    if (event.type === 'dismissed' || !selectedDate) {
-      return;
-    }
-    setBirthDateObj(selectedDate);
-    setBirthDate(formatBirthDate(selectedDate));
   };
 
   const handleCancel = () => {
@@ -426,49 +409,20 @@ export default function RegisterPatientScreen() {
         onSelectOption={setBloodType}
       />
 
-      {showDatePicker && Platform.OS === 'android' ? (
-        <SystemDatePicker
-          testID="birth-date-picker"
-          value={birthDateObj}
-          mode="date"
-          display="calendar"
-          maximumDate={new Date()}
-          minimumDate={MIN_BIRTH_DATE}
-          onChange={handleBirthDateChange}
-          locale={i18n.language === 'en' ? 'en-US' : 'es-ES'}
-        />
-      ) : null}
-
-      {Platform.OS === 'ios' ? (
-        <Modal
-          testID="birth-date-modal"
-          visible={showDatePicker}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowDatePicker(false)}>
-          <View style={styles.datePickerOverlay}>
-            <View style={styles.datePickerCard}>
-              <Text style={styles.datePickerTitle}>{t('registerPatient.birthDate')}</Text>
-              <SystemDatePicker
-                testID="birth-date-picker"
-                value={birthDateObj}
-                mode="date"
-                display="spinner"
-                maximumDate={new Date()}
-                minimumDate={MIN_BIRTH_DATE}
-                onChange={handleBirthDateChange}
-                locale={i18n.language === 'en' ? 'en-US' : 'es-ES'}
-              />
-              <TouchableOpacity
-                testID="btn-confirm-birth-date"
-                style={styles.primaryButton}
-                onPress={() => setShowDatePicker(false)}>
-                <Text style={styles.primaryButtonText}>{t('registerPatient.confirmDate')}</Text>
-              </TouchableOpacity>
-            </View>
-      </View>
-        </Modal>
-      ) : null}
+      <BirthDatePicker
+        visible={showDatePicker}
+        value={birthDateObj}
+        title={t('registerPatient.birthDate')}
+        confirmLabel={t('registerPatient.confirmDate')}
+        pickerTestID="birth-date-picker"
+        modalTestID="birth-date-modal"
+        locale={i18n.language === 'en' ? 'en-US' : 'es-ES'}
+        onClose={() => setShowDatePicker(false)}
+        onSelect={(date) => {
+          setBirthDateObj(date);
+          setBirthDate(formatBirthDate(date));
+        }}
+      />
     </View>
   );
 }
@@ -607,39 +561,4 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       marginBottom: 20,
       paddingHorizontal: 20,
     },
-    primaryButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.main,
-      borderRadius: 6,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-    },
-    primaryButtonText: {
-      color: theme.overMain,
-      fontWeight: '600',
-      fontSize: 15,
-    },
-    datePickerOverlay: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 24,
-      backgroundColor: theme.tooltipBackground,
-    },
-    datePickerCard: {
-      width: '100%',
-      maxWidth: 360,
-      backgroundColor: theme.backgroundElement,
-      borderRadius: 12,
-      padding: 16,
-      alignItems: 'center',
-    },
-    datePickerTitle: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: theme.pageTitle,
-      marginBottom: 8,
-      fontFamily: 'Open Sans',
-  },
 });

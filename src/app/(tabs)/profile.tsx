@@ -3,28 +3,21 @@ import NetInfo from '@react-native-community/netinfo';
 import { auth, firestore } from '@/config/firebase';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Image } from 'expo-image';
 import { VerificationLinkModal } from '@/components/OTPModal';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
+import { BirthDatePicker, formatBirthDate } from '@/components/ui/birth-date-picker';
 import { FormSelectField } from '@/components/ui/form-field';
 import { ModalOptionList } from '@/components/ui/modal-option-list';
-import { isSystemDatePickerAvailable, SystemDatePicker } from '@/components/ui/system-date-picker';
+import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
 import { getPatientGenderLabelKey, isPatientGender, PATIENT_GENDER_VALUES } from '@/constants/patient';
 import { parseFlexibleTimestamp } from '@/components/reports/utils/reports-utils';
 import { useTheme } from '@/hooks/use-theme';
 import { BottomTabInset } from '@/constants/theme';
-
-const MIN_BIRTH_DATE = new Date(1900, 0, 1);
-
-function formatBirthDate(date: Date): string {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${day}/${month}/${date.getFullYear()}`;
-}
 
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
@@ -279,17 +272,6 @@ export default function ProfileScreen() {
     setShowDatePicker(true);
   };
 
-  const handleBirthDateChange = (event: { type?: string }, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowDatePicker(false);
-    }
-    if (event.type === 'dismissed' || !selectedDate) {
-      return;
-    }
-    setBirthDateObj(selectedDate);
-    setBirthDate(formatBirthDate(selectedDate));
-  };
-
   return (
     <View style={styles.screen}>
       <AppHeader />
@@ -492,48 +474,19 @@ export default function ProfileScreen() {
         onSelectOption={setGender}
       />
 
-      {showDatePicker && Platform.OS === 'android' ? (
-        <SystemDatePicker
-          testID="profile-birth-date-picker"
-          value={birthDateObj}
-          mode="date"
-          display="calendar"
-          maximumDate={new Date()}
-          minimumDate={MIN_BIRTH_DATE}
-          onChange={handleBirthDateChange}
-          locale={i18n.language === 'en' ? 'en-US' : 'es-ES'}
-        />
-      ) : null}
-
-      {Platform.OS === 'ios' ? (
-        <Modal
-          visible={showDatePicker}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowDatePicker(false)}>
-          <View style={styles.datePickerOverlay}>
-            <View style={styles.datePickerCard}>
-              <Text style={styles.datePickerTitle}>{t('profile.birthDate')}</Text>
-              <SystemDatePicker
-                testID="profile-birth-date-picker"
-                value={birthDateObj}
-                mode="date"
-                display="spinner"
-                maximumDate={new Date()}
-                minimumDate={MIN_BIRTH_DATE}
-                onChange={handleBirthDateChange}
-                locale={i18n.language === 'en' ? 'en-US' : 'es-ES'}
-              />
-              <TouchableOpacity
-                testID="btn-confirm-birth-date"
-                style={styles.primaryButton}
-                onPress={() => setShowDatePicker(false)}>
-                <Text style={styles.primaryButtonText}>{t('profile.confirmDate')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      ) : null}
+      <BirthDatePicker
+        visible={showDatePicker}
+        value={birthDateObj}
+        title={t('profile.birthDate')}
+        confirmLabel={t('profile.confirmDate')}
+        pickerTestID="profile-birth-date-picker"
+        locale={i18n.language === 'en' ? 'en-US' : 'es-ES'}
+        onClose={() => setShowDatePicker(false)}
+        onSelect={(date) => {
+          setBirthDateObj(date);
+          setBirthDate(formatBirthDate(date));
+        }}
+      />
     </View >
   );
 }
@@ -785,38 +738,5 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       flexGrow: 1.35,
       flexBasis: 160,
       minWidth: 160,
-    },
-    datePickerOverlay: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 24,
-      backgroundColor: theme.tooltipBackground,
-    },
-    datePickerCard: {
-      width: '100%',
-      maxWidth: 360,
-      backgroundColor: theme.backgroundElement,
-      borderRadius: 12,
-      padding: 16,
-      alignItems: 'center',
-    },
-    datePickerTitle: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: theme.pageTitle,
-      marginBottom: 8,
-    },
-    primaryButton: {
-      marginTop: 12,
-      backgroundColor: theme.main,
-      borderRadius: 6,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-    },
-    primaryButtonText: {
-      color: theme.overMain,
-      fontWeight: '600',
-      fontSize: 15,
     },
   });
