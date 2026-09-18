@@ -9,6 +9,12 @@
     "avatarHelp": "JPG, GIF, or PNG. Max 1MB.",
     "firstName": "First Name",
     "lastName": "Last Name",
+    "birthDate": "Date of birth",
+    "birthDatePlaceholder": "Select date",
+    "gender": "Gender",
+    "genderPlaceholder": "Select",
+    "confirmDate": "Confirm",
+    "datePickerUnavailable": "The date picker is not available on this device.",
     "email": "Email Address",
     "phone": "Phone Number",
     "bio": "Professional Bio",
@@ -34,7 +40,10 @@
       "emptyEmail": "Email cannot be empty",
       "invalidEmail": "Invalid email format",
       "emailInUse": "This email is already registered to another account.",
-      "updateError": "An error occurred while trying to update the email."
+      "updateError": "An error occurred while trying to update the email.",
+      "verificationPendingTitle": "Verification pending",
+      "verificationPendingMessage": "We have not detected verification of your new email address.",
+      "keepWaiting": "Keep waiting"
     }
   },
   "tabs": {
@@ -184,7 +193,22 @@
     "crashRateToday": "CRASHRATE (TODAY)",
     "totalCrashesToday": "TOTAL CRASHES (TODAY)",
     "affectedUsers": "AFFECTED USERS",
-    "chartTitleCrashRate": "Crash percentage"
+    "chartTitleCrashRate": "Crash percentage",
+    "reportTypeDemographics": "User demographics",
+    "kpiTotalUsers": "TOTAL USERS",
+    "kpiAverageAge": "AVERAGE AGE",
+    "ageChartTitle": "Users by age range",
+    "genderChartTitle": "Gender distribution",
+    "ageRange18_25": "18 - 25",
+    "ageRange26_35": "26 - 35",
+    "ageRange36_50": "36 - 50",
+    "ageRange50Plus": "50+",
+    "ageRangeUnspecified": "Unspecified",
+    "genderFemale": "Female",
+    "genderMale": "Male",
+    "genderUnspecified": "Unspecified",
+    "genderTotal": "Total",
+    "averageAgeUnavailable": "—"
   },
   "admin": {
     "path": "Administration"

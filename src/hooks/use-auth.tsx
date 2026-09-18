@@ -11,6 +11,8 @@ export interface UserProfile {
   email: string | null;
   nombre?: string;
   alias?: string;
+  genero?: string;
+  fechaNacimiento?: unknown;
   rol?: 'odontologo' | 'asistente' | 'admin' | 'medico' | 'usuario_externo' | (string & {});
   estado?: 'pendiente' | 'activo' | 'inactivo' | (string & {});
   idiomaPreferencia?: 'es' | 'en' | (string & {});
@@ -89,6 +91,8 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
                 email: firebaseUser.email,
                 nombre: data.nombre,
                 alias: data.alias,
+                genero: data.genero,
+                fechaNacimiento: data.fechaNacimiento,
                 rol: data.rol,
                 estado: data.estado,
                 idiomaPreferencia: data.idiomaPreferencia,
