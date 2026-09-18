@@ -46,10 +46,18 @@
       "@react-native-firebase/auth",
       "expo-secure-store",
       "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ATI Dental necesita acceder a tus fotos para asignar una imagen de perfil al paciente.",
+          "microphonePermission": false
+        }
+      ],
       "expo-localization",
       "./scripts/withAndroidQueries.js",
       "expo-asset",
-      "@react-native-firebase/crashlytics"
+      "@react-native-firebase/crashlytics",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
