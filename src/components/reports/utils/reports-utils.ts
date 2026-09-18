@@ -34,7 +34,7 @@ export const getRecordTimestamp = (record: SessionRecord): number | null => {
     if (typeof raw?.toMillis === 'function') return raw.toMillis();
     if (typeof raw?.toDate === 'function') return raw.toDate().getTime();
     const parsed = Date.parse(raw);
-    return isNaN(parsed) ? null : parsed;
+    return Number.isNaN(parsed) ? null : parsed;
 };
 
 // Helper to extract duration in minutes

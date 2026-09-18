@@ -160,10 +160,9 @@ export function SearchFilter({general= true, value='', onChangeText, onChangeOrd
                   <Text style = {styles.filterLabels}>
                       {t('admin-users.orderBy')}
                   </Text>
-                  <DropdownSelector
-                    children = {orderByOptions}
-                    onChangeOption = {changeOrder}
-                  ></DropdownSelector>
+                  <DropdownSelector onChangeOption = {changeOrder}>
+                    {orderByOptions}
+                  </DropdownSelector>
               </View>
               <Pressable
                 testID="filter-toggle-btn"

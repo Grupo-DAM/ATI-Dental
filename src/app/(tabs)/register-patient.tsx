@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -17,6 +17,12 @@ import {
   PATIENT_GENDER_VALUES,
 } from '@/constants/patient';
 import { useTheme } from '@/hooks/use-theme';
+
+import { createPatient } from '@/services/patient-service';
+import { validatePatientForm } from '@/utils/patient-validation';
+
+import { useLocalSearchParams } from 'expo-router';
+import { getPatientById } from '@/services/patient-service';
 
 const AVATAR_FALLBACK = require('@/assets/expo.icon/Assets/avatar.png');
 const MAX_PHOTO_BYTES = 1024 * 1024;
@@ -76,6 +82,50 @@ export default function RegisterPatientScreen() {
   const [bloodModalVisible, setBloodModalVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ fullName?: string; email?: string }>({});
+
+    // Recibimos parámetros de la navegación (puede ser el ID o el objeto completo)
+    const params = useLocalSearchParams<{ patientId?: string; patientData?: string }>();
+
+    // Función que toma los datos del paciente y rellena los campos del formulario
+    const populateFormWithPatient = (data: any) => {
+      if (!data) return;
+      setFullName(data.fullName ?? data.nombre ?? '');
+      setDocumentId(data.documentId ?? data.cedula ?? '');
+      setBirthDate(data.birthDate ?? data.fechaNacimiento ?? '');
+      setGender(data.gender ?? data.genero ?? '');
+      setPhone(data.phone ?? data.telefono ?? '');
+      setEmail(data.email ?? '');
+      setAddress(data.address ?? data.direccion ?? '');
+      setBloodType(data.bloodType ?? data.tipoSangre ?? '');
+      setAllergies(data.allergies ?? data.alergias ?? '');
+      setConditions(data.conditions ?? data.condiciones ?? '');
+      setNotes(data.notes ?? data.notas ?? '');
+      if (data.photoUri) setPhotoUri(data.photoUri);
+    };
+
+    useEffect(() => {
+      // se pasó el objeto completo como string
+      if (params.patientData) {
+        try {
+          const parsed = JSON.parse(params.patientData);
+          populateFormWithPatient(parsed);
+        } catch (err) {
+          console.error('[RegisterPatient] Error parseando patientData:', err);
+        }
+        return;
+      }
+
+      // Opción B: solo el patientId de Firebase
+      if (params.patientId) {
+        getPatientById(params.patientId).then((patient) => {
+          if (patient) {
+            populateFormWithPatient(patient);
+          }
+        }).catch((err) => {
+          console.error('[RegisterPatient] Error consultando paciente:', err);
+        });
+      }
+    }, [params.patientId, params.patientData]);
 
   const genderOptions = useMemo(
     () =>
@@ -177,27 +227,84 @@ export default function RegisterPatientScreen() {
     router.replace('/(tabs)/explore');
   };
 
-  const handleSubmit = () => {
-    const nextErrors: { fullName?: string; email?: string } = {};
+    const handleSubmit = async () => {
+      if (isSubmitting) {
+        return;
+      }
 
-    if (!fullName.trim()) {
-      nextErrors.fullName = t('registerPatient.alerts.emptyName');
-    }
+      const validation = validatePatientForm({
+        fullName,
+        email,
+        phone,
+        documentId,
+        birthDate,
+        gender,
+        address,
+        bloodType,
+        allergies,
+        conditions,
+        notes,
+        photoUri,
+      });
 
-    if (email.trim() && !isValidPatientEmail(email)) {
-      nextErrors.email = t('registerPatient.alerts.invalidEmail');
-    }
+      if (!validation.isValid) {
+        const translatedErrors: { fullName?: string; email?: string } = {};
+        if (validation.errors.fullName) {
+          translatedErrors.fullName = t(validation.errors.fullName);
+        }
+        if (validation.errors.email) {
+          translatedErrors.email = t(validation.errors.email);
+        }
+        setErrors(translatedErrors);
+        return;
+      }
 
-    setErrors(nextErrors);
-    if (nextErrors.fullName || nextErrors.email) {
-      return;
-    }
+      setErrors({});
+      setIsSubmitting(true);
 
-    setIsSubmitting(true);
-    Alert.alert(t('registerPatient.alerts.successTitle'), t('registerPatient.alerts.successMessage'), [
-      { text: t('registerPatient.confirmDate'), onPress: () => setIsSubmitting(false) },
-    ]);
-  };
+      try {
+        await createPatient({
+          fullName,
+          documentId,
+          birthDate,
+          gender,
+          phone,
+          email,
+          address,
+          bloodType,
+          allergies,
+          conditions,
+          notes,
+          photoUri,
+        });
+
+        Alert.alert(
+          t('registerPatient.alerts.successTitle'),
+          t('registerPatient.alerts.successMessage'),
+          [
+            {
+              text: t('registerPatient.confirmDate'),
+              onPress: () => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace('/(tabs)/explore');
+                }
+              },
+            },
+          ]
+        );
+      } catch (error: any) {
+        console.error('[RegisterPatientScreen] Error registering patient:', error);
+        const detail = error?.message ? `\n${error.message}` : '';
+        Alert.alert(
+          t('registerPatient.alerts.errorTitle'),
+          `${t('registerPatient.alerts.saveError')}${detail}`
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
 
   return (
     <View testID="register-patient-screen" style={styles.container}>
