@@ -7,7 +7,7 @@ import { Platform, StyleSheet } from 'react-native'; // <--- CORREGIDO: Importam
 const mockTabs = jest.fn(({ children, tabBar }: any) => {
   // Comportamiento por defecto (Ruta 'home' activa)
   const fakeState = {
-    routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }],
+    routes: [{ name: 'home' }, { name: 'patients/patients-list' }, { name: 'profile' }],
     index: 0,
   };
   return (
@@ -74,7 +74,7 @@ describe('AppTabs Component & CustomTabBar', () => {
 
     mockTabs.mockImplementationOnce(({ tabBar }: any) =>
       tabBar({
-        state: { routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }], index: 0 },
+        state: { routes: [{ name: 'home' }, { name: 'patients/patients-list' }, { name: 'profile' }], index: 0 },
         descriptors: {},
         navigation: { navigate: mockNavigate }
       })
@@ -116,7 +116,7 @@ describe('AppTabs Component & CustomTabBar', () => {
 
       return tabBar({
         state: {
-          routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }],
+          routes: [{ name: 'home' }, { name: 'patients/patients-list' }, { name: 'profile' }],
           index: 1
         },
         descriptors: {},

@@ -80,18 +80,34 @@ export function UserCard({
         switchTestID,
         testID,
         onEdit = () => {},
-        onPress = () => {},
-        onLongPress = () => {},
+        onPress,
+        onLongPress,
     }: UserCardProps & { switchTestID?: string; testID?: string }) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
 
+    const handlePress = () => {
+        if (onPress) {
+            onPress();
+        } else {
+            Alert.alert('Press', 'Card de paciente presionada');
+        }
+    };
+
+    const handleLongPress = () => {
+        if (onLongPress) {
+            onLongPress();
+        } else {
+            Alert.alert('Long Press', 'Card de paciente presionada por más tiempo');
+        }
+    };
+
     return (
         <Pressable
             style={styles.pressableContainer}
-            onPress={onPress}
-            onLongPress={onLongPress}
+            onPress={handlePress}
+            onLongPress={handleLongPress}
         >
         <ThemedView style={styles.patientCard}>
             <View style={styles.patientInfo}>
@@ -114,7 +130,8 @@ export function UserCard({
                         />
                     )}
                         <Pressable
-                            onPress={onEdit}>
+                            onPress={onEdit}
+                            testID="edit-button">
                             <Image
                                 source = {EditIcon}
                                 style = {[styles.icon, styles.editIcon]}
@@ -124,7 +141,7 @@ export function UserCard({
                     {type === 'general' && (
                         <Switch
                             value = {status}
-                            onSwitch = {() => switchStatus}
+                            onSwitch = {() => switchStatus?.()}
                             testID = {switchTestID || (name ? `switch-${name}` : 'switch-pressable')}
                         />
                      )}

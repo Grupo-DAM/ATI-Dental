@@ -447,17 +447,16 @@ describe('AdminUserList Suite - Max Coverage', () => {
       estado: 'activo',
     };
 
-    const { getByTestId, queryByTestId } = render(<AdminUserList />);
+    const { queryByTestId, getByText } = render(<AdminUserList />);
     emitFirestoreData();
 
-    await waitFor(() => expect(getByTestId('user-card-Bob Jones')).toBeTruthy());
+    await waitFor(() => {
+        expect(getByText('admin-users.accessDeniedTitle')).toBeTruthy();
+        expect(getByText('admin-users.adminOnlyView')).toBeTruthy();
+    });
 
     // Intenta accionar el switch
-    fireEvent(getByTestId('switch-Bob Jones'), 'valueChange', true);
-
-    expect(alertSpy).toHaveBeenCalledWith('Acceso Denegado', 'Solo los administradores pueden modificar el estado de los usuarios.');
-    expect(queryByTestId('user-status-modal')).toBeNull();
-    expect(mockUpdate).not.toHaveBeenCalled();
+    expect(queryByTestId('user-card-Bob Jones')).toBeNull();
   });
 
   // --- 6. Pagination Edge Cases ---

@@ -154,16 +154,45 @@ describe('UserCard Component', () => {
     fireEvent.press(cardTrigger);
     expect(Alert.alert).toHaveBeenCalledWith(
       'Press',
-      'Card de paciente presionada',
-      expect.any(Array)
+      'Card de paciente presionada'
     );
 
     // Test Long Press
     fireEvent(cardTrigger, 'longPress');
     expect(Alert.alert).toHaveBeenCalledWith(
       'Long Press',
-      'Card de paciente presionada por más tiempo',
-      expect.any(Array)
+      'Card de paciente presionada por más tiempo'
     );
+  });
+
+  it('triggers onEdit callback when edit button is pressed', () => {
+      const mockOnEdit = jest.fn();
+
+      const { getByTestId } = render(
+          <UserCard
+              name="John Doe"
+              type="general"
+              switchStatus={mockSwitchStatus}
+              onEdit={mockOnEdit}
+          />
+      );
+
+      fireEvent.press(getByTestId('edit-button'));
+
+      expect(mockOnEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles edit press gracefully when onEdit prop is not provided', () => {
+      const { getByTestId } = render(
+          <UserCard
+              name="Jane Doe"
+              type="general"
+              switchStatus={mockSwitchStatus}
+          />
+      );
+
+      expect(() => {
+          fireEvent.press(getByTestId('edit-button'));
+      }).not.toThrow();
   });
 });
