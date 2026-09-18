@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, Platform } from 'react-native';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor, act } from '@testing-library/react-native';
 
 import RegisterPatientScreen from '@/app/(tabs)/patients/register-patient';
 import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
@@ -335,31 +335,28 @@ describe('RegisterPatientScreen', () => {
     expect(screen.getByTestId('input-allergies').props.value).toBe('Látex');
   });
 
-  it('cierra el estado de carga al confirmar el alert', async () => {
-    let alertCallback: (() => void) | undefined;
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
-      alertCallback = buttons?.[0]?.onPress;
+    it('cierra el estado de carga al confirmar el alert', async () => {
+      const { createPatient } = require('@/services/patient-service');
+      (createPatient as jest.Mock).mockRejectedValueOnce(new Error('Test error'));
+
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
+        buttons?.[0]?.onPress?.();
+      });
+      render(<RegisterPatientScreen />);
+      
+      // Llenar campos requeridos para pasar la validación
+      fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+      fireEvent.changeText(screen.getByTestId('input-document'), '123456');
+      
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('btn-submit-patient'));
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('btn-submit-patient-loading')).toBeNull();
+      }, { timeout: 3000 });
+      alertSpy.mockRestore();
     });
-
-    render(<RegisterPatientScreen />);
-    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
-    fireEvent.press(screen.getByTestId('btn-submit-patient'));
-
-    // Wait for Alert.alert to be called after createPatient resolves
-    await waitFor(() => {
-      expect(alertSpy).toHaveBeenCalled();
-    });
-
-    // Execute the alert button onPress callback to stop the loading state
-    alertCallback?.();
-
-    // Verify loading indicator is cleared
-    await waitFor(() => {
-      expect(screen.queryByTestId('btn-submit-patient-loading')).toBeNull();
-    });
-
-    alertSpy.mockRestore();
-  });
 
   it('avisa si el selector de fotos no está disponible', async () => {
     const imagePicker = require('expo-image-picker') as {

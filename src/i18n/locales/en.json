@@ -389,5 +389,40 @@
       "costInvalid": "Cost must be a valid, non-negative numeric value.",
       "examNameRequired": "Exam name cannot be empty."
     }
+  },
+  "patientFile": {
+    "title": "Patient File",
+    "years": "years",
+    "nextAppointment": "NEXT APPOINTMENT",
+    "lastVisit": "LAST VISIT",
+    "personalInfo": "Personal Information",
+    "medicalBackground": "Medical Background",
+    "treatmentHistory": "Treatment History",
+    "email": "Email",
+    "address": "Address",
+    "birthDate": "Date of Birth",
+    "phone": "Phone",
+    "bloodType": "Blood Type",
+    "knownAllergies": "Known Allergies",
+    "medicalConditions": "Previous Medical Conditions",
+    "additionalNotes": "Additional Notes",
+    "medicalHistory": "Medical History",
+    "pendingExams": "Pending Exams",
+    "noPendingExams": "No pending exams.",
+    "addTreatment": "Add",
+    "modify": "Modify",
+    "delete": "Delete",
+    "noTreatments": "No treatments registered",
+    "noTreatmentsMessage": "This patient does not have any associated treatments yet.",
+    "loading": "Loading patient file...",
+    "retry": "Retry",
+    "accessDenied": "Access Denied",
+    "accessDeniedMessage": "You do not have sufficient permissions to view patient files.",
+    "errors": {
+      "title": "Loading Error",
+      "loadFailed": "Unable to load the patient file. Please check your connection and try again.",
+      "patientNotFound": "The requested patient was not found.",
+      "noPatientId": "No patient identifier was provided."
+    }
   }
 }
