@@ -8,6 +8,13 @@ const mockUsePatients = jest.fn();
 const mockUseAuth = jest.fn();
 const mockUseNetInfo = jest.fn();
 
+const mockPush = jest.fn();
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
 jest.mock('@/hooks/user-list/use-patients-list', () => ({
   usePatients: () => mockUsePatients(),
 }));
@@ -215,5 +222,49 @@ describe('AdminUserList (Patients List) - Criterios de Aceptación', () => {
         );
       });
     });
+  });
+});
+
+describe('Pruebas de cobertura adicional para AdminUserList', () => {
+  const mockPatientsData = [
+    {
+      id: 'p1',
+      patientCode: '#P-0001',
+      fullName: 'Carlos Mendoza',
+      email: 'carlos@example.com',
+      ultima_visita: '2026-01-10',
+      proxima_vista: '2026-03-15',
+    },
+  ];
+
+  beforeEach(() => {
+    mockPush.mockClear();
+    (Alert.alert as jest.Mock).mockClear(); // <--- Limpia los llamados previos de Alert
+  });
+
+  it('ejecuta la vista detallada y presionado largo del paciente', () => {
+    mockUseAuth.mockReturnValue({ user: { role: 'odontologo' }, loading: false });
+    mockUsePatients.mockReturnValue({ 
+      patients: mockPatientsData, 
+      isRetrying: false, 
+      handleRetryConnection: jest.fn() 
+    });
+
+    const { UNSAFE_getAllByType } = render(<AdminUserList />);
+    const cards = UNSAFE_getAllByType(require('@/components/users-list/user-card').UserCard);
+
+    // Disparar onPress
+    cards[0].props.onPress();
+    expect(Alert.alert).toHaveBeenCalledWith(
+      'Ver ficha de paciente',
+      expect.stringContaining('Carlos Mendoza')
+    );
+
+    // Limpiar spy antes del segundo evento
+    (Alert.alert as jest.Mock).mockClear();
+
+    // Disparar onLongPress
+    cards[0].props.onLongPress();
+    expect(Alert.alert).toHaveBeenCalledWith('Opciones del paciente');
   });
 });

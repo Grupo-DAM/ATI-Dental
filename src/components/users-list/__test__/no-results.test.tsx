@@ -1,8 +1,15 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
+import { router } from 'expo-router';
 import { NoResultSearch } from '@/components/users-list/no-results';
 
 // --- Mocks ---
+
+jest.mock('expo-router', () => ({
+  router: {
+    replace: jest.fn(),
+  },
+}));
 
 jest.mock('@/hooks/use-theme', () => ({
   useTheme: () => ({
@@ -27,7 +34,6 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-// Mock expo-image to prevent native image loading errors
 jest.mock('expo-image', () => {
   const { View } = require('react-native');
   return {
@@ -36,6 +42,10 @@ jest.mock('expo-image', () => {
 });
 
 describe('NoResultSearch Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   // --- 1. General / Admin Mode (Default & Explicit) ---
 
   it('renders correctly with default props (general mode)', () => {
@@ -63,25 +73,46 @@ describe('NoResultSearch Component', () => {
     expect(getByText('Would you like to add a new patient?')).toBeTruthy();
     expect(getByText('Register New Patient')).toBeTruthy();
 
-    // Verify general strings are not rendered
     expect(queryByText('No users found')).toBeNull();
     expect(queryByText('Register New User')).toBeNull();
   });
 
-  // --- 3. UI Assets & Pressable Interactions ---
+  // --- 3. Functional / Navigation Branch Testing ---
+
+  it('navigates to patient registration when general is false and button is pressed', () => {
+    const { getByTestId } = render(<NoResultSearch general={false} />);
+
+    const button = getByTestId('no-result-search-users');
+    fireEvent.press(button);
+
+    expect(router.replace).toHaveBeenCalledTimes(1);
+    expect(router.replace).toHaveBeenCalledWith('/(tabs)/patients/register-patient');
+  });
+
+  it('does NOT navigate when general is true and button is pressed', () => {
+    const { getByTestId } = render(<NoResultSearch general={true} />);
+
+    const button = getByTestId('no-result-search-users');
+    fireEvent.press(button);
+
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  // --- 4. Fallback i18n Branch Testing ---
+
+  it('returns translation key if key is not found in i18n fallback', () => {
+    const { useTranslation } = require('react-i18next');
+    const t = useTranslation().t;
+
+    expect(t('unmapped.key')).toBe('unmapped.key');
+  });
+
+  // --- 5. UI Assets ---
 
   it('renders search and register icons', () => {
     const { getAllByTestId } = render(<NoResultSearch />);
 
-    // Should render two expo-image components (SearchIcon and NewUserIcon)
     const images = getAllByTestId('expo-image');
     expect(images.length).toBe(2);
-  });
-
-  it('handles button press without crashing', () => {
-    const { getByText } = render(<NoResultSearch />);
-
-    const registerBtn = getByText('Register New User');
-    expect(() => fireEvent.press(registerBtn)).not.toThrow();
   });
 });
