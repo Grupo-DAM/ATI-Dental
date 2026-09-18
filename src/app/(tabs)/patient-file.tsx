@@ -48,19 +48,62 @@ function calculateAge(dateString: string): number | null {
   }
 }
 
+function parseDateRobustly(dateInput: any): Date | null {
+  if (!dateInput) return null;
+  
+  let date: Date;
+  if (typeof dateInput.toDate === 'function') {
+    date = dateInput.toDate();
+  } else if (typeof dateInput === 'string') {
+    date = new Date(dateInput);
+    if (isNaN(date.getTime())) {
+      const match = dateInput.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (match) {
+        date = new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+      }
+    }
+  } else {
+    date = new Date(dateInput);
+  }
+
+  return isNaN(date.getTime()) ? null : date;
+}
+
 /** Format an ISO date string to a readable locale date */
-function formatDate(dateString: string | undefined): string {
-  if (!dateString) return '—';
+function formatDate(dateInput: any): string {
+  if (!dateInput) return '—';
   try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '—';
+    const date = parseDateRobustly(dateInput);
+    if (!date) return typeof dateInput === 'string' ? dateInput : '—';
+
     return date.toLocaleDateString('es-VE', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
     });
   } catch {
-    return '—';
+    return typeof dateInput === 'string' ? dateInput : '—';
+  }
+}
+
+/** Format date strictly to "DD MMM YYYY" for treatments and exams */
+function formatShortDate(dateInput: any, language: string = 'es'): string {
+  if (!dateInput) return '—';
+  try {
+    const date = parseDateRobustly(dateInput);
+    if (!date) return typeof dateInput === 'string' ? dateInput : '—';
+    
+    const monthsEs = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = language.startsWith('en') ? monthsEn : monthsEs;
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    return `${day} ${month} ${year}`;
+  } catch {
+    return typeof dateInput === 'string' ? dateInput : '—';
   }
 }
 
@@ -402,7 +445,7 @@ function TreatmentCard({
       <View style={treatmentStyles.content}>
         {/* Date and badges */}
         <View style={treatmentStyles.dateRow}>
-          <Text style={treatmentStyles.date}>{formatDate(treatment.treatmentDate)}</Text>
+          <Text style={treatmentStyles.date}>{formatShortDate(treatment.treatmentDate, typeof i18n !== 'undefined' ? i18n?.language : 'es')}</Text>
           <View style={{ flexDirection: 'row', gap: 6 }}>
             <View style={[treatmentStyles.statusBadge, { backgroundColor: statusColor.bg }]}>
               <Text style={[treatmentStyles.statusText, { color: statusColor.text }]}>
@@ -575,7 +618,7 @@ const treatmentStyles = StyleSheet.create({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function PatientFileScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { patientId, email } = useLocalSearchParams<{ patientId?: string; email?: string }>();
 
@@ -630,6 +673,15 @@ export default function PatientFileScreen() {
       if (!patientData) throw new Error('PATIENT_NOT_FOUND');
 
       const treatmentData = await getTreatmentsByPatientId(patientData.id);
+      
+      // Sort treatments by treatmentDate descending (newest first)
+      treatmentData.sort((a, b) => {
+        const dateA = parseDateRobustly(a.treatmentDate);
+        const dateB = parseDateRobustly(b.treatmentDate);
+        const timeA = dateA ? dateA.getTime() : 0;
+        const timeB = dateB ? dateB.getTime() : 0;
+        return timeB - timeA;
+      });
 
       setPatient(patientData);
       setTreatments(treatmentData);
@@ -855,12 +907,20 @@ export default function PatientFileScreen() {
 
         {/* Exámenes pendientes */}
         {(() => {
-          const pendingExams = treatments.flatMap((tr) =>
-            (tr.pendingExams || []).map((exam) => ({
-              ...exam,
-              treatmentName: tr.treatmentName,
-            }))
-          );
+          const pendingExams = treatments
+            .flatMap((tr) =>
+              (tr.pendingExams || []).map((exam) => ({
+                ...exam,
+                treatmentName: tr.treatmentName,
+              }))
+            )
+            .sort((a, b) => {
+              const dateA = parseDateRobustly(a.date);
+              const dateB = parseDateRobustly(b.date);
+              const timeA = dateA ? dateA.getTime() : 0;
+              const timeB = dateB ? dateB.getTime() : 0;
+              return timeB - timeA;
+            });
           return (
             <CollapsibleSection
               title={`${t('patientFile.pendingExams')} (${pendingExams.length})`}
@@ -871,7 +931,7 @@ export default function PatientFileScreen() {
                 pendingExams.map((exam, idx) => (
                   <View key={`${exam.id}-${idx}`} style={examStyles.row}>
                     <Text style={examStyles.name}>{exam.name}</Text>
-                    <Text style={examStyles.date}>{formatDate(exam.date)}</Text>
+                    <Text style={examStyles.date}>{formatShortDate(exam.date, i18n.language)}</Text>
                   </View>
                 ))
               ) : (
