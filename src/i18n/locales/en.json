@@ -194,6 +194,20 @@
     "totalCrashesToday": "TOTAL CRASHES (TODAY)",
     "affectedUsers": "AFFECTED USERS",
     "chartTitleCrashRate": "Crash percentage",
+    "reportTypeRetentionRate": "User retention rate",
+    "chartTitleRetentionRate": "Cohort Retention Rate",
+    "retentionDay1": "Day 1",
+    "retentionDay7": "Day 7",
+    "retentionDay30": "Day 30",
+    "retentionKpiDay1": "RETENTION DAY 1",
+    "retentionKpiDay7": "RETENTION DAY 7",
+    "retentionKpiDay30": "RETENTION DAY 30",
+    "retentionDay1Sub": "24 hours",
+    "retentionDay7Sub": "7 days",
+    "retentionDay30Sub": "30 days",
+    "retentionCohortUsers": "Cohort users",
+    "retentionErrorLoad": "An error occurred while fetching retention metrics.",
+    "retentionPermissionError": "You do not have permission in Firestore to query retention metrics.",
     "reportTypeDemographics": "User demographics",
     "kpiTotalUsers": "TOTAL USERS",
     "kpiAverageAge": "AVERAGE AGE",
@@ -210,6 +224,7 @@
     "genderTotal": "Total",
     "averageAgeUnavailable": "—"
   },
+
   "admin": {
     "path": "Administration"
   },
