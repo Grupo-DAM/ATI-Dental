@@ -20,8 +20,10 @@ import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/app-header';
 import { Colors } from '@/constants/theme';
-import { createTreatment, PendingExam } from '@/services/treatment-service';
+import { createTreatment, getTreatmentById, updateTreatment, PendingExam } from '@/services/treatment-service';
 import { validateTreatmentForm, ValidationErrors } from '@/utils/treatment-validation';
+import { NotificationToast } from '@/components/notification-toast';
+import { ConfirmationModal } from '@/components/confirmation-modal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface TreatmentForm {
@@ -94,12 +96,19 @@ export const STATUSES = [
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 /** Three-level breadcrumb for Pacientes > Ficha del paciente > Tratamiento */
-function TreatmentBreadcrumb({ t }: { t: (k: string) => string }) {
+function TreatmentBreadcrumb({ t, patientId }: { t: (k: string) => string; patientId: string }) {
   return (
     <View style={breadcrumbStyles.container}>
-      <Text style={breadcrumbStyles.parentText}>{t('registerTreatment.breadcrumb.patients')}</Text>
+      <TouchableOpacity onPress={() => router.push('/(tabs)/explore')} activeOpacity={0.7}>
+        <Text style={breadcrumbStyles.parentText}>{t('registerTreatment.breadcrumb.patients')}</Text>
+      </TouchableOpacity>
       <Text style={breadcrumbStyles.chevron}>   ›   </Text>
-      <Text style={breadcrumbStyles.parentText}>{t('registerTreatment.breadcrumb.patientRecord')}</Text>
+      <TouchableOpacity 
+        onPress={() => router.push({ pathname: '/(tabs)/patient-file', params: { patientId } })} 
+        activeOpacity={0.7}
+      >
+        <Text style={breadcrumbStyles.parentText}>{t('registerTreatment.breadcrumb.patientRecord')}</Text>
+      </TouchableOpacity>
       <Text style={breadcrumbStyles.chevron}>   ›   </Text>
       <Text style={breadcrumbStyles.currentText}>{t('registerTreatment.breadcrumb.treatment')}</Text>
     </View>
@@ -492,245 +501,6 @@ const inputStyles = StyleSheet.create({
   },
 });
 
-/** Success or Error toast notification */
-function NotificationToast({
-  visible,
-  type = 'success',
-  message,
-  title,
-  onDismiss,
-}: {
-  visible: boolean;
-  type?: 'success' | 'error';
-  message: string;
-  title: string;
-  onDismiss: () => void;
-}) {
-  const translateY = useRef(new RNAnimated.Value(-100)).current;
-
-  useEffect(() => {
-    if (visible) {
-      RNAnimated.spring(translateY, {
-        toValue: 0,
-        useNativeDriver: true,
-        friction: 8,
-      }).start();
-
-      const timer = setTimeout(() => {
-        RNAnimated.timing(translateY, {
-          toValue: -100,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => onDismiss());
-      }, 3500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [visible, translateY, onDismiss]);
-
-  if (!visible) return null;
-
-  const isSuccess = type === 'success';
-  const accentColor = isSuccess ? '#10B981' : '#EF4444';
-  const iconName = isSuccess ? 'checkmark-circle' : 'alert-circle';
-
-  return (
-    <RNAnimated.View
-      testID="notification-toast"
-      style={[
-        toastStyles.container,
-        { transform: [{ translateY }], borderLeftColor: accentColor },
-      ]}
-    >
-      <View style={toastStyles.iconCircle}>
-        <Ionicons name={iconName} size={24} color={accentColor} />
-      </View>
-      <View style={toastStyles.textContainer}>
-        <Text style={toastStyles.title}>{title}</Text>
-        <Text style={toastStyles.message}>{message}</Text>
-      </View>
-      <TouchableOpacity onPress={onDismiss} style={toastStyles.closeBtn} testID="btn-dismiss-toast">
-        <Ionicons name="close" size={20} color="#6B7280" />
-      </TouchableOpacity>
-    </RNAnimated.View>
-  );
-}
-
-const toastStyles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 10,
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
-    zIndex: 999,
-    borderLeftWidth: 4,
-  },
-  iconCircle: { marginRight: 12 },
-  textContainer: { flex: 1 },
-  title: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-  },
-  message: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-    marginTop: 2,
-  },
-  closeBtn: { padding: 4 },
-});
-
-/** Confirmation bottom sheet modal */
-function ConfirmationModal({
-  visible,
-  onConfirm,
-  onCancel,
-  isSubmitting = false,
-  t,
-}: {
-  visible: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-  isSubmitting?: boolean;
-  t: (k: string) => string;
-}) {
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={isSubmitting ? undefined : onCancel}
-    >
-      <Pressable style={modalStyles.overlay} onPress={isSubmitting ? undefined : onCancel}>
-        <View style={modalStyles.sheet}>
-          <View style={modalStyles.handle} />
-
-          <View style={modalStyles.iconCircle}>
-            <Ionicons name="help-circle-outline" size={40} color={Colors.light.main} />
-          </View>
-
-          <Text style={modalStyles.title}>{t('registerTreatment.modal.title')}</Text>
-          <Text style={modalStyles.message}>{t('registerTreatment.modal.message')}</Text>
-
-          <TouchableOpacity
-            testID="modal-confirm-btn"
-            style={[modalStyles.confirmBtn, isSubmitting && { opacity: 0.7 }]}
-            onPress={onConfirm}
-            disabled={isSubmitting}
-            activeOpacity={0.8}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={modalStyles.confirmText}>{t('registerTreatment.modal.confirm')}</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            testID="modal-cancel-btn"
-            style={modalStyles.cancelBtn}
-            onPress={onCancel}
-            disabled={isSubmitting}
-            activeOpacity={0.7}
-          >
-            <Text style={modalStyles.cancelText}>{t('registerTreatment.modal.cancel')}</Text>
-          </TouchableOpacity>
-        </View>
-      </Pressable>
-    </Modal>
-  );
-}
-
-const modalStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 28,
-    alignItems: 'center',
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#D1D5DB',
-    borderRadius: 2,
-    marginBottom: 20,
-  },
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#F3E8FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  message: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  confirmBtn: {
-    backgroundColor: Colors.light.main,
-    borderRadius: 10,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 12,
-  },
-  confirmText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-  },
-  cancelBtn: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 10,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-  },
-  cancelText: {
-    color: '#4B5563',
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-  },
-});
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function RegisterTreatmentScreen() {
@@ -743,6 +513,7 @@ export default function RegisterTreatmentScreen() {
     patientAge?: string;
     patientPhone?: string;
     patientImageUrl?: string;
+    treatmentId?: string;
   }>();
 
   // Dynamic or fallback patient
@@ -767,6 +538,35 @@ export default function RegisterTreatmentScreen() {
     notes: '',
     estimatedCost: '',
   });
+
+  const [isLoading, setIsLoading] = useState(!!params.treatmentId);
+
+  useEffect(() => {
+    async function loadTreatment() {
+      if (!params.treatmentId) return;
+      try {
+        const tr = await getTreatmentById(params.treatmentId);
+        if (tr) {
+          setForm({
+            category: tr.category,
+            treatmentName: tr.treatmentName,
+            dentalPiece: tr.dentalPiece || '',
+            treatmentDate: tr.treatmentDate,
+            responsibleDentist: tr.responsibleDentist,
+            status: tr.status,
+            notes: tr.notes || '',
+            estimatedCost: tr.estimatedCost.toString(),
+          });
+          setPendingExams(tr.pendingExams || []);
+        }
+      } catch (err) {
+        console.error('Failed to load treatment', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadTreatment();
+  }, [params.treatmentId]);
 
   // Validation errors & submitting guard
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -839,7 +639,7 @@ export default function RegisterTreatmentScreen() {
 
     setIsSubmitting(true);
     try {
-      await createTreatment({
+      const treatmentData = {
         patientId: patient.id,
         patientName: patient.name,
         category: form.category,
@@ -851,7 +651,13 @@ export default function RegisterTreatmentScreen() {
         notes: form.notes?.trim() || '',
         estimatedCost: Number(form.estimatedCost),
         pendingExams,
-      });
+      };
+
+      if (params.treatmentId) {
+        await updateTreatment(params.treatmentId, treatmentData);
+      } else {
+        await createTreatment(treatmentData);
+      }
 
       setShowConfirmModal(false);
       setToastConfig({
@@ -860,6 +666,11 @@ export default function RegisterTreatmentScreen() {
         title: t('registerTreatment.toast.title'),
         message: t('registerTreatment.toast.message'),
       });
+      
+      // Regresar a la ficha del paciente después de un momento para que se vea el toast
+      setTimeout(() => {
+        router.push({ pathname: '/(tabs)/patient-file', params: { patientId: patient.id } });
+      }, 1500);
     } catch (err: any) {
       console.error('[RegisterTreatment] Error saving treatment:', err);
       // In case of network or Firestore error, preserve form data and permit retry
@@ -877,13 +688,21 @@ export default function RegisterTreatmentScreen() {
   };
 
   const handleCancel = () => {
-    router.back();
+    router.push({ pathname: '/(tabs)/patient-file', params: { patientId: patient.id } });
   };
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={Colors.light.main} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <AppHeader />
-      <TreatmentBreadcrumb t={t} />
+      <TreatmentBreadcrumb t={t} patientId={patient.id} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -1097,10 +916,13 @@ export default function RegisterTreatmentScreen() {
       {/* Confirmation Modal */}
       <ConfirmationModal
         visible={showConfirmModal}
+        title={t('registerTreatment.modal.title')}
+        message={t('registerTreatment.modal.message')}
+        confirmText={t('registerTreatment.modal.confirm')}
+        cancelText={t('registerTreatment.modal.cancel')}
         onConfirm={handleConfirmSave}
         onCancel={() => setShowConfirmModal(false)}
         isSubmitting={isSubmitting}
-        t={t}
       />
 
       {/* Notification Toast (Success or Error) */}

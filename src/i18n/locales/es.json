@@ -402,5 +402,40 @@
       "costInvalid": "El costo debe ser un valor numérico válido y no negativo.",
       "examNameRequired": "El nombre del examen no puede estar vacío."
     }
+  },
+  "patientFile": {
+    "title": "Ficha del Paciente",
+    "years": "años",
+    "nextAppointment": "PRÓXIMA CITA",
+    "lastVisit": "ÚLTIMA VISITA",
+    "personalInfo": "Información Personal",
+    "medicalBackground": "Antecedentes Médicos",
+    "treatmentHistory": "Historial de Tratamientos",
+    "email": "Correo electrónico",
+    "address": "Dirección",
+    "birthDate": "Fecha de nacimiento",
+    "phone": "Teléfono",
+    "bloodType": "Tipo de Sangre",
+    "knownAllergies": "Alergias Conocidas",
+    "medicalConditions": "Condiciones Médicas Previas",
+    "additionalNotes": "Notas Adicionales",
+    "medicalHistory": "Antecedentes médicos",
+    "pendingExams": "Exámenes pendientes",
+    "noPendingExams": "No hay exámenes pendientes.",
+    "addTreatment": "Añadir",
+    "modify": "Modificar",
+    "delete": "Eliminar",
+    "noTreatments": "Sin tratamientos registrados",
+    "noTreatmentsMessage": "Este paciente aún no tiene tratamientos asociados.",
+    "loading": "Cargando ficha del paciente...",
+    "retry": "Reintentar",
+    "accessDenied": "Acceso Denegado",
+    "accessDeniedMessage": "No tienes permisos suficientes para consultar fichas de pacientes.",
+    "errors": {
+      "title": "Error al cargar",
+      "loadFailed": "No fue posible cargar la ficha del paciente. Verifique su conexión e intente nuevamente.",
+      "patientNotFound": "El paciente solicitado no fue encontrado.",
+      "noPatientId": "No se proporcionó un identificador de paciente."
+    }
   }
 }

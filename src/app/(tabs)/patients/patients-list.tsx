@@ -35,7 +35,10 @@ export default function AdminUserList() {
   };
 
   const handleViewPatient = (patient: any) => {
-    Alert.alert('Ver ficha de paciente', `Está intentando ver la ficha del paciente ${patient.fullName}`);
+    router.push({
+      pathname: '/(tabs)/patient-file',
+      params: { patientId: patient.id },
+    });
   };
 
   const handleLongPress = (patient: any) => {
