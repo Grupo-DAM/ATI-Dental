@@ -137,12 +137,8 @@ jobs:
             echo "$FIREBASE_QA_BASE64" | base64 --decode > ./google-services.json
           fi
 
-      - name: Setup Expo and EAS CLI
-        uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8
-        with:
-          expo-version: latest
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }} # Required for Expo Cloud interaction
+      - name: Setup EAS CLI
+        run: npm install -g eas-cli
 
       - name: Build Binary (Android / iOS)
         env:
@@ -259,12 +255,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Setup Expo and EAS CLI
-        uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8
-        with:
-          expo-version: latest
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Setup EAS CLI
+        run: npm install -g eas-cli
 
       - name: Release Production Bundles
         env:
