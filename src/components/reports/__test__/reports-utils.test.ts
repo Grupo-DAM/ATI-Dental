@@ -2,6 +2,8 @@ import {
   generatePeriodOptions,
   calculateDauMauRatio,
   calculateCrashRatePercentage,
+  formatRetentionPercentage,
+  parseRetentionData,
   getRecordTimestamp,
   getRecordDurationMinutes,
   buildHistoryMap,
@@ -45,6 +47,70 @@ describe('reports-utils unit tests', () => {
     it('calcula la tasa con 2 decimales', () => {
       expect(calculateCrashRatePercentage(5, 100)).toBe('5.00%');
       expect(calculateCrashRatePercentage(1, 3)).toBe('33.33%');
+    });
+  });
+
+  describe('formatRetentionPercentage', () => {
+    it('devuelve 0% para undefined, null, NaN o negativos', () => {
+      expect(formatRetentionPercentage(undefined)).toBe('0%');
+      expect(formatRetentionPercentage(null)).toBe('0%');
+      expect(formatRetentionPercentage(NaN)).toBe('0%');
+      expect(formatRetentionPercentage(-5)).toBe('0%');
+    });
+
+    it('formatea enteros sin decimales', () => {
+      expect(formatRetentionPercentage(0)).toBe('0%');
+      expect(formatRetentionPercentage(50)).toBe('50%');
+      expect(formatRetentionPercentage(100)).toBe('100%');
+    });
+
+    it('formatea decimales con 1 posición decimal', () => {
+      expect(formatRetentionPercentage(33.333)).toBe('33.3%');
+      expect(formatRetentionPercentage(45.56)).toBe('45.6%');
+    });
+  });
+
+  describe('parseRetentionData', () => {
+    const mockT = (key: string) => {
+      if (key === 'reports.retentionDay1') return 'Día 1';
+      if (key === 'reports.retentionDay7') return 'Día 7';
+      if (key === 'reports.retentionDay30') return 'Día 30';
+      return key;
+    };
+
+    it('extrae valores de dia1, dia7, dia30 correctamente', () => {
+      const data = parseRetentionData({ dia1: 80, dia7: 50, dia30: 25 }, mockT);
+      expect(data).toHaveLength(3);
+      expect(data[0]).toEqual({ cohort: 'Día 1', label: 'D1', percentage: 80 });
+      expect(data[1]).toEqual({ cohort: 'Día 7', label: 'D7', percentage: 50 });
+      expect(data[2]).toEqual({ cohort: 'Día 30', label: 'D30', percentage: 25 });
+    });
+
+    it('acepta nombres alternativos en inglés (day1, day7, day30)', () => {
+      const data = parseRetentionData({ day1: 75, day7: 40, day30: 20 }, mockT);
+      expect(data[0].percentage).toBe(75);
+      expect(data[1].percentage).toBe(40);
+      expect(data[2].percentage).toBe(20);
+    });
+
+    it('proporciona 0 de fallback seguro para base de datos vacía o datos corruptos', () => {
+      const dataEmpty = parseRetentionData(null, mockT);
+      expect(dataEmpty[0].percentage).toBe(0);
+      expect(dataEmpty[1].percentage).toBe(0);
+      expect(dataEmpty[2].percentage).toBe(0);
+
+      const dataInvalid = parseRetentionData({ dia1: 'inválido', dia7: -10, dia30: NaN }, mockT);
+      expect(dataInvalid[0].percentage).toBe(0);
+      expect(dataInvalid[1].percentage).toBe(0);
+      expect(dataInvalid[2].percentage).toBe(0);
+    });
+
+    it('utiliza fallbacks de texto por defecto si t() devuelve cadena vacía', () => {
+      const mockEmptyT = () => '';
+      const data = parseRetentionData({ dia1: 50 }, mockEmptyT);
+      expect(data[0].cohort).toBe('Día 1');
+      expect(data[1].cohort).toBe('Día 7');
+      expect(data[2].cohort).toBe('Día 30');
     });
   });
 

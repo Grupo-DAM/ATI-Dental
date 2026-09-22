@@ -194,6 +194,20 @@
     "totalCrashesToday": "TOTAL CRASHES (TODAY)",
     "affectedUsers": "AFFECTED USERS",
     "chartTitleCrashRate": "Crash percentage",
+    "reportTypeRetentionRate": "User retention rate",
+    "chartTitleRetentionRate": "Cohort Retention Rate",
+    "retentionDay1": "Day 1",
+    "retentionDay7": "Day 7",
+    "retentionDay30": "Day 30",
+    "retentionKpiDay1": "RETENTION DAY 1",
+    "retentionKpiDay7": "RETENTION DAY 7",
+    "retentionKpiDay30": "RETENTION DAY 30",
+    "retentionDay1Sub": "24 hours",
+    "retentionDay7Sub": "7 days",
+    "retentionDay30Sub": "30 days",
+    "retentionCohortUsers": "Cohort users",
+    "retentionErrorLoad": "An error occurred while fetching retention metrics.",
+    "retentionPermissionError": "You do not have permission in Firestore to query retention metrics.",
     "reportTypeDemographics": "User demographics",
     "kpiTotalUsers": "TOTAL USERS",
     "kpiAverageAge": "AVERAGE AGE",
@@ -210,8 +224,12 @@
     "genderTotal": "Total",
     "averageAgeUnavailable": "—"
   },
+
   "admin": {
     "path": "Administration"
+  },
+  "patients": {
+    "path": "Patients"
   },
   "registerPatient": {
     "breadcrumb": "New Patient",
@@ -266,12 +284,18 @@
     }
   },
   "patients-list": {
+    "title": "List of Patients",
+    "subtitle": "Manage and view all your patients records.",
+    "path": "List",
     "searchPatients": "Search Patient",
     "orderByLastVisit": "Last visit",
     "orderByNextVisit": "Next visit",
     "noResults": "No patient card matches the search query.",
     "noResultsQuestion": "New patient?",
-    "registerPatient": "Register Patient"
+    "registerPatient": "Register Patient",
+    "accessDeniedTitle": "Access Denied",
+    "odontologoOnlyView": "You don't have dentist's credentials to access the patients list.",
+    "odontologoOnlyViewAlert": "Only dental personnel have access to this section."
   },
   "admin-users": {
     "title": "List of Users",
@@ -309,7 +333,9 @@
     "confirmDeactivateBtn": "Deactivate",
     "successTitle": "Success",
     "errorTitle": "Error",
-    "accessDeniedTitle": "Access Denied"
+    "accessDeniedTitle": "Access Denied",
+    "adminOnlyView": "You don't have admin credentials to access this view.",
+    "adminOnlyViewAlert": "Only admin personnel have access to this section."
   },
   "user-card": {
     "lastVisitLabel": "LAST VISIT:",
@@ -377,6 +403,41 @@
       "costRequired": "Estimated cost is required.",
       "costInvalid": "Cost must be a valid, non-negative numeric value.",
       "examNameRequired": "Exam name cannot be empty."
+    }
+  },
+  "patientFile": {
+    "title": "Patient File",
+    "years": "years",
+    "nextAppointment": "NEXT APPOINTMENT",
+    "lastVisit": "LAST VISIT",
+    "personalInfo": "Personal Information",
+    "medicalBackground": "Medical Background",
+    "treatmentHistory": "Treatment History",
+    "email": "Email",
+    "address": "Address",
+    "birthDate": "Date of Birth",
+    "phone": "Phone",
+    "bloodType": "Blood Type",
+    "knownAllergies": "Known Allergies",
+    "medicalConditions": "Previous Medical Conditions",
+    "additionalNotes": "Additional Notes",
+    "medicalHistory": "Medical History",
+    "pendingExams": "Pending Exams",
+    "noPendingExams": "No pending exams.",
+    "addTreatment": "Add",
+    "modify": "Modify",
+    "delete": "Delete",
+    "noTreatments": "No treatments registered",
+    "noTreatmentsMessage": "This patient does not have any associated treatments yet.",
+    "loading": "Loading patient file...",
+    "retry": "Retry",
+    "accessDenied": "Access Denied",
+    "accessDeniedMessage": "You do not have sufficient permissions to view patient files.",
+    "errors": {
+      "title": "Loading Error",
+      "loadFailed": "Unable to load the patient file. Please check your connection and try again.",
+      "patientNotFound": "The requested patient was not found.",
+      "noPatientId": "No patient identifier was provided."
     }
   }
 }

@@ -9,6 +9,8 @@ import { firestore } from '@/config/firebase';
 
 describe('Treatment Service (Persistence Layer)', () => {
   const mockFirestoreInstance = firestore();
+  (mockFirestoreInstance as any).update = jest.fn();
+  (mockFirestoreInstance as any).delete = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -181,6 +183,71 @@ describe('Treatment Service (Persistence Layer)', () => {
 
       const treatment = await getTreatmentById('non-existent');
       expect(treatment).toBeNull();
+    });
+  });
+
+  describe('updateTreatment', () => {
+    it('debe actualizar los datos de un tratamiento existente y asignar updatedAt', async () => {
+      (mockFirestoreInstance.doc as jest.Mock).mockReturnValueOnce(mockFirestoreInstance);
+      (mockFirestoreInstance.update as jest.Mock).mockResolvedValueOnce(undefined);
+
+      const m = require('@/services/treatment-service');
+      await expect(m.updateTreatment('t-doc-123', { status: 'Completado' })).resolves.toBeUndefined();
+
+      expect(mockFirestoreInstance.collection).toHaveBeenCalledWith(TREATMENTS_COLLECTION);
+      expect(mockFirestoreInstance.doc).toHaveBeenCalledWith('t-doc-123');
+      expect(mockFirestoreInstance.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'Completado',
+          updatedAt: 'mock-server-timestamp',
+        })
+      );
+    });
+  });
+
+  describe('deleteTreatment', () => {
+    it('debe eliminar un tratamiento por su ID', async () => {
+      (mockFirestoreInstance.doc as jest.Mock).mockReturnValueOnce(mockFirestoreInstance);
+      (mockFirestoreInstance.delete as jest.Mock).mockResolvedValueOnce(undefined);
+
+      const m = require('@/services/treatment-service');
+      await expect(m.deleteTreatment('t-doc-123')).resolves.toBeUndefined();
+
+      expect(mockFirestoreInstance.collection).toHaveBeenCalledWith(TREATMENTS_COLLECTION);
+      expect(mockFirestoreInstance.doc).toHaveBeenCalledWith('t-doc-123');
+      expect(mockFirestoreInstance.delete).toHaveBeenCalled();
+    });
+  });
+
+  describe('getServerTimestamp fallback', () => {
+    it('debe usar new Date() si FieldValue.serverTimestamp no está disponible', async () => {
+      const originalFieldValue = firestore.FieldValue;
+      (firestore as any).FieldValue = undefined; // Quitar FieldValue temporalmente
+      
+      const { createTreatment } = require('@/services/treatment-service');
+      (mockFirestoreInstance.add as jest.Mock).mockResolvedValueOnce({ id: 'fallback-id' });
+      
+      const input = {
+        patientId: 'pat-1',
+        category: 'Cat',
+        treatmentName: 'Treat',
+        treatmentDate: '10/10/2023',
+        responsibleDentist: 'Dr.',
+        status: 'Pendiente',
+        estimatedCost: 100,
+        pendingExams: [],
+      } as TreatmentInput;
+
+      await createTreatment(input);
+      
+      expect(mockFirestoreInstance.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
+      );
+      
+      (firestore as any).FieldValue = originalFieldValue; // Restaurar
     });
   });
 });

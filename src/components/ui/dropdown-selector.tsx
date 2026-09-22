@@ -10,7 +10,7 @@ import { useTheme } from '@/hooks/use-theme';
 
 type DropdownSelectorProps = {
     children: string[];
-    onChangeOption: (indx: int) => void;
+    onChangeOption: (indx: number) => void;
 };
 
 export function DropdownSelector({children, onChangeOption}: DropdownSelectorProps) {

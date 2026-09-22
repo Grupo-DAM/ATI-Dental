@@ -59,7 +59,7 @@ export const Colors = {
     accentText: '#725C8A',
     main: '#5B2D8B',
     overMain: '#ffffff',
-    border: '#DBD4E2',
+    border: '#3d4858',
     pageSeparator: '#262C36',
     cardSeparator: '#374151',
     error: '#BA1A1A',
@@ -106,6 +106,10 @@ export const Fonts = Platform.select({
     mono: 'var(--font-mono)',
   },
 });
+
+export const FontFamily = {
+  regular: 'Open Sans',
+}
 
 export const Spacing = {
   half: 2,

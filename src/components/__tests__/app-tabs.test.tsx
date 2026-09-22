@@ -7,7 +7,7 @@ import { Platform, StyleSheet } from 'react-native'; // <--- CORREGIDO: Importam
 const mockTabs = jest.fn(({ children, tabBar }: any) => {
   // Comportamiento por defecto (Ruta 'home' activa)
   const fakeState = {
-    routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }],
+    routes: [{ name: 'home' }, { name: 'patients/patients-list' }, { name: 'profile' }],
     index: 0,
   };
   return (
@@ -75,7 +75,7 @@ describe('AppTabs Component & CustomTabBar', () => {
 
     mockTabs.mockImplementationOnce(({ tabBar }: any) =>
       tabBar({
-        state: { routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }], index: 0 },
+        state: { routes: [{ name: 'home' }, { name: 'patients/patients-list' }, { name: 'profile' }], index: 0 },
         descriptors: {},
         navigation: { navigate: mockNavigate }
       })
@@ -117,7 +117,7 @@ describe('AppTabs Component & CustomTabBar', () => {
 
       return tabBar({
         state: {
-          routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }],
+          routes: [{ name: 'home' }, { name: 'patients/patients-list' }, { name: 'profile' }],
           index: 1
         },
         descriptors: {},
@@ -159,7 +159,7 @@ describe('AppTabs Component & CustomTabBar', () => {
 
     mockTabs.mockImplementationOnce(({ tabBar }: any) =>
       tabBar({
-        state: { routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }], index: 0 },
+        state: { routes: [{ name: 'home' }, { name: 'patients/patients-list' }, { name: 'profile' }], index: 0 },
         descriptors: {},
         navigation: { navigate: mockNavigate },
       }),
@@ -168,7 +168,7 @@ describe('AppTabs Component & CustomTabBar', () => {
     const { getByTestId } = render(<AppTabs />);
     fireEvent.press(getByTestId('explore-tab'));
 
-    expect(mockNavigate).toHaveBeenCalledWith('explore');
+    expect(mockNavigate).toHaveBeenCalledWith('patients/patients-list');
   });
 
   it('should navigate to register-treatment when pressing the central button', () => {
@@ -176,7 +176,7 @@ describe('AppTabs Component & CustomTabBar', () => {
 
     mockTabs.mockImplementationOnce(({ tabBar }: any) =>
       tabBar({
-        state: { routes: [{ name: 'home' }, { name: 'explore' }, { name: 'profile' }], index: 0 },
+        state: { routes: [{ name: 'home' }, { name: 'patients/patients-list' }, { name: 'profile' }], index: 0 },
         descriptors: {},
         navigation: { navigate: mockNavigate },
       }),
@@ -185,6 +185,6 @@ describe('AppTabs Component & CustomTabBar', () => {
     const { getByTestId } = render(<AppTabs />);
     fireEvent.press(getByTestId('center-btn'));
 
-    expect(mockNavigate).toHaveBeenCalledWith('register-treatment');
+    expect(mockNavigate).toHaveBeenCalledWith('patient-file', { patientId: 'paciente_cova_123' });
   });
 });

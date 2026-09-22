@@ -16,14 +16,15 @@ export default function AppTabs() {
       tabBar={renderTabBar}
     >
       <Tabs.Screen name="home" options={{ title: 'Inicio' }} />
-      <Tabs.Screen name="explore" options={{ title: 'Pacientes' }} />
+      <Tabs.Screen name="patients/patients-list" options={{ title: 'Pacientes' }} />
       <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
       <Tabs.Screen name="contacts" options={{ href: null, title: 'Contacto' }} />
-      <Tabs.Screen name="register-patient" options={{ href: null, title: 'Registrar Paciente' }} />
+      <Tabs.Screen name="patients/register-patient" options={{ href: null, title: 'Registrar Paciente' }} />
       <Tabs.Screen name="admin/users" options={{ href: null, title: 'Admin Usuarios' }} />
       <Tabs.Screen name="admin/reports" options={{ href: null, title: 'Admin Reportes' }} />
       <Tabs.Screen name="update-contact-info" options={{ href: null, title: 'Actualizar contacto' }} />
-      <Tabs.Screen name="register-treatment" options={{ href: null, title: 'Registrar Tratamiento' }} />
+      <Tabs.Screen name="patients/register-treatment" options={{ href: null, title: 'Registrar Tratamiento' }} />
+      <Tabs.Screen name="patient-file" options={{ href: null, title: 'Ficha de Paciente' }} />
     </Tabs>
   );
 }
@@ -33,7 +34,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const activeRouteName = state.routes[state.index].name;
-  const isPatientsSection = activeRouteName === 'explore' || activeRouteName === 'register-patient';
+  const isPatientsSection = activeRouteName === 'patients/patients-list' || activeRouteName === 'patients/register-patient' || activeRouteName === 'patient-file';
 
   const handleNavigate = (routeName: string) => {
     navigation.navigate(routeName);
@@ -57,6 +58,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           {
             backgroundColor: colors.backgroundElement,
             paddingBottom: dynamicPaddingBottom,
+            borderTopColor: colors.pageSeparator,
           }
     ]}>
       {/* 1. HOME TAB */}
@@ -82,7 +84,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
       {/* 2. EXPLORE (PACIENTES) TAB */}
       <TouchableOpacity
         testID="explore-tab"
-        onPress={() => handleNavigate('explore')}
+        onPress={() => handleNavigate('patients/patients-list')}
         style={styles.tabItem}>
         <Image
           source={require('@/assets/expo.icon/Assets/lista.svg')}
@@ -103,7 +105,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           testID = 'center-btn'
           activeOpacity={0.8}
           style={[styles.floatingButton, { backgroundColor: colors.main }]}
-          onPress={() => handleNavigate('register-treatment')}
+          onPress={() => navigation.navigate('patient-file', { patientId: 'paciente_cova_123' })}
         >
           <Image
             source={require('@/assets/expo.icon/Assets/plus-solid.svg')}
@@ -155,7 +157,6 @@ const styles = StyleSheet.create({
     minHeight: Platform.OS === 'ios' ? 76 : 64,
     paddingTop: 12,
     borderTopWidth: 0.5,
-    borderTopColor: '#E2E8F0',
     alignItems: 'center',
     justifyContent: 'space-around',
   },

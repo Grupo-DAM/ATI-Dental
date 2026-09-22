@@ -1,0 +1,11 @@
+name = "secure-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENVIRONMENT = "production"
+FIREBASE_PROJECT_ID = "ati-dental"
+
+# Secretos configurables con `wrangler secret put <NOMBRE>`:
+# - FIREBASE_API_KEY: Clave de API de Firebase para REST API
+# - DENTAL_API_KEY: Clave de autenticación para llamadas seguras desde la app

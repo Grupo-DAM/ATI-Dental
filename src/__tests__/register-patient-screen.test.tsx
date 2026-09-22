@@ -1,8 +1,8 @@
 import React from 'react';
 import { Alert, Platform } from 'react-native';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor, act } from '@testing-library/react-native';
 
-import RegisterPatientScreen from '@/app/(tabs)/register-patient';
+import RegisterPatientScreen from '@/app/(tabs)/patients/register-patient';
 import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
 
 import { createPatient } from '@/services/patient-service';
@@ -336,12 +336,21 @@ describe('RegisterPatientScreen', () => {
   });
 
     it('cierra el estado de carga al confirmar el alert', async () => {
+      const { createPatient } = require('@/services/patient-service');
+      (createPatient as jest.Mock).mockRejectedValueOnce(new Error('Test error'));
+
       const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
         buttons?.[0]?.onPress?.();
       });
       render(<RegisterPatientScreen />);
+      
+      // Llenar campos requeridos para pasar la validación
       fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
-      fireEvent.press(screen.getByTestId('btn-submit-patient'));
+      fireEvent.changeText(screen.getByTestId('input-document'), '123456');
+      
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('btn-submit-patient'));
+      });
 
       await waitFor(() => {
         expect(screen.queryByTestId('btn-submit-patient-loading')).toBeNull();
