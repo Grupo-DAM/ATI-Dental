@@ -4,6 +4,12 @@ Historial de versiones del proyecto ATI-Dental siguiendo [Semantic Versioning](h
 
 Entradas más recientes arriba.
 
+## [1.4.0] - 2026-09-22,19:10:48.349Z
+
+**v1.4.0** — Funcionalidad inicial del Módulo de Pacientes y Tratamientos.
+
+---
+
 ## [1.3.0] - 2026-09-13
 
 **v1.3.0** — Funcionalidad inicial del Módulo Administrativo.
