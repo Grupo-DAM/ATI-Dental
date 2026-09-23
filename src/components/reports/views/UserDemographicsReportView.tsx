@@ -22,7 +22,7 @@ export function UserDemographicsReportView({
   authLoading,
   periodLabel,
   onOpenPeriodModal,
-}: UserDemographicsReportViewProps) {
+}: Readonly<UserDemographicsReportViewProps>) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = createReportsStyles(theme);

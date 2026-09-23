@@ -21,10 +21,8 @@ export interface PatientValidationErrors {
   [key: string]: string | undefined;
 }
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export function isValidEmail(email: string): boolean {
-  if (!email || !email.trim()) return true;
+  if (!email?.trim()) return true;
   const trimmed = email.trim();
   const atIndex = trimmed.indexOf('@');
   if (atIndex <= 0 || atIndex !== trimmed.lastIndexOf('@')) {
@@ -44,14 +42,14 @@ export function validatePatientForm(
   const errors: PatientValidationErrors = {};
 
   // Campo obligatorio Nombre completo
-  if (!form.fullName || !form.fullName.trim()) {
+  if (!form.fullName?.trim()) {
     errors.fullName = 'registerPatient.alerts.emptyName';
   }
 
   // Validación de formato de correo si hay
-    if (form.email && !isValidEmail(form.email)) {
-      errors.email = 'registerPatient.alerts.invalidEmail';
-    }
+  if (form.email && !isValidEmail(form.email)) {
+    errors.email = 'registerPatient.alerts.invalidEmail';
+  }
 
   return {
     isValid: Object.keys(errors).length === 0,

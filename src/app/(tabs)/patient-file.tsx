@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Platform,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -26,16 +25,16 @@ import { ConfirmationModal } from '@/components/confirmation-modal';
 // ─── Constants ────────────────────────────────────────────────────────────────
 const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
 
-const ALLOWED_ROLES = ['odontologo', 'admin', 'asistente', 'medico'];
+const ALLOWED_ROLES = new Set(['odontologo', 'admin', 'asistente', 'medico']);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Compute age from an ISO date string */
-function calculateAge(dateString: string): number | null {
+function calculateAge(dateString?: string): number | null {
   if (!dateString) return null;
   try {
     const birth = new Date(dateString);
-    if (isNaN(birth.getTime())) return null;
+    if (Number.isNaN(birth.getTime())) return null;
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
@@ -56,8 +55,8 @@ function parseDateRobustly(dateInput: any): Date | null {
     date = dateInput.toDate();
   } else if (typeof dateInput === 'string') {
     date = new Date(dateInput);
-    if (isNaN(date.getTime())) {
-      const match = dateInput.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (Number.isNaN(date.getTime())) {
+      const match = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(dateInput);
       if (match) {
         date = new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
       }
@@ -66,7 +65,7 @@ function parseDateRobustly(dateInput: any): Date | null {
     date = new Date(dateInput);
   }
 
-  return isNaN(date.getTime()) ? null : date;
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 /** Format an ISO date string to a readable locale date */
@@ -110,7 +109,7 @@ function formatShortDate(dateInput: any, language: string = 'es'): string {
 /** Format medical-history items for display */
 function formatAntecedente(raw: string): string {
   return raw
-    .replace(/_/g, ' ')
+    .replaceAll('_', ' ')
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
@@ -171,7 +170,7 @@ const actionBarStyles = StyleSheet.create({
 });
 
 /** Patient info card with gradient-style background */
-function PatientCard({ patient, t }: { patient: Patient; t: (k: string) => string }) {
+function PatientCard({ patient, t }: Readonly<{ patient: Patient; t: (k: string) => string }>) {
   const age = calculateAge(patient.birthDate);
   const gender = patient.gender || '—';
 
@@ -238,7 +237,7 @@ const patientCardStyles = StyleSheet.create({
 });
 
 /** Appointment badge pills */
-function AppointmentBadges({ patient, t }: { patient: Patient; t: (k: string) => string }) {
+function AppointmentBadges({ patient, t }: Readonly<{ patient: Patient; t: (k: string) => string }>) {
   return (
     <View style={badgeStyles.row}>
       <View style={badgeStyles.badge}>
@@ -301,12 +300,12 @@ function CollapsibleSection({
   icon,
   children,
   defaultOpen = false,
-}: {
+}: Readonly<{
   title: string;
   icon: keyof typeof Ionicons.glyphMap;
   children: React.ReactNode;
   defaultOpen?: boolean;
-}) {
+}>) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
@@ -365,7 +364,7 @@ const sectionStyles = StyleSheet.create({
 });
 
 /** Detail row inside a section */
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <View style={detailStyles.row}>
       <Text style={detailStyles.label}>{label}</Text>
@@ -417,12 +416,12 @@ function TreatmentCard({
   t,
   onModify,
   onDelete
-}: { 
+}: Readonly<{ 
   treatment: Treatment; 
   t: (k: string) => string;
   onModify: (id: string) => void;
   onDelete: (id: string) => void;
-}) {
+}>) {
   const statusColor = getStatusColor(treatment.status);
   const categoryColor = getCategoryColor(treatment.category);
   const iconProps = getTimelineIconProps(treatment.treatmentName);
@@ -444,7 +443,7 @@ function TreatmentCard({
       <View style={treatmentStyles.content}>
         {/* Date and badges */}
         <View style={treatmentStyles.dateRow}>
-          <Text style={treatmentStyles.date}>{formatShortDate(treatment.treatmentDate, typeof i18n !== 'undefined' ? i18n?.language : 'es')}</Text>
+          <Text style={treatmentStyles.date}>{formatShortDate(treatment.treatmentDate)}</Text>
           <View style={{ flexDirection: 'row', gap: 6 }}>
             <View style={[treatmentStyles.statusBadge, { backgroundColor: statusColor.bg }]}>
               <Text style={[treatmentStyles.statusText, { color: statusColor.text }]}>
@@ -649,7 +648,7 @@ export default function PatientFileScreen() {
   });
 
   // ── Access control ──
-  const hasAccess = user?.rol ? ALLOWED_ROLES.includes(user.rol) : false;
+  const hasAccess = user?.rol ? ALLOWED_ROLES.has(user.rol) : false;
 
   const loadData = useCallback(async () => {
     if (!patientId && !email) {
@@ -709,7 +708,7 @@ export default function PatientFileScreen() {
   const handleAddTreatment = () => {
     if (!patient) return;
     router.push({
-      pathname: '/(tabs)/patients/register-treatment',
+      pathname: '/(tabs)/patients/register-treatment' as any,
       params: {
         patientId: patient.id,
         patientName: patient.fullName,
@@ -722,7 +721,7 @@ export default function PatientFileScreen() {
   const handleModifyTreatment = (treatmentId: string) => {
     if (!patient) return;
     router.push({
-      pathname: '/(tabs)/patients/register-treatment',
+      pathname: '/(tabs)/patients/register-treatment' as any,
       params: {
         patientId: patient.id,
         patientName: patient.fullName,
@@ -837,10 +836,10 @@ export default function PatientFileScreen() {
           icon="person-outline"
           defaultOpen={false}
         >
-          <DetailRow label={t('patientFile.email')} value={patient.email} />
+          <DetailRow label={t('patientFile.email')} value={patient.email || '—'} />
           <DetailRow label={t('patientFile.address')} value={patient.address || '—'} />
           <DetailRow label={t('patientFile.birthDate')} value={formatDate(patient.birthDate)} />
-          <DetailRow label={t('patientFile.phone')} value={patient.phone} />
+          <DetailRow label={t('patientFile.phone')} value={patient.phone || '—'} />
         </CollapsibleSection>
 
         {/* Antecedentes Médicos */}
@@ -974,7 +973,7 @@ export default function PatientFileScreen() {
           ) : null}
 
           {treatments.length > 0 ? (
-            <View style={treatmentSectionStyles.list}>
+            <View>
               {treatments.map((tr) => (
                 <TreatmentCard 
                   key={tr.id} 
