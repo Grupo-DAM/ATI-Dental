@@ -94,6 +94,30 @@
       "accountDeactivated": "Your account has been deactivated. Please contact the administrator"
     }
   },
+  "register": {
+    "title": "Register",
+    "subtitle": "Enter your credentials to create your account",
+    "emailPlaceholder": "example@email.com",
+    "emailLabel": "Email address",
+    "passwordPlaceholder": "Minimum 6 characters",
+    "passwordLabel": "Password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "confirmPasswordLabel": "Confirm Password",
+    "registerButton": "Register",
+    "hasAccount": "Already have an account?",
+    "loginLink": "Log in",
+    "errors": {
+      "noNetwork": "No internet connection. Please check your network and try again.",
+      "networkTitle": "Connection Error",
+      "networkMessage": "Server connection error. Please try again later.",
+      "empty": "Please fill in all fields.",
+      "invalidEmail": "The email address format is invalid.",
+      "match": "Passwords do not match.",
+      "shortPassword": "Password must be at least 6 characters.",
+      "emailInUse": "This email address is already registered.",
+      "generic": "An error occurred while attempting to register the user."
+    }
+  },
   "contacts": {
     "title": "Information & Contact",
     "subtitle": "Manage communication with the team and check recent activity.",

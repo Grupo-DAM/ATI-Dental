@@ -94,6 +94,30 @@
       "accountDeactivated": "Su cuenta ha sido desactivada. Póngase en contacto con el administrador"
     }
   },
+  "register": {
+    "title": "Registro",
+    "subtitle": "Ingresa tus credenciales para crear tu cuenta",
+    "emailPlaceholder": "ejemplo@correo.com",
+    "emailLabel": "Correo electrónico",
+    "passwordPlaceholder": "Mínimo 6 caracteres",
+    "passwordLabel": "Contraseña",
+    "confirmPasswordPlaceholder": "Vuelve a escribir la contraseña",
+    "confirmPasswordLabel": "Confirmar Contraseña",
+    "registerButton": "Registrarse",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "loginLink": "Iniciar sesión",
+    "errors": {
+      "noNetwork": "No hay conexión a internet. Por favor, revisa tu red e intenta de nuevo.",
+      "networkTitle":"Error de conexión",
+      "networkMessage": "Error de conexión con el servidor. Intente más tarde.",
+      "empty": "Por favor, rellena todos los campos.",
+      "invalidEmail": "El formato de correo no es válido.",
+      "match": "Las contraseñas no coinciden.",
+      "shortPassword": "La contraseña debe tener al menos 6 caracteres.",
+      "emailInUse": "El correo electrónico ya se encuentra registrado.",
+      "generic": "Error al intentar registrar el usuario."
+    }
+  },
   "contacts": {
     "title": "Información y Contacto",
     "subtitle": "Gestione la comunicación con el equipo y revise la actividad reciente.",
