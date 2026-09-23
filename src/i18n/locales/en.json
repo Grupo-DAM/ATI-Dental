@@ -118,6 +118,18 @@
       "generic": "An error occurred while attempting to register the user."
     }
   },
+  "verifyCode": {
+    "title": "Email Verification",
+    "subtitle": "We have sent a verification link to your email address. Please check your inbox or spam folder, click the link, and then press the button below.",
+    "success": "Email verified successfully! Logging into the application...",
+    "verifyButton": "I already verified my email",
+    "errors": {
+      "noNetwork": "No internet connection. Please check your network and try again.",
+      "networkTitle": "Connection Error",
+      "networkMessage": "Server connection error. Please try again later.",
+      "generic": "Error verifying email. Please try again."
+    }
+  },
   "contacts": {
     "title": "Information & Contact",
     "subtitle": "Manage communication with the team and check recent activity.",

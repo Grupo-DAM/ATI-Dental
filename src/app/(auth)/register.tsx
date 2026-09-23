@@ -35,8 +35,6 @@ export default function RegisterScreen() {
     const [networkError, setNetworkError] = useState(false);
 
     const handleRegister = async () => {
-        router.push('/verify-code'); //JUST FOR TESTING DELETE
-
         setError(null);
         setEmailError(false);
         setPasswordError(false);

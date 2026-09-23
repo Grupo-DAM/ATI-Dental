@@ -118,6 +118,18 @@
       "generic": "Error al intentar registrar el usuario."
     }
   },
+  "verifyCode": {
+    "title": "Verificación de correo",
+    "subtitle": "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor revisa tu bandeja de entrada o spam, haz clic en el enlace y luego presiona el botón de abajo.",
+    "success": "¡Correo verificado con éxito! Ingresando a la aplicación...",
+    "verifyButton": "Ya verifiqué mi correo",
+    "errors": {
+      "noNetwork": "No hay conexión a internet. Por favor, revisa tu red e intenta de nuevo.",
+      "networkTitle": "Error de conexión",
+      "networkMessage": "Error de conexión con el servidor. Intente más tarde.",
+      "generic": "Error al verificar el correo. Intenta nuevamente."
+    }
+  },
   "contacts": {
     "title": "Información y Contacto",
     "subtitle": "Gestione la comunicación con el equipo y revise la actividad reciente.",

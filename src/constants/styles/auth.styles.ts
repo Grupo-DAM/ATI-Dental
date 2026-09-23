@@ -119,7 +119,14 @@ export const createAuthStyles = (theme: any) => {
         warningIcon: {
             marginTop: Spacing.two,
             height: Icon.size.regular,
-        }
+        },
+        successText: {
+            color: theme.success || '#2e7d32', // Falls back to theme.success if defined
+            fontSize: FontSize.h4,
+            fontWeight: FontWeight.bold,
+            marginTop: Spacing.two,
+            textAlign: 'center',
+        },
     });
 };
 
