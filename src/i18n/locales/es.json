@@ -222,7 +222,14 @@
     "genderMale": "Masculino",
     "genderUnspecified": "No especificado",
     "genderTotal": "Total",
-    "averageAgeUnavailable": "—"
+    "averageAgeUnavailable": "—",
+    "reportTypeGeographics": "Distribución geografica",
+    "kpiCities": "CIUDADES",
+    "kpiPrincipal": "PRINCIPAL",
+    "chartTopCountries": "Top 8 Usuarios por país",
+    "chartRegions": "Distribución por Región",
+    "regionTotal": "Total",
+    "geoDataUnavailable": "No hay datos de ubicación geográfica disponibles"
   },
 
   "admin": {

@@ -17,7 +17,7 @@ export const AVAILABLE_PERIODS: PeriodOption[] = [7, 15, 30];
 export const DAU_MAU_TARGET_RATIO = 50;
 export const CRASH_RATE_TOLERANCE_LIMIT = 0.1;
 
-export type ReportType = 'usage' | 'access' | 'dau_mau' | 'crash_rate' | 'retention_rate' | 'demographics';
+export type ReportType = 'usage' | 'access' | 'dau_mau' | 'crash_rate' | 'retention_rate' | 'demographics' | 'geographics';
 
 export interface RetentionDataPoint {
   cohort: string;
@@ -69,4 +69,28 @@ export interface UserDemographicsMetrics {
   averageAge: number | null;
   ageBuckets: AgeBucket[];
   genderSlices: GenderSlice[];
+}
+
+export type RegionBucket = 'andina' | 'caribe' | 'pacifica' | 'otros';
+
+export interface CountryBucket {
+  key: string;
+  label: string;
+  count: number;
+}
+
+export interface RegionSlice {
+  key: RegionBucket;
+  label: string;
+  count: number;
+  percent: number;
+}
+
+export interface UserGeographicsMetrics {
+  totalCities: number;
+  mainCountry: string;
+  mainCountryPercent: number;
+  totalUsers: number;
+  countryBuckets: CountryBucket[];
+  regionSlices: RegionSlice[];
 }
