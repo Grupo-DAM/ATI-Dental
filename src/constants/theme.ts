@@ -112,14 +112,57 @@ export const FontFamily = {
 }
 
 export const Spacing = {
+  none: 0,
+  quarter: 1,
   half: 2,
   one: 4,
+  oneHalf: 6,
   two: 8,
   three: 16,
   four: 24,
   five: 32,
   six: 64,
 } as const;
+
+export const FontWeight = {
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+} as const
+
+export const FontSize = {
+  h1: 32,
+  h2: 24,
+  h3: 20,
+  h4: 16,
+  h5: 14,
+  h6: 14,
+  p: 12,
+  small: 10,
+} as const
+
+export const LineHeight = {
+  loginTitle: 40,
+  pageTitle: 32,
+  loginSubtitle: 24,
+  pageSubtitle: 20,
+  note: 16,
+} as const
+
+export const Border = {
+  width: {
+    regular: 1,
+    bold: 2,
+  },
+  radius: 8,
+} as const
+
+export const Icon = {
+  size: {
+    regular: 20,
+  }
+}
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;

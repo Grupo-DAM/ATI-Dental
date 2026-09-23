@@ -1,13 +1,13 @@
 // Hoja de estilos
 import { StyleSheet } from 'react-native';
-import { FontFamily, Spacing } from '@/constants/theme';
+import { FontFamily, Spacing, FontWeight } from '@/constants/theme';
 
 export const createListStyles = (theme: any) => StyleSheet.create({
   scrollContent: {
-    flexGrow: 1,
+    flexGrow: Spacing.quarter || 1,
   },
   container: {
-    flex: 1,
+    flex: Spacing.quarter || 1,
   },
   titleSection: {
     paddingHorizontal: 20,
@@ -15,50 +15,50 @@ export const createListStyles = (theme: any) => StyleSheet.create({
   },
   mainTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: FontWeight.bold,
     color: theme.pageTitle, // Ebony Clay
-    fontFamily: 'Open Sans',
-    marginBottom: 6,
+    fontFamily: FontFamily.regular || 'System',
+    marginBottom: Spacing.oneHalf || 6,
   },
   subtitle: {
     fontSize: 14,
     color: theme.pageSubtitle, // Pale Sky
     lineHeight: 20,
-    fontFamily: 'Open Sans',
+    fontFamily: FontFamily.regular || 'System',
   },
     filterContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        gap: 8,
-        paddingHorizontal: 16,
-        marginBottom: 16,
+        gap: Spacing.two,
+        paddingHorizontal: Spacing.three,
+        marginBottom: Spacing.three,
     },
     filterLabels: {
         color: theme.textNames,
         fontWeight: 600,
         fontSize: 12,
         lineHeight: 20,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular || 'System',
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: 1,
+        borderWidth: Spacing.quarter,
         borderColor: theme.border,
         backgroundColor: theme.backgroundElement,
-        borderRadius: 8,
+        borderRadius: Spacing.two,
         paddingLeft: Spacing.two || 6,
-        paddingRight: 4,
+        paddingRight: Spacing.one,
         height: 28,
     },
     searchContainer: {
         width: '70%',
     },
     input: {
-        flex: 1,
+        flex: Spacing.quarter,
         height: '100%',
         fontSize: 12,
-        paddingVertical: 0,
+        paddingVertical: Spacing.none,
         color: theme.text,
         fontFamily: FontFamily.regular || 'System'
     },
