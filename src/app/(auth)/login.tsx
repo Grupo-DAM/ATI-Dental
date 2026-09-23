@@ -83,13 +83,13 @@ export default function LoginScreen() {
             title={t('login.title')}
             subtitle={t('login.subtitle')}
             titleTestID="login-title"
-        >
-            {networkError && (
+            topContent= {networkError && (
                 <NetworkErrorBanner
                 title={t('login.errors.networkTitle')}
                 message={t('login.errors.networkMessage')}
                 />
             )}
+        >
 
             <ThemedView>
                 <ThemedTextInput

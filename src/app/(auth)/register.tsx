@@ -35,6 +35,8 @@ export default function RegisterScreen() {
     const [networkError, setNetworkError] = useState(false);
 
     const handleRegister = async () => {
+        router.push('/verify-code'); //JUST FOR TESTING DELETE
+
         setError(null);
         setEmailError(false);
         setPasswordError(false);
@@ -82,7 +84,7 @@ export default function RegisterScreen() {
             setError(err.message || t('register.errors.generic', 'Error al intentar registrar el usuario.'));
         }
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -90,13 +92,13 @@ export default function RegisterScreen() {
         <AuthLayout
         title={t('register.title', 'Registro')}
         subtitle={t('register.subtitle', 'Ingresa tus credenciales para crear tu cuenta')}
-        >
-        {networkError && (
+        topContent= {networkError && (
             <NetworkErrorBanner
             title={t('register.errors.networkTitle', 'Error de conexión')}
             message={t('register.errors.networkMessage', 'Error de conexión con el servidor. Intente más tarde.')}
             />
         )}
+        >
 
         <ThemedView>
             <ThemedTextInput
