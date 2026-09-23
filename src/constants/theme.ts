@@ -125,10 +125,10 @@ export const Spacing = {
 } as const;
 
 export const FontWeight = {
-  regular: 400,
-  medium: 500,
-  semibold: 600,
-  bold: 700,
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700',
 } as const
 
 export const FontSize = {
@@ -139,7 +139,7 @@ export const FontSize = {
   h5: 14,
   h6: 14,
   p: 12,
-  small: 10,
+  small: 11,
 } as const
 
 export const LineHeight = {
@@ -149,6 +149,10 @@ export const LineHeight = {
   pageSubtitle: 20,
   note: 16,
 } as const
+
+export const LetterSpacing = {
+  half: 0.5
+}
 
 export const Border = {
   width: {
@@ -160,7 +164,10 @@ export const Border = {
 
 export const Icon = {
   size: {
+    small: 18,
     regular: 20,
+    big: 24,
+    headerLogo: 28,
   }
 }
 

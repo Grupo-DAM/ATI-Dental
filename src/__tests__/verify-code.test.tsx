@@ -51,7 +51,8 @@ describe('VerifyCodeScreen', () => {
       fireEvent.press(getByText('Ya verifiqué mi correo'));
     });
 
-    expect(await findByText('No hay conexión a internet. Por favor, revisa tu red e intenta de nuevo.')).toBeTruthy();
+    // Assert against the NetworkErrorBanner text instead
+    expect(await findByText('Error de conexión con el servidor. Intente más tarde.')).toBeTruthy();
     expect(mockVerifyCode).not.toHaveBeenCalled();
   });
 

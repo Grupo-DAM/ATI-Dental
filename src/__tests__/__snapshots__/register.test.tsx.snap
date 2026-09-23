@@ -38,23 +38,54 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
             {
               "alignItems": "center",
               "flexDirection": "row",
-              "height": 50,
               "justifyContent": "center",
+              "width": "100%",
             },
             undefined,
           ],
         ]
       }
     >
-      <Image
-        source={1}
-        style={
+      <ViewManagerAdapter_ExpoImage
+        aspectRatio={9}
+        containerViewRef={"[React.ref]"}
+        contentFit="contain"
+        contentPosition={
+          {
+            "left": "50%",
+            "top": "50%",
+          }
+        }
+        nativeViewRef={"[React.ref]"}
+        onError={[Function]}
+        onLoad={[Function]}
+        onLoadStart={[Function]}
+        onProgress={[Function]}
+        placeholder={[]}
+        sfEffect={null}
+        source={
           [
             {
-              "tintColor": "#5B2D8B",
+              "__packager_asset": true,
+              "height": 1,
+              "scale": 1,
+              "uri": "uri",
+              "width": 1,
             },
           ]
         }
+        style={
+          {
+            "aspectRatio": 9,
+            "tintColor": "#5B2D8B",
+            "width": "100%",
+          }
+        }
+        symbolSize={null}
+        symbolWeight={null}
+        tintColor={4284165515}
+        transition={null}
+        width="100%"
       />
     </View>
     <Text
@@ -76,8 +107,11 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           false,
           false,
           {
+            "color": "#141018",
+            "fontFamily": "Open Sans",
             "fontSize": 32,
-            "fontWeight": "bold",
+            "fontWeight": "700",
+            "lineHeight": 40,
             "textAlign": "center",
           },
         ]
@@ -105,8 +139,10 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           false,
           {
             "color": "#725C8A",
+            "fontFamily": "Open Sans",
             "fontSize": 16,
-            "fontWeight": "regular",
+            "fontWeight": "400",
+            "lineHeight": 24,
             "textAlign": "center",
           },
         ]
@@ -131,7 +167,9 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           {
             "backgroundColor": "#F7F6F8",
           },
-          undefined,
+          {
+            "gap": 6,
+          },
         ]
       }
     >
@@ -168,8 +206,10 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
               false,
               {
                 "color": "#141018",
+                "fontFamily": "Open Sans",
                 "fontSize": 14,
-                "fontWeight": 500,
+                "fontWeight": "500",
+                "lineHeight": 16,
               },
             ]
           }
@@ -214,34 +254,68 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           style={
             [
               {
+                "color": "#141018",
                 "flex": 1,
+                "fontFamily": "Open Sans",
                 "fontSize": 16,
                 "height": "100%",
+                "lineHeight": 16,
                 "paddingVertical": 0,
               },
               {
                 "color": "#141018",
-                "fontFamily": "System",
               },
             ]
           }
           testID="email-input"
           value=""
         />
-        <Image
-          source={1}
-          style={
+        <ViewManagerAdapter_ExpoImage
+          alignItems="center"
+          containerViewRef={"[React.ref]"}
+          contentFit="contain"
+          contentPosition={
+            {
+              "left": "50%",
+              "top": "50%",
+            }
+          }
+          height="100%"
+          justifyContent="center"
+          margin={8}
+          nativeViewRef={"[React.ref]"}
+          onError={[Function]}
+          onLoad={[Function]}
+          onLoadStart={[Function]}
+          onProgress={[Function]}
+          placeholder={[]}
+          sfEffect={null}
+          source={
             [
               {
-                "alignItems": "center",
-                "justifyContent": "center",
-                "margin": 8,
-              },
-              {
-                "tintColor": "#9E8BAC",
+                "__packager_asset": true,
+                "height": 1,
+                "scale": 1,
+                "uri": "uri",
+                "width": 1,
               },
             ]
           }
+          style={
+            {
+              "alignItems": "center",
+              "height": "100%",
+              "justifyContent": "center",
+              "margin": 8,
+              "tintColor": "#9E8BAC",
+              "width": 20,
+            }
+          }
+          symbolSize={null}
+          symbolWeight={null}
+          tintColor={4288580524}
+          transition={null}
+          width={20}
         />
       </View>
     </View>
@@ -251,7 +325,9 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           {
             "backgroundColor": "#F7F6F8",
           },
-          undefined,
+          {
+            "gap": 6,
+          },
         ]
       }
     >
@@ -288,8 +364,10 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
               false,
               {
                 "color": "#141018",
+                "fontFamily": "Open Sans",
                 "fontSize": 14,
-                "fontWeight": 500,
+                "fontWeight": "500",
+                "lineHeight": 16,
               },
             ]
           }
@@ -331,14 +409,16 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           style={
             [
               {
+                "color": "#141018",
                 "flex": 1,
+                "fontFamily": "Open Sans",
                 "fontSize": 16,
                 "height": "100%",
+                "lineHeight": 16,
                 "paddingVertical": 0,
               },
               {
                 "color": "#141018",
-                "fontFamily": "System",
               },
             ]
           }
@@ -379,22 +459,59 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
             [
               {
                 "alignItems": "center",
+                "height": "100%",
                 "justifyContent": "center",
-                "padding": 8,
               },
               false,
             ]
           }
         >
-          <Image
-            source={1}
-            style={
+          <ViewManagerAdapter_ExpoImage
+            alignItems="center"
+            containerViewRef={"[React.ref]"}
+            contentFit="contain"
+            contentPosition={
+              {
+                "left": "50%",
+                "top": "50%",
+              }
+            }
+            height="100%"
+            justifyContent="center"
+            margin={8}
+            nativeViewRef={"[React.ref]"}
+            onError={[Function]}
+            onLoad={[Function]}
+            onLoadStart={[Function]}
+            onProgress={[Function]}
+            placeholder={[]}
+            sfEffect={null}
+            source={
               [
                 {
-                  "tintColor": "#9E8BAC",
+                  "__packager_asset": true,
+                  "height": 1,
+                  "scale": 1,
+                  "uri": "uri",
+                  "width": 1,
                 },
               ]
             }
+            style={
+              {
+                "alignItems": "center",
+                "height": "100%",
+                "justifyContent": "center",
+                "margin": 8,
+                "tintColor": "#9E8BAC",
+                "width": 20,
+              }
+            }
+            symbolSize={null}
+            symbolWeight={null}
+            tintColor={4288580524}
+            transition={null}
+            width={20}
           />
         </View>
       </View>
@@ -405,7 +522,9 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           {
             "backgroundColor": "#F7F6F8",
           },
-          undefined,
+          {
+            "gap": 6,
+          },
         ]
       }
     >
@@ -442,8 +561,10 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
               false,
               {
                 "color": "#141018",
+                "fontFamily": "Open Sans",
                 "fontSize": 14,
-                "fontWeight": 500,
+                "fontWeight": "500",
+                "lineHeight": 16,
               },
             ]
           }
@@ -485,14 +606,16 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           style={
             [
               {
+                "color": "#141018",
                 "flex": 1,
+                "fontFamily": "Open Sans",
                 "fontSize": 16,
                 "height": "100%",
+                "lineHeight": 16,
                 "paddingVertical": 0,
               },
               {
                 "color": "#141018",
-                "fontFamily": "System",
               },
             ]
           }
@@ -533,22 +656,59 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
             [
               {
                 "alignItems": "center",
+                "height": "100%",
                 "justifyContent": "center",
-                "padding": 8,
               },
               false,
             ]
           }
         >
-          <Image
-            source={1}
-            style={
+          <ViewManagerAdapter_ExpoImage
+            alignItems="center"
+            containerViewRef={"[React.ref]"}
+            contentFit="contain"
+            contentPosition={
+              {
+                "left": "50%",
+                "top": "50%",
+              }
+            }
+            height="100%"
+            justifyContent="center"
+            margin={8}
+            nativeViewRef={"[React.ref]"}
+            onError={[Function]}
+            onLoad={[Function]}
+            onLoadStart={[Function]}
+            onProgress={[Function]}
+            placeholder={[]}
+            sfEffect={null}
+            source={
               [
                 {
-                  "tintColor": "#9E8BAC",
+                  "__packager_asset": true,
+                  "height": 1,
+                  "scale": 1,
+                  "uri": "uri",
+                  "width": 1,
                 },
               ]
             }
+            style={
+              {
+                "alignItems": "center",
+                "height": "100%",
+                "justifyContent": "center",
+                "margin": 8,
+                "tintColor": "#9E8BAC",
+                "width": 20,
+              }
+            }
+            symbolSize={null}
+            symbolWeight={null}
+            tintColor={4288580524}
+            transition={null}
+            width={20}
           />
         </View>
       </View>
@@ -665,7 +825,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           {
             "color": "#725C8A",
             "fontSize": 14,
-            "fontWeight": "regular",
+            "fontWeight": "400",
             "textAlign": "center",
           },
         ]
@@ -695,7 +855,7 @@ exports[`RegisterScreen renders correctly and matches snapshot 1`] = `
           {
             "color": "#5B2D8B",
             "fontSize": 14,
-            "fontWeight": "bold",
+            "fontWeight": "700",
           },
         ]
       }

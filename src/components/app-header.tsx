@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useNavigationMenu } from '@/hooks/use-navigation-menu';
+import { createAppHeaderStyles } from '@/constants/styles/global.styles';
 
 export type AppHeaderProps = {
   title?: string;
@@ -13,6 +14,8 @@ export type AppHeaderProps = {
 };
 
 export function AppHeader({ title = 'ATI Dental', onMenuPress }: Readonly<AppHeaderProps>) {
+  const colors = useTheme();
+  const styles = useMemo(() => createAppHeaderStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const navigationMenu = useNavigationMenu();
@@ -50,34 +53,3 @@ export function AppHeader({ title = 'ATI Dental', onMenuPress }: Readonly<AppHea
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    backgroundColor: Colors.light.header,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-  },
-  logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  logo: {
-    width: 28,
-    height: 28,
-  },
-  headerTitle: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  menuButton: {
-    padding: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

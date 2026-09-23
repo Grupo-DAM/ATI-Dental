@@ -9,38 +9,95 @@ exports[`VerifyCodeScreen renders correctly and matches snapshot 1`] = `
       },
       {
         "flex": 1,
+        "gap": 32,
+        "justifyContent": "center",
+        "padding": 20,
       },
     ]
   }
 >
-  <RNCSafeAreaView
-    edges={
-      {
-        "bottom": "additive",
-        "left": "additive",
-        "right": "additive",
-        "top": "additive",
-      }
-    }
+  <View
     style={
-      {
-        "flex": 1,
-        "justifyContent": "center",
-        "padding": 20,
-      }
+      [
+        {
+          "backgroundColor": "#F7F6F8",
+        },
+        {
+          "gap": 8,
+        },
+      ]
     }
   >
+    <View
+      style={
+        [
+          {
+            "backgroundColor": "#F7F6F8",
+          },
+          [
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "justifyContent": "center",
+              "width": "100%",
+            },
+            undefined,
+          ],
+        ]
+      }
+    >
+      <ViewManagerAdapter_ExpoImage
+        aspectRatio={9}
+        containerViewRef={"[React.ref]"}
+        contentFit="contain"
+        contentPosition={
+          {
+            "left": "50%",
+            "top": "50%",
+          }
+        }
+        nativeViewRef={"[React.ref]"}
+        onError={[Function]}
+        onLoad={[Function]}
+        onLoadStart={[Function]}
+        onProgress={[Function]}
+        placeholder={[]}
+        sfEffect={null}
+        source={
+          [
+            {
+              "__packager_asset": true,
+              "height": 1,
+              "scale": 1,
+              "uri": "uri",
+              "width": 1,
+            },
+          ]
+        }
+        style={
+          {
+            "aspectRatio": 9,
+            "tintColor": "#5B2D8B",
+            "width": "100%",
+          }
+        }
+        symbolSize={null}
+        symbolWeight={null}
+        tintColor={4284165515}
+        transition={null}
+        width="100%"
+      />
+    </View>
     <Text
       style={
         [
           {
             "color": "#141018",
           },
-          false,
           {
-            "fontSize": 48,
-            "fontWeight": 600,
-            "lineHeight": 52,
+            "fontSize": 16,
+            "fontWeight": 500,
+            "lineHeight": 24,
           },
           false,
           false,
@@ -48,8 +105,13 @@ exports[`VerifyCodeScreen renders correctly and matches snapshot 1`] = `
           false,
           false,
           false,
+          false,
           {
-            "marginBottom": 8,
+            "color": "#141018",
+            "fontFamily": "Open Sans",
+            "fontSize": 32,
+            "fontWeight": "700",
+            "lineHeight": 40,
             "textAlign": "center",
           },
         ]
@@ -59,81 +121,121 @@ exports[`VerifyCodeScreen renders correctly and matches snapshot 1`] = `
     </Text>
     <Text
       style={
-        {
-          "color": "#666",
-          "marginBottom": 24,
-          "textAlign": "center",
-        }
+        [
+          {
+            "color": "#141018",
+          },
+          {
+            "fontSize": 16,
+            "fontWeight": 500,
+            "lineHeight": 24,
+          },
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          {
+            "color": "#725C8A",
+            "fontFamily": "Open Sans",
+            "fontSize": 16,
+            "fontWeight": "400",
+            "lineHeight": 24,
+            "textAlign": "center",
+          },
+        ]
       }
     >
       Hemos enviado un enlace de verificación a tu correo electrónico. Por favor revisa tu bandeja de entrada o spam, haz clic en el enlace y luego presiona el botón de abajo.
     </Text>
-    <View
-      style={
+  </View>
+  <View
+    style={
+      [
         {
-          "gap": 16,
+          "backgroundColor": "#F7F6F8",
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": false,
+          "expanded": undefined,
+          "selected": undefined,
         }
       }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "backgroundColor": "#5B2D8B",
+            "borderRadius": 8,
+            "height": 48,
+            "justifyContent": "center",
+            "marginBottom": 16,
+            "marginTop": 8,
+          },
+          false,
+        ]
+      }
+      testID="verify-button"
     >
-      <View
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
+      <Text
         style={
-          {
-            "opacity": 1,
-          }
+          [
+            {
+              "color": "#141018",
+            },
+            {
+              "fontSize": 16,
+              "fontWeight": 500,
+              "lineHeight": 24,
+            },
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            {
+              "color": "#ffffff",
+              "fontSize": 16,
+              "fontWeight": "600",
+            },
+          ]
         }
       >
-        <View
-          style={
-            [
-              {},
-            ]
-          }
-        >
-          <Text
-            style={
-              [
-                {
-                  "color": "#007AFF",
-                  "fontSize": 18,
-                  "margin": 8,
-                  "textAlign": "center",
-                },
-              ]
-            }
-          >
-            Ya verifiqué mi correo
-          </Text>
-        </View>
-      </View>
+        Ya verifiqué mi correo
+      </Text>
     </View>
-  </RNCSafeAreaView>
+  </View>
 </View>
 `;

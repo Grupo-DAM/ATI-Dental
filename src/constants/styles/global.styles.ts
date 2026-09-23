@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { 
     FontFamily, 
     Spacing, 
@@ -7,6 +7,7 @@ import {
     FontSize,
     LineHeight,
     Icon,
+    LetterSpacing
 } from '@/constants/theme';
 
 export const createGlobalStyles = (theme: any) => StyleSheet.create({
@@ -87,3 +88,83 @@ export const createInputFieldStyles = (theme: any) => {
         fontWeight: FontWeight.medium,
     }
 })};
+
+export const createTabBarStyles = (theme: any) => StyleSheet.create({
+  tabBar: {
+    flexDirection: 'row',
+    minHeight: Platform.OS === 'ios' ? 76 : Spacing.six,
+    paddingTop: Spacing.two + Spacing.one,
+    borderTopWidth: 0.5,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  tabItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: Spacing.quarter,
+  },
+  floatingButtonContainer: {
+    width: Spacing.six,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  floatingButton: {
+    position: 'absolute',
+    top: -50,
+    width: 58,
+    height: 58,
+    borderRadius: Spacing.five,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: Spacing.none, height: Spacing.one },
+    shadowOpacity: 0.15,
+    shadowRadius: Spacing.one + Spacing.quarter,
+    elevation: Spacing.two,
+  },
+  icon: {
+    width: Icon.size.big,
+    height: Icon.size.big,
+    marginBottom: Spacing.one,
+  },
+  plusIcon: {
+    width: Icon.size.small,
+    height: Icon.size.small,
+  },
+  label: {
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.medium,
+  },
+});
+
+export const createAppHeaderStyles = (theme: any) => StyleSheet.create({
+  header: {
+    backgroundColor: theme.header,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.four,
+    paddingBottom: Spacing.three,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  logo: {
+    width: Icon.size.headerLogo,
+    height: Icon.size.headerLogo,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: FontSize.h3,
+    fontWeight: FontWeight.bold,
+    letterSpacing: LetterSpacing.half,
+  },
+  menuButton: {
+    padding: Spacing.one,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
