@@ -13,6 +13,8 @@
     "birthDatePlaceholder": "Seleccionar fecha",
     "gender": "Género",
     "genderPlaceholder": "Seleccionar",
+    "country": "País / Nacionalidad",
+    "countryPlaceholder": "Seleccionar",
     "confirmDate": "Confirmar",
     "datePickerUnavailable": "El calendario no está disponible en este dispositivo.",
     "email": "Correo Electrónico",

@@ -13,6 +13,8 @@
     "birthDatePlaceholder": "Select date",
     "gender": "Gender",
     "genderPlaceholder": "Select",
+    "country": "Country / Nationality",
+    "countryPlaceholder": "Select",
     "confirmDate": "Confirm",
     "datePickerUnavailable": "The date picker is not available on this device.",
     "email": "Email Address",

@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/use-theme';
@@ -85,20 +86,21 @@ export function ModalOptionList({
             >
               <View style={styles.modalCard}>
                 <Text style={styles.modalTitle}>{title}</Text>
-                {/* Options of the modal */}
-                {options.map((opt: any, index: number) => (
-                    <ModalOption
-                        key={opt.name+index}
-                        name={opt.name}
-                        isSelected={selectedOption === opt.name}
-                        onSelect = {() => {
-                            onSelectOption(opt.name);
-                            onRequestClose();
-                        }}
-                        testID = {opt.testID}
-                        label = {opt.label}
-                    />
-                ))}
+                <ScrollView style={{ flexShrink: 1 }} showsVerticalScrollIndicator={true}>
+                  {options.map((opt: any, index: number) => (
+                      <ModalOption
+                          key={opt.name+index}
+                          name={opt.name}
+                          isSelected={selectedOption === opt.name}
+                          onSelect = {() => {
+                              onSelectOption(opt.name);
+                              onRequestClose();
+                          }}
+                          testID = {opt.testID}
+                          label = {opt.label}
+                      />
+                  ))}
+                </ScrollView>
               </View>
             </TouchableOpacity>
         </Modal>
@@ -116,6 +118,7 @@ const createStyles = (theme:any) => StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 360,
+    maxHeight: '80%',
     backgroundColor: theme.backgroundElement,
     borderRadius: 12,
     padding: 16,

@@ -1,0 +1,58 @@
+appId: ${APP_ID}
+---
+# Esperar a que la app inicie
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
+# --- Inicio de Sesión (Administrador) ---
+- tapOn:
+    id: "email-input"
+- inputText: "carloscaoucv2022@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "Cao1234"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+- extendedWaitUntil:
+    visible:
+        id: "welcome-header"
+
+# --- Modificar Perfil (Seleccionar País) ---
+# Vamos al tab de perfil
+- tapOn: "Perfil"
+- extendedWaitUntil:
+    visible: "Información Personal"
+- scroll
+- tapOn:
+    id: "select-country"
+- extendedWaitUntil:
+    visible: "País / Nacionalidad"
+- scrollUntilVisible:
+    element: "Colombia"
+    direction: DOWN
+- tapOn: "Colombia"
+- tapOn:
+    id: "btn-save"
+- extendedWaitUntil:
+    visible: "OK" # Confirmación de que se guardó
+- tapOn: "OK"
+
+# --- Verificar Reporte en Administración ---
+# Volvemos al inicio para abrir el menú o vamos directo al tab si existe
+- tapOn: "Inicio"
+# Abrir menú lateral (si aplica) o navegar a reportes
+- tapOn: "Generar Reportes"
+- extendedWaitUntil:
+    visible:
+      id: "report-type-select"
+# Seleccionar reporte geográfico
+- tapOn:
+    id: "report-type-select"
+- tapOn:
+    id: "type-option-geographics"
+- extendedWaitUntil:
+    visible: "Distribución por País" # o el título del gráfico
+- assertVisible: "🇨🇴 Colombia"
