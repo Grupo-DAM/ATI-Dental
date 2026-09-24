@@ -48,10 +48,10 @@ interface FormErrors {
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────
-const EMAIL_REGEX = /^[^\s@]+@[^.\s@]+(?:\.[^.\s@]+)+$/;
-const PHONE_REGEX = /^\+?[0-9 ]{7,20}$/;
+export const EMAIL_REGEX = /^[^\s@]+@[^.\s@]+(?:\.[^.\s@]+)+$/;
+export const PHONE_REGEX = /^\+?[0-9 ]{7,20}$/;
 
-function validate(form: ContactForm, t: (k: string) => string): FormErrors {
+export function validate(form: ContactForm, t: (k: string) => string): FormErrors {
   const errors: FormErrors = {};
   if (!form.email || !EMAIL_REGEX.test(form.email)) {
     errors.email = t('updateContact.validation.invalidEmail');

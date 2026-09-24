@@ -38,7 +38,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const INITIAL_SESSION_DURATION_MINUTES = 15;
 
-async function fetchUserByEmailFallback(email: string): Promise<{ userDoc: any; userData: any } | null> {
+export async function fetchUserByEmailFallback(email: string): Promise<{ userDoc: any; userData: any } | null> {
   console.log('[useAuth] UID no encontrado o sin estado. Intentando fallback por email...');
   try {
     let querySnap = await firestore()
@@ -67,7 +67,7 @@ async function fetchUserByEmailFallback(email: string): Promise<{ userDoc: any; 
   return null;
 }
 
-async function fetchUserDocument(uid: string, email?: string | null): Promise<{ docExists: boolean; userData: any; fromCache?: boolean }> {
+export async function fetchUserDocument(uid: string, email?: string | null): Promise<{ docExists: boolean; userData: any; fromCache?: boolean }> {
   let userDoc: any;
   try {
     userDoc = await firestore()
@@ -97,7 +97,7 @@ async function fetchUserDocument(uid: string, email?: string | null): Promise<{ 
   return { docExists, userData, fromCache: userDoc?.metadata?.fromCache };
 }
 
-async function recordUserSession(uid: string, email?: string | null): Promise<void> {
+export async function recordUserSession(uid: string, email?: string | null): Promise<void> {
   try {
     await firestore().collection('sesiones').add({
       userId: uid,
