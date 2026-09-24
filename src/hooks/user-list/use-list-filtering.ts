@@ -112,6 +112,32 @@ export function usePatientFiltering(data: any[]) {
 }
 
 /**
+ * Helper predicates to reduce cognitive complexity
+ */
+function matchesUserSearch(item: any, query: string): boolean {
+  if (!query) return true;
+  const matchesName = item.nombre?.toLowerCase().includes(query);
+  const matchesEmail = item.email?.toLowerCase().includes(query);
+  const matchesID = (item.pid || item.id)?.toLowerCase().includes(query);
+  return Boolean(matchesName || matchesEmail || matchesID);
+}
+
+function matchesUserRole(itemRole: string, selectedRoles: string[]): boolean {
+  if (selectedRoles.length === 0) return true;
+  return selectedRoles.some(role => {
+    if (role === USER_ROLES.ADMIN) {
+      return itemRole === USER_ROLES.ADMIN || itemRole === LEGACY_ADMIN_ROLE;
+    }
+    return itemRole === role;
+  });
+}
+
+function matchesUserStatus(itemStatus: string, selectedStatus: string[]): boolean {
+  if (selectedStatus.length === 0) return true;
+  return selectedStatus.includes(itemStatus);
+}
+
+/**
  * 3. User Filtering Hook
  */
 export function useUserFiltering(data: any[]) {
@@ -128,21 +154,11 @@ export function useUserFiltering(data: any[]) {
 
   const filterFn = useMemo(() => {
     return (item: any, query: string) => {
-      const matchesName = item.nombre?.toLowerCase().includes(query);
-      const matchesEmail = item.email?.toLowerCase().includes(query);
-      const matchesID = (item.pid || item.id)?.toLowerCase().includes(query);
-      const matchesSearch = !query || matchesName || matchesEmail || matchesID;
-
-      const matchesRole = selectedRoles.length === 0 || selectedRoles.some(role => {
-        if (role === USER_ROLES.ADMIN) {
-          return item.rol === USER_ROLES.ADMIN || item.rol === LEGACY_ADMIN_ROLE;
-        }
-        return item.rol === role;
-      });
-
-      const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(item.estado);
-
-      return matchesSearch && matchesRole && matchesStatus;
+      return (
+        matchesUserSearch(item, query) &&
+        matchesUserRole(item.rol, selectedRoles) &&
+        matchesUserStatus(item.estado, selectedStatus)
+      );
     };
   }, [selectedRoles, selectedStatus]);
 

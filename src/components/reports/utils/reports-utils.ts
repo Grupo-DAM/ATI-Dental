@@ -1,12 +1,11 @@
 // Cálculos matemáticos y manejo de fechas
-import { ModalOptionList, ModalOptionProp } from '@/components/ui/modal-option-list';
+import { ModalOptionProp } from '@/components/ui/modal-option-list';
 import { ChartDataPoint } from '@/components/reports/usage-line-chart';
 import {
   AGE_BUCKET_ORDER,
   AgeBucketKey,
   AVAILABLE_PERIODS,
   GenderBucket,
-  PeriodOption,
   SessionRecord,
   UserDemographicsMetrics,
   UserDemographicsRecord,
@@ -35,7 +34,7 @@ export function calculateCrashRatePercentage(totalCrashes: number, totalSessions
 }
 
 export function formatRetentionPercentage(value: number | undefined | null): string {
-    if (value === undefined || value === null || isNaN(value) || value < 0) {
+    if (value === undefined || value === null || Number.isNaN(value) || value < 0) {
         return '0%';
     }
     const cleanNum = Number(value);
@@ -50,9 +49,9 @@ export function parseRetentionData(
     const rawDia7 = docData?.dia7 ?? docData?.day7;
     const rawDia30 = docData?.dia30 ?? docData?.day30;
 
-    const dia1 = typeof rawDia1 === 'number' && !isNaN(rawDia1) && rawDia1 >= 0 ? rawDia1 : 0;
-    const dia7 = typeof rawDia7 === 'number' && !isNaN(rawDia7) && rawDia7 >= 0 ? rawDia7 : 0;
-    const dia30 = typeof rawDia30 === 'number' && !isNaN(rawDia30) && rawDia30 >= 0 ? rawDia30 : 0;
+    const dia1 = typeof rawDia1 === 'number' && !Number.isNaN(rawDia1) && rawDia1 >= 0 ? rawDia1 : 0;
+    const dia7 = typeof rawDia7 === 'number' && !Number.isNaN(rawDia7) && rawDia7 >= 0 ? rawDia7 : 0;
+    const dia30 = typeof rawDia30 === 'number' && !Number.isNaN(rawDia30) && rawDia30 >= 0 ? rawDia30 : 0;
 
     return [
         { cohort: t('reports.retentionDay1') || 'Día 1', label: 'D1', percentage: dia1 },
@@ -73,6 +72,15 @@ export const getRecordTimestamp = (record: SessionRecord): number | null => {
     return Number.isNaN(parsed) ? null : parsed;
 };
 
+function parseSessionBoundary(val: unknown): number | null {
+    if (!val) return null;
+    const value = val as { toMillis?: () => number };
+    if (typeof value?.toMillis === 'function') {
+        return value.toMillis();
+    }
+    return new Date(val as string | number | Date).getTime();
+}
+
 // Helper to extract duration in minutes
 export const getRecordDurationMinutes = (record: SessionRecord): number => {
     if (typeof record.tiempoUso === 'number') return record.tiempoUso;
@@ -80,16 +88,8 @@ export const getRecordDurationMinutes = (record: SessionRecord): number => {
         // If duration > 300, it's likely in seconds
         return record.duracion > 300 ? Math.round(record.duracion / 60) : record.duracion;
     }
-    const start = record.tiempoInicio
-        ? typeof record.tiempoInicio?.toMillis === 'function'
-        ? record.tiempoInicio.toMillis()
-        : new Date(record.tiempoInicio).getTime()
-        : null;
-    const end = record.tiempoFin
-        ? typeof record.tiempoFin?.toMillis === 'function'
-        ? record.tiempoFin.toMillis()
-        : new Date(record.tiempoFin).getTime()
-        : null;
+    const start = parseSessionBoundary(record.tiempoInicio);
+    const end = parseSessionBoundary(record.tiempoFin);
 
     if (start && end && end > start) {
         return Math.round((end - start) / 60000);
@@ -158,6 +158,16 @@ export function parseFlexibleTimestamp(raw: unknown): number | null {
     return null;
 }
 
+function calculateAgeFromBirthDate(birth: Date, now: Date): number | null {
+    let age = now.getFullYear() - birth.getFullYear();
+    const monthDiff = now.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
+        age -= 1;
+    }
+    if (age < 0 || age > 129) return null;
+    return age;
+}
+
 export function parseUserAge(user: UserDemographicsRecord, now: Date = new Date()): number | null {
     const numeric = user.edad ?? user.age;
     if (typeof numeric === 'number' && Number.isFinite(numeric) && numeric > 0 && numeric < 130) {
@@ -175,14 +185,7 @@ export function parseUserAge(user: UserDemographicsRecord, now: Date = new Date(
     );
     if (birthMs === null) return null;
 
-    const birth = new Date(birthMs);
-    let age = now.getFullYear() - birth.getFullYear();
-    const monthDiff = now.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
-        age -= 1;
-    }
-    if (age < 0 || age > 129) return null;
-    return age;
+    return calculateAgeFromBirthDate(new Date(birthMs), now);
 }
 
 export function normalizeUserGender(user: UserDemographicsRecord): GenderBucket {

@@ -1,14 +1,15 @@
-// components/users-list/offline-banner.tsx
 import React from 'react';
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
-import { StyleSheet } from 'react-native';
-import { FontFamily, Spacing } from '@/constants/theme';
 
+interface OfflineBannerProps {
+  isRetrying?: boolean;
+  onRetry?: () => void;
+}
 
-export function OfflineBanner({ isRetrying, onRetry }: any) {
+export function OfflineBanner({ isRetrying, onRetry }: Readonly<OfflineBannerProps>) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = createStyles(theme);

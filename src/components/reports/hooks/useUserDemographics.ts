@@ -17,7 +17,7 @@ export function useUserDemographics({
   authLoading,
   enabled,
   t,
-}: UseUserDemographicsProps) {
+}: Readonly<UseUserDemographicsProps>) {
   const [loading, setLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
   const [users, setUsers] = useState<UserDemographicsRecord[]>([]);
@@ -46,9 +46,10 @@ export function useUserDemographics({
           },
           (err: { code?: string; message?: string }) => {
             if (!isMounted) return;
+            const errStr = err?.message ?? (typeof err === 'string' ? err : JSON.stringify(err));
             const isPerm =
               err?.code === 'firestore/permission-denied' ||
-              String(err?.message || err).includes('permission-denied');
+              errStr.includes('permission-denied');
             setQueryError(isPerm ? t('reports.permissionError') : t('reports.errorLoad'));
             setLoading(false);
           },

@@ -29,14 +29,14 @@ export default function AdminUserList() {
 
   const handleEditPatient = (patient: any) => {
     router.push({
-      pathname: '/(tabs)/patients/register-patient',
+      pathname: '/(tabs)/patients/register-patient' as any,
       params: { patientId: patient.id, patientData: JSON.stringify(patient) },
     });
   };
 
   const handleViewPatient = (patient: any) => {
     router.push({
-      pathname: '/(tabs)/patient-file',
+      pathname: '/(tabs)/patient-file' as any,
       params: { patientId: patient.id },
     });
   };

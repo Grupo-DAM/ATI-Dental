@@ -96,7 +96,7 @@ export const STATUSES = [
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 /** Three-level breadcrumb for Pacientes > Ficha del paciente > Tratamiento */
-function TreatmentBreadcrumb({ t, patientId }: { t: (k: string) => string; patientId: string }) {
+function TreatmentBreadcrumb({ t, patientId }: Readonly<{ t: (k: string) => string; patientId: string }>) {
   return (
     <View style={breadcrumbStyles.container}>
       <TouchableOpacity onPress={() => router.push('/(tabs)/explore')} activeOpacity={0.7}>
@@ -104,7 +104,7 @@ function TreatmentBreadcrumb({ t, patientId }: { t: (k: string) => string; patie
       </TouchableOpacity>
       <Text style={breadcrumbStyles.chevron}>   ›   </Text>
       <TouchableOpacity 
-        onPress={() => router.push({ pathname: '/(tabs)/patient-file', params: { patientId } })} 
+        onPress={() => router.push({ pathname: '/(tabs)/patient-file' as any, params: { patientId } })} 
         activeOpacity={0.7}
       >
         <Text style={breadcrumbStyles.parentText}>{t('registerTreatment.breadcrumb.patientRecord')}</Text>
@@ -143,7 +143,7 @@ const breadcrumbStyles = StyleSheet.create({
 });
 
 /** Patient info card with gradient-style background */
-function PatientInfoCard({ patient, t }: { patient: PatientInfo; t: (k: string) => string }) {
+function PatientInfoCard({ patient, t }: Readonly<{ patient: PatientInfo; t: (k: string) => string }>) {
   return (
     <View style={patientCardStyles.card} testID="patient-info-card">
       <Image
@@ -207,7 +207,7 @@ const patientCardStyles = StyleSheet.create({
 });
 
 /** Section header with icon */
-function SectionHeader({ icon, title }: { icon: keyof typeof Ionicons.glyphMap; title: string }) {
+function SectionHeader({ icon, title }: Readonly<{ icon: keyof typeof Ionicons.glyphMap; title: string }>) {
   return (
     <View style={sectionStyles.header}>
       <Ionicons name={icon} size={20} color={Colors.light.main} />
@@ -240,7 +240,7 @@ function SelectField({
   onSelect,
   error,
   testID,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   placeholder: string;
@@ -248,7 +248,7 @@ function SelectField({
   onSelect: (val: string) => void;
   error?: string;
   testID?: string;
-}) {
+}>) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -320,7 +320,7 @@ function InputField({
   prefix,
   error,
   testID,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -331,7 +331,7 @@ function InputField({
   prefix?: string;
   error?: string;
   testID?: string;
-}) {
+}>) {
   return (
     <View style={inputStyles.fieldGroup}>
       <Text style={inputStyles.label}>{label}</Text>
@@ -373,14 +373,14 @@ function DateField({
   placeholder,
   error,
   testID,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   onChangeText: (text: string) => void;
   placeholder: string;
   error?: string;
   testID?: string;
-}) {
+}>) {
   return (
     <View style={inputStyles.fieldGroup}>
       <Text style={inputStyles.label}>{label}</Text>
@@ -669,7 +669,7 @@ export default function RegisterTreatmentScreen() {
       
       // Regresar a la ficha del paciente después de un momento para que se vea el toast
       setTimeout(() => {
-        router.push({ pathname: '/(tabs)/patient-file', params: { patientId: patient.id } });
+        router.push({ pathname: '/(tabs)/patient-file' as any, params: { patientId: patient.id } });
       }, 1500);
     } catch (err: any) {
       console.error('[RegisterTreatment] Error saving treatment:', err);
@@ -688,7 +688,7 @@ export default function RegisterTreatmentScreen() {
   };
 
   const handleCancel = () => {
-    router.push({ pathname: '/(tabs)/patient-file', params: { patientId: patient.id } });
+    router.push({ pathname: '/(tabs)/patient-file' as any, params: { patientId: patient.id } });
   };
 
   if (isLoading) {

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -19,11 +19,8 @@ import {
 } from '@/constants/patient';
 import { useTheme } from '@/hooks/use-theme';
 
-import { createPatient } from '@/services/patient-service';
+import { createPatient, getPatientById } from '@/services/patient-service';
 import { validatePatientForm } from '@/utils/patient-validation';
-
-import { useLocalSearchParams } from 'expo-router';
-import { getPatientById } from '@/services/patient-service';
 
 const AVATAR_FALLBACK = require('@/assets/expo.icon/Assets/avatar.png');
 const MAX_PHOTO_BYTES = 1024 * 1024;
