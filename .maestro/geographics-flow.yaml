@@ -1,5 +1,6 @@
-appId: ${APP_ID}
+appId: com.proyect1.ATIDental
 ---
+- launchApp
 # Esperar a que la app inicie
 - extendedWaitUntil:
     visible:
@@ -9,10 +10,10 @@ appId: ${APP_ID}
 # --- Inicio de Sesión (Administrador) ---
 - tapOn:
     id: "email-input"
-- inputText: "carloscaoucv2022@gmail.com"
+- inputText: "jesusecova73@gmail.com"
 - tapOn:
     id: "password-input"
-- inputText: "Cao1234"
+- inputText: "123456"
 - hideKeyboard
 - tapOn:
     id: "login-button"
@@ -22,18 +23,24 @@ appId: ${APP_ID}
 
 # --- Modificar Perfil (Seleccionar País) ---
 # Vamos al tab de perfil
-- tapOn: "Perfil"
+- tapOn: "Perfil|Profile"
 - extendedWaitUntil:
-    visible: "Información Personal"
+    visible: "Información Personal|Personal Information"
 - scroll
 - tapOn:
     id: "select-country"
 - extendedWaitUntil:
-    visible: "País / Nacionalidad"
+    visible: "País / Nacionalidad|Country / Nationality"
 - scrollUntilVisible:
-    element: "Colombia"
+    element:
+      id: "profile-country-option-co"
     direction: DOWN
-- tapOn: "Colombia"
+- tapOn:
+    id: "profile-country-option-co"
+- scrollUntilVisible:
+    element:
+      id: "btn-save"
+    direction: DOWN
 - tapOn:
     id: "btn-save"
 - extendedWaitUntil:
@@ -41,10 +48,17 @@ appId: ${APP_ID}
 - tapOn: "OK"
 
 # --- Verificar Reporte en Administración ---
-# Volvemos al inicio para abrir el menú o vamos directo al tab si existe
-- tapOn: "Inicio"
-# Abrir menú lateral (si aplica) o navegar a reportes
-- tapOn: "Generar Reportes"
+# Abrir menú lateral
+- tapOn:
+    id: "menu-btn"
+# Desplegar la lista de administración
+- extendedWaitUntil:
+    visible: "Administración|Administration"
+- tapOn: "Administración|Administration"
+# Navegar a reportes
+- extendedWaitUntil:
+    visible: "Generar Reportes|Generate Reports"
+- tapOn: "Generar Reportes|Generate Reports"
 - extendedWaitUntil:
     visible:
       id: "report-type-select"
@@ -54,5 +68,5 @@ appId: ${APP_ID}
 - tapOn:
     id: "type-option-geographics"
 - extendedWaitUntil:
-    visible: "Distribución por País" # o el título del gráfico
+    visible: ".*país.*|.*country.*" # Coincide con 'Top Países' o 'Top Countries'
 - assertVisible: "🇨🇴 Colombia"
