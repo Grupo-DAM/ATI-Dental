@@ -4,7 +4,7 @@ import Svg, { Path } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
 import { RegionBucket, RegionSlice } from './types';
-import { describeDonutSlice } from './gender-donut-chart';
+import { useDonutSlices } from './utils/donut-utils';
 
 const SLICE_COLORS: Record<RegionBucket, string> = {
   andina: '#5B2D8B',
@@ -34,21 +34,7 @@ export function RegionDonutChart({
   const outerRadius = 68;
   const innerRadius = 42;
 
-  const slices = useMemo(() => {
-    let angle = 0;
-    return data
-      .filter((item) => item.count > 0)
-      .map((item) => {
-        const sweep = total > 0 ? (item.count / total) * 360 : 0;
-        const start = angle;
-        const end = angle + sweep;
-        angle = end;
-        return {
-          ...item,
-          d: describeDonutSlice(cx, cy, outerRadius, innerRadius, start, end),
-        };
-      });
-  }, [cx, cy, data, total]);
+  const slices = useDonutSlices(data, total, cx, cy, outerRadius, innerRadius);
 
   return (
     <View style={styles.container} testID={testID}>

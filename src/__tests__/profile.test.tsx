@@ -27,6 +27,14 @@ jest.mock('@react-native-firebase/firestore', () => {
         }),
       })),
     })),
+    runTransaction: jest.fn((transactionUpdate) => {
+      // Execute the transaction callback immediately with a mock transaction object
+      return transactionUpdate({
+        get: jest.fn().mockResolvedValue({ exists: false, data: () => ({}) }),
+        set: jest.fn(),
+        update: jest.fn(),
+      });
+    }),
   });
   const mockFirestore = jest.fn(createFirestore);
   mockFirestore.__create = createFirestore;
@@ -288,7 +296,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     const modal = getByTestId('modal-verification');
 
     // Al intentar ejecutar el reenvío, este lanzará la excepción asíncrona 'auth/network-request-failed'
-    expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
+    await expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
   });
 
   it('Debe cambiar el idioma a inglés y guardarlo al hacer save', async () => {
@@ -394,6 +402,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
           }),
         }),
       }),
+      runTransaction: jest.fn().mockRejectedValue(new Error('Firestore error')),
     }));
 
     const { getByTestId } = render(<ProfileScreen />);
@@ -448,6 +457,13 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
           update: jest.fn().mockResolvedValue(true),
         })),
       })),
+      runTransaction: jest.fn((transactionUpdate) => {
+        return transactionUpdate({
+          get: jest.fn().mockResolvedValue({ exists: false, data: () => ({}) }),
+          set: jest.fn(),
+          update: jest.fn(),
+        });
+      }),
     }));
   });
 
@@ -459,7 +475,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
 
     (NetInfo.fetch as jest.Mock).mockResolvedValueOnce({ isConnected: false });
     const modal = getByTestId('modal-verification');
-    expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
+    await expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
   });
 
   it('Advierte si se intenta reenviar sin usuario activo', async () => {
@@ -565,6 +581,22 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     fireEvent.press(getByTestId('profile-gender-option-female'));
     fireEvent.press(getByTestId('select-birth-date'));
     fireEvent.press(getByTestId('confirm-birth-date'));
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage',
+      );
+    });
+  });
+
+  it('guarda el país de residencia en Firestore y la métrica geográfica', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+
+    // Seleccionar país
+    fireEvent.press(getByTestId('select-country'));
+    fireEvent.press(getByTestId('profile-country-option-co'));
     fireEvent.press(getByTestId('btn-save'));
 
     await waitFor(() => {

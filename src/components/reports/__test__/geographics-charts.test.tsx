@@ -3,7 +3,7 @@ import renderer from 'react-test-renderer';
 import { render } from '@testing-library/react-native';
 import { CountryBarChart } from '@/components/reports/country-bar-chart';
 import { RegionDonutChart } from '@/components/reports/region-donut-chart';
-import { describeDonutSlice } from '@/components/reports/gender-donut-chart';
+import { describeDonutSlice } from '@/components/reports/utils/donut-utils';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
