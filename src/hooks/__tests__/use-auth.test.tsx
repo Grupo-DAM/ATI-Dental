@@ -13,13 +13,13 @@ describe('useAuth Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const instance = firestore();
+    const instance = firestore() as any;
     (instance.collection as jest.Mock).mockImplementation(() => instance);
     (instance.doc as jest.Mock).mockImplementation(() => instance);
-    (instance.where as jest.Mock).mockImplementation(() => instance);
-    (instance.limit as jest.Mock).mockImplementation(() => instance);
-    (instance.get as jest.Mock).mockImplementation(() => Promise.resolve({ docs: [], empty: true, exists: () => false, data: () => ({}) }));
-    (instance.add as jest.Mock).mockImplementation(() => Promise.resolve({ id: 'mock-id' }));
+    instance.where = jest.fn(() => instance);
+    instance.limit = jest.fn(() => instance);
+    instance.get = jest.fn(() => Promise.resolve({ docs: [], empty: true, exists: () => false, data: () => ({}) }));
+    instance.add = jest.fn(() => Promise.resolve({ id: 'mock-id' }));
   });
 
   afterEach(() => {
@@ -404,7 +404,7 @@ describe('useAuth Hook', () => {
         })),
       });
 
-      const spySave = jest.spyOn(secureStorage, 'saveSessionToken').mockResolvedValue(undefined);
+      const spySave = jest.spyOn(secureStorage, 'saveSessionToken').mockResolvedValue(true as any);
 
       await act(async () => {
         await result.current.verifyCode();
@@ -422,7 +422,7 @@ describe('useAuth Hook', () => {
   describe('Authentication Firestore Helpers', () => {
     it('fetchUserByEmailFallback returns document data when found', async () => {
       const mockDoc = { id: 'doc-123', data: () => ({ estado: 'activo' }) };
-      (firestore().get as jest.Mock).mockResolvedValueOnce({
+      ((firestore() as any).get as jest.Mock).mockResolvedValueOnce({
         empty: false,
         docs: [mockDoc],
       });
@@ -434,7 +434,7 @@ describe('useAuth Hook', () => {
 
     it('fetchUserByEmailFallback handles empty query and attempts second query branch', async () => {
       const mockDoc = { id: 'doc-456', data: () => ({ estado: 'activo' }) };
-      (firestore().get as jest.Mock)
+      ((firestore() as any).get as jest.Mock)
         .mockResolvedValueOnce({
           empty: true,
           docs: [],
@@ -450,14 +450,14 @@ describe('useAuth Hook', () => {
     });
 
     it('fetchUserByEmailFallback returns null on firestore error', async () => {
-      (firestore().get as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      ((firestore() as any).get as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
       const result = await fetchUserByEmailFallback('error@example.com');
       expect(result).toBeNull();
     });
 
     it('fetchUserDocument falls back to default get when server get throws', async () => {
-      (firestore().get as jest.Mock)
+      ((firestore() as any).get as jest.Mock)
         .mockRejectedValueOnce(new Error('offline'))
         .mockResolvedValueOnce({
           exists: () => true,
@@ -471,7 +471,7 @@ describe('useAuth Hook', () => {
 
     it('recordUserSession catches and logs error gracefully', async () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      (firestore().add as jest.Mock).mockRejectedValueOnce(new Error('Quota exceeded'));
+      ((firestore() as any).add as jest.Mock).mockRejectedValueOnce(new Error('Quota exceeded'));
 
       await expect(recordUserSession('user-1', 'test@test.com')).resolves.not.toThrow();
       expect(warnSpy).toHaveBeenCalled();
