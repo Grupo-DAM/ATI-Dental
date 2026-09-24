@@ -48,7 +48,7 @@ interface FormErrors {
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^.\s@]+(?:\.[^.\s@]+)+$/;
 const PHONE_REGEX = /^\+?[0-9 ]{7,20}$/;
 
 function validate(form: ContactForm, t: (k: string) => string): FormErrors {
