@@ -90,25 +90,24 @@ describe('AppTabs Component & CustomTabBar', () => {
     expect(mockNavigate).toHaveBeenCalledWith('profile');
   });
 
-  it('should not allow interaction or navigate if the tab is disabled (Agenda)', () => {
+  it('should navigate to agenda when pressing the agenda tab', () => {
     const mockNavigate = jest.fn();
 
     mockTabs.mockImplementationOnce(({ tabBar }: any) =>
       tabBar({
-        state: { routes: [{ name: 'home' }], index: 0 },
+        state: { routes: [{ name: 'home' }, { name: 'agenda' }], index: 0 },
         descriptors: {},
         navigation: { navigate: mockNavigate }
       })
     );
 
-    render(<AppTabs />);
+    const { getByTestId } = render(<AppTabs />);
 
-    const agendaTab = screen.getByText('tabs.agenda').parent;
-    if (agendaTab) {
-      fireEvent.press(agendaTab);
-    }
+    const agendaTab = getByTestId('agenda-tab');
+    fireEvent.press(agendaTab);
 
-    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).toHaveBeenCalledWith('agenda');
   });
 
   it('should apply correct focus colors based on active path', () => {
