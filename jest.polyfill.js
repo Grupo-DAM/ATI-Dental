@@ -1,4 +1,4 @@
-if (typeof globalThis.FormData === 'undefined') {
+if (globalThis.FormData === undefined) {
   globalThis.FormData = class FormData {
     constructor() {
       this._parts = [];
@@ -23,18 +23,18 @@ if (typeof globalThis.FormData === 'undefined') {
   global.FormData = globalThis.FormData;
 }
 
-if (typeof globalThis.Request === 'undefined' || typeof globalThis.Response === 'undefined' || typeof globalThis.Headers === 'undefined') {
+if (globalThis.Request === undefined || globalThis.Response === undefined || globalThis.Headers === undefined) {
   try {
     const fetch = require('node-fetch');
-    if (typeof globalThis.Headers === 'undefined') {
+    if (globalThis.Headers === undefined) {
       globalThis.Headers = fetch.Headers;
       global.Headers = fetch.Headers;
     }
-    if (typeof globalThis.Request === 'undefined') {
+    if (globalThis.Request === undefined) {
       globalThis.Request = fetch.Request;
       global.Request = fetch.Request;
     }
-    if (typeof globalThis.Response === 'undefined') {
+    if (globalThis.Response === undefined) {
       globalThis.Response = fetch.Response;
       global.Response = fetch.Response;
     }

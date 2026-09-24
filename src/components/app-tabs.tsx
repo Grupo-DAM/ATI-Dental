@@ -41,9 +41,12 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
   };
 
   // Dynamic padding compensation for iOS gestures and Android navigation bars
-  const dynamicPaddingBottom = Platform.OS === 'ios'
-    ? (insets.bottom > 0 ? insets.bottom : 24)
-    : (insets.bottom > 0 ? insets.bottom + 4 : 12);
+  let dynamicPaddingBottom = 12;
+  if (Platform.OS === 'ios') {
+    dynamicPaddingBottom = insets.bottom > 0 ? insets.bottom : 24;
+  } else if (insets.bottom > 0) {
+    dynamicPaddingBottom = insets.bottom + 4;
+  }
 
   return (
     <View
