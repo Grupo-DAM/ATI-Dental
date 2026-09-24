@@ -1,13 +1,19 @@
 const isReassure = process.argv.some(arg => arg.includes('perf') || arg.includes('reassure'));
+const jestPreset = require('jest-expo/jest-preset');
 
 module.exports = {
-  preset: "jest-expo",
-  setupFiles: ["<rootDir>/jest.setup.js"],
+  ...jestPreset,
+  setupFiles: [
+    "<rootDir>/jest.polyfill.js",
+    ...(jestPreset.setupFiles || []),
+    "<rootDir>/jest.setup.js"
+  ],
   moduleNameMapper: {
     "\\.css$": "<rootDir>/jest.styleMock.js",
     "\\.(png|jpg|jpeg|gif|webp|svg)$": "<rootDir>/jest.assetMock.js",
     "^@/assets/(.*)$": "<rootDir>/assets/$1",
-    "^@/(.*)$": "<rootDir>/src/$1"
+    "^@/(.*)$": "<rootDir>/src/$1",
+    ...(jestPreset.moduleNameMapper || {})
   },
   testPathIgnorePatterns: isReassure
     ? ["/node_modules/"]
