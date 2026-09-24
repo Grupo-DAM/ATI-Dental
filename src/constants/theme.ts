@@ -42,6 +42,7 @@ export const Colors = {
     accentBackground: '#F3E8FF',
     reportValueText: '#111827', //Ebony
     positive: '#10B981',
+    shadowColor: '#000',
   },
   dark: {
     text: '#ffffff',
@@ -77,6 +78,7 @@ export const Colors = {
     accentBackground: '#4D2875',
     reportValueText: '#F8FAFC',
     positive: '#10B981',
+    shadowColor: '#000',
   },
 } as const;
 

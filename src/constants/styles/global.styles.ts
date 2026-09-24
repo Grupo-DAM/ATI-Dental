@@ -7,15 +7,27 @@ import {
     FontSize,
     LineHeight,
     Icon,
-    LetterSpacing
+    LetterSpacing,
+    BottomTabInset
 } from '@/constants/theme';
 
 export const createGlobalStyles = (theme: any) => StyleSheet.create({
-   text: {
-    fontFamily: FontFamily.regular || 'System',
-    color: theme.text,
-    lineHeight: LineHeight.note,
-   }
+    text: {
+      fontFamily: FontFamily.regular || 'System',
+      color: theme.text,
+      lineHeight: LineHeight.note,
+    },
+    screen: {
+      flex: Spacing.quarter,
+      backgroundColor: theme.background,
+    },
+    scrollContent: {
+      paddingBottom: BottomTabInset + 20,
+    },
+    title: {
+
+    },
+   
 });
 
 export const createInputFieldStyles = (theme: any) => {
