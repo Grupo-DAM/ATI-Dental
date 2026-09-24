@@ -37,7 +37,7 @@ export function UserGeographicsReportView({
 
   const hasData = data && data.totalUsers > 0;
 
-  if (loading || (!data && !queryError)) {
+  if (loading) {
     return (
       <View style={{ marginTop: 20 }}>
         <Text style={{ textAlign: 'center', color: theme.pageSubtitle, fontFamily: 'Open Sans' }}>
