@@ -3,32 +3,27 @@ import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
-import { GenderBucket, GenderSlice } from './types';
+import { RegionBucket, RegionSlice } from './types';
+import { useDonutSlices } from './utils/donut-utils';
 
-const SLICE_COLORS: Record<GenderBucket, string> = {
-  female: '#5B2D8B',
-  male: '#B39DDB',
-  unspecified: '#EDE4F5',
+const SLICE_COLORS: Record<RegionBucket, string> = {
+  andina: '#5B2D8B',
+  caribe: '#8B5BBD',
+  pacifica: '#A989C8',
+  otros: '#CFC0DF',
 };
 
-const LABEL_KEYS: Record<GenderBucket, string> = {
-  female: 'reports.genderFemale',
-  male: 'reports.genderMale',
-  unspecified: 'reports.genderUnspecified',
-};
-
-interface GenderDonutChartProps {
-  data: GenderSlice[];
+interface RegionDonutChartProps {
+  data: RegionSlice[];
   total: number;
   testID?: string;
 }
 
-import { describeDonutSlice, useDonutSlices } from './utils/donut-utils';
-export function GenderDonutChart({
+export function RegionDonutChart({
   data,
   total,
-  testID = 'reports-gender-donut-chart',
-}: Readonly<GenderDonutChartProps>) {
+  testID = 'reports-region-donut-chart',
+}: Readonly<RegionDonutChartProps>) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -47,24 +42,24 @@ export function GenderDonutChart({
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           {slices.map((slice) =>
             slice.d ? (
-              <Path key={slice.key} d={slice.d} fill={SLICE_COLORS[slice.key]} />
+              <Path key={slice.key} d={slice.d} fill={SLICE_COLORS[slice.key] || '#EDE4F5'} />
             ) : null,
           )}
         </Svg>
         <View style={styles.centerLabel} pointerEvents="none">
-          <Text style={styles.centerValue} testID="gender-donut-total">
+          <Text style={styles.centerValue} testID="region-donut-total">
             {total}
           </Text>
-          <Text style={styles.centerCaption}>{t('reports.genderTotal')}</Text>
+          <Text style={styles.centerCaption}>{t('reports.regionTotal')}</Text>
         </View>
       </View>
 
       <View style={styles.legend}>
         {data.map((item) => (
-          <View key={item.key} style={styles.legendItem} testID={`gender-legend-${item.key}`}>
-            <View style={[styles.legendDot, { backgroundColor: SLICE_COLORS[item.key] }]} />
+          <View key={item.key} style={styles.legendItem} testID={`region-legend-${item.key}`}>
+            <View style={[styles.legendDot, { backgroundColor: SLICE_COLORS[item.key] || '#EDE4F5' }]} />
             <Text style={styles.legendText}>
-              {t(LABEL_KEYS[item.key])} {item.percent}% ({item.count})
+              <Text style={{fontWeight: '700', color: theme.text}}>{item.label}</Text> ({item.percent}%)
             </Text>
           </View>
         ))}
@@ -76,7 +71,6 @@ export function GenderDonutChart({
 const createStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
     container: {
-      flexDirection: 'row',
       alignItems: 'center',
       gap: 16,
       paddingVertical: 8,
@@ -103,13 +97,19 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       fontFamily: 'Open Sans',
     },
     legend: {
-      flex: 1,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      width: '100%',
+      paddingHorizontal: 16,
       gap: 10,
     },
     legendItem: {
       flexDirection: 'row',
       alignItems: 'center',
+      width: '45%',
       gap: 8,
+      marginBottom: 8,
     },
     legendDot: {
       width: 10,
@@ -117,7 +117,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       borderRadius: 5,
     },
     legendText: {
-      flex: 1,
       fontSize: 12,
       color: theme.pageSubtitle,
       fontFamily: 'Open Sans',

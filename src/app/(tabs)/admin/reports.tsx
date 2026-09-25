@@ -26,6 +26,7 @@ import { DauMauReportView } from '@/components/reports/views/DauMauReportView';
 import { CrashRateReportView } from '@/components/reports/views/CrashRateReportView';
 import { RetentionReportView } from '@/components/reports/views/RetentionReportView';
 import { UserDemographicsReportView } from '@/components/reports/views/UserDemographicsReportView';
+import { UserGeographicsReportView } from '@/components/reports/views/UserGeographicsReportView';
 
 
 // 4. RE-EXPORTS (Crucial para no romper tests unitarios de Jest)
@@ -92,6 +93,9 @@ export default function AdminReportsScreen() {
 
   // Etiqueta del tipo de reporte activo
   const reportTypeLabel = useMemo(() => {
+    if (selectedReportType === 'geographics') {
+      return t('reports.reportTypeGeographics');
+    }
     if (selectedReportType === 'demographics') {
       return t('reports.reportTypeDemographics');
     }
@@ -110,6 +114,7 @@ export default function AdminReportsScreen() {
   }, [selectedReportType, t]);
 
   const reportTypeOptions: ModalOptionProp[] = [
+    { name: 'geographics', testID: 'type-option-geographics', label: t('reports.reportTypeGeographics') },
     { name: 'demographics', testID: 'type-option-demographics', label: t('reports.reportTypeDemographics') },
     { name: 'usage', testID: 'type-option-usage', label: t('reports.reportTypeUsage') },
     { name: 'dau_mau', testID: 'type-option-dau-mau', label: t('reports.reportTypeDauMau') },
@@ -177,6 +182,15 @@ export default function AdminReportsScreen() {
 
           {selectedReportType === 'demographics' && (
             <UserDemographicsReportView
+              user={user}
+              authLoading={authLoading}
+              periodLabel={periodLabel}
+              onOpenPeriodModal={() => setShowPeriodModal(true)}
+            />
+          )}
+
+          {selectedReportType === 'geographics' && (
+            <UserGeographicsReportView
               user={user}
               authLoading={authLoading}
               periodLabel={periodLabel}

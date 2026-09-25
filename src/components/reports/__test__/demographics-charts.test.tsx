@@ -2,7 +2,8 @@ import React from 'react';
 import renderer from 'react-test-renderer';
 import { render } from '@testing-library/react-native';
 import { AgeBarChart } from '@/components/reports/age-bar-chart';
-import { GenderDonutChart, describeDonutSlice } from '@/components/reports/gender-donut-chart';
+import { GenderDonutChart } from '@/components/reports/gender-donut-chart';
+import { describeDonutSlice } from '@/components/reports/utils/donut-utils';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),

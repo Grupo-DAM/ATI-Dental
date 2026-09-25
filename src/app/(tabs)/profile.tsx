@@ -18,6 +18,7 @@ import { getPatientGenderLabelKey, isPatientGender, PATIENT_GENDER_VALUES } from
 import { parseFlexibleTimestamp } from '@/components/reports/utils/reports-utils';
 import { useTheme } from '@/hooks/use-theme';
 import { BottomTabInset } from '@/constants/theme';
+import { COUNTRIES } from '@/constants/countries';
 
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
@@ -33,6 +34,9 @@ export default function ProfileScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [gender, setGender] = useState('');
   const [genderModalVisible, setGenderModalVisible] = useState(false);
+  const [country, setCountry] = useState('');
+  const [originalCountry, setOriginalCountry] = useState('');
+  const [countryModalVisible, setCountryModalVisible] = useState(false);
 
   const [errors, setErrors] = useState<{ name?: string; lastName?: string; email?: string }>({});
   const [showModal, setShowModal] = useState(false);
@@ -52,13 +56,76 @@ export default function ProfileScreen() {
     ? t(getPatientGenderLabelKey(gender))
     : t('profile.genderPlaceholder');
 
-  const persistProfileFields = (uid: string) =>
-    firestore().collection('usuarios').doc(uid).update({
-      idiomaPreferencia: language,
-      nombre: `${name.trim()} ${lastName.trim()}`,
-      genero: gender || null,
-      fechaNacimiento: birthDate ? birthDateObj : null,
-    });
+  const countryOptions = useMemo(
+    () =>
+      COUNTRIES.map((c) => ({
+        name: c.code,
+        label: `${c.flag} ${c.name}`,
+        testID: `profile-country-option-${c.code}`,
+      })),
+    [],
+  );
+
+  const countryLabel = country
+    ? (() => {
+        const c = COUNTRIES.find((c) => c.code === country);
+        return c ? `${c.flag} ${c.name}` : country;
+      })()
+    : t('profile.countryPlaceholder');
+
+  const persistProfileFields = async (uid: string) => {
+    try {
+      const db = firestore();
+      const userRef = db.collection('usuarios').doc(uid);
+      const metricsRef = db.collection('metricas_geograficas').doc('actual');
+
+      await db.runTransaction(async (transaction) => {
+        const metricsDoc = await transaction.get(metricsRef);
+        
+        let metricsData: any = {};
+        if (metricsDoc.exists) {
+          metricsData = typeof metricsDoc.data === 'function' ? metricsDoc.data() : metricsDoc.data;
+        }
+
+        let countriesData = metricsData?.countries || {};
+        let totalUsers = metricsData?.totalUsers || 0;
+
+        if (country !== originalCountry) {
+          if (originalCountry) {
+            countriesData[originalCountry] = Math.max(0, (countriesData[originalCountry] || 0) - 1);
+          } else {
+            totalUsers += 1;
+          }
+          if (country) {
+            countriesData[country] = (countriesData[country] || 0) + 1;
+          } else if (originalCountry) {
+             totalUsers = Math.max(0, totalUsers - 1);
+          }
+        }
+
+        if (country !== originalCountry) {
+          transaction.set(metricsRef, {
+            totalUsers,
+            countries: countriesData,
+            actualizadoEn: firestore.FieldValue.serverTimestamp(),
+          }, { merge: true });
+        }
+
+        transaction.update(userRef, {
+          idiomaPreferencia: language,
+          nombre: `${name.trim()} ${lastName.trim()}`,
+          genero: gender || null,
+          fechaNacimiento: birthDate ? birthDateObj : null,
+          pais: country || null,
+        });
+      });
+
+      setOriginalCountry(country);
+    } catch (error) {
+      console.error('Error al sincronizar perfil y métricas en Firestore', error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     setLanguage(i18n.language || 'es');
@@ -86,6 +153,10 @@ export default function ProfileScreen() {
           const data = typeof docSnapshot.data === 'function' ? docSnapshot.data() || {} : {};
           if (typeof data.genero === 'string') {
             setGender(data.genero);
+          }
+          if (typeof data.pais === 'string') {
+            setCountry(data.pais);
+            setOriginalCountry(data.pais);
           }
           const birthMs = parseFlexibleTimestamp(data.fechaNacimiento);
           if (birthMs != null) {
@@ -355,6 +426,19 @@ export default function ProfileScreen() {
               </View>
             </View>
 
+            <View style={styles.row}>
+              <View style={styles.rowItemWide}>
+                <FormSelectField
+                  testID="select-country"
+                  label={t('profile.country')}
+                  valueLabel={countryLabel}
+                  isPlaceholder={!country}
+                  onPress={() => setCountryModalVisible(true)}
+                  iconName="chevron-down"
+                />
+              </View>
+            </View>
+
             <Text style={styles.label}>{t('profile.email')}</Text>
             <View style={[styles.inputWithIcon, errors.email ? styles.inputError : null]}>
               <Image
@@ -472,6 +556,15 @@ export default function ProfileScreen() {
         options={genderOptions}
         selectedOption={gender}
         onSelectOption={setGender}
+      />
+
+      <ModalOptionList
+        visible={countryModalVisible}
+        onRequestClose={() => setCountryModalVisible(false)}
+        title={t('profile.country')}
+        options={countryOptions}
+        selectedOption={country}
+        onSelectOption={setCountry}
       />
 
       <BirthDatePicker

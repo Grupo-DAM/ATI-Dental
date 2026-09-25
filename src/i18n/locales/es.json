@@ -13,6 +13,8 @@
     "birthDatePlaceholder": "Seleccionar fecha",
     "gender": "Género",
     "genderPlaceholder": "Seleccionar",
+    "country": "País / Nacionalidad",
+    "countryPlaceholder": "Seleccionar",
     "confirmDate": "Confirmar",
     "datePickerUnavailable": "El calendario no está disponible en este dispositivo.",
     "email": "Correo Electrónico",
@@ -222,7 +224,14 @@
     "genderMale": "Masculino",
     "genderUnspecified": "No especificado",
     "genderTotal": "Total",
-    "averageAgeUnavailable": "—"
+    "averageAgeUnavailable": "—",
+    "reportTypeGeographics": "Distribución geografica",
+    "kpiCities": "CIUDADES",
+    "kpiPrincipal": "PRINCIPAL",
+    "chartTopCountries": "Top 8 Usuarios por país",
+    "chartRegions": "Distribución por Región",
+    "regionTotal": "Total",
+    "geoDataUnavailable": "No hay datos de ubicación geográfica disponibles"
   },
 
   "admin": {

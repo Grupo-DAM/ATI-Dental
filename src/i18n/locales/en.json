@@ -13,6 +13,8 @@
     "birthDatePlaceholder": "Select date",
     "gender": "Gender",
     "genderPlaceholder": "Select",
+    "country": "Country / Nationality",
+    "countryPlaceholder": "Select",
     "confirmDate": "Confirm",
     "datePickerUnavailable": "The date picker is not available on this device.",
     "email": "Email Address",
@@ -222,7 +224,14 @@
     "genderMale": "Male",
     "genderUnspecified": "Unspecified",
     "genderTotal": "Total",
-    "averageAgeUnavailable": "—"
+    "averageAgeUnavailable": "—",
+    "reportTypeGeographics": "Geographic distribution",
+    "kpiCities": "CITIES",
+    "kpiPrincipal": "MAIN",
+    "chartTopCountries": "Top 8 Users by country",
+    "chartRegions": "Region Distribution",
+    "regionTotal": "Total",
+    "geoDataUnavailable": "No geographic data available"
   },
 
   "admin": {

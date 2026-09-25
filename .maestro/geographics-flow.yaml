@@ -1,0 +1,72 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+# Esperar a que la app inicie
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
+# --- Inicio de Sesión (Administrador) ---
+- tapOn:
+    id: "email-input"
+- inputText: "jesusecova73@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "123456"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+- extendedWaitUntil:
+    visible:
+        id: "welcome-header"
+
+# --- Modificar Perfil (Seleccionar País) ---
+# Vamos al tab de perfil
+- tapOn: "Perfil|Profile"
+- extendedWaitUntil:
+    visible: "Información Personal|Personal Information"
+- scroll
+- tapOn:
+    id: "select-country"
+- extendedWaitUntil:
+    visible: "País / Nacionalidad|Country / Nationality"
+- scrollUntilVisible:
+    element:
+      id: "profile-country-option-co"
+    direction: DOWN
+- tapOn:
+    id: "profile-country-option-co"
+- scrollUntilVisible:
+    element:
+      id: "btn-save"
+    direction: DOWN
+- tapOn:
+    id: "btn-save"
+- extendedWaitUntil:
+    visible: "OK" # Confirmación de que se guardó
+- tapOn: "OK"
+
+# --- Verificar Reporte en Administración ---
+# Abrir menú lateral
+- tapOn:
+    id: "menu-btn"
+# Desplegar la lista de administración
+- extendedWaitUntil:
+    visible: "Administración|Administration"
+- tapOn: "Administración|Administration"
+# Navegar a reportes
+- extendedWaitUntil:
+    visible: "Generar Reportes|Generate Reports"
+- tapOn: "Generar Reportes|Generate Reports"
+- extendedWaitUntil:
+    visible:
+      id: "report-type-select"
+# Seleccionar reporte geográfico
+- tapOn:
+    id: "report-type-select"
+- tapOn:
+    id: "type-option-geographics"
+- extendedWaitUntil:
+    visible: ".*país.*|.*country.*" # Coincide con 'Top Países' o 'Top Countries'
+- assertVisible: "🇨🇴 Colombia"

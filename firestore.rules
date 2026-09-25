@@ -104,5 +104,11 @@ service cloud.firestore {
       // Solo administradores o Cloud Functions pueden actualizar métricas de retención
       allow write: if isAuthenticated() && isAdminUser();
     }
+
+    // 14. Colección de Métricas Geográficas (US-28)
+    match /metricas_geograficas/{docId} {
+      // Cualquier usuario autenticado puede leer y escribir (requerido para la transacción en el perfil)
+      allow read, write: if isAuthenticated();
+    }
   }
 }
