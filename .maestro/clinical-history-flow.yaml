@@ -1,28 +1,8 @@
 appId: com.proyect1.ATIDental
 ---
-- launchApp:
+- launchApp
 
-# Esperar a que la app inicie y cargue el login o la vista inicial
-- extendedWaitUntil:
-    visible:
-      id: "email-input"
-    timeout: 60000
-
-# --- Inicio de Sesión como Odontólogo ---
-- tapOn:
-    id: "email-input"
-- inputText: "jesusecova73@gmail.com"
-- tapOn:
-    id: "password-input"
-- inputText: "123456"
-- hideKeyboard
-- tapOn:
-    id: "login-button"
-
-- extendedWaitUntil:
-    visible:
-      id: "tabBar"
-    timeout: 15000
+- runFlow: common/login-admin.yaml
 
 # =======================================================
 # NAVEGACIÓN A FICHA DE PACIENTE

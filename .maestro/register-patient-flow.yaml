@@ -2,28 +2,7 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
-# 1. Esperar a que cargue la pantalla de login
-- extendedWaitUntil:
-    visible:
-      id: "email-input"
-    timeout: 60000
-
-# 2. Inicio de Sesión
-- tapOn:
-    id: "email-input"
-- inputText: "carloscaoucv2022@gmail.com"
-- tapOn:
-    id: "password-input"
-- inputText: "Cao1234"
-- hideKeyboard
-- tapOn:
-    id: "login-button"
-
-# 3. Esperar a que la app inicie en Home
-- extendedWaitUntil:
-    visible:
-      id: "welcome-header"
-    timeout: 20000
+- runFlow: common/login-user.yaml
 
 # 4. Navegar a la pestaña de Perfil (donde se ubica la cabecera con el menú lateral)
 - extendedWaitUntil:
@@ -88,10 +67,10 @@ appId: com.proyect1.ATIDental
     id: "input-full-name"
 - inputText: "Eccelsa Ciccolella"
 - hideKeyboard
-
+- evalScript: ${output.docNumber = "V-" + Math.floor(10000000 + Math.random() * 90000000)}
 - tapOn:
     id: "input-document"
-- inputText: "V-20123456"
+- inputText: ${output.docNumber}
 - hideKeyboard
 
 - scrollUntilVisible:
@@ -104,10 +83,10 @@ appId: com.proyect1.ATIDental
     id: "input-phone"
 - inputText: "+584141234567"
 - hideKeyboard
-
+- evalScript: ${output.patientEmail = "paciente_" + Date.now() + "@ejemplo.com"}
 - tapOn:
     id: "input-email"
-- inputText: "eccelsa@ejemplo.com"
+- inputText: ${output.patientEmail}
 - hideKeyboard
 
 # Scroll hacia abajo para los datos clínicos
