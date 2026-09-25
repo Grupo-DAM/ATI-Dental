@@ -590,4 +590,127 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     });
   });
 
+  it('transacción con cambio de país (originalCountry ya existía)', async () => {
+    const mockSet = jest.fn();
+    const mockUpdate = jest.fn();
+    const firestoreMock = require('@react-native-firebase/firestore');
+    firestoreMock.mockImplementation(() => ({
+      collection: jest.fn(() => ({
+        doc: jest.fn(() => ({
+          update: jest.fn().mockResolvedValue(true),
+          get: jest.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({ genero: 'male', pais: 'mx', fechaNacimiento: { toDate: () => new Date(1990, 4, 15) } }),
+          }),
+        })),
+      })),
+      runTransaction: jest.fn(async (cb) => {
+        await cb({
+          get: jest.fn().mockResolvedValue({
+            exists: true,
+            data: () => ({ totalUsers: 10, countries: { mx: 5, co: 3 } }),
+          }),
+          set: mockSet,
+          update: mockUpdate,
+        });
+      }),
+    }));
+
+    const { getByTestId } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('select-country')).toBeTruthy();
+    });
+
+    // Cambiar país de mx (pre-cargado) a co
+    fireEvent.press(getByTestId('select-country'));
+    fireEvent.press(getByTestId('profile-country-option-co'));
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage',
+      );
+    });
+  });
+
+  it('transacción sin cambio de país (country === originalCountry)', async () => {
+    const mockSet = jest.fn();
+    const mockUpdate = jest.fn();
+    const firestoreMock = require('@react-native-firebase/firestore');
+    firestoreMock.mockImplementation(() => ({
+      collection: jest.fn(() => ({
+        doc: jest.fn(() => ({
+          update: jest.fn().mockResolvedValue(true),
+          get: jest.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({ genero: 'female', pais: 'co' }),
+          }),
+        })),
+      })),
+      runTransaction: jest.fn(async (cb) => {
+        await cb({
+          get: jest.fn().mockResolvedValue({
+            exists: true,
+            data: () => ({ totalUsers: 5, countries: { co: 5 } }),
+          }),
+          set: mockSet,
+          update: mockUpdate,
+        });
+      }),
+    }));
+
+    const { getByTestId } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('select-country')).toBeTruthy();
+    });
+
+    // No cambiar país — guardar directamente
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage',
+      );
+    });
+
+    // No se debería haber llamado set en metricsRef porque el país no cambió
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it('carga perfil con fechaNacimiento como timestamp de Firestore', async () => {
+    const firestoreMock = require('@react-native-firebase/firestore');
+    firestoreMock.mockImplementation(() => ({
+      collection: jest.fn(() => ({
+        doc: jest.fn(() => ({
+          update: jest.fn().mockResolvedValue(true),
+          get: jest.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({
+              genero: 'female',
+              pais: 'co',
+              fechaNacimiento: { toDate: () => new Date(1995, 6, 20) },
+            }),
+          }),
+        })),
+      })),
+      runTransaction: jest.fn(async (cb) => {
+        await cb({
+          get: jest.fn().mockResolvedValue({ exists: false, data: () => ({}) }),
+          set: jest.fn(),
+          update: jest.fn(),
+        });
+      }),
+    }));
+
+    const { getByTestId } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('select-country')).toBeTruthy();
+    });
+  });
+
 });
