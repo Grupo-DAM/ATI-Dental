@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { Treatment } from '@/services/treatment-service';
+import {
+  TimelineSearchBar,
+  TimelineItemActions,
+  TimelineEmptyState,
+} from './TimelineComponents';
 
 function formatTreatmentDate(dateStr?: string): string {
   if (!dateStr) return '—';
@@ -79,40 +83,26 @@ export function TreatmentsTimeline({
         </TouchableOpacity>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={16} color={theme.placeholderColor} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t('clinicalHistory.searchPlaceholder', 'Buscar por motivo, diagnostico o fecha')}
-          placeholderTextColor={theme.placeholderColor}
-          value={searchQuery}
-          onChangeText={onSearchChange}
-          clearButtonMode="while-editing"
-          testID="search-treatments-input"
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => onSearchChange('')} style={{ padding: 4 }}>
-            <Ionicons name="close-circle" size={16} color={theme.placeholderColor} />
-          </TouchableOpacity>
-        )}
-      </View>
+      {/* Reusable Search Bar */}
+      <TimelineSearchBar
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        placeholder={t('clinicalHistory.searchPlaceholder', 'Buscar por motivo, diagnostico o fecha')}
+        testID="search-treatments-input"
+      />
 
-      {/* Empty State */}
+      {/* Reusable Empty State */}
       {treatments.length === 0 ? (
-        <View style={styles.emptyContainer} testID="empty-treatments">
-          <Ionicons name="clipboard-outline" size={48} color={theme.pageSubtitle} />
-          <Text style={styles.emptyTitle}>
-            {searchQuery
-              ? t('clinicalHistory.noSearchResults', 'Sin resultados')
-              : t('clinicalHistory.noTreatments', 'Sin tratamientos registrados')}
-          </Text>
-          <Text style={styles.emptySubtitle}>
-            {searchQuery
-              ? t('clinicalHistory.noSearchResultsDesc', 'No se encontraron tratamientos que coincidan.')
-              : t('clinicalHistory.noTreatmentsDesc', 'Este paciente aún no tiene procedimientos registrados.')}
-          </Text>
-        </View>
+        <TimelineEmptyState
+          icon="clipboard-outline"
+          title={searchQuery
+            ? t('clinicalHistory.noSearchResults', 'Sin resultados')
+            : t('clinicalHistory.noTreatments', 'Sin tratamientos registrados')}
+          subtitle={searchQuery
+            ? t('clinicalHistory.noSearchResultsDesc', 'No se encontraron tratamientos que coincidan.')
+            : t('clinicalHistory.noTreatmentsDesc', 'Este paciente aún no tiene procedimientos registrados.')}
+          testID="empty-treatments"
+        />
       ) : null}
 
       {/* Treatments List */}
@@ -185,26 +175,11 @@ export function TreatmentsTimeline({
                 ) : null}
               </View>
 
-              {/* Actions Footer */}
-              <View style={styles.actionsFooter}>
-                <TouchableOpacity
-                  style={styles.actionItem}
-                  onPress={() => onModifyTreatment(tr.id)}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="create-outline" size={14} color={theme.pageSubtitle} />
-                  <Text style={styles.actionText}>Modificar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.actionItem}
-                  onPress={() => onDeleteTreatment(tr.id)}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="trash-outline" size={14} color={theme.pageSubtitle} />
-                  <Text style={styles.actionText}>Eliminar</Text>
-                </TouchableOpacity>
-              </View>
+              {/* Reusable Actions Footer */}
+              <TimelineItemActions
+                onModify={() => onModifyTreatment(tr.id)}
+                onDelete={() => onDeleteTreatment(tr.id)}
+              />
             </View>
           </View>
         );
@@ -245,27 +220,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       fontSize: 12,
       fontWeight: '600',
       fontFamily: 'Open Sans',
-    },
-    searchContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.backgroundElement,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      borderRadius: 8,
-      paddingHorizontal: 10,
-      height: 40,
-      marginBottom: 16,
-    },
-    searchIcon: {
-      marginRight: 6,
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: 13,
-      color: theme.text,
-      fontFamily: 'Open Sans',
-      paddingVertical: 0,
     },
     timelineItem: {
       flexDirection: 'row',
@@ -359,46 +313,5 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
     metaSeparator: {
       fontSize: 11,
       color: theme.cardSeparator,
-    },
-    actionsFooter: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      gap: 16,
-      borderTopWidth: 1,
-      borderTopColor: theme.pageSeparator,
-      paddingTop: 8,
-    },
-    actionItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    actionText: {
-      fontSize: 12,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-    },
-    emptyContainer: {
-      alignItems: 'center',
-      paddingVertical: 32,
-      backgroundColor: theme.backgroundElement,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      paddingHorizontal: 20,
-    },
-    emptyTitle: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: theme.pageTitle,
-      fontFamily: 'Open Sans',
-      marginTop: 10,
-    },
-    emptySubtitle: {
-      fontSize: 12,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-      textAlign: 'center',
-      marginTop: 4,
     },
   });

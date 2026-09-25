@@ -22,6 +22,7 @@ import { getPatientById, getPatientByEmail, Patient } from '@/services/patient-s
 import { getTreatmentsByPatientId, deleteTreatment, Treatment } from '@/services/treatment-service';
 import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
+import { calculateAge, parseDateRobustly } from '@/utils/date-utils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
@@ -29,45 +30,6 @@ const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
 const ALLOWED_ROLES = new Set(['odontologo', 'admin', 'asistente', 'medico']);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Compute age from an ISO date string */
-function calculateAge(dateString?: string): number | null {
-  if (!dateString) return null;
-  try {
-    const birth = new Date(dateString);
-    if (Number.isNaN(birth.getTime())) return null;
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  } catch {
-    return null;
-  }
-}
-
-function parseDateRobustly(dateInput: any): Date | null {
-  if (!dateInput) return null;
-  
-  let date: Date;
-  if (typeof dateInput.toDate === 'function') {
-    date = dateInput.toDate();
-  } else if (typeof dateInput === 'string') {
-    date = new Date(dateInput);
-    if (Number.isNaN(date.getTime())) {
-      const match = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(dateInput);
-      if (match) {
-        date = new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
-      }
-    }
-  } else {
-    date = new Date(dateInput);
-  }
-
-  return Number.isNaN(date.getTime()) ? null : date;
-}
 
 /** Format an ISO date string to a readable locale date */
 function formatDate(dateInput: any): string {

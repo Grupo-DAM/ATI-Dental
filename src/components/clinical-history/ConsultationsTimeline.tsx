@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { Consultation } from '@/types/clinical-record';
+import {
+  TimelineSearchBar,
+  TimelineItemActions,
+  TimelineEmptyState,
+} from './TimelineComponents';
 
 function formatTimelineDate(dateStr?: string): { day: string; monthYear: string } {
   if (!dateStr) return { day: '—', monthYear: '—' };
@@ -72,40 +76,26 @@ export function ConsultationsTimeline({
         </TouchableOpacity>
       </View>
 
-      {/* Search Input */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={16} color={theme.placeholderColor} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t('clinicalHistory.searchPlaceholder', 'Buscar por motivo, diagnostico o fecha')}
-          placeholderTextColor={theme.placeholderColor}
-          value={searchQuery}
-          onChangeText={onSearchChange}
-          clearButtonMode="while-editing"
-          testID="search-consultations-input"
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => onSearchChange('')} style={{ padding: 4 }}>
-            <Ionicons name="close-circle" size={16} color={theme.placeholderColor} />
-          </TouchableOpacity>
-        )}
-      </View>
+      {/* Reusable Search Input */}
+      <TimelineSearchBar
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        placeholder={t('clinicalHistory.searchPlaceholder', 'Buscar por motivo, diagnostico o fecha')}
+        testID="search-consultations-input"
+      />
 
-      {/* Empty State */}
+      {/* Reusable Empty State */}
       {consultations.length === 0 ? (
-        <View style={styles.emptyContainer} testID="empty-consultations">
-          <Ionicons name="calendar-outline" size={48} color={theme.pageSubtitle} />
-          <Text style={styles.emptyTitle}>
-            {searchQuery
-              ? t('clinicalHistory.noSearchResults', 'Sin resultados')
-              : t('clinicalHistory.noConsultations', 'Sin consultas registradas')}
-          </Text>
-          <Text style={styles.emptySubtitle}>
-            {searchQuery
-              ? t('clinicalHistory.noSearchResultsDesc', 'No se encontraron consultas que coincidan con la búsqueda.')
-              : t('clinicalHistory.noConsultationsDesc', 'Este paciente aún no posee consultas odontológicas registradas.')}
-          </Text>
-        </View>
+        <TimelineEmptyState
+          icon="calendar-outline"
+          title={searchQuery
+            ? t('clinicalHistory.noSearchResults', 'Sin resultados')
+            : t('clinicalHistory.noConsultations', 'Sin consultas registradas')}
+          subtitle={searchQuery
+            ? t('clinicalHistory.noSearchResultsDesc', 'No se encontraron consultas que coincidan con la búsqueda.')
+            : t('clinicalHistory.noConsultationsDesc', 'Este paciente aún no posee consultas odontológicas registradas.')}
+          testID="empty-consultations"
+        />
       ) : null}
 
       {/* Timeline List */}
@@ -150,33 +140,12 @@ export function ConsultationsTimeline({
                 </Text>
               </View>
 
-              {/* Actions Footer */}
-              <View style={styles.actionsFooter}>
-                <TouchableOpacity
-                  style={styles.actionItem}
-                  onPress={(e) => {
-                    e?.stopPropagation?.();
-                    onModifyConsultation?.(item);
-                  }}
-                  activeOpacity={0.7}
-                  testID={`btn-modify-consultation-${item.id}`}
-                >
-                  <Ionicons name="create-outline" size={14} color={theme.pageSubtitle} />
-                  <Text style={styles.actionText}>Modificar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.actionItem}
-                  onPress={(e) => {
-                    e?.stopPropagation?.();
-                    onDeleteConsultation?.(item.id);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="trash-outline" size={14} color={theme.pageSubtitle} />
-                  <Text style={styles.actionText}>Eliminar</Text>
-                </TouchableOpacity>
-              </View>
+              {/* Reusable Actions Footer */}
+              <TimelineItemActions
+                onModify={() => onModifyConsultation?.(item)}
+                onDelete={() => onDeleteConsultation?.(item.id)}
+                modifyTestID={`btn-modify-consultation-${item.id}`}
+              />
             </TouchableOpacity>
           </View>
         );
@@ -217,27 +186,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       fontSize: 12,
       fontWeight: '600',
       fontFamily: 'Open Sans',
-    },
-    searchContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.backgroundElement,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      borderRadius: 8,
-      paddingHorizontal: 10,
-      height: 40,
-      marginBottom: 16,
-    },
-    searchIcon: {
-      marginRight: 6,
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: 13,
-      color: theme.text,
-      fontFamily: 'Open Sans',
-      paddingVertical: 0,
     },
     timelineItem: {
       flexDirection: 'row',
@@ -316,47 +264,5 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       color: theme.text,
       fontFamily: 'Open Sans',
       flex: 1,
-    },
-    actionsFooter: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      gap: 16,
-      borderTopWidth: 1,
-      borderTopColor: theme.pageSeparator,
-      marginTop: 10,
-      paddingTop: 8,
-    },
-    actionItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    actionText: {
-      fontSize: 12,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-    },
-    emptyContainer: {
-      alignItems: 'center',
-      paddingVertical: 32,
-      backgroundColor: theme.backgroundElement,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      paddingHorizontal: 20,
-    },
-    emptyTitle: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: theme.pageTitle,
-      fontFamily: 'Open Sans',
-      marginTop: 10,
-    },
-    emptySubtitle: {
-      fontSize: 12,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-      textAlign: 'center',
-      marginTop: 4,
     },
   });

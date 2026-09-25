@@ -5,23 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { Patient } from '@/services/patient-service';
-
-function calculateAge(dateString?: string): number | null {
-  if (!dateString) return null;
-  try {
-    const birth = new Date(dateString);
-    if (Number.isNaN(birth.getTime())) return null;
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  } catch {
-    return null;
-  }
-}
+import { calculateAge } from '@/utils/date-utils';
 
 function getInitials(name: string): string {
   if (!name) return 'PT';

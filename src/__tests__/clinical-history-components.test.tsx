@@ -5,6 +5,11 @@ import { ConsultationsTimeline } from '@/components/clinical-history/Consultatio
 import { PatientSummaryCard } from '@/components/clinical-history/PatientSummaryCard';
 import { OdontogramContainer } from '@/components/clinical-history/OdontogramContainer';
 import { ConsultationDetailModal } from '@/components/clinical-history/ConsultationDetailModal';
+import {
+  TimelineSearchBar,
+  TimelineItemActions,
+  TimelineEmptyState,
+} from '@/components/clinical-history/TimelineComponents';
 import { Treatment } from '@/services/treatment-service';
 import { Consultation } from '@/types/clinical-record';
 import { Patient } from '@/services/patient-service';
@@ -550,6 +555,82 @@ describe('Clinical History Sub-Components - Unit & Branch Coverage', () => {
       await waitFor(() => {
         expect(onSave).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('TimelineComponents', () => {
+    it('TimelineSearchBar renderiza, escribe y limpia texto', () => {
+      const onSearchChange = jest.fn();
+      const { rerender } = render(
+        <TimelineSearchBar
+          searchQuery=""
+          onSearchChange={onSearchChange}
+          placeholder="Buscar..."
+          testID="test-search-bar"
+        />
+      );
+
+      const input = screen.getByTestId('test-search-bar');
+      expect(input).toBeTruthy();
+      fireEvent.changeText(input, 'limpieza');
+      expect(onSearchChange).toHaveBeenCalledWith('limpieza');
+
+      // Re-render con texto activo muestra botón de limpiar
+      rerender(
+        <TimelineSearchBar
+          searchQuery="limpieza"
+          onSearchChange={onSearchChange}
+          placeholder="Buscar..."
+          testID="test-search-bar"
+        />
+      );
+
+      const clearBtn = screen.getByTestId('btn-clear-search');
+      expect(clearBtn).toBeTruthy();
+      fireEvent.press(clearBtn);
+      expect(onSearchChange).toHaveBeenCalledWith('');
+    });
+
+    it('TimelineItemActions ejecuta onModify y onDelete con y sin stopPropagation', () => {
+      const onModify = jest.fn();
+      const onDelete = jest.fn();
+
+      render(
+        <TimelineItemActions
+          onModify={onModify}
+          onDelete={onDelete}
+          modifyTestID="btn-modify-test"
+          deleteTestID="btn-delete-test"
+        />
+      );
+
+      fireEvent.press(screen.getByTestId('btn-modify-test'), { stopPropagation: jest.fn() });
+      expect(onModify).toHaveBeenCalled();
+
+      fireEvent.press(screen.getByTestId('btn-delete-test'), {});
+      expect(onDelete).toHaveBeenCalled();
+    });
+
+    it('TimelineItemActions maneja callbacks no definidos de forma segura', () => {
+      render(<TimelineItemActions />);
+      fireEvent.press(screen.getByText('Modificar'));
+      fireEvent.press(screen.getByText('Eliminar'));
+      expect(screen.getByText('Modificar')).toBeTruthy();
+    });
+
+    it('TimelineEmptyState renderiza icono, título y subtítulo', () => {
+      render(
+        <TimelineEmptyState
+          icon="calendar-outline"
+          title="Sin consultas"
+          subtitle="No hay registros"
+          testID="test-empty-state"
+        />
+      );
+
+      expect(screen.getByTestId('test-empty-state')).toBeTruthy();
+      expect(screen.getByText('Sin consultas')).toBeTruthy();
+      expect(screen.getByText('No hay registros')).toBeTruthy();
     });
   });
 });

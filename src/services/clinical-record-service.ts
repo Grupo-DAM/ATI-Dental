@@ -4,29 +4,62 @@ import { getSessionToken } from '@/utils/secure-storage';
 import { getPatientById, Patient } from '@/services/patient-service';
 import { getTreatmentsByPatientId, Treatment } from '@/services/treatment-service';
 import { ClinicalRecord, ClinicalRecordResponse, Consultation, OdontogramData } from '@/types/clinical-record';
+import { parseDateRobustly } from '@/utils/date-utils';
 
 export const CONSULTATIONS_COLLECTION = 'consultas';
 
-function parseDateRobustly(dateInput: any): Date | null {
-  if (!dateInput) return null;
-  try {
-    if (typeof dateInput.toDate === 'function') {
-      return dateInput.toDate();
-    }
-    if (typeof dateInput === 'string') {
-      const d = new Date(dateInput);
-      if (!Number.isNaN(d.getTime())) return d;
-      const match = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(dateInput);
-      if (match) {
-        return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
-      }
-    }
-    const d = new Date(dateInput);
-    return Number.isNaN(d.getTime()) ? null : d;
-  } catch {
-    return null;
-  }
-}
+const DEFAULT_SEEDS = [
+  {
+    id: 'c-default-1',
+    consultationDate: '2023-09-20T10:00:00Z',
+    title: 'Limpieza dental profunda',
+    motivo: 'Control y Limpieza',
+    diagnostico: 'Buena salud periodontal. Se recomienda profilaxis cada 6 meses.',
+    diagnosticoDetallado: [
+      'Gingivitis generalizada leve',
+      'Acumulacion de placa bacteriana',
+      'Buen estado general de la limpieza',
+    ],
+    proximaCita: '14 Oct 2023',
+    doctor: 'Dr. Smith',
+    duration: '45 minutos',
+    tratamientosRealizados: 'Limpieza Dental Profunda - Profilaxis completa y aplicación de flúor.',
+    notas: 'Paciente refiere sensibilidad leve en encías tras el cepillado.',
+  },
+  {
+    id: 'c-default-2',
+    consultationDate: '2023-08-15T11:30:00Z',
+    title: 'Obturación Resina (Pieza 46)',
+    motivo: 'Dolor en pieza 46',
+    diagnostico: 'Caries oclusal en pieza 46. Cavidad tratada y sellada con resina.',
+    diagnosticoDetallado: [
+      'Caries oclusal clase I',
+      'Restauración con resina compuesta',
+    ],
+    proximaCita: '20 Sep 2023',
+    doctor: 'Dra. Martinez',
+    duration: '30 minutos',
+    tratamientosRealizados: 'Obturación Resina Fotocurada',
+    notas: 'Sin compromiso pulpar evidente.',
+  },
+  {
+    id: 'c-default-3',
+    consultationDate: '2023-01-02T09:00:00Z',
+    title: 'Primera consulta',
+    motivo: 'Evaluación General',
+    diagnostico: 'Buena salud periodontal. Se recomienda profilaxis cada 6 meses.',
+    diagnosticoDetallado: [
+      'Evaluación inicial completa',
+      'Radiografías panorámicas solicitadas',
+      'Plan de tratamiento inicial establecido',
+    ],
+    proximaCita: 'No se programó',
+    doctor: 'Dr. Smith',
+    duration: '40 minutos',
+    tratamientosRealizados: 'Diagnóstico y plan de tratamiento',
+    notas: 'Apertura de ficha clínica y registro de antecedentes.',
+  },
+];
 
 /**
  * Genera consultas iniciales basadas en el paciente y los tratamientos si aún no existen
@@ -55,61 +88,10 @@ function generateDefaultConsultations(patient: Patient, treatments: Treatment[])
   }
 
   // Fallback representativo basado en Figma
-  return [
-    {
-      id: 'c-default-1',
-      patientId: patient.id,
-      consultationDate: '2023-09-20T10:00:00Z',
-      title: 'Limpieza dental profunda',
-      motivo: 'Control y Limpieza',
-      diagnostico: 'Buena salud periodontal. Se recomienda profilaxis cada 6 meses.',
-      diagnosticoDetallado: [
-        'Gingivitis generalizada leve',
-        'Acumulacion de placa bacteriana',
-        'Buen estado general de la limpieza',
-      ],
-      proximaCita: '14 Oct 2023',
-      doctor: 'Dr. Smith',
-      duration: '45 minutos',
-      tratamientosRealizados: 'Limpieza Dental Profunda - Profilaxis completa y aplicación de flúor.',
-      notas: 'Paciente refiere sensibilidad leve en encías tras el cepillado.',
-    },
-    {
-      id: 'c-default-2',
-      patientId: patient.id,
-      consultationDate: '2023-08-15T11:30:00Z',
-      title: 'Obturación Resina (Pieza 46)',
-      motivo: 'Dolor en pieza 46',
-      diagnostico: 'Caries oclusal en pieza 46. Cavidad tratada y sellada con resina.',
-      diagnosticoDetallado: [
-        'Caries oclusal clase I',
-        'Restauración con resina compuesta',
-      ],
-      proximaCita: '20 Sep 2023',
-      doctor: 'Dra. Martinez',
-      duration: '30 minutos',
-      tratamientosRealizados: 'Obturación Resina Fotocurada',
-      notas: 'Sin compromiso pulpar evidente.',
-    },
-    {
-      id: 'c-default-3',
-      patientId: patient.id,
-      consultationDate: '2023-01-02T09:00:00Z',
-      title: 'Primera consulta',
-      motivo: 'Evaluación General',
-      diagnostico: 'Buena salud periodontal. Se recomienda profilaxis cada 6 meses.',
-      diagnosticoDetallado: [
-        'Evaluación inicial completa',
-        'Radiografías panorámicas solicitadas',
-        'Plan de tratamiento inicial establecido',
-      ],
-      proximaCita: 'No se programó',
-      doctor: 'Dr. Smith',
-      duration: '40 minutos',
-      tratamientosRealizados: 'Diagnóstico y plan de tratamiento',
-      notas: 'Apertura de ficha clínica y registro de antecedentes.',
-    },
-  ];
+  return DEFAULT_SEEDS.map((seed) => ({
+    ...seed,
+    patientId: patient.id,
+  }));
 }
 
 /**
@@ -218,21 +200,15 @@ export async function fetchClinicalRecord(patientId: string): Promise<ClinicalRe
     }
 
     // Orden cronológico descendente estricto (Escenario 3)
-    consultations.sort((a, b) => {
-      const dateA = parseDateRobustly(a.consultationDate);
-      const dateB = parseDateRobustly(b.consultationDate);
-      const timeA = dateA ? dateA.getTime() : 0;
-      const timeB = dateB ? dateB.getTime() : 0;
-      return timeB - timeA;
-    });
-
-    treatments.sort((a, b) => {
-      const dateA = parseDateRobustly(a.treatmentDate);
-      const dateB = parseDateRobustly(b.treatmentDate);
-      const timeA = dateA ? dateA.getTime() : 0;
-      const timeB = dateB ? dateB.getTime() : 0;
-      return timeB - timeA;
-    });
+    const sortByDateDesc = <T>(list: T[], getDate: (item: T) => any) => {
+      list.sort((a, b) => {
+        const timeA = parseDateRobustly(getDate(a))?.getTime() ?? 0;
+        const timeB = parseDateRobustly(getDate(b))?.getTime() ?? 0;
+        return timeB - timeA;
+      });
+    };
+    sortByDateDesc(consultations, (c) => c.consultationDate);
+    sortByDateDesc(treatments, (t) => t.treatmentDate);
 
     const odontogram: OdontogramData = {
       patientId: patient.id,
@@ -261,21 +237,31 @@ export async function fetchClinicalRecord(patientId: string): Promise<ClinicalRe
   }
 }
 
+async function mutateConsultationDoc(
+  consultationId: string,
+  action: 'delete' | 'update',
+  updatedData?: Partial<Consultation>
+): Promise<boolean> {
+  try {
+    const docRef = firestore().collection(CONSULTATIONS_COLLECTION).doc(consultationId);
+    if (action === 'delete') {
+      await docRef.delete();
+    } else if (updatedData) {
+      await docRef.set(updatedData, { merge: true });
+    }
+    return true;
+  } catch (error) {
+    console.warn(`[clinical-record-service] ${action}Consultation error in Firestore:`, error);
+    // Para consultas virtuales en memoria o fallback
+    return true;
+  }
+}
+
 /**
  * Elimina una consulta de la historia clínica
  */
 export async function deleteConsultation(consultationId: string): Promise<boolean> {
-  try {
-    await firestore()
-      .collection(CONSULTATIONS_COLLECTION)
-      .doc(consultationId)
-      .delete();
-    return true;
-  } catch (error) {
-    console.warn('[clinical-record-service] deleteConsultation error in Firestore:', error);
-    // Si era una consulta virtual por fallback, se retorna true
-    return true;
-  }
+  return mutateConsultationDoc(consultationId, 'delete');
 }
 
 /**
@@ -285,16 +271,6 @@ export async function updateConsultation(
   consultationId: string,
   updatedData: Partial<Consultation>
 ): Promise<boolean> {
-  try {
-    await firestore()
-      .collection(CONSULTATIONS_COLLECTION)
-      .doc(consultationId)
-      .set(updatedData, { merge: true });
-    return true;
-  } catch (error) {
-    console.warn('[clinical-record-service] updateConsultation error in Firestore:', error);
-    // Para consultas virtuales en memoria o fallback
-    return true;
-  }
+  return mutateConsultationDoc(consultationId, 'update', updatedData);
 }
 
