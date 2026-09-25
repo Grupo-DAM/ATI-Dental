@@ -448,5 +448,49 @@
       "patientNotFound": "The requested patient was not found.",
       "noPatientId": "No patient identifier was provided."
     }
+  },
+  "agenda": {
+    "title": "Weekly Agenda",
+    "weeklySchedule": "Weekly Agenda",
+    "noAppointments": "No scheduled appointments",
+    "noAppointmentsMessage": "There are no appointments scheduled for this day.",
+    "errorLoading": "Could not load agenda",
+    "errorLoadingSubtitle": "An error occurred while fetching appointments for the week.",
+    "retry": "Retry",
+    "confirmed": "CONFIRMED",
+    "pending": "PENDING",
+    "cancelled": "CANCELLED",
+    "lunchBreak": "LUNCH BREAK",
+    "minutes": "MIN",
+    "chair": "CHAIR {{number}}",
+    "accessDeniedTitle": "Access Denied",
+    "accessDeniedMessage": "This section is restricted to dentists only.",
+    "options": "Options",
+    "optionsMessage": "Options for {{name}}'s appointment",
+    "viewDetails": "View details",
+    "close": "Close",
+    "months": {
+      "0": "JANUARY",
+      "1": "FEBRUARY",
+      "2": "MARCH",
+      "3": "APRIL",
+      "4": "MAY",
+      "5": "JUNE",
+      "6": "JULY",
+      "7": "AUGUST",
+      "8": "SEPTEMBER",
+      "9": "OCTOBER",
+      "10": "NOVEMBER",
+      "11": "DECEMBER"
+    },
+    "days": {
+      "0": "SUN",
+      "1": "MON",
+      "2": "TUE",
+      "3": "WED",
+      "4": "THU",
+      "5": "FRI",
+      "6": "SAT"
+    }
   }
 }

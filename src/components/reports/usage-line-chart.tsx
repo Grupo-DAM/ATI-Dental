@@ -5,18 +5,18 @@ import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export interface ChartDataPoint {
-  label: string;
-  value: number;
-  date?: string;
-  fullDate?: string;
+  readonly label: string;
+  readonly value: number;
+  readonly date?: string;
+  readonly fullDate?: string;
 }
 
 export interface UsageLineChartProps {
-  data: ChartDataPoint[];
-  height?: number;
-  unit?: string;
-  lineColor?: string;
-  testID?: string;
+  readonly data: ChartDataPoint[];
+  readonly height?: number;
+  readonly unit?: string;
+  readonly lineColor?: string;
+  readonly testID?: string;
 }
 
 /**
@@ -108,6 +108,7 @@ export function UsageLineChart({
       return [{
         x: paddingLeft + chartWidth / 2,
         y: paddingTop + chartHeight - (data[0].value / maxValue) * chartHeight,
+        id: data[0].fullDate || data[0].date || data[0].label || 'single-point',
       }];
     }
 
@@ -115,7 +116,8 @@ export function UsageLineChart({
       const x = paddingLeft + (index / (data.length - 1)) * chartWidth;
       const normalizedY = Math.min(Math.max(d.value / maxValue, 0), 1);
       const y = paddingTop + chartHeight - normalizedY * chartHeight;
-      return { x, y };
+      const id = d.fullDate || (d.date ? `${d.label}-${d.date}` : `${d.label}-${d.value}-${index}`);
+      return { x, y, id };
     });
   }, [data, chartWidth, chartHeight, maxValue]);
 
@@ -210,7 +212,7 @@ export function UsageLineChart({
 
           return (
             <SvgText
-              key={`x-label-${d.label}-${index}`}
+              key={`x-label-${points[index].id}`}
               x={points[index].x}
               y={paddingTop + chartHeight + 18}
               fill={theme.chartLegendText}
@@ -244,7 +246,7 @@ export function UsageLineChart({
         {points.map((p, index) => {
           const isSelected = selectedIndex === index;
           return (
-            <React.Fragment key={`point-${index}`}>
+            <React.Fragment key={`point-${p.id}`}>
               <Circle
                 cx={p.x}
                 cy={p.y}
@@ -265,7 +267,7 @@ export function UsageLineChart({
       {/* Touch targets over points for interaction */}
       {points.map((p, index) => (
         <TouchableOpacity
-          key={`touch-${index}`}
+          key={`touch-${p.id}`}
           testID={`chart-point-${index}`}
           style={[
             styles.touchTarget,

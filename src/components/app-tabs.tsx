@@ -17,6 +17,7 @@ export default function AppTabs() {
     >
       <Tabs.Screen name="home" options={{ title: 'Inicio' }} />
       <Tabs.Screen name="patients/patients-list" options={{ title: 'Pacientes' }} />
+      <Tabs.Screen name="agenda" options={{ title: 'Agenda' }} />
       <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
       <Tabs.Screen name="contacts" options={{ href: null, title: 'Contacto' }} />
       <Tabs.Screen name="patients/register-patient" options={{ href: null, title: 'Registrar Paciente' }} />
@@ -29,7 +30,18 @@ export default function AppTabs() {
   );
 }
 
-function CustomTabBar({ state, descriptors, navigation }: any) {
+interface CustomTabBarProps {
+  state: {
+    index: number;
+    routes: Array<{ name: string; key: string }>;
+  };
+  descriptors?: Record<string, any>;
+  navigation: {
+    navigate: (name: string, params?: any) => void;
+  };
+}
+
+function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
   const colors = useTheme();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
@@ -42,12 +54,10 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
   // Dynamic padding compensation for iOS gestures and Android navigation bars
   let dynamicPaddingBottom = 12;
-
   if (Platform.OS === 'ios') {
-      dynamicPaddingBottom = insets.bottom > 0 ? insets.bottom : 24;
-  } else {
-      // Lógica para Android
-      dynamicPaddingBottom = insets.bottom > 0 ? insets.bottom + 4 : 12;
+    dynamicPaddingBottom = insets.bottom > 0 ? insets.bottom : 24;
+  } else if (insets.bottom > 0) {
+    dynamicPaddingBottom = insets.bottom + 4;
   }
 
   return (
@@ -116,15 +126,21 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
         </TouchableOpacity>
       </View>
 
+      {/* 4. AGENDA TAB */}
       <TouchableOpacity
-        disabled
+        testID="agenda-tab"
+        onPress={() => handleNavigate('agenda')}
         style={styles.tabItem}>
         <Image
           source={require('@/assets/expo.icon/Assets/agenda-pencil-left.svg')}
           style={styles.icon}
-          tintColor={colors.textSecondary}
+          tintColor={activeRouteName === 'agenda' ? colors.main : colors.textSecondary}
         />
-        <Text style={[styles.label, { color: colors.textSecondary }]}>
+        <Text
+          style={[
+            styles.label,
+            { color: activeRouteName === 'agenda' ? colors.main : colors.textSecondary },
+          ]}>
           {t('tabs.agenda')}
         </Text>
       </TouchableOpacity>

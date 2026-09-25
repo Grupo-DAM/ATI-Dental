@@ -129,6 +129,33 @@ export const generatePaddedChartData = (historyMap: Map<string, number>, periodD
     return paddedData;
 };
 
+function parseFirestoreTimestampObject(raw: object): number | null {
+    const value = raw as { toMillis?: () => number; toDate?: () => Date; seconds?: number };
+    if (typeof value.toMillis === 'function') {
+        return value.toMillis();
+    }
+    if (typeof value.toDate === 'function') {
+        const date = value.toDate();
+        return date instanceof Date && !Number.isNaN(date.getTime()) ? date.getTime() : null;
+    }
+    if (typeof value.seconds === 'number') {
+        return value.seconds * 1000;
+    }
+    return null;
+}
+
+function parseStringTimestamp(raw: string): number | null {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+    const dmy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmed);
+    if (dmy) {
+        const date = new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+        return Number.isNaN(date.getTime()) ? null : date.getTime();
+    }
+    const parsed = Date.parse(trimmed);
+    return Number.isNaN(parsed) ? null : parsed;
+}
+
 export function parseFlexibleTimestamp(raw: unknown): number | null {
     if (raw == null || raw === '') return null;
     if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
@@ -137,23 +164,10 @@ export function parseFlexibleTimestamp(raw: unknown): number | null {
         return Number.isNaN(time) ? null : time;
     }
     if (typeof raw === 'object') {
-        const value = raw as { toMillis?: () => number; toDate?: () => Date; seconds?: number };
-        if (typeof value.toMillis === 'function') return value.toMillis();
-        if (typeof value.toDate === 'function') {
-            const date = value.toDate();
-            return date instanceof Date && !Number.isNaN(date.getTime()) ? date.getTime() : null;
-        }
-        if (typeof value.seconds === 'number') return value.seconds * 1000;
+        return parseFirestoreTimestampObject(raw);
     }
     if (typeof raw === 'string') {
-        const trimmed = raw.trim();
-        const dmy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmed);
-        if (dmy) {
-            const date = new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
-            return Number.isNaN(date.getTime()) ? null : date.getTime();
-        }
-        const parsed = Date.parse(trimmed);
-        return Number.isNaN(parsed) ? null : parsed;
+        return parseStringTimestamp(raw);
     }
     return null;
 }

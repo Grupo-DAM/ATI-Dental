@@ -54,23 +54,27 @@ function useBaseFiltering<T>(
 /**
  * Shared Name & ID Comparators
  */
+function compareNullableStrings(strA: string, strB: string): number {
+  if (strA && !strB) return -1;
+  if (!strA && strB) return 1;
+  return strA.localeCompare(strB);
+}
+
+function compareLastName(nameA: string, nameB: string): number {
+  const lastNameA = nameA?.toLowerCase().split(' ').slice(1).join(' ') || '';
+  const lastNameB = nameB?.toLowerCase().split(' ').slice(1).join(' ') || '';
+  return compareNullableStrings(lastNameA, lastNameB);
+}
+
 function sortByNameOrId(a: any, b: any, orderBy: string, nameKey: string, idKey: string) {
   if (orderBy === 'name' || orderBy === 'ID') {
-    const keyA = orderBy === 'name' ? a[nameKey] : a[idKey];
-    const keyB = orderBy === 'name' ? b[nameKey] : b[idKey];
-    const strA = keyA?.toLowerCase() || '';
-    const strB = keyB?.toLowerCase() || '';
-    if (strA && !strB) return -1;
-    if (!strA && strB) return 1;
-    return strA.localeCompare(strB);
+    const keyA = (orderBy === 'name' ? a[nameKey] : a[idKey])?.toLowerCase() || '';
+    const keyB = (orderBy === 'name' ? b[nameKey] : b[idKey])?.toLowerCase() || '';
+    return compareNullableStrings(keyA, keyB);
   }
 
   if (orderBy === 'lastname') {
-    const lastNameA = a[nameKey]?.toLowerCase().split(' ').slice(1).join(' ') || '';
-    const lastNameB = b[nameKey]?.toLowerCase().split(' ').slice(1).join(' ') || '';
-    if (lastNameA && !lastNameB) return -1;
-    if (!lastNameA && lastNameB) return 1;
-    return lastNameA.localeCompare(lastNameB);
+    return compareLastName(a[nameKey], b[nameKey]);
   }
 
   return 0;

@@ -446,5 +446,49 @@
       "patientNotFound": "El paciente solicitado no fue encontrado.",
       "noPatientId": "No se proporcionó un identificador de paciente."
     }
+  },
+  "agenda": {
+    "title": "Agenda Semanal",
+    "weeklySchedule": "Agenda Semanal",
+    "noAppointments": "Sin consultas programadas",
+    "noAppointmentsMessage": "No hay citas agendadas para este día.",
+    "errorLoading": "No se pudo cargar la agenda",
+    "errorLoadingSubtitle": "Ocurrió un error al obtener las citas de la semana.",
+    "retry": "Reintentar",
+    "confirmed": "CONFIRMADO",
+    "pending": "EN ESPERA",
+    "cancelled": "CANCELADO",
+    "lunchBreak": "HORA DE ALMUERZO",
+    "minutes": "MIN",
+    "chair": "SILLÓN {{number}}",
+    "accessDeniedTitle": "Acceso Denegado",
+    "accessDeniedMessage": "Esta sección está restringida únicamente a odontólogos.",
+    "options": "Opciones",
+    "optionsMessage": "Opciones para la cita de {{name}}",
+    "viewDetails": "Ver detalles",
+    "close": "Cerrar",
+    "months": {
+      "0": "ENERO",
+      "1": "FEBRERO",
+      "2": "MARZO",
+      "3": "ABRIL",
+      "4": "MAYO",
+      "5": "JUNIO",
+      "6": "JULIO",
+      "7": "AGOSTO",
+      "8": "SEPTIEMBRE",
+      "9": "OCTUBRE",
+      "10": "NOVIEMBRE",
+      "11": "DICIEMBRE"
+    },
+    "days": {
+      "0": "DOM",
+      "1": "LUN",
+      "2": "MAR",
+      "3": "MIÉ",
+      "4": "JUE",
+      "5": "VIE",
+      "6": "SÁB"
+    }
   }
 }
