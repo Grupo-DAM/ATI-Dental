@@ -26,6 +26,7 @@ export default function AppTabs() {
       <Tabs.Screen name="update-contact-info" options={{ href: null, title: 'Actualizar contacto' }} />
       <Tabs.Screen name="patients/register-treatment" options={{ href: null, title: 'Registrar Tratamiento' }} />
       <Tabs.Screen name="patient-file" options={{ href: null, title: 'Ficha de Paciente' }} />
+      <Tabs.Screen name="patients/clinical-history" options={{ href: null, title: 'Historia Clínica' }} />
     </Tabs>
   );
 }
@@ -46,7 +47,11 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const activeRouteName = state.routes[state.index].name;
-  const isPatientsSection = activeRouteName === 'patients/patients-list' || activeRouteName === 'patients/register-patient' || activeRouteName === 'patient-file';
+  const isPatientsSection =
+    activeRouteName === 'patients/patients-list' ||
+    activeRouteName === 'patients/register-patient' ||
+    activeRouteName === 'patient-file' ||
+    activeRouteName === 'patients/clinical-history';
 
   const handleNavigate = (routeName: string) => {
     navigation.navigate(routeName);

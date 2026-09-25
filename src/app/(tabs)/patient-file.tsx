@@ -132,11 +132,22 @@ function getCategoryColor(category: string): { bg: string; text: string } {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-/** Action bar with edit and calendar buttons */
-function ActionBar() {
+/** Action bar with edit, calendar and clinical history buttons */
+function ActionBar({ onOpenClinicalHistory }: Readonly<{ onOpenClinicalHistory?: () => void }>) {
   return (
     <View style={actionBarStyles.container}>
       <View style={actionBarStyles.actions}>
+        {onOpenClinicalHistory && (
+          <TouchableOpacity
+            style={actionBarStyles.clinicalHistoryButton}
+            onPress={onOpenClinicalHistory}
+            activeOpacity={0.7}
+            testID="btn-open-clinical-history"
+          >
+            <Ionicons name="medical-outline" size={18} color={Colors.light.main} />
+            <Text style={actionBarStyles.clinicalHistoryText}>Historia Clínica</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={actionBarStyles.iconButton} activeOpacity={0.7}>
           <Ionicons name="create-outline" size={20} color={Colors.light.main} />
         </TouchableOpacity>
@@ -157,7 +168,23 @@ const actionBarStyles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
+  },
+  clinicalHistoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#F3E8FF',
+    gap: 6,
+  },
+  clinicalHistoryText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.light.main,
+    fontFamily: 'Open Sans',
   },
   iconButton: {
     width: 40,
@@ -705,6 +732,14 @@ export default function PatientFileScreen() {
     }, [hasAccess, loadData])
   );
 
+  const handleOpenClinicalHistory = () => {
+    if (!patient) return;
+    router.push({
+      pathname: '/(tabs)/patients/clinical-history' as any,
+      params: { patientId: patient.id },
+    });
+  };
+
   const handleAddTreatment = () => {
     if (!patient) return;
     router.push({
@@ -822,7 +857,7 @@ export default function PatientFileScreen() {
       <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Action bar */}
-        <ActionBar />
+        <ActionBar onOpenClinicalHistory={handleOpenClinicalHistory} />
 
         {/* Patient card */}
         <PatientCard patient={patient} t={t} />

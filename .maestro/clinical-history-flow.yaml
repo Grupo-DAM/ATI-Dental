@@ -1,0 +1,93 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp:
+
+# Esperar a que la app inicie y cargue el login o la vista inicial
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
+# --- Inicio de Sesión como Odontólogo ---
+- tapOn:
+    id: "email-input"
+- inputText: "jesusecova73@gmail.com"
+- tapOn:
+    id: "password-input"
+- inputText: "123456"
+- hideKeyboard
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "tabBar"
+    timeout: 15000
+
+# =======================================================
+# NAVEGACIÓN A FICHA DE PACIENTE
+# =======================================================
+- tapOn:
+    id: "center-btn"
+
+# Verificamos que la tarjeta del paciente carga y es visible
+- extendedWaitUntil:
+    visible:
+      id: "patient-info-card"
+    timeout: 10000
+
+# =======================================================
+# NAVEGACIÓN A HISTORIA CLÍNICA DENTAL
+# =======================================================
+- tapOn:
+    id: "btn-open-clinical-history"
+
+# Verificamos que carga la pantalla de Historia Clínica
+- extendedWaitUntil:
+    visible:
+      id: "clinical-history-screen"
+    timeout: 10000
+
+# Escenario 1: Verificamos datos personales y antecedentes clínicos
+- assertVisible:
+    id: "patient-summary-card"
+
+# Verificamos pestañas disponibles
+- assertVisible:
+    id: "clinical-history-tabs"
+
+# Escenario 2: Verificamos el contenedor preparado para el odontograma futuro
+- tapOn:
+    id: "tab-odontograma"
+
+- extendedWaitUntil:
+    visible:
+      id: "odontogram-container"
+    timeout: 5000
+
+- assertVisible: ".*(Próximamente|Coming Soon).*"
+- assertVisible: ".*(Odontograma Dental|Dental Odontogram).*"
+
+# Escenario 3: Verificamos pestaña de Consultas con diagnósticos y procedimientos
+- tapOn:
+    id: "tab-consultas"
+
+- extendedWaitUntil:
+    visible:
+      id: "consultations-timeline"
+    timeout: 5000
+
+- assertVisible:
+    id: "search-consultations-input"
+
+# Verificamos pestaña de Tratamientos
+- tapOn:
+    id: "tab-tratamientos"
+
+- extendedWaitUntil:
+    visible:
+      id: "treatments-timeline"
+    timeout: 5000
+
+- assertVisible:
+    id: "btn-add-treatment"

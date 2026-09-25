@@ -492,5 +492,46 @@
       "5": "FRI",
       "6": "SAT"
     }
+  },
+  "clinicalHistory": {
+    "title": "Dental Clinical History",
+    "consultation": "Consultation",
+    "tabs": {
+      "consultations": "Consultations",
+      "odontogram": "Odontogram",
+      "treatments": "Treatments"
+    },
+    "scheduleAppointment": "Schedule Appointment",
+    "searchPlaceholder": "Search by reason, diagnosis or date",
+    "noConsultations": "No consultations recorded",
+    "noConsultationsDesc": "This patient has no dental consultations recorded yet.",
+    "noTreatments": "No treatments recorded",
+    "noTreatmentsDesc": "This patient has no procedures recorded yet.",
+    "noSearchResults": "No results found",
+    "noSearchResultsDesc": "No items matched your search query.",
+    "odontogramTitle": "Dental Odontogram",
+    "comingSoon": "Coming Soon",
+    "odontogramPlaceholderTitle": "Digital Odontogram Module",
+    "odontogramPlaceholderDesc": "This modular container is prepared with the data structure for injecting the interactive chart component in the next sprint.",
+    "consultationReason": "Reason for Consultation",
+    "diagnosis": "Diagnosis",
+    "performedTreatments": "Performed Treatments",
+    "additionalNotes": "Additional Notes",
+    "viewOdontogram": "View Odontogram",
+    "treatmentHistory": "Treatment History",
+    "add": "Add",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "deleteConsultation": "Delete Consultation",
+    "confirmDeleteTitle": "Confirm Deletion",
+    "confirmDeleteMessage": "Are you sure you want to delete this record? This action cannot be undone.",
+    "deleteSuccessTitle": "Successfully deleted",
+    "deleteSuccessMessage": "The record has been successfully deleted.",
+    "loading": "Loading dental clinical history...",
+    "retry": "Retry",
+    "errorTitle": "Error querying clinical history",
+    "errorLoad": "A connection error occurred. Please try again.",
+    "accessDenied": "Access Restricted to Dentists",
+    "accessDeniedMessage": "Only personnel with Dentist or Administrator roles are authorized to view patients' clinical history."
   }
 }

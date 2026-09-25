@@ -255,6 +255,28 @@ describe('PatientFileScreen', () => {
 
       // Check for elements rendered by ActionBar / PatientCard
       expect(screen.getByTestId('patient-info-card')).toBeTruthy();
+      expect(screen.getByTestId('btn-open-clinical-history')).toBeTruthy();
+    });
+
+    it('navigates to clinical history screen when Historia Clínica button is clicked', async () => {
+      (getPatientById as jest.Mock).mockResolvedValue(mockPatient);
+      (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+
+      render(<PatientFileScreen />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('btn-open-clinical-history')).toBeTruthy();
+      });
+
+      fireEvent.press(screen.getByTestId('btn-open-clinical-history'));
+
+      const { router } = require('expo-router');
+      expect(router.push).toHaveBeenCalledWith({
+        pathname: '/(tabs)/patients/clinical-history',
+        params: {
+          patientId: '123',
+        },
+      });
     });
   });
 });

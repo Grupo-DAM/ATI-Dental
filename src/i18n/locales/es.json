@@ -490,5 +490,46 @@
       "5": "VIE",
       "6": "SÁB"
     }
+  },
+  "clinicalHistory": {
+    "title": "Historia Clínica",
+    "consultation": "Consulta",
+    "tabs": {
+      "consultations": "Consultas",
+      "odontogram": "Odontograma",
+      "treatments": "Tratamientos"
+    },
+    "scheduleAppointment": "Agendar Cita",
+    "searchPlaceholder": "Buscar por motivo, diagnostico o fecha",
+    "noConsultations": "Sin consultas registradas",
+    "noConsultationsDesc": "Este paciente aún no posee consultas odontológicas registradas.",
+    "noTreatments": "Sin tratamientos registrados",
+    "noTreatmentsDesc": "Este paciente aún no tiene procedimientos registrados.",
+    "noSearchResults": "Sin resultados",
+    "noSearchResultsDesc": "No se encontraron elementos que coincidan con la búsqueda.",
+    "odontogramTitle": "Odontograma Dental",
+    "comingSoon": "Próximamente",
+    "odontogramPlaceholderTitle": "Módulo de Odontograma Digital",
+    "odontogramPlaceholderDesc": "Este contenedor modular está preparado con la estructura de datos para la inyección del componente gráfico interactivo en el siguiente sprint.",
+    "consultationReason": "Motivo de Consulta",
+    "diagnosis": "Diagnóstico",
+    "performedTreatments": "Tratamientos realizados",
+    "additionalNotes": "Notas adicionales",
+    "viewOdontogram": "Ver Odontograma",
+    "treatmentHistory": "Historial de Tratamientos",
+    "add": "Añadir",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "deleteConsultation": "Eliminar consulta",
+    "confirmDeleteTitle": "Confirmar Eliminación",
+    "confirmDeleteMessage": "¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.",
+    "deleteSuccessTitle": "Eliminado con éxito",
+    "deleteSuccessMessage": "El registro ha sido eliminado correctamente.",
+    "loading": "Cargando historia clínica dental...",
+    "retry": "Reintentar",
+    "errorTitle": "Error al consultar la historia clínica",
+    "errorLoad": "Ocurrió un fallo de conexión. Intente nuevamente.",
+    "accessDenied": "Acceso Restringido a Odontólogos",
+    "accessDeniedMessage": "Solo el personal con rol de Odontólogo o Administrador está autorizado para consultar la historia clínica y diagnósticos de los pacientes."
   }
 }
