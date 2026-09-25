@@ -83,4 +83,54 @@ describe('gráficos de geografía', () => {
     expect(countryTree).toMatchSnapshot();
     expect(regionTree).toMatchSnapshot();
   });
+
+  it('RegionDonutChart usa color fallback para clave desconocida', () => {
+    const { getByTestId } = render(
+      <RegionDonutChart
+        total={5}
+        data={[
+          { key: 'desconocido' as any, count: 5, percent: 100, label: 'Desconocido' },
+        ]}
+      />,
+    );
+
+    expect(getByTestId('reports-region-donut-chart')).toBeTruthy();
+    // La leyenda también debe renderizar el item con color fallback
+    expect(getByTestId('region-legend-desconocido')).toBeTruthy();
+  });
+
+  it('describeDonutSlice genera arco completo (>= 359.99°)', () => {
+    const path = describeDonutSlice(80, 80, 60, 40, 0, 360);
+    // Full circle: should contain two arcs (split at 180°)
+    expect(path).toContain('A');
+    expect(path.length).toBeGreaterThan(50);
+  });
+
+  it('describeDonutSlice retorna vacío para sweep negativo', () => {
+    const path = describeDonutSlice(80, 80, 60, 40, 90, 50);
+    expect(path).toBe('');
+  });
+
+  it('describeDonutSlice genera arco mayor a 180°', () => {
+    const path = describeDonutSlice(80, 80, 60, 40, 0, 270);
+    expect(path).toContain('A');
+    // largeArc should be 1 for sweep > 180
+    expect(path).toContain('1 1');
+  });
+
+  it('RegionDonutChart con datos vacíos (todos count=0)', () => {
+    const { getByTestId } = render(
+      <RegionDonutChart
+        total={0}
+        data={[
+          { key: 'andina', count: 0, percent: 0, label: 'Andina' },
+          { key: 'caribe', count: 0, percent: 0, label: 'Caribe' },
+        ]}
+      />,
+    );
+
+    expect(getByTestId('reports-region-donut-chart')).toBeTruthy();
+    expect(getByTestId('region-donut-total').props.children).toBe(0);
+  });
 });
+
