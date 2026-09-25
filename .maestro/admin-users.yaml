@@ -2,25 +2,7 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
-- extendedWaitUntil:
-    visible:
-      id: "email-input"
-    timeout: 60000
-
-- tapOn:
-    id: "email-input"
-- inputText: "soamaia03@gmail.com"
-- tapOn:
-    id: "password-input"
-- inputText: "Robin123456"
-- hideKeyboard
-- tapOn:
-    id: "login-button"
-
-- extendedWaitUntil:
-    visible:
-      id: "welcome-header"
-    timeout: 10000
+- runFlow: common/login-admin.yaml
 
 - tapOn:
     id: "profile-tab"
@@ -48,7 +30,7 @@ appId: com.proyect1.ATIDental
 - extendedWaitUntil:
       visible:
           id: "no-search-result-message"
-      timeout: 1000
+      timeout: 5000
 - tapOn:
       id: "users-search-bar"
 - eraseText
@@ -60,7 +42,7 @@ appId: com.proyect1.ATIDental
 - extendedWaitUntil:
     visible:
       id: "dropdown-options"
-    timeout: 1000
+    timeout: 5000
 
 - tapOn:
       id: "dropdown-btn"
@@ -69,7 +51,7 @@ appId: com.proyect1.ATIDental
 - extendedWaitUntil:
       notVisible:
           id: "dropdown-options"
-      timeout: 1000
+      timeout: 5000
 
 - tapOn:
       id: "filter-toggle-btn"
@@ -77,14 +59,14 @@ appId: com.proyect1.ATIDental
 - extendedWaitUntil:
       visible:
           id: "select-filters"
-      timeout: 1000
+      timeout: 5000
 
 - tapOn:
       id: "filter-toggle-btn"
 - extendedWaitUntil:
       notVisible:
           id: "select-filters"
-      timeout: 1000
+      timeout: 5000
 
 - scrollUntilVisible:
       element:

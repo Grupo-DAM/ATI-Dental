@@ -1,0 +1,36 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+- runFlow: common/login-admin.yaml
+
+# Navegar a la pestaña de Agenda
+- tapOn:
+    id: "agenda-tab"
+
+- extendedWaitUntil:
+    visible:
+      id: "prev-week-btn"
+    timeout: 15000
+
+# Probar cambio de semana hacia adelante y hacia atrás
+- tapOn:
+    id: "next-week-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "prev-week-btn"
+    timeout: 5000
+
+- tapOn:
+    id: "prev-week-btn"
+
+# Verificar que carga el contenedor de citas o el estado vacío
+- assertVisible: ".*(Weekly Agenda|Agenda Semanal).*"
+
+# Cierre de sesión limpio
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

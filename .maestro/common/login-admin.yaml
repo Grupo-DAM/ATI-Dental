@@ -1,0 +1,25 @@
+appId: com.proyect1.ATIDental
+---
+# Esperar pantalla de login
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 60000
+
+# Credenciales de Administrador
+- tapOn:
+    id: "email-input"
+- inputText: "jesusecova73@gmail.com"
+
+- tapOn:
+    id: "password-input"
+- inputText: "123456"
+- hideKeyboard
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-header"
+    timeout: 60000

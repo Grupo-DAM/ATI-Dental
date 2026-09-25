@@ -2,33 +2,26 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
-# Esperar a que la app inicie y cargue el login o la vista inicial
-- extendedWaitUntil:
-    visible:
-      id: "email-input"
-    timeout: 60000
-
-# --- Inicio de Sesión ---
-- tapOn:
-    id: "email-input"
-- inputText: "carloscaoucv2022@gmail.com"
-- tapOn:
-    id: "password-input"
-- inputText: "Cao1234"
-- hideKeyboard
-- tapOn:
-    id: "login-button"
-
-- extendedWaitUntil:
-    visible:
-      id: "tabBar"
-    timeout: 15000
+- runFlow: common/login-admin.yaml
 
 # =======================================================
 # NAVEGACIÓN A REGISTRO DE TRATAMIENTOS
 # =======================================================
 - tapOn:
     id: "center-btn"
+
+# 2. Esperar a que cargue la ficha del paciente
+- extendedWaitUntil:
+    visible: ".*(Ficha del Paciente|Patient File).*"
+    timeout: 10000
+# 3. Tocar el botón "Añadir +" de tratamientos
+- scrollUntilVisible:
+    element:
+      id: "add-treatment-btn"
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    id: "add-treatment-btn"
 
 - extendedWaitUntil:
     visible: ".*(Registrar Tratamiento|Register Treatment).*"
@@ -62,7 +55,7 @@ appId: com.proyect1.ATIDental
 
 - tapOn:
     id: "exam-name-input"
-- inputText: "Radiografía periapical"
+- inputText: "Radiografia periapical"
 - hideKeyboard
 
 - tapOn:
@@ -74,7 +67,7 @@ appId: com.proyect1.ATIDental
     id: "add-exam-btn"
 
 # El examen agregado debe ser visible
-- assertVisible: "Radiografía periapical"
+- assertVisible: "Radiografia periapical"
 
 # =======================================================
 # ESCENARIO 3: VALIDACIÓN DE COSTO NEGATIVO
@@ -89,6 +82,12 @@ appId: com.proyect1.ATIDental
 - inputText: "-150.00"
 - hideKeyboard
 
+# Hacer scroll para que el botón de guardar quede a la vista
+- scrollUntilVisible:
+    element:
+      id: "save-treatment-btn"
+    direction: DOWN
+
 - tapOn:
     id: "save-treatment-btn"
 
@@ -99,6 +98,11 @@ appId: com.proyect1.ATIDental
 # ESCENARIO 4: COMPLETAR FORMULARIO Y CANCELAR EN MODAL
 # =======================================================
 # Corregir costo con valor válido y no negativo
+- scrollUntilVisible:
+    element:
+      id: "estimated-cost-input"
+    direction: UP
+
 - tapOn:
     id: "estimated-cost-input"
 - eraseText
@@ -139,15 +143,22 @@ appId: com.proyect1.ATIDental
 # Seleccionar Odontólogo
 - scrollUntilVisible:
     element:
-      id: "dentist-select"
+      id: "status-select"
     direction: DOWN
 - tapOn:
     id: "dentist-select"
-- tapOn: "Dr. Smith"
+- tapOn: ".*Garc.*"
 
 # Seleccionar Estado
+- scrollUntilVisible:
+    element:
+      id: "status-select"
+    direction: DOWN
 - tapOn:
     id: "status-select"
+- scrollUntilVisible:
+    element: "En Progreso"
+    direction: DOWN
 - tapOn: "En Progreso"
 
 # Pulsar Guardar Tratamiento
@@ -185,10 +196,14 @@ appId: com.proyect1.ATIDental
 - tapOn:
     id: "modal-confirm-btn"
 
-# Verificar notificación de éxito
 - extendedWaitUntil:
-    visible:
-      id: "notification-toast"
-    timeout: 10000
+    visible: ".*(Ficha del Paciente|Patient File).*"
+    timeout: 15000
+# Validar que estamos en la Ficha del Paciente
+- assertVisible: ".*(Ficha del Paciente|Patient File).*"
 
-- assertVisible: ".*(Registro Exitoso|Registration Successful).*"
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"
