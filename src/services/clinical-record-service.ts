@@ -176,21 +176,24 @@ export async function fetchClinicalRecord(patientId: string): Promise<ClinicalRe
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-    const response = await fetch(endpoint, {
-      method: 'GET',
-      headers,
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
+    try {
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers,
+        signal: controller.signal,
+      });
 
-    if (response.ok) {
-      const serverData = await response.json();
-      if (serverData && serverData.patient) {
-        return {
-          success: true,
-          data: serverData,
-        };
+      if (response.ok) {
+        const serverData = await response.json();
+        if (serverData && serverData.patient) {
+          return {
+            success: true,
+            data: serverData,
+          };
+        }
       }
+    } finally {
+      clearTimeout(timeoutId);
     }
   } catch (proxyError) {
     // Si la capa serverless no responde o está en modo offline, continuamos con Firestore

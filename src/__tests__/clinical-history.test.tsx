@@ -478,6 +478,89 @@ describe('ClinicalHistoryScreen', () => {
     });
   });
 
+  it('maneja error cuando falla la actualización de una consulta', async () => {
+    (updateConsultation as jest.Mock).mockRejectedValue(new Error('Network error on update'));
+    render(<ClinicalHistoryScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-modify-consultation-c-1')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByTestId('btn-modify-consultation-c-1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-modal-save-consultation')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByTestId('btn-modal-save-consultation'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Error')).toBeTruthy();
+    });
+  });
+
+  it('maneja error al eliminar consulta y permite cancelar eliminación', async () => {
+    (deleteConsultation as jest.Mock).mockRejectedValue(new Error('Network error on delete'));
+    render(<ClinicalHistoryScreen />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Eliminar').length).toBeGreaterThan(0);
+    });
+
+    // Abrir modal y luego cancelar
+    fireEvent.press(screen.getAllByText('Eliminar')[0]);
+    await waitFor(() => {
+      expect(screen.getByText('Confirmar Eliminación')).toBeTruthy();
+    });
+    fireEvent.press(screen.getByTestId('modal-cancel-btn'));
+    await waitFor(() => {
+      expect(screen.queryByText('Confirmar Eliminación')).toBeNull();
+    });
+
+    // Abrir modal de nuevo y confirmar para disparar el catch
+    fireEvent.press(screen.getAllByText('Eliminar')[0]);
+    await waitFor(() => {
+      expect(screen.getByText('Confirmar Eliminación')).toBeTruthy();
+    });
+    fireEvent.press(screen.getByTestId('modal-confirm-btn'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Error')).toBeTruthy();
+    });
+  });
+
+  it('permite eliminar una consulta desde el interior del modal de detalle', async () => {
+    (deleteConsultation as jest.Mock).mockResolvedValue(true);
+    render(<ClinicalHistoryScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Limpieza dental profunda')).toBeTruthy();
+    });
+
+    // Abrir modal de detalle
+    fireEvent.press(screen.getByText('Limpieza dental profunda'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-modal-edit-consultation')).toBeTruthy();
+    });
+
+    // Click en Eliminar dentro del modal
+    fireEvent.press(screen.getByTestId('btn-modal-delete-consultation'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Confirmar Eliminación')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByTestId('modal-confirm-btn'));
+
+    await waitFor(() => {
+      expect(deleteConsultation).toHaveBeenCalledWith('c-1');
+      expect(screen.getByText('Eliminado con éxito')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByTestId('btn-dismiss-toast'));
+  });
+
   // ── Dark Mode Test ──
   it('aplica correctamente los estilos y tokens del tema en modo oscuro (dark mode)', async () => {
     jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('dark');

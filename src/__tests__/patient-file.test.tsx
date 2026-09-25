@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react-nativ
 import PatientFileScreen from '../app/(tabs)/patient-file';
 import { useAuth } from '../hooks/use-auth';
 import { getPatientById } from '../services/patient-service';
-import { getTreatmentsByPatientId } from '../services/treatment-service';
+import { getTreatmentsByPatientId, deleteTreatment } from '../services/treatment-service';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
 jest.mock('expo-router', () => {
@@ -155,6 +155,124 @@ describe('PatientFileScreen', () => {
         patientCedula: 'V-12345678',
         patientPhone: '04141234567',
       },
+    });
+  });
+
+  it('navigates to register treatment in edit mode when Modify is clicked on a treatment', async () => {
+    (getPatientById as jest.Mock).mockResolvedValue(mockPatient);
+    (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('patientFile.modify').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.press(screen.getAllByText('patientFile.modify')[0]);
+
+    const { router } = require('expo-router');
+    expect(router.push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/(tabs)/patients/register-treatment',
+        params: expect.objectContaining({
+          treatmentId: 't1',
+        }),
+      })
+    );
+  });
+
+  it('permite abrir modal de confirmación y eliminar un tratamiento exitosamente', async () => {
+    (getPatientById as jest.Mock).mockResolvedValue(mockPatient);
+    (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+    (deleteTreatment as jest.Mock).mockResolvedValue(true);
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('patientFile.delete').length).toBeGreaterThan(0);
+    });
+
+    // Abrir modal de confirmación
+    fireEvent.press(screen.getAllByText('patientFile.delete')[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText('Eliminar Tratamiento')).toBeTruthy();
+    });
+
+    // Confirmar eliminación
+    fireEvent.press(screen.getByText('Eliminar'));
+
+    await waitFor(() => {
+      expect(deleteTreatment).toHaveBeenCalledWith('t1');
+      expect(screen.getByText('Tratamiento eliminado')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByTestId('btn-dismiss-toast'));
+  });
+
+  it('permite cancelar el modal de eliminación de tratamiento', async () => {
+    (getPatientById as jest.Mock).mockResolvedValue(mockPatient);
+    (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('patientFile.delete').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.press(screen.getAllByText('patientFile.delete')[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText('Cancelar')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByText('Cancelar'));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Eliminar Tratamiento')).toBeNull();
+    });
+  });
+
+  it('maneja error cuando falla la eliminación de un tratamiento', async () => {
+    (getPatientById as jest.Mock).mockResolvedValue(mockPatient);
+    (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+    (deleteTreatment as jest.Mock).mockRejectedValue(new Error('Delete error'));
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('patientFile.delete').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.press(screen.getAllByText('patientFile.delete')[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText('Eliminar')).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByText('Eliminar'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Error')).toBeTruthy();
+    });
+  });
+
+  it('muestra pantalla de acceso denegado si el rol del usuario no tiene permisos', async () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { rol: 'usuario_externo' },
+      loading: false,
+    });
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText('patientFile.accessDenied')).toBeTruthy();
+    });
+
+    // Restaurar usuario
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { rol: 'odontologo' },
+      loading: false,
     });
   });
 

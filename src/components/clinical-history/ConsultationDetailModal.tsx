@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -71,12 +71,12 @@ export function ConsultationDetailModal({
   const [isSaving, setIsSaving] = useState(false);
 
   // Form states
-  const [formTitle, setFormTitle] = useState('');
-  const [formMotivo, setFormMotivo] = useState('');
-  const [formDiagnostico, setFormDiagnostico] = useState('');
-  const [formTratamientos, setFormTratamientos] = useState('');
-  const [formNotas, setFormNotas] = useState('');
-  const [formProximaCita, setFormProximaCita] = useState('');
+  const [formTitle, setFormTitle] = useState(consultation?.title || '');
+  const [formMotivo, setFormMotivo] = useState(consultation?.motivo || '');
+  const [formDiagnostico, setFormDiagnostico] = useState(consultation?.diagnostico || '');
+  const [formTratamientos, setFormTratamientos] = useState(consultation?.tratamientosRealizados || '');
+  const [formNotas, setFormNotas] = useState(consultation?.notas || '');
+  const [formProximaCita, setFormProximaCita] = useState(consultation?.proximaCita || '');
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     motivo: true,
@@ -86,16 +86,23 @@ export function ConsultationDetailModal({
     proximaCita: true,
   });
 
+  const prevConsultationIdRef = useRef(consultation?.id);
+  const prevEditModeRef = useRef(initialEditMode);
+
   useEffect(() => {
-    if (consultation) {
-      setFormTitle(consultation.title || '');
-      setFormMotivo(consultation.motivo || '');
-      setFormDiagnostico(consultation.diagnostico || '');
-      setFormTratamientos(consultation.tratamientosRealizados || '');
-      setFormNotas(consultation.notas || '');
-      setFormProximaCita(consultation.proximaCita || '');
+    if (prevConsultationIdRef.current !== consultation?.id || prevEditModeRef.current !== initialEditMode) {
+      prevConsultationIdRef.current = consultation?.id;
+      prevEditModeRef.current = initialEditMode;
+      if (consultation) {
+        setFormTitle(consultation.title || '');
+        setFormMotivo(consultation.motivo || '');
+        setFormDiagnostico(consultation.diagnostico || '');
+        setFormTratamientos(consultation.tratamientosRealizados || '');
+        setFormNotas(consultation.notas || '');
+        setFormProximaCita(consultation.proximaCita || '');
+      }
+      setIsEditing(initialEditMode);
     }
-    setIsEditing(initialEditMode);
   }, [consultation, initialEditMode]);
 
   if (!consultation) return null;
@@ -165,6 +172,7 @@ export function ConsultationDetailModal({
                   onPress={() => setIsEditing(false)}
                   style={styles.cancelHeaderButton}
                   activeOpacity={0.7}
+                  testID="btn-modal-cancel-edit"
                 >
                   <Text style={styles.cancelHeaderText}>
                     {t('clinicalHistory.cancel', 'Cancelar')}
@@ -477,6 +485,7 @@ export function ConsultationDetailModal({
               style={styles.deleteButton}
               onPress={() => onDelete(consultation.id)}
               activeOpacity={0.7}
+              testID="btn-modal-delete-consultation"
             >
               <Ionicons name="trash-outline" size={16} color={theme.error} />
               <Text style={styles.deleteText}>

@@ -327,32 +327,35 @@ export default function ClinicalHistoryScreen() {
       </ScrollView>
 
       {/* Modal Detallado de Consulta (Figma Historia Clinica (Consultas)-1) */}
-      <ConsultationDetailModal
-        visible={Boolean(selectedConsultation)}
-        consultation={selectedConsultation}
-        patient={record.patient}
-        initialEditMode={isEditingConsultation}
-        onSave={handleSaveConsultation}
-        onClose={() => {
-          setSelectedConsultation(null);
-          setIsEditingConsultation(false);
-        }}
-        onOpenOdontogram={() => {
-          setSelectedConsultation(null);
-          setIsEditingConsultation(false);
-          setActiveTab('odontograma');
-        }}
-        onDelete={(id) => {
-          setSelectedConsultation(null);
-          setIsEditingConsultation(false);
-          setDeleteModalConfig({
-            visible: true,
-            type: 'consultation',
-            id,
-            isDeleting: false,
-          });
-        }}
-      />
+      {selectedConsultation && (
+        <ConsultationDetailModal
+          key={`${selectedConsultation.id}-${isEditingConsultation}`}
+          visible={Boolean(selectedConsultation)}
+          consultation={selectedConsultation}
+          patient={record.patient}
+          initialEditMode={isEditingConsultation}
+          onSave={handleSaveConsultation}
+          onClose={() => {
+            setSelectedConsultation(null);
+            setIsEditingConsultation(false);
+          }}
+          onOpenOdontogram={() => {
+            setSelectedConsultation(null);
+            setIsEditingConsultation(false);
+            setActiveTab('odontograma');
+          }}
+          onDelete={(id) => {
+            setSelectedConsultation(null);
+            setIsEditingConsultation(false);
+            setDeleteModalConfig({
+              visible: true,
+              type: 'consultation',
+              id,
+              isDeleting: false,
+            });
+          }}
+        />
+      )}
 
       {/* Modal de Confirmación para Eliminación */}
       <ConfirmationModal
