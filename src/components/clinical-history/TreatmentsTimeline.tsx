@@ -57,6 +57,8 @@ export function TreatmentsTimeline({
   const theme = useTheme();
   const styles = createStyles(theme);
 
+  const isDark = theme.background === '#000000';
+
   return (
     <View style={styles.container} testID="treatments-timeline">
       {/* Header Row: Title & Añadir */}
@@ -123,7 +125,7 @@ export function TreatmentsTimeline({
             {/* Left Icon Dot & Line */}
             <View style={styles.leftColumn}>
               <View style={styles.iconCircle}>
-                <Ionicons name="bandage-outline" size={14} color={theme.main} />
+                <Ionicons name="bandage-outline" size={14} color={isDark ? '#FFFFFF' : theme.main} />
               </View>
               {!isLast && <View style={styles.connectingLine} />}
             </View>
@@ -143,7 +145,7 @@ export function TreatmentsTimeline({
                   ) : null}
                   {tr.category ? (
                     <View style={[styles.badge, { backgroundColor: theme.accentBackground }]}>
-                      <Text style={[styles.badgeText, { color: theme.main }]}>
+                      <Text style={[styles.badgeText, { color: isDark ? '#FFFFFF' : theme.main }]}>
                         {tr.category}
                       </Text>
                     </View>

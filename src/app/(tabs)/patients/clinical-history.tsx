@@ -56,7 +56,10 @@ export default function ClinicalHistoryScreen() {
     setSelectedConsultation,
     refetch,
     deleteConsultation,
+    updateConsultation,
   } = useClinicalRecord(hasAccess ? patientId : undefined);
+
+  const [isEditingConsultation, setIsEditingConsultation] = useState(false);
 
   // Modal de confirmación para eliminar
   const [deleteModalConfig, setDeleteModalConfig] = useState<{
@@ -149,6 +152,26 @@ export default function ClinicalHistoryScreen() {
         type: 'error',
         title: 'Error',
         message: err?.message || 'No se pudo eliminar el elemento.',
+      });
+    }
+  };
+
+  const handleSaveConsultation = async (updatedData: Partial<Consultation>) => {
+    if (!selectedConsultation) return;
+    try {
+      await updateConsultation(selectedConsultation.id, updatedData);
+      setToastConfig({
+        visible: true,
+        type: 'success',
+        title: t('clinicalHistory.updateSuccessTitle', 'Consulta actualizada'),
+        message: t('clinicalHistory.updateSuccessMessage', 'La consulta ha sido actualizada exitosamente.'),
+      });
+    } catch (err: any) {
+      setToastConfig({
+        visible: true,
+        type: 'error',
+        title: 'Error',
+        message: err?.message || 'No se pudo actualizar la consulta.',
       });
     }
   };
@@ -259,8 +282,14 @@ export default function ClinicalHistoryScreen() {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onScheduleAppointment={handleScheduleAppointment}
-            onSelectConsultation={(c: Consultation) => setSelectedConsultation(c)}
-            onModifyConsultation={(c: Consultation) => setSelectedConsultation(c)}
+            onSelectConsultation={(c: Consultation) => {
+              setSelectedConsultation(c);
+              setIsEditingConsultation(false);
+            }}
+            onModifyConsultation={(c: Consultation) => {
+              setSelectedConsultation(c);
+              setIsEditingConsultation(true);
+            }}
             onDeleteConsultation={(id: string) => {
               setDeleteModalConfig({
                 visible: true,
@@ -302,13 +331,20 @@ export default function ClinicalHistoryScreen() {
         visible={Boolean(selectedConsultation)}
         consultation={selectedConsultation}
         patient={record.patient}
-        onClose={() => setSelectedConsultation(null)}
+        initialEditMode={isEditingConsultation}
+        onSave={handleSaveConsultation}
+        onClose={() => {
+          setSelectedConsultation(null);
+          setIsEditingConsultation(false);
+        }}
         onOpenOdontogram={() => {
           setSelectedConsultation(null);
+          setIsEditingConsultation(false);
           setActiveTab('odontograma');
         }}
         onDelete={(id) => {
           setSelectedConsultation(null);
+          setIsEditingConsultation(false);
           setDeleteModalConfig({
             visible: true,
             type: 'consultation',

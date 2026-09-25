@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchClinicalRecord, deleteConsultation } from '@/services/clinical-record-service';
+import { fetchClinicalRecord, deleteConsultation, updateConsultation } from '@/services/clinical-record-service';
 import { ClinicalRecord, Consultation } from '@/types/clinical-record';
 import { Treatment } from '@/services/treatment-service';
 
@@ -103,6 +103,28 @@ export function useClinicalRecord(patientId?: string) {
     [record, selectedConsultation]
   );
 
+  const handleUpdateConsultation = useCallback(
+    async (consultationId: string, updatedData: Partial<Consultation>): Promise<boolean> => {
+      const ok = await updateConsultation(consultationId, updatedData);
+      if (ok) {
+        setRecord((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            consultations: prev.consultations.map((c) =>
+              c.id === consultationId ? { ...c, ...updatedData } : c
+            ),
+          };
+        });
+        setSelectedConsultation((prev) =>
+          prev?.id === consultationId ? { ...prev, ...updatedData } : prev
+        );
+      }
+      return ok;
+    },
+    []
+  );
+
   return {
     record,
     loading,
@@ -117,5 +139,6 @@ export function useClinicalRecord(patientId?: string) {
     setSelectedConsultation,
     refetch: loadData,
     deleteConsultation: handleDeleteConsultation,
+    updateConsultation: handleUpdateConsultation,
   };
 }

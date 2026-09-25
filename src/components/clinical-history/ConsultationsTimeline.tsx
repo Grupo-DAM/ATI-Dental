@@ -159,6 +159,7 @@ export function ConsultationsTimeline({
                     onModifyConsultation?.(item);
                   }}
                   activeOpacity={0.7}
+                  testID={`btn-modify-consultation-${item.id}`}
                 >
                   <Ionicons name="create-outline" size={14} color={theme.pageSubtitle} />
                   <Text style={styles.actionText}>Modificar</Text>

@@ -530,6 +530,11 @@
     "errorTitle": "Error al consultar la historia clínica",
     "errorLoad": "Ocurrió un fallo de conexión. Intente nuevamente.",
     "accessDenied": "Acceso Restringido a Odontólogos",
-    "accessDeniedMessage": "Solo el personal con rol de Odontólogo o Administrador está autorizado para consultar la historia clínica y diagnósticos de los pacientes."
+    "accessDeniedMessage": "Solo el personal con rol de Odontólogo o Administrador está autorizado para consultar la historia clínica y diagnósticos de los pacientes.",
+    "edit": "Modificar",
+    "save": "Guardar",
+    "saveChanges": "Guardar Cambios",
+    "updateSuccessTitle": "Consulta actualizada",
+    "updateSuccessMessage": "La consulta ha sido actualizada exitosamente."
   }
 }

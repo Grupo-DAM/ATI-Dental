@@ -3,11 +3,17 @@
 exports[`PatientFileScreen matches snapshot 1`] = `
 <View
   style={
-    {
-      "backgroundColor": "#F7F6F8",
-      "flex": 1,
-    }
+    [
+      {
+        "backgroundColor": "#F7F6F8",
+        "flex": 1,
+      },
+      {
+        "backgroundColor": "#F7F6F8",
+      },
+    ]
   }
+  testID="patient-file-container"
 >
   <View
     style={
@@ -259,12 +265,17 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             </Text>
             <Text
               style={
-                {
-                  "color": "#5B2D8B",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 13,
-                  "fontWeight": "600",
-                }
+                [
+                  {
+                    "color": "#5B2D8B",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 13,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#5B2D8B",
+                  },
+                ]
               }
             >
               Historia Clínica
@@ -518,17 +529,23 @@ exports[`PatientFileScreen matches snapshot 1`] = `
       >
         <View
           style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#FFFFFF",
-              "borderColor": "#E5E7EB",
-              "borderRadius": 10,
-              "borderWidth": 1,
-              "flex": 1,
-              "flexDirection": "row",
-              "paddingHorizontal": 14,
-              "paddingVertical": 12,
-            }
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#E5E7EB",
+                "borderRadius": 10,
+                "borderWidth": 1,
+                "flex": 1,
+                "flexDirection": "row",
+                "paddingHorizontal": 14,
+                "paddingVertical": 12,
+              },
+              {
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
+              },
+            ]
           }
         >
           <Text
@@ -557,24 +574,34 @@ exports[`PatientFileScreen matches snapshot 1`] = `
           <View>
             <Text
               style={
-                {
-                  "color": "#6B7280",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 11,
-                  "fontWeight": "500",
-                }
+                [
+                  {
+                    "color": "#6B7280",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 11,
+                    "fontWeight": "500",
+                  },
+                  {
+                    "color": "#6B7280",
+                  },
+                ]
               }
             >
               patientFile.nextAppointment
             </Text>
             <Text
               style={
-                {
-                  "color": "#1F2937",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 13,
-                  "fontWeight": "600",
-                }
+                [
+                  {
+                    "color": "#1F2937",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 13,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
               }
             >
               —
@@ -583,17 +610,23 @@ exports[`PatientFileScreen matches snapshot 1`] = `
         </View>
         <View
           style={
-            {
-              "alignItems": "center",
-              "backgroundColor": "#FFFFFF",
-              "borderColor": "#E5E7EB",
-              "borderRadius": 10,
-              "borderWidth": 1,
-              "flex": 1,
-              "flexDirection": "row",
-              "paddingHorizontal": 14,
-              "paddingVertical": 12,
-            }
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#E5E7EB",
+                "borderRadius": 10,
+                "borderWidth": 1,
+                "flex": 1,
+                "flexDirection": "row",
+                "paddingHorizontal": 14,
+                "paddingVertical": 12,
+              },
+              {
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
+              },
+            ]
           }
         >
           <Text
@@ -622,24 +655,34 @@ exports[`PatientFileScreen matches snapshot 1`] = `
           <View>
             <Text
               style={
-                {
-                  "color": "#6B7280",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 11,
-                  "fontWeight": "500",
-                }
+                [
+                  {
+                    "color": "#6B7280",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 11,
+                    "fontWeight": "500",
+                  },
+                  {
+                    "color": "#6B7280",
+                  },
+                ]
               }
             >
               patientFile.lastVisit
             </Text>
             <Text
               style={
-                {
-                  "color": "#1F2937",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 13,
-                  "fontWeight": "600",
-                }
+                [
+                  {
+                    "color": "#1F2937",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 13,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
               }
             >
               —
@@ -649,15 +692,21 @@ exports[`PatientFileScreen matches snapshot 1`] = `
       </View>
       <View
         style={
-          {
-            "backgroundColor": "#FFFFFF",
-            "borderColor": "#E5E7EB",
-            "borderRadius": 10,
-            "borderWidth": 1,
-            "marginBottom": 12,
-            "marginHorizontal": 16,
-            "overflow": "hidden",
-          }
+          [
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#E5E7EB",
+              "borderRadius": 10,
+              "borderWidth": 1,
+              "marginBottom": 12,
+              "marginHorizontal": 16,
+              "overflow": "hidden",
+            },
+            {
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
+            },
+          ]
         }
       >
         <View
@@ -730,12 +779,17 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             </Text>
             <Text
               style={
-                {
-                  "color": "#1F2937",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 15,
-                  "fontWeight": "600",
-                }
+                [
+                  {
+                    "color": "#1F2937",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
               }
             >
               patientFile.personalInfo
@@ -747,7 +801,7 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             style={
               [
                 {
-                  "color": "#9CA3AF",
+                  "color": "#6B7280",
                   "fontSize": 18,
                 },
                 undefined,
@@ -766,15 +820,21 @@ exports[`PatientFileScreen matches snapshot 1`] = `
       </View>
       <View
         style={
-          {
-            "backgroundColor": "#FFFFFF",
-            "borderColor": "#E5E7EB",
-            "borderRadius": 10,
-            "borderWidth": 1,
-            "marginBottom": 12,
-            "marginHorizontal": 16,
-            "overflow": "hidden",
-          }
+          [
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#E5E7EB",
+              "borderRadius": 10,
+              "borderWidth": 1,
+              "marginBottom": 12,
+              "marginHorizontal": 16,
+              "overflow": "hidden",
+            },
+            {
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
+            },
+          ]
         }
       >
         <View
@@ -847,12 +907,17 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             </Text>
             <Text
               style={
-                {
-                  "color": "#1F2937",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 15,
-                  "fontWeight": "600",
-                }
+                [
+                  {
+                    "color": "#1F2937",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
               }
             >
               patientFile.medicalBackground
@@ -864,7 +929,7 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             style={
               [
                 {
-                  "color": "#9CA3AF",
+                  "color": "#6B7280",
                   "fontSize": 18,
                 },
                 undefined,
@@ -883,15 +948,21 @@ exports[`PatientFileScreen matches snapshot 1`] = `
       </View>
       <View
         style={
-          {
-            "backgroundColor": "#FFFFFF",
-            "borderColor": "#E5E7EB",
-            "borderRadius": 10,
-            "borderWidth": 1,
-            "marginBottom": 12,
-            "marginHorizontal": 16,
-            "overflow": "hidden",
-          }
+          [
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#E5E7EB",
+              "borderRadius": 10,
+              "borderWidth": 1,
+              "marginBottom": 12,
+              "marginHorizontal": 16,
+              "overflow": "hidden",
+            },
+            {
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
+            },
+          ]
         }
       >
         <View
@@ -964,12 +1035,17 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             </Text>
             <Text
               style={
-                {
-                  "color": "#1F2937",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 15,
-                  "fontWeight": "600",
-                }
+                [
+                  {
+                    "color": "#1F2937",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
               }
             >
               patientFile.pendingExams (0)
@@ -981,7 +1057,7 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             style={
               [
                 {
-                  "color": "#9CA3AF",
+                  "color": "#6B7280",
                   "fontSize": 18,
                 },
                 undefined,
@@ -1000,15 +1076,21 @@ exports[`PatientFileScreen matches snapshot 1`] = `
       </View>
       <View
         style={
-          {
-            "backgroundColor": "#FFFFFF",
-            "borderColor": "#E5E7EB",
-            "borderRadius": 10,
-            "borderWidth": 1,
-            "marginBottom": 16,
-            "marginHorizontal": 16,
-            "padding": 16,
-          }
+          [
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#E5E7EB",
+              "borderRadius": 10,
+              "borderWidth": 1,
+              "marginBottom": 16,
+              "marginHorizontal": 16,
+              "padding": 16,
+            },
+            {
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
+            },
+          ]
         }
       >
         <View
@@ -1023,12 +1105,17 @@ exports[`PatientFileScreen matches snapshot 1`] = `
         >
           <Text
             style={
-              {
-                "color": "#1F2937",
-                "fontFamily": "Open Sans",
-                "fontSize": 15,
-                "fontWeight": "600",
-              }
+              [
+                {
+                  "color": "#1F2937",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 15,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#1F2937",
+                },
+              ]
             }
           >
             patientFile.treatmentHistory
@@ -1077,12 +1164,17 @@ exports[`PatientFileScreen matches snapshot 1`] = `
           >
             <Text
               style={
-                {
-                  "color": "#5B2D8B",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 13,
-                  "fontWeight": "600",
-                }
+                [
+                  {
+                    "color": "#5B2D8B",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 13,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#5B2D8B",
+                  },
+                ]
               }
             >
               patientFile.addTreatment
@@ -1171,26 +1263,37 @@ exports[`PatientFileScreen matches snapshot 1`] = `
               </View>
               <View
                 style={
-                  {
-                    "backgroundColor": "#E5E7EB",
-                    "flex": 1,
-                    "marginTop": 4,
-                    "width": 2,
-                  }
+                  [
+                    {
+                      "backgroundColor": "#E5E7EB",
+                      "flex": 1,
+                      "marginTop": 4,
+                      "width": 2,
+                    },
+                    {
+                      "backgroundColor": "#D1D5DB",
+                    },
+                  ]
                 }
               />
             </View>
             <View
               style={
-                {
-                  "backgroundColor": "#FFFFFF",
-                  "borderColor": "#E5E7EB",
-                  "borderRadius": 10,
-                  "borderWidth": 1,
-                  "flex": 1,
-                  "marginBottom": 12,
-                  "padding": 14,
-                }
+                [
+                  {
+                    "backgroundColor": "#FFFFFF",
+                    "borderColor": "#E5E7EB",
+                    "borderRadius": 10,
+                    "borderWidth": 1,
+                    "flex": 1,
+                    "marginBottom": 12,
+                    "padding": 14,
+                  },
+                  {
+                    "backgroundColor": "#ffffff",
+                    "borderColor": "#D1D5DB",
+                  },
+                ]
               }
             >
               <View
@@ -1207,12 +1310,17 @@ exports[`PatientFileScreen matches snapshot 1`] = `
               >
                 <Text
                   style={
-                    {
-                      "color": "#5B2D8B",
-                      "fontFamily": "Open Sans",
-                      "fontSize": 12,
-                      "fontWeight": "600",
-                    }
+                    [
+                      {
+                        "color": "#5B2D8B",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 12,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "color": "#5B2D8B",
+                      },
+                    ]
                   }
                 >
                   20 Sep 2023
@@ -1291,13 +1399,18 @@ exports[`PatientFileScreen matches snapshot 1`] = `
               </View>
               <Text
                 style={
-                  {
-                    "color": "#1F2937",
-                    "fontFamily": "Open Sans",
-                    "fontSize": 15,
-                    "fontWeight": "700",
-                    "marginBottom": 4,
-                  }
+                  [
+                    {
+                      "color": "#1F2937",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 15,
+                      "fontWeight": "700",
+                      "marginBottom": 4,
+                    },
+                    {
+                      "color": "#1F2937",
+                    },
+                  ]
                 }
               >
                 Limpieza
@@ -1335,24 +1448,34 @@ exports[`PatientFileScreen matches snapshot 1`] = `
                 </Text>
                 <Text
                   style={
-                    {
-                      "color": "#6B7280",
-                      "fontFamily": "Open Sans",
-                      "fontSize": 12,
-                    }
+                    [
+                      {
+                        "color": "#6B7280",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 12,
+                      },
+                      {
+                        "color": "#6B7280",
+                      },
+                    ]
                   }
                 />
               </View>
               <View
                 style={
-                  {
-                    "borderTopColor": "#F3F4F6",
-                    "borderTopWidth": 1,
-                    "flexDirection": "row",
-                    "gap": 16,
-                    "justifyContent": "flex-end",
-                    "paddingTop": 10,
-                  }
+                  [
+                    {
+                      "borderTopColor": "#F3F4F6",
+                      "borderTopWidth": 1,
+                      "flexDirection": "row",
+                      "gap": 16,
+                      "justifyContent": "flex-end",
+                      "paddingTop": 10,
+                    },
+                    {
+                      "borderTopColor": "#EDF2F7",
+                    },
+                  ]
                 }
               >
                 <View
@@ -1415,11 +1538,16 @@ exports[`PatientFileScreen matches snapshot 1`] = `
                   </Text>
                   <Text
                     style={
-                      {
-                        "color": "#6B7280",
-                        "fontFamily": "Open Sans",
-                        "fontSize": 12,
-                      }
+                      [
+                        {
+                          "color": "#6B7280",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 12,
+                        },
+                        {
+                          "color": "#6B7280",
+                        },
+                      ]
                     }
                   >
                     patientFile.modify
@@ -1485,11 +1613,16 @@ exports[`PatientFileScreen matches snapshot 1`] = `
                   </Text>
                   <Text
                     style={
-                      {
-                        "color": "#6B7280",
-                        "fontFamily": "Open Sans",
-                        "fontSize": 12,
-                      }
+                      [
+                        {
+                          "color": "#6B7280",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 12,
+                        },
+                        {
+                          "color": "#6B7280",
+                        },
+                      ]
                     }
                   >
                     patientFile.delete

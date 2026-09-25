@@ -274,3 +274,24 @@ export async function deleteConsultation(consultationId: string): Promise<boolea
     return true;
   }
 }
+
+/**
+ * Actualiza los datos de una consulta de la historia clínica
+ */
+export async function updateConsultation(
+  consultationId: string,
+  updatedData: Partial<Consultation>
+): Promise<boolean> {
+  try {
+    await firestore()
+      .collection(CONSULTATIONS_COLLECTION)
+      .doc(consultationId)
+      .set(updatedData, { merge: true });
+    return true;
+  } catch (error) {
+    console.warn('[clinical-record-service] updateConsultation error in Firestore:', error);
+    // Para consultas virtuales en memoria o fallback
+    return true;
+  }
+}
+

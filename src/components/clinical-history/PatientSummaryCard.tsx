@@ -51,6 +51,8 @@ export function PatientSummaryCard({
     ? patient.medicalHistory.join(', ')
     : patient.conditions || 'Ninguna registrada';
 
+  const isDark = theme.background === '#000000';
+
   return (
     <View style={styles.card} testID="patient-summary-card">
       <View style={styles.mainRow}>
@@ -92,7 +94,7 @@ export function PatientSummaryCard({
             activeOpacity={0.7}
             accessibilityLabel="Editar paciente"
           >
-            <Ionicons name="create-outline" size={18} color={theme.main} />
+            <Ionicons name="create-outline" size={18} color={isDark ? '#FFFFFF' : theme.main} />
           </TouchableOpacity>
         )}
       </View>
@@ -105,7 +107,7 @@ export function PatientSummaryCard({
           activeOpacity={0.7}
         >
           <View style={styles.medicalHeaderLeft}>
-            <Ionicons name="medical" size={15} color={theme.main} />
+            <Ionicons name="medical" size={15} color={isDark ? '#FFFFFF' : theme.main} />
             <Text style={styles.medicalTitle}>{t('patientFile.medicalBackground')}</Text>
             {patient.bloodType ? (
               <View style={styles.bloodTypeBadge}>

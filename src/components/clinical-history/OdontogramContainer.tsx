@@ -14,6 +14,8 @@ export function OdontogramContainer({ odontogram }: Readonly<Props>) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = createStyles(theme);
+  const isDark = theme.background === '#000000';
+  const badgeTextColor = isDark ? '#FFFFFF' : theme.main;
 
   return (
     <View style={styles.card} testID="odontogram-container">
@@ -26,7 +28,7 @@ export function OdontogramContainer({ odontogram }: Readonly<Props>) {
           </Text>
         </View>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>
+          <Text style={[styles.badgeText, { color: badgeTextColor }]}>
             {t('clinicalHistory.comingSoon', 'Próximamente')}
           </Text>
         </View>
@@ -35,7 +37,7 @@ export function OdontogramContainer({ odontogram }: Readonly<Props>) {
       {/* Placeholder visual */}
       <View style={styles.placeholderBox}>
         <View style={styles.iconCircle}>
-          <Ionicons name="fitness-outline" size={40} color={theme.main} />
+          <Ionicons name="fitness-outline" size={40} color={isDark ? '#FFFFFF' : theme.main} />
         </View>
         <Text style={styles.placeholderTitle}>
           {t('clinicalHistory.odontogramPlaceholderTitle', 'Módulo de Odontograma Digital')}
@@ -67,7 +69,7 @@ export function OdontogramContainer({ odontogram }: Readonly<Props>) {
       {/* Metadata status footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Estado del módulo: <Text style={{ fontWeight: '700', color: theme.main }}>Estructura lista ({odontogram?.status || 'placeholder'})</Text>
+          Estado del módulo: <Text style={{ fontWeight: '700', color: isDark ? '#FFFFFF' : theme.main }}>Estructura lista ({odontogram?.status || 'placeholder'})</Text>
         </Text>
       </View>
     </View>

@@ -278,5 +278,27 @@ describe('PatientFileScreen', () => {
         },
       });
     });
+
+    it('aplica correctamente los estilos y tokens del tema en modo oscuro (dark mode)', async () => {
+      jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('dark');
+      (getPatientById as jest.Mock).mockResolvedValue(mockPatient);
+      (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+
+      render(<PatientFileScreen />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('patient-file-container')).toBeTruthy();
+      });
+
+      const container = screen.getByTestId('patient-file-container');
+      expect(container.props.style).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ backgroundColor: '#000000' }),
+        ])
+      );
+
+      // Restore light mode
+      jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('light');
+    });
   });
 });

@@ -699,9 +699,14 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                   "fontSize": 12,
                   "fontWeight": "600",
                 },
-                {
-                  "color": "#5B2D8B",
-                },
+                [
+                  {
+                    "color": "#5B2D8B",
+                  },
+                  {
+                    "color": "#5B2D8B",
+                  },
+                ],
               ]
             }
           >
@@ -1319,6 +1324,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                     "opacity": 1,
                   }
                 }
+                testID="btn-modify-consultation-c-1"
               >
                 <Text
                   allowFontScaling={false}
@@ -1698,6 +1704,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                     "opacity": 1,
                   }
                 }
+                testID="btn-modify-consultation-c-2"
               >
                 <Text
                   allowFontScaling={false}

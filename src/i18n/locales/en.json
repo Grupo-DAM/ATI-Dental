@@ -532,6 +532,11 @@
     "errorTitle": "Error querying clinical history",
     "errorLoad": "A connection error occurred. Please try again.",
     "accessDenied": "Access Restricted to Dentists",
-    "accessDeniedMessage": "Only personnel with Dentist or Administrator roles are authorized to view patients' clinical history."
+    "accessDeniedMessage": "Only personnel with Dentist or Administrator roles are authorized to view patients' clinical history.",
+    "edit": "Edit",
+    "save": "Save",
+    "saveChanges": "Save Changes",
+    "updateSuccessTitle": "Consultation updated",
+    "updateSuccessMessage": "The consultation has been updated successfully."
   }
 }

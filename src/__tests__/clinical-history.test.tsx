@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import ClinicalHistoryScreen from '../app/(tabs)/patients/clinical-history';
 import { useAuth } from '../hooks/use-auth';
-import { fetchClinicalRecord, deleteConsultation } from '../services/clinical-record-service';
+import { fetchClinicalRecord, deleteConsultation, updateConsultation } from '../services/clinical-record-service';
 import { deleteTreatment } from '../services/treatment-service';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
@@ -28,6 +28,7 @@ jest.mock('../hooks/use-auth', () => ({
 jest.mock('../services/clinical-record-service', () => ({
   fetchClinicalRecord: jest.fn(),
   deleteConsultation: jest.fn(),
+  updateConsultation: jest.fn(),
 }));
 
 jest.mock('../services/treatment-service', () => ({
@@ -441,6 +442,39 @@ describe('ClinicalHistoryScreen', () => {
     await waitFor(() => {
       expect(screen.queryByText('Limpieza Dental Profunda')).toBeNull();
       expect(screen.getByTestId('empty-treatments')).toBeTruthy();
+    });
+  });
+
+  it('permite abrir modal de edición y guardar modificaciones de una consulta', async () => {
+    (updateConsultation as jest.Mock).mockResolvedValue(true);
+    render(<ClinicalHistoryScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('btn-modify-consultation-c-1')).toBeTruthy();
+    });
+
+    // Abrir modificación
+    fireEvent.press(screen.getByTestId('btn-modify-consultation-c-1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('input-edit-consultation-title')).toBeTruthy();
+    });
+
+    // Modificar título y motivo
+    fireEvent.changeText(screen.getByTestId('input-edit-consultation-title'), 'Limpieza dental y profilaxis profunda');
+    fireEvent.changeText(screen.getByTestId('input-edit-consultation-motivo'), 'Sensibilidad en encías');
+
+    // Guardar
+    fireEvent.press(screen.getByTestId('btn-modal-save-consultation'));
+
+    await waitFor(() => {
+      expect(updateConsultation).toHaveBeenCalledWith(
+        'c-1',
+        expect.objectContaining({
+          title: 'Limpieza dental y profilaxis profunda',
+          motivo: 'Sensibilidad en encías',
+        })
+      );
     });
   });
 

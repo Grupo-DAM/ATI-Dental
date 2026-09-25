@@ -38,6 +38,9 @@ export function ClinicalHistoryTabs({ activeTab, onTabChange }: Readonly<Props>)
     },
   ];
 
+  const isDark = theme.background === '#000000';
+  const activeColor = isDark ? '#FFFFFF' : theme.main;
+
   return (
     <View style={styles.tabsContainer} testID="clinical-history-tabs">
       {tabs.map((tab) => {
@@ -56,12 +59,12 @@ export function ClinicalHistoryTabs({ activeTab, onTabChange }: Readonly<Props>)
             <Ionicons
               name={tab.icon}
               size={18}
-              color={isActive ? theme.main : theme.pageSubtitle}
+              color={isActive ? activeColor : theme.pageSubtitle}
             />
             <Text
               style={[
                 styles.tabLabel,
-                isActive ? styles.activeTabLabel : styles.inactiveTabLabel,
+                isActive ? [styles.activeTabLabel, { color: activeColor }] : styles.inactiveTabLabel,
               ]}
             >
               {tab.label}
