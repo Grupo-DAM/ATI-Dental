@@ -1,5 +1,5 @@
-const { execSync } = require('child_process');
-const os = require('os');
+const { execSync } = require('node:child_process');
+const os = require('node:os');
 
 console.log('Verificando entorno de desarrollo para Expo/Android...\n');
 let hasErrors = false;

@@ -119,15 +119,18 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     });
   });
 
-  it('Caso Borde 3.2: Falla validación síncrona si el nombre está vacío', async () => {
+  test.each([
+    { field: 'el nombre', testId: 'input-name', expectedAlert: 'profile.alerts.emptyName' },
+    { field: 'el apellido', testId: 'input-lastname', expectedAlert: 'profile.alerts.emptyLastName' },
+    { field: 'el correo', testId: 'input-email', expectedAlert: 'profile.alerts.emptyEmail' },
+  ])('Falla validación síncrona si $field está vacío', async ({ testId, expectedAlert }) => {
     const { getByTestId, getByText } = render(<ProfileScreen />);
 
-    const inputNombre = getByTestId('input-name');
-    fireEvent.changeText(inputNombre, '');
+    fireEvent.changeText(getByTestId(testId), '');
     fireEvent.press(getByTestId('btn-save'));
 
     await waitFor(() => {
-      expect(getByText('profile.alerts.emptyName')).toBeTruthy();
+      expect(getByText(expectedAlert)).toBeTruthy();
       expect(mockVerifyBeforeUpdateEmail).not.toHaveBeenCalled();
     });
   });
@@ -184,17 +187,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
   // ========================================================
   // NUEVAS PRUEBAS DE COBERTURA (SIN ROMPER LAS ANTERIORES)
   // ========================================================
-
-  it('Caso Borde 3.3: Falla validación síncrona si el apellido está vacío', async () => {
-    const { getByTestId, getByText } = render(<ProfileScreen />);
-
-    fireEvent.changeText(getByTestId('input-lastname'), '');
-    fireEvent.press(getByTestId('btn-save'));
-
-    await waitFor(() => {
-      expect(getByText('profile.alerts.emptyLastName')).toBeTruthy();
-    });
-  });
 
   it('Simulación Maestro: Intercepta dr.nuevo@atidental.com y abre el modal sin llamar a Firebase', async () => {
     const { getByTestId } = render(<ProfileScreen />);
@@ -332,15 +324,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     fireEvent.press(getByTestId('btn-save'));
     
     await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
-  });
-
-  it('Caso Borde 3.4: Falla validación síncrona si el correo está vacío', async () => {
-    const { getByTestId, getByText } = render(<ProfileScreen />);
-    fireEvent.changeText(getByTestId('input-email'), '');
-    fireEvent.press(getByTestId('btn-save'));
-    await waitFor(() => {
-      expect(getByText('profile.alerts.emptyEmail')).toBeTruthy();
-    });
   });
 
   it('Aplica cambio de idioma optimista aunque falle la red', async () => {

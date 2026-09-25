@@ -23,7 +23,6 @@ import { ContactButton } from '@/components/contact/contact-button';
 import { ResponsibleCard } from '@/components/contact/responsible-card';
 import { Config } from '@/constants/config';
 import { Colors } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
 import { firestore } from '@/config/firebase';
 
 // Mock images representing local assets or high-quality photos
@@ -78,7 +77,6 @@ const facebookPosts = [
 
 export default function ContactsScreen() {
   const { t } = useTranslation();
-  const theme = useTheme();
   const netInfo = useNetInfo();
 
   const [responsibles, setResponsibles] = useState<any[]>([]);
