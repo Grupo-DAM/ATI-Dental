@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { ClinicalTab } from '@/hooks/use-clinical-record';
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
 
 export function ClinicalHistoryTabs({ activeTab, onTabChange }: Readonly<Props>) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = createStyles(theme);
 
   const tabs: Array<{
     key: ClinicalTab;
@@ -53,7 +56,7 @@ export function ClinicalHistoryTabs({ activeTab, onTabChange }: Readonly<Props>)
             <Ionicons
               name={tab.icon}
               size={18}
-              color={isActive ? Colors.light.main : '#6B7280'}
+              color={isActive ? theme.main : theme.pageSubtitle}
             />
             <Text
               style={[
@@ -70,39 +73,40 @@ export function ClinicalHistoryTabs({ activeTab, onTabChange }: Readonly<Props>)
   );
 }
 
-const styles = StyleSheet.create({
-  tabsContainer: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  tabItem: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    gap: 4,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  activeTabItem: {
-    borderBottomColor: Colors.light.main,
-    backgroundColor: '#F3E8FF',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-  },
-  tabLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-  },
-  activeTabLabel: {
-    color: Colors.light.main,
-  },
-  inactiveTabLabel: {
-    color: '#6B7280',
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    tabsContainer: {
+      flexDirection: 'row',
+      marginHorizontal: 16,
+      marginBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.cardSeparator,
+    },
+    tabItem: {
+      flex: 1,
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 10,
+      gap: 4,
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
+    },
+    activeTabItem: {
+      borderBottomColor: theme.main,
+      backgroundColor: theme.accentBackground,
+      borderTopLeftRadius: 8,
+      borderTopRightRadius: 8,
+    },
+    tabLabel: {
+      fontSize: 12,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
+    },
+    activeTabLabel: {
+      color: theme.main,
+    },
+    inactiveTabLabel: {
+      color: theme.pageSubtitle,
+    },
+  });

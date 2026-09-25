@@ -444,6 +444,33 @@ describe('ClinicalHistoryScreen', () => {
     });
   });
 
+  // ── Dark Mode Test ──
+  it('aplica correctamente los estilos y tokens del tema en modo oscuro (dark mode)', async () => {
+    jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('dark');
+
+    const { getByTestId } = render(<ClinicalHistoryScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText('María González')).toBeTruthy();
+    });
+
+    const screenContainer = getByTestId('clinical-history-screen');
+    expect(screenContainer.props.style).toEqual(
+      expect.objectContaining({ backgroundColor: '#000000' })
+    );
+
+    const summaryCard = getByTestId('patient-summary-card');
+    expect(summaryCard.props.style).toEqual(
+      expect.objectContaining({
+        backgroundColor: '#121315',
+        borderColor: '#374151',
+      })
+    );
+
+    // Restaurar a light
+    jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('light');
+  });
+
   // ── Snapshot test ──
   it('coincide con el snapshot estructural', async () => {
     const { toJSON } = render(<ClinicalHistoryScreen />);

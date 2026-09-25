@@ -179,8 +179,8 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
       <View
         style={
           {
-            "backgroundColor": "#FFFFFF",
-            "borderColor": "#E5E7EB",
+            "backgroundColor": "#ffffff",
+            "borderColor": "#D1D5DB",
             "borderRadius": 16,
             "borderWidth": 1,
             "marginBottom": 12,
@@ -272,7 +272,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                 style={
                   {
                     "alignItems": "center",
-                    "backgroundColor": "#F3F4F6",
+                    "backgroundColor": "#F9FAFB",
                     "borderRadius": 6,
                     "flexDirection": "row",
                     "gap": 4,
@@ -305,7 +305,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                 <Text
                   style={
                     {
-                      "color": "#4B5563",
+                      "color": "#60646C",
                       "fontFamily": "Open Sans",
                       "fontSize": 11,
                     }
@@ -318,7 +318,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                 style={
                   {
                     "alignItems": "center",
-                    "backgroundColor": "#F3F4F6",
+                    "backgroundColor": "#F9FAFB",
                     "borderRadius": 6,
                     "flexDirection": "row",
                     "gap": 4,
@@ -351,7 +351,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                 <Text
                   style={
                     {
-                      "color": "#4B5563",
+                      "color": "#60646C",
                       "fontFamily": "Open Sans",
                       "fontSize": 11,
                     }
@@ -366,7 +366,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                 style={
                   {
                     "alignItems": "center",
-                    "backgroundColor": "#F3F4F6",
+                    "backgroundColor": "#F9FAFB",
                     "borderRadius": 6,
                     "flexDirection": "row",
                     "gap": 4,
@@ -399,7 +399,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                 <Text
                   style={
                     {
-                      "color": "#4B5563",
+                      "color": "#60646C",
                       "fontFamily": "Open Sans",
                       "fontSize": 11,
                     }
@@ -478,7 +478,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
         <View
           style={
             {
-              "borderTopColor": "#F3F4F6",
+              "borderTopColor": "#EDF2F7",
               "borderTopWidth": 1,
               "marginTop": 12,
               "paddingTop": 10,
@@ -615,7 +615,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
       <View
         style={
           {
-            "borderBottomColor": "#E5E7EB",
+            "borderBottomColor": "#D1D5DB",
             "borderBottomWidth": 1,
             "flexDirection": "row",
             "marginBottom": 16,
@@ -983,7 +983,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
           style={
             {
               "alignItems": "center",
-              "backgroundColor": "#FFFFFF",
+              "backgroundColor": "#ffffff",
               "borderColor": "#D1D5DB",
               "borderRadius": 8,
               "borderWidth": 1,
@@ -1000,7 +1000,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
             style={
               [
                 {
-                  "color": "#9CA3AF",
+                  "color": "#9E8BAC",
                   "fontSize": 16,
                 },
                 {
@@ -1021,10 +1021,10 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
             clearButtonMode="while-editing"
             onChangeText={[Function]}
             placeholder="Buscar por motivo, diagnostico o fecha"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#9E8BAC"
             style={
               {
-                "color": "#1F2937",
+                "color": "#141018",
                 "flex": 1,
                 "fontFamily": "Open Sans",
                 "fontSize": 13,
@@ -1084,7 +1084,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
             <View
               style={
                 {
-                  "backgroundColor": "#FFFFFF",
+                  "backgroundColor": "#ffffff",
                   "borderColor": "#5B2D8B",
                   "borderRadius": 7,
                   "borderWidth": 2,
@@ -1097,7 +1097,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               style={
                 {
                   "alignSelf": "center",
-                  "backgroundColor": "#E5E7EB",
+                  "backgroundColor": "#D1D5DB",
                   "bottom": -20,
                   "position": "absolute",
                   "top": 48,
@@ -1136,8 +1136,8 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
             onStartShouldSetResponder={[Function]}
             style={
               {
-                "backgroundColor": "#FFFFFF",
-                "borderColor": "#E5E7EB",
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
                 "borderRadius": 16,
                 "borderWidth": 1,
                 "elevation": 1,
@@ -1179,7 +1179,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#4B5563",
+                    "color": "#374151",
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
                     "fontWeight": "600",
@@ -1191,7 +1191,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#1F2937",
+                    "color": "#141018",
                     "flex": 1,
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
@@ -1213,7 +1213,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#4B5563",
+                    "color": "#374151",
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
                     "fontWeight": "600",
@@ -1226,7 +1226,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                 numberOfLines={2}
                 style={
                   {
-                    "color": "#1F2937",
+                    "color": "#141018",
                     "flex": 1,
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
@@ -1248,7 +1248,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#4B5563",
+                    "color": "#374151",
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
                     "fontWeight": "600",
@@ -1260,7 +1260,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#1F2937",
+                    "color": "#141018",
                     "flex": 1,
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
@@ -1273,7 +1273,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
             <View
               style={
                 {
-                  "borderTopColor": "#F3F4F6",
+                  "borderTopColor": "#EDF2F7",
                   "borderTopWidth": 1,
                   "flexDirection": "row",
                   "gap": 16,
@@ -1475,7 +1475,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
             <View
               style={
                 {
-                  "backgroundColor": "#FFFFFF",
+                  "backgroundColor": "#ffffff",
                   "borderColor": "#5B2D8B",
                   "borderRadius": 7,
                   "borderWidth": 2,
@@ -1515,8 +1515,8 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
             onStartShouldSetResponder={[Function]}
             style={
               {
-                "backgroundColor": "#FFFFFF",
-                "borderColor": "#E5E7EB",
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
                 "borderRadius": 16,
                 "borderWidth": 1,
                 "elevation": 1,
@@ -1558,7 +1558,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#4B5563",
+                    "color": "#374151",
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
                     "fontWeight": "600",
@@ -1570,7 +1570,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#1F2937",
+                    "color": "#141018",
                     "flex": 1,
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
@@ -1592,7 +1592,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#4B5563",
+                    "color": "#374151",
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
                     "fontWeight": "600",
@@ -1605,7 +1605,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                 numberOfLines={2}
                 style={
                   {
-                    "color": "#1F2937",
+                    "color": "#141018",
                     "flex": 1,
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
@@ -1627,7 +1627,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#4B5563",
+                    "color": "#374151",
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
                     "fontWeight": "600",
@@ -1639,7 +1639,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
               <Text
                 style={
                   {
-                    "color": "#1F2937",
+                    "color": "#141018",
                     "flex": 1,
                     "fontFamily": "Open Sans",
                     "fontSize": 12,
@@ -1652,7 +1652,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
             <View
               style={
                 {
-                  "borderTopColor": "#F3F4F6",
+                  "borderTopColor": "#EDF2F7",
                   "borderTopWidth": 1,
                   "flexDirection": "row",
                   "gap": 16,

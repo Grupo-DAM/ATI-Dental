@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { Consultation } from '@/types/clinical-record';
 import { Patient } from '@/services/patient-service';
 
@@ -55,6 +56,8 @@ export function ConsultationDetailModal({
   onOpenOdontogram,
 }: Readonly<Props>) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = createStyles(theme);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     motivo: true,
@@ -82,13 +85,13 @@ export function ConsultationDetailModal({
         {/* Header */}
         <View style={styles.navHeader}>
           <TouchableOpacity onPress={onClose} style={styles.backButton} activeOpacity={0.7}>
-            <Ionicons name="chevron-back" size={24} color={Colors.light.main} />
+            <Ionicons name="chevron-back" size={24} color={theme.main} />
             <Text style={styles.breadcrumbText}>
               {t('clinicalHistory.title', 'Historia Clínica')} &gt; {t('clinicalHistory.consultation', 'Consulta')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.7}>
-            <Ionicons name="close" size={22} color="#6B7280" />
+            <Ionicons name="close" size={22} color={theme.pageSubtitle} />
           </TouchableOpacity>
         </View>
 
@@ -119,7 +122,7 @@ export function ConsultationDetailModal({
                 }}
                 activeOpacity={0.7}
               >
-                <Ionicons name="medkit-outline" size={16} color={Colors.light.main} />
+                <Ionicons name="medkit-outline" size={16} color={theme.main} />
                 <Text style={styles.odontogramButtonText}>
                   {t('clinicalHistory.viewOdontogram', 'Ver Odontograma')}
                 </Text>
@@ -140,7 +143,7 @@ export function ConsultationDetailModal({
               <Ionicons
                 name={openSections.motivo ? 'chevron-up' : 'chevron-down'}
                 size={18}
-                color="#6B7280"
+                color={theme.pageSubtitle}
               />
             </TouchableOpacity>
             {openSections.motivo && (
@@ -163,7 +166,7 @@ export function ConsultationDetailModal({
               <Ionicons
                 name={openSections.diagnostico ? 'chevron-up' : 'chevron-down'}
                 size={18}
-                color="#6B7280"
+                color={theme.pageSubtitle}
               />
             </TouchableOpacity>
             {openSections.diagnostico && (
@@ -175,7 +178,7 @@ export function ConsultationDetailModal({
                   <View style={styles.bulletsList}>
                     {consultation.diagnosticoDetallado.map((item, idx) => (
                       <View key={idx} style={styles.bulletRow}>
-                        <Text style={styles.bulletDot}>•</Text>
+                        <Text style={[styles.bulletDot, { color: theme.main }]}>•</Text>
                         <Text style={styles.bulletText}>{item}</Text>
                       </View>
                     ))}
@@ -198,7 +201,7 @@ export function ConsultationDetailModal({
               <Ionicons
                 name={openSections.tratamientos ? 'chevron-up' : 'chevron-down'}
                 size={18}
-                color="#6B7280"
+                color={theme.pageSubtitle}
               />
             </TouchableOpacity>
             {openSections.tratamientos && (
@@ -231,7 +234,7 @@ export function ConsultationDetailModal({
               <Ionicons
                 name={openSections.notas ? 'chevron-up' : 'chevron-down'}
                 size={18}
-                color="#6B7280"
+                color={theme.pageSubtitle}
               />
             </TouchableOpacity>
             {openSections.notas && (
@@ -247,7 +250,7 @@ export function ConsultationDetailModal({
           {consultation.proximaCita && (
             <View style={styles.nextAppointmentCard}>
               <View style={styles.calendarIconCircle}>
-                <Ionicons name="calendar" size={18} color={Colors.light.main} />
+                <Ionicons name="calendar" size={18} color={theme.main} />
               </View>
               <View>
                 <Text style={styles.nextAppointmentLabel}>PRÓXIMA CITA</Text>
@@ -263,7 +266,7 @@ export function ConsultationDetailModal({
               onPress={() => onDelete(consultation.id)}
               activeOpacity={0.7}
             >
-              <Ionicons name="trash-outline" size={16} color="#DC2626" />
+              <Ionicons name="trash-outline" size={16} color={theme.error} />
               <Text style={styles.deleteText}>
                 {t('clinicalHistory.deleteConsultation', 'Eliminar')}
               </Text>
@@ -275,236 +278,237 @@ export function ConsultationDetailModal({
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F7F6F8',
-  },
-  navHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  breadcrumbText: {
-    fontSize: 14,
-    color: '#374151',
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-  },
-  closeButton: {
-    padding: 6,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  mainCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 12,
-  },
-  dateBlock: {
-    alignItems: 'center',
-    paddingRight: 16,
-    borderRightWidth: 1,
-    borderRightColor: '#E5E7EB',
-    minWidth: 70,
-  },
-  dayNumber: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-  },
-  monthText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-  },
-  timeText: {
-    fontSize: 10,
-    color: '#9CA3AF',
-    fontFamily: 'Open Sans',
-    marginTop: 2,
-  },
-  titleBlock: {
-    flex: 1,
-    paddingLeft: 16,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.light.main,
-    fontFamily: 'Open Sans',
-    marginBottom: 4,
-  },
-  doctorText: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-  },
-  actionButtonRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 12,
-  },
-  odontogramButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F3E8FF',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
-  },
-  odontogramButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.light.main,
-    fontFamily: 'Open Sans',
-  },
-  accordionSection: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 10,
-    overflow: 'hidden',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 14,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-  },
-  sectionBody: {
-    paddingHorizontal: 14,
-    paddingBottom: 14,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-  },
-  bodyText: {
-    fontSize: 13,
-    color: '#4B5563',
-    lineHeight: 19,
-    fontFamily: 'Open Sans',
-    marginTop: 8,
-  },
-  bulletsList: {
-    gap: 4,
-    paddingLeft: 4,
-  },
-  bulletRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 6,
-  },
-  bulletDot: {
-    fontSize: 14,
-    color: Colors.light.main,
-  },
-  bulletText: {
-    fontSize: 13,
-    color: '#4B5563',
-    fontFamily: 'Open Sans',
-    flex: 1,
-  },
-  treatmentRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  treatmentName: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-  },
-  statusCompletedBadge: {
-    backgroundColor: '#E8F5E9',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  statusCompletedText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#2E7D32',
-    fontFamily: 'Open Sans',
-  },
-  treatmentDoctor: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-  },
-  nextAppointmentCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    gap: 12,
-    marginBottom: 16,
-  },
-  calendarIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#F3E8FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  nextAppointmentLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-    letterSpacing: 0.5,
-  },
-  nextAppointmentDate: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-    marginTop: 2,
-  },
-  deleteButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 12,
-  },
-  deleteText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#DC2626',
-    fontFamily: 'Open Sans',
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    navHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.cardSeparator,
+      backgroundColor: theme.backgroundElement,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    breadcrumbText: {
+      fontSize: 14,
+      color: theme.fieldLabel,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
+    },
+    closeButton: {
+      padding: 6,
+    },
+    scrollContent: {
+      padding: 16,
+      paddingBottom: 40,
+    },
+    mainCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.backgroundElement,
+      borderRadius: 16,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      marginBottom: 12,
+    },
+    dateBlock: {
+      alignItems: 'center',
+      paddingRight: 16,
+      borderRightWidth: 1,
+      borderRightColor: theme.cardSeparator,
+      minWidth: 70,
+    },
+    dayNumber: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+    },
+    monthText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+    },
+    timeText: {
+      fontSize: 10,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+      marginTop: 2,
+    },
+    titleBlock: {
+      flex: 1,
+      paddingLeft: 16,
+    },
+    cardTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: theme.main,
+      fontFamily: 'Open Sans',
+      marginBottom: 4,
+    },
+    doctorText: {
+      fontSize: 12,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+    },
+    actionButtonRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      marginBottom: 12,
+    },
+    odontogramButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.accentBackground,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 8,
+      gap: 6,
+    },
+    odontogramButtonText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: theme.main,
+      fontFamily: 'Open Sans',
+    },
+    accordionSection: {
+      backgroundColor: theme.backgroundElement,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      marginBottom: 10,
+      overflow: 'hidden',
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 14,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+    },
+    sectionBody: {
+      paddingHorizontal: 14,
+      paddingBottom: 14,
+      borderTopWidth: 1,
+      borderTopColor: theme.pageSeparator,
+    },
+    bodyText: {
+      fontSize: 13,
+      color: theme.text,
+      lineHeight: 19,
+      fontFamily: 'Open Sans',
+      marginTop: 8,
+    },
+    bulletsList: {
+      gap: 4,
+      paddingLeft: 4,
+    },
+    bulletRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 6,
+    },
+    bulletDot: {
+      fontSize: 14,
+      color: theme.main,
+    },
+    bulletText: {
+      fontSize: 13,
+      color: theme.text,
+      fontFamily: 'Open Sans',
+      flex: 1,
+    },
+    treatmentRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 8,
+      marginBottom: 4,
+    },
+    treatmentName: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+    },
+    statusCompletedBadge: {
+      backgroundColor: '#E8F5E9',
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 6,
+    },
+    statusCompletedText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: '#2E7D32',
+      fontFamily: 'Open Sans',
+    },
+    treatmentDoctor: {
+      fontSize: 12,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+    },
+    nextAppointmentCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.backgroundElement,
+      borderRadius: 12,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      gap: 12,
+      marginBottom: 16,
+    },
+    calendarIconCircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: theme.accentBackground,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    nextAppointmentLabel: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+      letterSpacing: 0.5,
+    },
+    nextAppointmentDate: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+      marginTop: 2,
+    },
+    deleteButton: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 12,
+    },
+    deleteText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: theme.error,
+      fontFamily: 'Open Sans',
+    },
+  });

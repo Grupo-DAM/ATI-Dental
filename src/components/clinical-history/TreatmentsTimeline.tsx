@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { Treatment } from '@/services/treatment-service';
 
 function formatTreatmentDate(dateStr?: string): string {
@@ -53,6 +54,8 @@ export function TreatmentsTimeline({
   onDeleteTreatment,
 }: Readonly<Props>) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = createStyles(theme);
 
   return (
     <View style={styles.container} testID="treatments-timeline">
@@ -76,11 +79,11 @@ export function TreatmentsTimeline({
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={16} color="#9CA3AF" style={styles.searchIcon} />
+        <Ionicons name="search" size={16} color={theme.placeholderColor} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder={t('clinicalHistory.searchPlaceholder', 'Buscar por motivo, diagnostico o fecha')}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={theme.placeholderColor}
           value={searchQuery}
           onChangeText={onSearchChange}
           clearButtonMode="while-editing"
@@ -88,7 +91,7 @@ export function TreatmentsTimeline({
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => onSearchChange('')} style={{ padding: 4 }}>
-            <Ionicons name="close-circle" size={16} color="#9CA3AF" />
+            <Ionicons name="close-circle" size={16} color={theme.placeholderColor} />
           </TouchableOpacity>
         )}
       </View>
@@ -96,7 +99,7 @@ export function TreatmentsTimeline({
       {/* Empty State */}
       {treatments.length === 0 ? (
         <View style={styles.emptyContainer} testID="empty-treatments">
-          <Ionicons name="clipboard-outline" size={48} color="#D1D5DB" />
+          <Ionicons name="clipboard-outline" size={48} color={theme.pageSubtitle} />
           <Text style={styles.emptyTitle}>
             {searchQuery
               ? t('clinicalHistory.noSearchResults', 'Sin resultados')
@@ -120,7 +123,7 @@ export function TreatmentsTimeline({
             {/* Left Icon Dot & Line */}
             <View style={styles.leftColumn}>
               <View style={styles.iconCircle}>
-                <Ionicons name="bandage-outline" size={14} color={Colors.light.main} />
+                <Ionicons name="bandage-outline" size={14} color={theme.main} />
               </View>
               {!isLast && <View style={styles.connectingLine} />}
             </View>
@@ -139,8 +142,8 @@ export function TreatmentsTimeline({
                     </View>
                   ) : null}
                   {tr.category ? (
-                    <View style={[styles.badge, { backgroundColor: '#F3E8FF' }]}>
-                      <Text style={[styles.badgeText, { color: '#6B21A8' }]}>
+                    <View style={[styles.badge, { backgroundColor: theme.accentBackground }]}>
+                      <Text style={[styles.badgeText, { color: theme.main }]}>
                         {tr.category}
                       </Text>
                     </View>
@@ -160,13 +163,13 @@ export function TreatmentsTimeline({
 
               {/* Meta row: Doctor, Duration, Dental piece */}
               <View style={styles.metaRow}>
-                <Ionicons name="person-outline" size={12} color="#6B7280" />
+                <Ionicons name="person-outline" size={12} color={theme.pageSubtitle} />
                 <Text style={styles.metaText}>{tr.responsibleDentist}</Text>
 
                 {tr.duration ? (
                   <>
                     <Text style={styles.metaSeparator}>|</Text>
-                    <Ionicons name="time-outline" size={12} color="#6B7280" />
+                    <Ionicons name="time-outline" size={12} color={theme.pageSubtitle} />
                     <Text style={styles.metaText}>{tr.duration}</Text>
                   </>
                 ) : null}
@@ -174,7 +177,7 @@ export function TreatmentsTimeline({
                 {tr.dentalPiece ? (
                   <>
                     <Text style={styles.metaSeparator}>|</Text>
-                    <Ionicons name="medkit-outline" size={12} color="#6B7280" />
+                    <Ionicons name="medkit-outline" size={12} color={theme.pageSubtitle} />
                     <Text style={styles.metaText}>{tr.dentalPiece}</Text>
                   </>
                 ) : null}
@@ -187,7 +190,7 @@ export function TreatmentsTimeline({
                   onPress={() => onModifyTreatment(tr.id)}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="create-outline" size={14} color="#6B7280" />
+                  <Ionicons name="create-outline" size={14} color={theme.pageSubtitle} />
                   <Text style={styles.actionText}>Modificar</Text>
                 </TouchableOpacity>
 
@@ -196,7 +199,7 @@ export function TreatmentsTimeline({
                   onPress={() => onDeleteTreatment(tr.id)}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="trash-outline" size={14} color="#6B7280" />
+                  <Ionicons name="trash-outline" size={14} color={theme.pageSubtitle} />
                   <Text style={styles.actionText}>Eliminar</Text>
                 </TouchableOpacity>
               </View>
@@ -208,191 +211,192 @@ export function TreatmentsTimeline({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.light.main,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
-    gap: 4,
-  },
-  addButtonText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 40,
-    marginBottom: 16,
-  },
-  searchIcon: {
-    marginRight: 6,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 13,
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-    paddingVertical: 0,
-  },
-  timelineItem: {
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
-  leftColumn: {
-    width: 36,
-    alignItems: 'center',
-    position: 'relative',
-    paddingTop: 4,
-    marginRight: 10,
-  },
-  iconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#F3E8FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: Colors.light.main,
-  },
-  connectingLine: {
-    position: 'absolute',
-    top: 36,
-    bottom: -16,
-    width: 2,
-    backgroundColor: '#E5E7EB',
-    alignSelf: 'center',
-  },
-  card: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 14,
-  },
-  dateRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  dateText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#374151',
-    fontFamily: 'Open Sans',
-  },
-  badgesGroup: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    fontFamily: 'Open Sans',
-  },
-  treatmentName: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-    marginBottom: 4,
-  },
-  treatmentNotes: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-    lineHeight: 17,
-    marginBottom: 8,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 10,
-    flexWrap: 'wrap',
-  },
-  metaText: {
-    fontSize: 11,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-  },
-  metaSeparator: {
-    fontSize: 11,
-    color: '#D1D5DB',
-  },
-  actionsFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    paddingTop: 8,
-  },
-  actionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  actionText: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 32,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    paddingHorizontal: 20,
-  },
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#4B5563',
-    fontFamily: 'Open Sans',
-    marginTop: 10,
-  },
-  emptySubtitle: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    fontFamily: 'Open Sans',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 16,
+      paddingBottom: 24,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+    },
+    addButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.main,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 8,
+      gap: 4,
+    },
+    addButtonText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.backgroundElement,
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      height: 40,
+      marginBottom: 16,
+    },
+    searchIcon: {
+      marginRight: 6,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 13,
+      color: theme.text,
+      fontFamily: 'Open Sans',
+      paddingVertical: 0,
+    },
+    timelineItem: {
+      flexDirection: 'row',
+      marginBottom: 16,
+    },
+    leftColumn: {
+      width: 36,
+      alignItems: 'center',
+      position: 'relative',
+      paddingTop: 4,
+      marginRight: 10,
+    },
+    iconCircle: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: theme.accentBackground,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1.5,
+      borderColor: theme.main,
+    },
+    connectingLine: {
+      position: 'absolute',
+      top: 36,
+      bottom: -16,
+      width: 2,
+      backgroundColor: theme.cardSeparator,
+      alignSelf: 'center',
+    },
+    card: {
+      flex: 1,
+      backgroundColor: theme.backgroundElement,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      padding: 14,
+    },
+    dateRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 6,
+    },
+    dateText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+    },
+    badgesGroup: {
+      flexDirection: 'row',
+      gap: 6,
+    },
+    badge: {
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 6,
+    },
+    badgeText: {
+      fontSize: 10,
+      fontWeight: '700',
+      fontFamily: 'Open Sans',
+    },
+    treatmentName: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+      marginBottom: 4,
+    },
+    treatmentNotes: {
+      fontSize: 12,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+      lineHeight: 17,
+      marginBottom: 8,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 10,
+      flexWrap: 'wrap',
+    },
+    metaText: {
+      fontSize: 11,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+    },
+    metaSeparator: {
+      fontSize: 11,
+      color: theme.cardSeparator,
+    },
+    actionsFooter: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.pageSeparator,
+      paddingTop: 8,
+    },
+    actionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    actionText: {
+      fontSize: 12,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      paddingVertical: 32,
+      backgroundColor: theme.backgroundElement,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      paddingHorizontal: 20,
+    },
+    emptyTitle: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+      marginTop: 10,
+    },
+    emptySubtitle: {
+      fontSize: 12,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+      textAlign: 'center',
+      marginTop: 4,
+    },
+  });

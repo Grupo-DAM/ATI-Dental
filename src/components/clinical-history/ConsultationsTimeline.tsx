@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { Consultation } from '@/types/clinical-record';
 
 function formatTimelineDate(dateStr?: string): { day: string; monthYear: string } {
@@ -48,6 +49,8 @@ export function ConsultationsTimeline({
   onDeleteConsultation,
 }: Readonly<Props>) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = createStyles(theme);
 
   return (
     <View style={styles.container} testID="consultations-timeline">
@@ -71,11 +74,11 @@ export function ConsultationsTimeline({
 
       {/* Search Input */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={16} color="#9CA3AF" style={styles.searchIcon} />
+        <Ionicons name="search" size={16} color={theme.placeholderColor} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder={t('clinicalHistory.searchPlaceholder', 'Buscar por motivo, diagnostico o fecha')}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={theme.placeholderColor}
           value={searchQuery}
           onChangeText={onSearchChange}
           clearButtonMode="while-editing"
@@ -83,7 +86,7 @@ export function ConsultationsTimeline({
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => onSearchChange('')} style={{ padding: 4 }}>
-            <Ionicons name="close-circle" size={16} color="#9CA3AF" />
+            <Ionicons name="close-circle" size={16} color={theme.placeholderColor} />
           </TouchableOpacity>
         )}
       </View>
@@ -91,7 +94,7 @@ export function ConsultationsTimeline({
       {/* Empty State */}
       {consultations.length === 0 ? (
         <View style={styles.emptyContainer} testID="empty-consultations">
-          <Ionicons name="calendar-outline" size={48} color="#D1D5DB" />
+          <Ionicons name="calendar-outline" size={48} color={theme.pageSubtitle} />
           <Text style={styles.emptyTitle}>
             {searchQuery
               ? t('clinicalHistory.noSearchResults', 'Sin resultados')
@@ -157,7 +160,7 @@ export function ConsultationsTimeline({
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="create-outline" size={14} color="#6B7280" />
+                  <Ionicons name="create-outline" size={14} color={theme.pageSubtitle} />
                   <Text style={styles.actionText}>Modificar</Text>
                 </TouchableOpacity>
 
@@ -169,7 +172,7 @@ export function ConsultationsTimeline({
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="trash-outline" size={14} color="#6B7280" />
+                  <Ionicons name="trash-outline" size={14} color={theme.pageSubtitle} />
                   <Text style={styles.actionText}>Eliminar</Text>
                 </TouchableOpacity>
               </View>
@@ -181,177 +184,178 @@ export function ConsultationsTimeline({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-  },
-  scheduleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.light.main,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
-    gap: 6,
-  },
-  scheduleButtonText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 40,
-    marginBottom: 16,
-  },
-  searchIcon: {
-    marginRight: 6,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 13,
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-    paddingVertical: 0,
-  },
-  timelineItem: {
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
-  dateColumn: {
-    width: 64,
-    alignItems: 'center',
-    position: 'relative',
-    paddingTop: 2,
-    marginRight: 8,
-  },
-  dayText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-  },
-  monthYearText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-    textAlign: 'center',
-    marginBottom: 6,
-  },
-  markerCircle: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    borderWidth: 2,
-    borderColor: Colors.light.main,
-    backgroundColor: '#FFFFFF',
-  },
-  connectingLine: {
-    position: 'absolute',
-    top: 48,
-    bottom: -20,
-    width: 2,
-    backgroundColor: '#E5E7EB',
-    alignSelf: 'center',
-  },
-  card: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: Colors.light.main,
-    fontFamily: 'Open Sans',
-    marginBottom: 8,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    marginBottom: 4,
-    alignItems: 'flex-start',
-  },
-  detailLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4B5563',
-    fontFamily: 'Open Sans',
-  },
-  detailValue: {
-    fontSize: 12,
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-    flex: 1,
-  },
-  actionsFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    marginTop: 10,
-    paddingTop: 8,
-  },
-  actionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  actionText: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: 32,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    paddingHorizontal: 20,
-  },
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#4B5563',
-    fontFamily: 'Open Sans',
-    marginTop: 10,
-  },
-  emptySubtitle: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    fontFamily: 'Open Sans',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 16,
+      paddingBottom: 24,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+    },
+    scheduleButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.main,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 8,
+      gap: 6,
+    },
+    scheduleButtonText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.backgroundElement,
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      height: 40,
+      marginBottom: 16,
+    },
+    searchIcon: {
+      marginRight: 6,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 13,
+      color: theme.text,
+      fontFamily: 'Open Sans',
+      paddingVertical: 0,
+    },
+    timelineItem: {
+      flexDirection: 'row',
+      marginBottom: 16,
+    },
+    dateColumn: {
+      width: 64,
+      alignItems: 'center',
+      position: 'relative',
+      paddingTop: 2,
+      marginRight: 8,
+    },
+    dayText: {
+      fontSize: 18,
+      fontWeight: '800',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+    },
+    monthYearText: {
+      fontSize: 10,
+      fontWeight: '600',
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+      textAlign: 'center',
+      marginBottom: 6,
+    },
+    markerCircle: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      borderWidth: 2,
+      borderColor: theme.main,
+      backgroundColor: theme.backgroundElement,
+    },
+    connectingLine: {
+      position: 'absolute',
+      top: 48,
+      bottom: -20,
+      width: 2,
+      backgroundColor: theme.cardSeparator,
+      alignSelf: 'center',
+    },
+    card: {
+      flex: 1,
+      backgroundColor: theme.backgroundElement,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      padding: 14,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    cardTitle: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: theme.main,
+      fontFamily: 'Open Sans',
+      marginBottom: 8,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      marginBottom: 4,
+      alignItems: 'flex-start',
+    },
+    detailLabel: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: theme.fieldLabel,
+      fontFamily: 'Open Sans',
+    },
+    detailValue: {
+      fontSize: 12,
+      color: theme.text,
+      fontFamily: 'Open Sans',
+      flex: 1,
+    },
+    actionsFooter: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.pageSeparator,
+      marginTop: 10,
+      paddingTop: 8,
+    },
+    actionItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    actionText: {
+      fontSize: 12,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      paddingVertical: 32,
+      backgroundColor: theme.backgroundElement,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.cardSeparator,
+      paddingHorizontal: 20,
+    },
+    emptyTitle: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+      marginTop: 10,
+    },
+    emptySubtitle: {
+      fontSize: 12,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+      textAlign: 'center',
+      marginTop: 4,
+    },
+  });

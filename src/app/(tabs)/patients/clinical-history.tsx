@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
 import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
 import { useClinicalRecord } from '@/hooks/use-clinical-record';
@@ -31,6 +32,8 @@ import { Consultation } from '@/types/clinical-record';
 
 export default function ClinicalHistoryScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = createStyles(theme);
   const { user, loading: authLoading } = useAuth();
   const { patientId } = useLocalSearchParams<{ patientId?: string }>();
 
@@ -160,7 +163,7 @@ export default function ClinicalHistoryScreen() {
           current={t('clinicalHistory.title', 'Historia Clínica')}
         />
         <View style={styles.centerContainer}>
-          <Ionicons name="lock-closed-outline" size={56} color="#9CA3AF" />
+          <Ionicons name="lock-closed-outline" size={56} color={theme.pageSubtitle} />
           <Text style={styles.stateTitle}>
             {t('clinicalHistory.accessDenied', 'Acceso Restringido a Odontólogos')}
           </Text>
@@ -185,7 +188,7 @@ export default function ClinicalHistoryScreen() {
           current={t('clinicalHistory.title', 'Historia Clínica')}
         />
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={Colors.light.main} />
+          <ActivityIndicator size="large" color={theme.main} />
           <Text style={styles.stateMessage}>
             {t('clinicalHistory.loading', 'Cargando historia clínica dental...')}
           </Text>
@@ -204,7 +207,7 @@ export default function ClinicalHistoryScreen() {
           current={t('clinicalHistory.title', 'Historia Clínica')}
         />
         <View style={styles.centerContainer}>
-          <Ionicons name="alert-circle-outline" size={56} color="#DC2626" />
+          <Ionicons name="alert-circle-outline" size={56} color={theme.error} />
           <Text style={styles.stateTitle}>
             {t('clinicalHistory.errorTitle', 'Error al consultar la historia clínica')}
           </Text>
@@ -346,50 +349,51 @@ export default function ClinicalHistoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#F7F6F8',
-  },
-  scrollContent: {
-    paddingBottom: Platform.OS === 'ios' ? 100 : 80,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  stateTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  stateMessage: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  retryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 20,
-    backgroundColor: Colors.light.main,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-  retryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    scrollContent: {
+      paddingBottom: Platform.OS === 'ios' ? 100 : 80,
+    },
+    centerContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 32,
+    },
+    stateTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+      marginTop: 16,
+      textAlign: 'center',
+    },
+    stateMessage: {
+      fontSize: 14,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+      marginTop: 8,
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+    retryButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 20,
+      backgroundColor: theme.main,
+      paddingHorizontal: 22,
+      paddingVertical: 12,
+      borderRadius: 10,
+    },
+    retryButtonText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
+    },
+  });
