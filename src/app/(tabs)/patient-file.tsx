@@ -17,10 +17,12 @@ import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
+import { useTheme } from '@/hooks/use-theme';
 import { getPatientById, getPatientByEmail, Patient } from '@/services/patient-service';
 import { getTreatmentsByPatientId, deleteTreatment, Treatment } from '@/services/treatment-service';
 import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
+import { calculateAge, parseDateRobustly } from '@/utils/date-utils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
@@ -28,45 +30,6 @@ const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
 const ALLOWED_ROLES = new Set(['odontologo', 'admin', 'asistente', 'medico']);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Compute age from an ISO date string */
-function calculateAge(dateString?: string): number | null {
-  if (!dateString) return null;
-  try {
-    const birth = new Date(dateString);
-    if (Number.isNaN(birth.getTime())) return null;
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  } catch {
-    return null;
-  }
-}
-
-function parseDateRobustly(dateInput: any): Date | null {
-  if (!dateInput) return null;
-  
-  let date: Date;
-  if (typeof dateInput.toDate === 'function') {
-    date = dateInput.toDate();
-  } else if (typeof dateInput === 'string') {
-    date = new Date(dateInput);
-    if (Number.isNaN(date.getTime())) {
-      const match = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(dateInput);
-      if (match) {
-        date = new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
-      }
-    }
-  } else {
-    date = new Date(dateInput);
-  }
-
-  return Number.isNaN(date.getTime()) ? null : date;
-}
 
 /** Format an ISO date string to a readable locale date */
 function formatDate(dateInput: any): string {
@@ -132,16 +95,31 @@ function getCategoryColor(category: string): { bg: string; text: string } {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-/** Action bar with edit and calendar buttons */
-function ActionBar() {
+/** Action bar with edit, calendar and clinical history buttons */
+function ActionBar({ onOpenClinicalHistory }: Readonly<{ onOpenClinicalHistory?: () => void }>) {
+  const theme = useTheme();
+  const isDark = theme.background === '#000000';
+  const iconColor = isDark ? '#FFFFFF' : theme.main;
+
   return (
     <View style={actionBarStyles.container}>
       <View style={actionBarStyles.actions}>
-        <TouchableOpacity style={actionBarStyles.iconButton} activeOpacity={0.7}>
-          <Ionicons name="create-outline" size={20} color={Colors.light.main} />
+        {onOpenClinicalHistory && (
+          <TouchableOpacity
+            style={[actionBarStyles.clinicalHistoryButton, { backgroundColor: theme.accentBackground }]}
+            onPress={onOpenClinicalHistory}
+            activeOpacity={0.7}
+            testID="btn-open-clinical-history"
+          >
+            <Ionicons name="medical-outline" size={18} color={iconColor} />
+            <Text style={[actionBarStyles.clinicalHistoryText, { color: iconColor }]}>Historia Clínica</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity style={[actionBarStyles.iconButton, { backgroundColor: theme.accentBackground }]} activeOpacity={0.7}>
+          <Ionicons name="create-outline" size={20} color={iconColor} />
         </TouchableOpacity>
-        <TouchableOpacity style={actionBarStyles.iconButton} activeOpacity={0.7}>
-          <Ionicons name="calendar-outline" size={20} color={Colors.light.main} />
+        <TouchableOpacity style={[actionBarStyles.iconButton, { backgroundColor: theme.accentBackground }]} activeOpacity={0.7}>
+          <Ionicons name="calendar-outline" size={20} color={iconColor} />
         </TouchableOpacity>
       </View>
     </View>
@@ -157,7 +135,23 @@ const actionBarStyles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
+  },
+  clinicalHistoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#F3E8FF',
+    gap: 6,
+  },
+  clinicalHistoryText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.light.main,
+    fontFamily: 'Open Sans',
   },
   iconButton: {
     width: 40,
@@ -238,22 +232,26 @@ const patientCardStyles = StyleSheet.create({
 
 /** Appointment badge pills */
 function AppointmentBadges({ patient, t }: Readonly<{ patient: Patient; t: (k: string) => string }>) {
+  const theme = useTheme();
+  const isDark = theme.background === '#000000';
+  const iconColor = isDark ? '#FFFFFF' : theme.main;
+
   return (
     <View style={badgeStyles.row}>
-      <View style={badgeStyles.badge}>
-        <Ionicons name="calendar-outline" size={16} color={Colors.light.main} style={{ marginRight: 6 }} />
+      <View style={[badgeStyles.badge, { backgroundColor: theme.backgroundElement, borderColor: theme.cardSeparator }]}>
+        <Ionicons name="calendar-outline" size={16} color={iconColor} style={{ marginRight: 6 }} />
         <View>
-          <Text style={badgeStyles.badgeLabel}>{t('patientFile.nextAppointment')}</Text>
-          <Text style={badgeStyles.badgeValue}>
+          <Text style={[badgeStyles.badgeLabel, { color: theme.pageSubtitle }]}>{t('patientFile.nextAppointment')}</Text>
+          <Text style={[badgeStyles.badgeValue, { color: theme.pageTitle }]}>
             {patient.nextAppointment ? formatDate(patient.nextAppointment) : '—'}
           </Text>
         </View>
       </View>
-      <View style={badgeStyles.badge}>
-        <Ionicons name="time-outline" size={16} color={Colors.light.main} style={{ marginRight: 6 }} />
+      <View style={[badgeStyles.badge, { backgroundColor: theme.backgroundElement, borderColor: theme.cardSeparator }]}>
+        <Ionicons name="time-outline" size={16} color={iconColor} style={{ marginRight: 6 }} />
         <View>
-          <Text style={badgeStyles.badgeLabel}>{t('patientFile.lastVisit')}</Text>
-          <Text style={badgeStyles.badgeValue}>
+          <Text style={[badgeStyles.badgeLabel, { color: theme.pageSubtitle }]}>{t('patientFile.lastVisit')}</Text>
+          <Text style={[badgeStyles.badgeValue, { color: theme.pageTitle }]}>
             {patient.lastVisit ? formatDate(patient.lastVisit) : '—'}
           </Text>
         </View>
@@ -307,22 +305,24 @@ function CollapsibleSection({
   defaultOpen?: boolean;
 }>) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const theme = useTheme();
+  const isDark = theme.background === '#000000';
 
   return (
-    <View style={sectionStyles.container}>
+    <View style={[sectionStyles.container, { backgroundColor: theme.backgroundElement, borderColor: theme.cardSeparator }]}>
       <TouchableOpacity
         style={sectionStyles.header}
         onPress={() => setIsOpen(!isOpen)}
         activeOpacity={0.7}
       >
         <View style={sectionStyles.headerLeft}>
-          <Ionicons name={icon} size={20} color={Colors.light.main} />
-          <Text style={sectionStyles.headerTitle}>{title}</Text>
+          <Ionicons name={icon} size={20} color={isDark ? '#FFFFFF' : theme.main} />
+          <Text style={[sectionStyles.headerTitle, { color: theme.pageTitle }]}>{title}</Text>
         </View>
         <Ionicons
           name={isOpen ? 'chevron-up' : 'chevron-down'}
           size={18}
-          color="#9CA3AF"
+          color={theme.pageSubtitle}
         />
       </TouchableOpacity>
       {isOpen && <View style={sectionStyles.content}>{children}</View>}
@@ -365,10 +365,12 @@ const sectionStyles = StyleSheet.create({
 
 /** Detail row inside a section */
 function DetailRow({ label, value }: Readonly<{ label: string; value: string }>) {
+  const theme = useTheme();
+
   return (
-    <View style={detailStyles.row}>
-      <Text style={detailStyles.label}>{label}</Text>
-      <Text style={detailStyles.value}>{value || '—'}</Text>
+    <View style={[detailStyles.row, { borderBottomColor: theme.pageSeparator }]}>
+      <Text style={[detailStyles.label, { color: theme.pageSubtitle }]}>{label}</Text>
+      <Text style={[detailStyles.value, { color: theme.pageTitle }]}>{value || '—'}</Text>
     </View>
   );
 }
@@ -422,6 +424,8 @@ function TreatmentCard({
   onModify: (id: string) => void;
   onDelete: (id: string) => void;
 }>) {
+  const theme = useTheme();
+  const isDark = theme.background === '#000000';
   const statusColor = getStatusColor(treatment.status);
   const categoryColor = getCategoryColor(treatment.category);
   const iconProps = getTimelineIconProps(treatment.treatmentName);
@@ -432,27 +436,34 @@ function TreatmentCard({
       <View style={treatmentStyles.timelineColumn}>
         <View style={[
           treatmentStyles.iconDot, 
-          { backgroundColor: iconProps.bg, borderColor: iconProps.borderColor }
+          { 
+            backgroundColor: iconProps.bg === '#FFF' ? (isDark ? theme.backgroundElement : '#FFF') : iconProps.bg, 
+            borderColor: iconProps.borderColor === '#D1D5DB' ? theme.cardSeparator : iconProps.borderColor 
+          }
         ]}>
-          <Ionicons name={iconProps.icon} size={14} color={iconProps.color} />
+          <Ionicons 
+            name={iconProps.icon} 
+            size={14} 
+            color={iconProps.color === Colors.light.main && isDark ? '#FFFFFF' : iconProps.color} 
+          />
         </View>
-        <View style={treatmentStyles.line} />
+        <View style={[treatmentStyles.line, { backgroundColor: theme.cardSeparator }]} />
       </View>
 
       {/* Card content */}
-      <View style={treatmentStyles.content}>
+      <View style={[treatmentStyles.content, { backgroundColor: theme.backgroundElement, borderColor: theme.cardSeparator }]}>
         {/* Date and badges */}
         <View style={treatmentStyles.dateRow}>
-          <Text style={treatmentStyles.date}>{formatShortDate(treatment.treatmentDate)}</Text>
+          <Text style={[treatmentStyles.date, { color: isDark ? '#FFFFFF' : theme.main }]}>{formatShortDate(treatment.treatmentDate)}</Text>
           <View style={{ flexDirection: 'row', gap: 6 }}>
-            <View style={[treatmentStyles.statusBadge, { backgroundColor: statusColor.bg }]}>
-              <Text style={[treatmentStyles.statusText, { color: statusColor.text }]}>
+            <View style={[treatmentStyles.statusBadge, { backgroundColor: isDark ? theme.accentBackground : statusColor.bg }]}>
+              <Text style={[treatmentStyles.statusText, { color: isDark ? '#FFFFFF' : statusColor.text }]}>
                 {treatment.status}
               </Text>
             </View>
             {treatment.category ? (
-              <View style={[treatmentStyles.statusBadge, { backgroundColor: categoryColor.bg }]}>
-                <Text style={[treatmentStyles.statusText, { color: categoryColor.text }]}>
+              <View style={[treatmentStyles.statusBadge, { backgroundColor: isDark ? theme.accentBackground : categoryColor.bg }]}>
+                <Text style={[treatmentStyles.statusText, { color: isDark ? '#FFFFFF' : categoryColor.text }]}>
                   {treatment.category}
                 </Text>
               </View>
@@ -461,44 +472,44 @@ function TreatmentCard({
         </View>
 
         {/* Treatment name */}
-        <Text style={treatmentStyles.name}>{treatment.treatmentName}</Text>
+        <Text style={[treatmentStyles.name, { color: theme.pageTitle }]}>{treatment.treatmentName}</Text>
 
         {/* Notes */}
         {treatment.notes ? (
-          <Text style={treatmentStyles.notes} numberOfLines={2}>{treatment.notes}</Text>
+          <Text style={[treatmentStyles.notes, { color: theme.pageSubtitle }]} numberOfLines={2}>{treatment.notes}</Text>
         ) : null}
 
         {/* Doctor, duration and dental piece */}
         <View style={treatmentStyles.metaRow}>
-          <Ionicons name="person-outline" size={13} color="#6B7280" />
-          <Text style={treatmentStyles.metaText}>{treatment.responsibleDentist}</Text>
+          <Ionicons name="person-outline" size={13} color={theme.pageSubtitle} />
+          <Text style={[treatmentStyles.metaText, { color: theme.pageSubtitle }]}>{treatment.responsibleDentist}</Text>
           
           {treatment.dentalPiece ? (
             <>
-              <Text style={treatmentStyles.metaDot}>  |  </Text>
-              <Ionicons name="medkit-outline" size={13} color="#6B7280" />
-              <Text style={treatmentStyles.metaText}>{treatment.dentalPiece}</Text>
+              <Text style={[treatmentStyles.metaDot, { color: theme.cardSeparator }]}>  |  </Text>
+              <Ionicons name="medkit-outline" size={13} color={theme.pageSubtitle} />
+              <Text style={[treatmentStyles.metaText, { color: theme.pageSubtitle }]}>{treatment.dentalPiece}</Text>
             </>
           ) : null}
 
           {treatment.duration ? (
             <>
-              <Text style={treatmentStyles.metaDot}>  |  </Text>
-              <Ionicons name="time-outline" size={13} color="#6B7280" />
-              <Text style={treatmentStyles.metaText}>{treatment.duration}</Text>
+              <Text style={[treatmentStyles.metaDot, { color: theme.cardSeparator }]}>  |  </Text>
+              <Ionicons name="time-outline" size={13} color={theme.pageSubtitle} />
+              <Text style={[treatmentStyles.metaText, { color: theme.pageSubtitle }]}>{treatment.duration}</Text>
             </>
           ) : null}
         </View>
 
         {/* Actions */}
-        <View style={treatmentStyles.actionsRow}>
+        <View style={[treatmentStyles.actionsRow, { borderTopColor: theme.pageSeparator }]}>
           <TouchableOpacity style={treatmentStyles.actionButton} activeOpacity={0.7} onPress={() => onModify(treatment.id)}>
-            <Ionicons name="create-outline" size={14} color="#6B7280" />
-            <Text style={treatmentStyles.actionText}>{t('patientFile.modify')}</Text>
+            <Ionicons name="create-outline" size={14} color={theme.pageSubtitle} />
+            <Text style={[treatmentStyles.actionText, { color: theme.pageSubtitle }]}>{t('patientFile.modify')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={treatmentStyles.actionButton} activeOpacity={0.7} onPress={() => onDelete(treatment.id)}>
-            <Ionicons name="trash-outline" size={14} color="#6B7280" />
-            <Text style={treatmentStyles.actionText}>{t('patientFile.delete')}</Text>
+            <Ionicons name="trash-outline" size={14} color={theme.pageSubtitle} />
+            <Text style={[treatmentStyles.actionText, { color: theme.pageSubtitle }]}>{t('patientFile.delete')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -618,6 +629,9 @@ const treatmentStyles = StyleSheet.create({
 export default function PatientFileScreen() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const theme = useTheme();
+  const isDark = theme.background === '#000000';
+  const accentIconColor = isDark ? '#FFFFFF' : theme.main;
   const { patientId, email } = useLocalSearchParams<{ patientId?: string; email?: string }>();
 
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -705,6 +719,14 @@ export default function PatientFileScreen() {
     }, [hasAccess, loadData])
   );
 
+  const handleOpenClinicalHistory = () => {
+    if (!patient) return;
+    router.push({
+      pathname: '/(tabs)/patients/clinical-history' as any,
+      params: { patientId: patient.id },
+    });
+  };
+
   const handleAddTreatment = () => {
     if (!patient) return;
     router.push({
@@ -770,13 +792,13 @@ export default function PatientFileScreen() {
   // ── Access denied state ──
   if (!hasAccess && !loading) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <AppHeader />
         <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
         <View style={styles.centerState}>
-          <Ionicons name="lock-closed-outline" size={56} color="#D1D5DB" />
-          <Text style={styles.stateTitle}>{t('patientFile.accessDenied')}</Text>
-          <Text style={styles.stateMessage}>{t('patientFile.accessDeniedMessage')}</Text>
+          <Ionicons name="lock-closed-outline" size={56} color={theme.pageSubtitle} />
+          <Text style={[styles.stateTitle, { color: theme.pageTitle }]}>{t('patientFile.accessDenied')}</Text>
+          <Text style={[styles.stateMessage, { color: theme.pageSubtitle }]}>{t('patientFile.accessDeniedMessage')}</Text>
         </View>
       </View>
     );
@@ -785,12 +807,12 @@ export default function PatientFileScreen() {
   // ── Loading state ──
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <AppHeader />
         <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
         <View style={styles.centerState}>
-          <ActivityIndicator size="large" color={Colors.light.main} />
-          <Text style={styles.stateMessage}>{t('patientFile.loading')}</Text>
+          <ActivityIndicator size="large" color={theme.main} />
+          <Text style={[styles.stateMessage, { color: theme.pageSubtitle }]}>{t('patientFile.loading')}</Text>
         </View>
       </View>
     );
@@ -799,14 +821,14 @@ export default function PatientFileScreen() {
   // ── Error state ──
   if (error || !patient) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <AppHeader />
         <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
         <View style={styles.centerState}>
           <Ionicons name="alert-circle-outline" size={56} color="#F87171" />
-          <Text style={styles.stateTitle}>{t('patientFile.errors.title')}</Text>
-          <Text style={styles.stateMessage}>{error || t('patientFile.errors.loadFailed')}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadData} activeOpacity={0.7}>
+          <Text style={[styles.stateTitle, { color: theme.pageTitle }]}>{t('patientFile.errors.title')}</Text>
+          <Text style={[styles.stateMessage, { color: theme.pageSubtitle }]}>{error || t('patientFile.errors.loadFailed')}</Text>
+          <TouchableOpacity style={[styles.retryButton, { backgroundColor: theme.main }]} onPress={loadData} activeOpacity={0.7}>
             <Ionicons name="refresh" size={18} color="#FFFFFF" />
             <Text style={styles.retryText}>{t('patientFile.retry')}</Text>
           </TouchableOpacity>
@@ -817,12 +839,12 @@ export default function PatientFileScreen() {
 
   // ── Success state ──
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]} testID="patient-file-container">
       <AppHeader />
       <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Action bar */}
-        <ActionBar />
+        <ActionBar onOpenClinicalHistory={handleOpenClinicalHistory} />
 
         {/* Patient card */}
         <PatientCard patient={patient} t={t} />
@@ -849,24 +871,24 @@ export default function PatientFileScreen() {
           defaultOpen={false}
         >
           {/* Tipo de Sangre */}
-          <View style={medicalRowStyles.row}>
-            <View style={medicalRowStyles.iconContainer}>
-              <Ionicons name="water-outline" size={18} color={Colors.light.main} />
+          <View style={[medicalRowStyles.row, { borderBottomColor: theme.pageSeparator }]}>
+            <View style={[medicalRowStyles.iconContainer, { backgroundColor: theme.accentBackground }]}>
+              <Ionicons name="water-outline" size={18} color={accentIconColor} />
             </View>
             <View style={medicalRowStyles.textContainer}>
-              <Text style={medicalRowStyles.label}>{t('patientFile.bloodType')}</Text>
-              <Text style={medicalRowStyles.value}>{patient.bloodType || '—'}</Text>
+              <Text style={[medicalRowStyles.label, { color: theme.pageTitle }]}>{t('patientFile.bloodType')}</Text>
+              <Text style={[medicalRowStyles.value, { color: theme.pageSubtitle }]}>{patient.bloodType || '—'}</Text>
             </View>
           </View>
 
           {/* Alergias Conocidas */}
-          <View style={medicalRowStyles.row}>
-            <View style={medicalRowStyles.iconContainer}>
-              <Ionicons name="warning-outline" size={18} color={Colors.light.main} />
+          <View style={[medicalRowStyles.row, { borderBottomColor: theme.pageSeparator }]}>
+            <View style={[medicalRowStyles.iconContainer, { backgroundColor: theme.accentBackground }]}>
+              <Ionicons name="warning-outline" size={18} color={accentIconColor} />
             </View>
             <View style={medicalRowStyles.textContainer}>
-              <Text style={medicalRowStyles.label}>{t('patientFile.knownAllergies')}</Text>
-              <Text style={medicalRowStyles.value}>
+              <Text style={[medicalRowStyles.label, { color: theme.pageTitle }]}>{t('patientFile.knownAllergies')}</Text>
+              <Text style={[medicalRowStyles.value, { color: theme.pageSubtitle }]}>
                 {(patient.knownAllergies && patient.knownAllergies.length > 0)
                   ? patient.knownAllergies.map(formatAntecedente).join(', ')
                   : '—'}
@@ -875,13 +897,13 @@ export default function PatientFileScreen() {
           </View>
 
           {/* Condiciones Médicas Previas */}
-          <View style={medicalRowStyles.row}>
-            <View style={medicalRowStyles.iconContainer}>
-              <Ionicons name="fitness-outline" size={18} color={Colors.light.main} />
+          <View style={[medicalRowStyles.row, { borderBottomColor: theme.pageSeparator }]}>
+            <View style={[medicalRowStyles.iconContainer, { backgroundColor: theme.accentBackground }]}>
+              <Ionicons name="fitness-outline" size={18} color={accentIconColor} />
             </View>
             <View style={medicalRowStyles.textContainer}>
-              <Text style={medicalRowStyles.label}>{t('patientFile.medicalConditions')}</Text>
-              <Text style={medicalRowStyles.value}>
+              <Text style={[medicalRowStyles.label, { color: theme.pageTitle }]}>{t('patientFile.medicalConditions')}</Text>
+              <Text style={[medicalRowStyles.value, { color: theme.pageSubtitle }]}>
                 {(patient.medicalHistory && patient.medicalHistory.length > 0)
                   ? patient.medicalHistory.map(formatAntecedente).join(', ')
                   : '—'}
@@ -891,12 +913,12 @@ export default function PatientFileScreen() {
 
           {/* Notas Adicionales */}
           <View style={[medicalRowStyles.row, { borderBottomWidth: 0 }]}>
-            <View style={medicalRowStyles.iconContainer}>
-              <Ionicons name="document-text-outline" size={18} color={Colors.light.main} />
+            <View style={[medicalRowStyles.iconContainer, { backgroundColor: theme.accentBackground }]}>
+              <Ionicons name="document-text-outline" size={18} color={accentIconColor} />
             </View>
             <View style={medicalRowStyles.textContainer}>
-              <Text style={medicalRowStyles.label}>{t('patientFile.additionalNotes')}</Text>
-              <Text style={medicalRowStyles.noteText}>
+              <Text style={[medicalRowStyles.label, { color: theme.pageTitle }]}>{t('patientFile.additionalNotes')}</Text>
+              <Text style={[medicalRowStyles.noteText, { color: theme.pageSubtitle }]}>
                 {patient.notes || '—'}
               </Text>
             </View>
@@ -927,14 +949,14 @@ export default function PatientFileScreen() {
             >
               {pendingExams.length > 0 ? (
                 pendingExams.map((exam, idx) => (
-                  <View key={`${exam.id}-${idx}`} style={examStyles.row}>
-                    <Text style={examStyles.name}>{exam.name}</Text>
-                    <Text style={examStyles.date}>{formatShortDate(exam.date, i18n.language)}</Text>
+                  <View key={`${exam.id}-${idx}`} style={[examStyles.row, { borderBottomColor: theme.pageSeparator }]}>
+                    <Text style={[examStyles.name, { color: theme.pageTitle }]}>{exam.name}</Text>
+                    <Text style={[examStyles.date, { color: theme.pageSubtitle }]}>{formatShortDate(exam.date, i18n.language)}</Text>
                   </View>
                 ))
               ) : (
                 <View style={examStyles.emptyState}>
-                  <Text style={examStyles.emptyText}>{t('patientFile.noPendingExams')}</Text>
+                  <Text style={[examStyles.emptyText, { color: theme.pageSubtitle }]}>{t('patientFile.noPendingExams')}</Text>
                 </View>
               )}
             </CollapsibleSection>
@@ -942,31 +964,31 @@ export default function PatientFileScreen() {
         })()}
 
         {/* Treatment History */}
-        <View style={treatmentSectionStyles.container}>
+        <View style={[treatmentSectionStyles.container, { backgroundColor: theme.backgroundElement, borderColor: theme.cardSeparator }]}>
           <View style={treatmentSectionStyles.header}>
-            <Text style={treatmentSectionStyles.title}>
+            <Text style={[treatmentSectionStyles.title, { color: theme.pageTitle }]}>
               {t('patientFile.treatmentHistory')}
             </Text>
             <TouchableOpacity
-              style={treatmentSectionStyles.addButton}
+              style={[treatmentSectionStyles.addButton, { backgroundColor: theme.accentBackground }]}
               onPress={handleAddTreatment}
               activeOpacity={0.7}
               testID="add-treatment-btn"
             >
-              <Text style={treatmentSectionStyles.addButtonText}>
+              <Text style={[treatmentSectionStyles.addButtonText, { color: accentIconColor }]}>
                 {t('patientFile.addTreatment')}
               </Text>
-              <Ionicons name="add" size={16} color={Colors.light.main} />
+              <Ionicons name="add" size={16} color={accentIconColor} />
             </TouchableOpacity>
           </View>
 
           {treatments.length === 0 ? (
             <View style={treatmentSectionStyles.emptyState}>
-              <Ionicons name="document-text-outline" size={40} color="#D1D5DB" />
-              <Text style={treatmentSectionStyles.emptyTitle}>
+              <Ionicons name="document-text-outline" size={40} color={theme.pageSubtitle} />
+              <Text style={[treatmentSectionStyles.emptyTitle, { color: theme.pageSubtitle }]}>
                 {t('patientFile.noTreatments')}
               </Text>
-              <Text style={treatmentSectionStyles.emptyMessage}>
+              <Text style={[treatmentSectionStyles.emptyMessage, { color: theme.pageSubtitle }]}>
                 {t('patientFile.noTreatmentsMessage')}
               </Text>
             </View>

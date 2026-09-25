@@ -36,6 +36,9 @@ jest.mock('@react-native-firebase/firestore', () => {
       return jest.fn(); // unsubscribe
     }),
     add: jest.fn(() => Promise.resolve({ id: 'mock-id' })),
+    set: jest.fn(() => Promise.resolve()),
+    update: jest.fn(() => Promise.resolve()),
+    delete: jest.fn(() => Promise.resolve()),
   };
   
   const mockFirestore = jest.fn(() => mockFirestoreInstance);
