@@ -43,7 +43,7 @@ export const createInputFieldStyles = (theme: any) => {
         borderWidth: Border.width.regular,
         borderColor: theme.border,
         backgroundColor: theme.backgroundElement,
-        borderRadius: Border.radius,
+        borderRadius: Border.radius.regular,
         paddingLeft: Spacing.three || 12,
         paddingRight: Spacing.one,
         marginBottom: Spacing.four || 16,
@@ -179,4 +179,23 @@ export const createAppHeaderStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+});
+
+export const createCardContainerStyles = (theme: any) => StyleSheet.create({
+  cardWrapper: {
+    flex: 1,
+    paddingTop: Spacing.two,
+    borderRadius: 12,
+    backgroundColor: theme.main,
+    shadowColor: theme.shadowColor,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  card: {
+    backgroundColor: theme.backgroundElement,
+    borderRadius: 12,
+    padding: Border.radius.wide,
+  }
 });
