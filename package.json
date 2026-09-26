@@ -13,6 +13,7 @@
     "test:coverage": "jest --coverage",
     "test:e2e": "maestro test .maestro/",
     "test:perf": "reassure",
+    "test:api": "jest --testMatch=\"**/src/__tests__/api/**/*.test.ts\" --runInBand",
     "postinstall": "npx patch-package"
   },
   "dependencies": {
