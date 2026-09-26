@@ -53,3 +53,8 @@ GoogleService-Info.plist
 
 # IDE Android studio
 .idea/
+
+# env files
+.env
+.env.*
+!.env*.example
