@@ -68,32 +68,16 @@ describe('Módulo de Contacto - Componentes Reutilizables', () => {
   });
 
   describe('ContactButton Component', () => {
-    it('debe renderizar correctamente según el tipo "email"', () => {
+    it.each([
+      { type: 'email' as const, label: 'Enviar Correo', testId: 'btn-contact-email' },
+      { type: 'phone' as const, label: 'Llamada', testId: 'btn-contact-phone' },
+      { type: 'whatsapp' as const, label: 'WhatsApp', testId: 'btn-contact-whatsapp' },
+    ])('debe renderizar correctamente según el tipo "$type"', ({ type, label, testId }) => {
       const mockPress = jest.fn();
-      render(<ContactButton type="email" onPress={mockPress} />);
+      render(<ContactButton type={type} onPress={mockPress} />);
       
-      expect(screen.getByText('Enviar Correo')).toBeTruthy();
-      const btn = screen.getByTestId('btn-contact-email');
-      fireEvent.press(btn);
-      expect(mockPress).toHaveBeenCalledTimes(1);
-    });
-
-    it('debe renderizar correctamente según el tipo "phone"', () => {
-      const mockPress = jest.fn();
-      render(<ContactButton type="phone" onPress={mockPress} />);
-      
-      expect(screen.getByText('Llamada')).toBeTruthy();
-      const btn = screen.getByTestId('btn-contact-phone');
-      fireEvent.press(btn);
-      expect(mockPress).toHaveBeenCalledTimes(1);
-    });
-
-    it('debe renderizar correctamente según el tipo "whatsapp"', () => {
-      const mockPress = jest.fn();
-      render(<ContactButton type="whatsapp" onPress={mockPress} />);
-      
-      expect(screen.getByText('WhatsApp')).toBeTruthy();
-      const btn = screen.getByTestId('btn-contact-whatsapp');
+      expect(screen.getByText(label)).toBeTruthy();
+      const btn = screen.getByTestId(testId);
       fireEvent.press(btn);
       expect(mockPress).toHaveBeenCalledTimes(1);
     });

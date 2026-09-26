@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import React, { useMemo, useState } from 'react';
 import { Image } from 'expo-image';
-import { View, Text, Platform, StyleSheet, TextInput, Pressable} from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable} from 'react-native';
 import { DropdownSelector } from '@/components/ui/dropdown-selector';
-import { Colors, Fonts, Spacing, FontFamily } from '@/constants/theme';
+import { Colors, Spacing, FontFamily } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { USER_ROLES, getRoleLabelKey, type AppUserRole } from '@/constants/user-roles';
 
@@ -12,12 +12,12 @@ const FilterIcon = require('@/assets/icons/filter-list.svg');
 const PlusIcon = require('@/assets/expo.icon/Assets/plus-solid.svg')
 
 type SelectableOptionProp = {
-    option: string;
-    isSelected: boolean;
+    option?: string;
+    isSelected?: boolean;
     onPress: () => void;
 };
 
-export function SelectableOption({option = '', isSelected = false, onPress}: SelectableOptionProp) {
+export function SelectableOption({option = '', isSelected = false, onPress}: Readonly<SelectableOptionProp>) {
     const theme = useTheme();
     const styles = createStyles(theme);
 
@@ -43,12 +43,12 @@ type FilterOption = {
 }
 
 type FilterCategoryProp = {
-    title: string;
+    title?: string;
     options: FilterOption[];
     onToggleOption: (optionName: string) => void;
 }
 
-export function FilterCategory({title = '', options, onToggleOption}: FilterCategoryProp) {
+export function FilterCategory({title = '', options, onToggleOption}: Readonly<FilterCategoryProp>) {
     const theme = useTheme();
     const styles = createStyles(theme);
 
@@ -70,9 +70,9 @@ export function FilterCategory({title = '', options, onToggleOption}: FilterCate
 
 type ListType = {
     general?: boolean;
-    value: string;
-    onChangeText: (text: string) => void;
-    onChangeOrder: (text: string) => void;
+    value?: string;
+    onChangeText?: (text: string) => void;
+    onChangeOrder?: (text: string) => void;
     activeRoles?: string[];
     activeStatus?: string[];
     onToggleFilter?: (categoryTitle: string, optionName: string) => void;
@@ -83,12 +83,11 @@ export function SearchFilter({
     onChangeText = () => {}, 
     onChangeOrder = () => {},
     activeRoles = [], activeStatus = [], 
-    onToggleFilter = () => {}}: ListType) {
+    onToggleFilter = () => {}}: Readonly<ListType>) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = createStyles(theme);
 
-    const [option, setOption] = useState<number>(0);
     const [selectFilters, setSelectFilters] = useState<boolean>(false);
 
     const orderByOptions = useMemo(() => {

@@ -45,7 +45,7 @@ export function AdminListLayout({
   isGeneralFilter = false,
   children,
   testID,
-}: AdminListLayoutProps) {
+}: Readonly<AdminListLayoutProps>) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createListStyles(theme), [theme]); //only will recalculate if theme changes

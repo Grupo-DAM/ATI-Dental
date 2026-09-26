@@ -27,6 +27,14 @@ jest.mock('@react-native-firebase/firestore', () => {
         }),
       })),
     })),
+    runTransaction: jest.fn((transactionUpdate) => {
+      // Execute the transaction callback immediately with a mock transaction object
+      return transactionUpdate({
+        get: jest.fn().mockResolvedValue({ exists: false, data: () => ({}) }),
+        set: jest.fn(),
+        update: jest.fn(),
+      });
+    }),
   });
   const mockFirestore = jest.fn(createFirestore);
   mockFirestore.__create = createFirestore;
@@ -111,15 +119,18 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     });
   });
 
-  it('Caso Borde 3.2: Falla validación síncrona si el nombre está vacío', async () => {
+  test.each([
+    { field: 'el nombre', testId: 'input-name', expectedAlert: 'profile.alerts.emptyName' },
+    { field: 'el apellido', testId: 'input-lastname', expectedAlert: 'profile.alerts.emptyLastName' },
+    { field: 'el correo', testId: 'input-email', expectedAlert: 'profile.alerts.emptyEmail' },
+  ])('Falla validación síncrona si $field está vacío', async ({ testId, expectedAlert }) => {
     const { getByTestId, getByText } = render(<ProfileScreen />);
 
-    const inputNombre = getByTestId('input-name');
-    fireEvent.changeText(inputNombre, '');
+    fireEvent.changeText(getByTestId(testId), '');
     fireEvent.press(getByTestId('btn-save'));
 
     await waitFor(() => {
-      expect(getByText('profile.alerts.emptyName')).toBeTruthy();
+      expect(getByText(expectedAlert)).toBeTruthy();
       expect(mockVerifyBeforeUpdateEmail).not.toHaveBeenCalled();
     });
   });
@@ -176,17 +187,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
   // ========================================================
   // NUEVAS PRUEBAS DE COBERTURA (SIN ROMPER LAS ANTERIORES)
   // ========================================================
-
-  it('Caso Borde 3.3: Falla validación síncrona si el apellido está vacío', async () => {
-    const { getByTestId, getByText } = render(<ProfileScreen />);
-
-    fireEvent.changeText(getByTestId('input-lastname'), '');
-    fireEvent.press(getByTestId('btn-save'));
-
-    await waitFor(() => {
-      expect(getByText('profile.alerts.emptyLastName')).toBeTruthy();
-    });
-  });
 
   it('Simulación Maestro: Intercepta dr.nuevo@atidental.com y abre el modal sin llamar a Firebase', async () => {
     const { getByTestId } = render(<ProfileScreen />);
@@ -288,7 +288,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     const modal = getByTestId('modal-verification');
 
     // Al intentar ejecutar el reenvío, este lanzará la excepción asíncrona 'auth/network-request-failed'
-    expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
+    await expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
   });
 
   it('Debe cambiar el idioma a inglés y guardarlo al hacer save', async () => {
@@ -324,15 +324,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     fireEvent.press(getByTestId('btn-save'));
     
     await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
-  });
-
-  it('Caso Borde 3.4: Falla validación síncrona si el correo está vacío', async () => {
-    const { getByTestId, getByText } = render(<ProfileScreen />);
-    fireEvent.changeText(getByTestId('input-email'), '');
-    fireEvent.press(getByTestId('btn-save'));
-    await waitFor(() => {
-      expect(getByText('profile.alerts.emptyEmail')).toBeTruthy();
-    });
   });
 
   it('Aplica cambio de idioma optimista aunque falle la red', async () => {
@@ -394,6 +385,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
           }),
         }),
       }),
+      runTransaction: jest.fn().mockRejectedValue(new Error('Firestore error')),
     }));
 
     const { getByTestId } = render(<ProfileScreen />);
@@ -448,6 +440,13 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
           update: jest.fn().mockResolvedValue(true),
         })),
       })),
+      runTransaction: jest.fn((transactionUpdate) => {
+        return transactionUpdate({
+          get: jest.fn().mockResolvedValue({ exists: false, data: () => ({}) }),
+          set: jest.fn(),
+          update: jest.fn(),
+        });
+      }),
     }));
   });
 
@@ -459,7 +458,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
 
     (NetInfo.fetch as jest.Mock).mockResolvedValueOnce({ isConnected: false });
     const modal = getByTestId('modal-verification');
-    expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
+    await expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
   });
 
   it('Advierte si se intenta reenviar sin usuario activo', async () => {
@@ -572,6 +571,145 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
         'profile.alerts.updatedTitle',
         'profile.alerts.updatedMessage',
       );
+    });
+  });
+
+  it('guarda el país de residencia en Firestore y la métrica geográfica', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+
+    // Seleccionar país
+    fireEvent.press(getByTestId('select-country'));
+    fireEvent.press(getByTestId('profile-country-option-co'));
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage',
+      );
+    });
+  });
+
+  it('transacción con cambio de país (originalCountry ya existía)', async () => {
+    const mockSet = jest.fn();
+    const mockUpdate = jest.fn();
+    const firestoreMock = require('@react-native-firebase/firestore');
+    firestoreMock.mockImplementation(() => ({
+      collection: jest.fn(() => ({
+        doc: jest.fn(() => ({
+          update: jest.fn().mockResolvedValue(true),
+          get: jest.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({ genero: 'male', pais: 'mx', fechaNacimiento: { toDate: () => new Date(1990, 4, 15) } }),
+          }),
+        })),
+      })),
+      runTransaction: jest.fn(async (cb) => {
+        await cb({
+          get: jest.fn().mockResolvedValue({
+            exists: true,
+            data: () => ({ totalUsers: 10, countries: { mx: 5, co: 3 } }),
+          }),
+          set: mockSet,
+          update: mockUpdate,
+        });
+      }),
+    }));
+
+    const { getByTestId } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('select-country')).toBeTruthy();
+    });
+
+    // Cambiar país de mx (pre-cargado) a co
+    fireEvent.press(getByTestId('select-country'));
+    fireEvent.press(getByTestId('profile-country-option-co'));
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage',
+      );
+    });
+  });
+
+  it('transacción sin cambio de país (country === originalCountry)', async () => {
+    const mockSet = jest.fn();
+    const mockUpdate = jest.fn();
+    const firestoreMock = require('@react-native-firebase/firestore');
+    firestoreMock.mockImplementation(() => ({
+      collection: jest.fn(() => ({
+        doc: jest.fn(() => ({
+          update: jest.fn().mockResolvedValue(true),
+          get: jest.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({ genero: 'female', pais: 'co' }),
+          }),
+        })),
+      })),
+      runTransaction: jest.fn(async (cb) => {
+        await cb({
+          get: jest.fn().mockResolvedValue({
+            exists: true,
+            data: () => ({ totalUsers: 5, countries: { co: 5 } }),
+          }),
+          set: mockSet,
+          update: mockUpdate,
+        });
+      }),
+    }));
+
+    const { getByTestId } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('select-country')).toBeTruthy();
+    });
+
+    // No cambiar país — guardar directamente
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage',
+      );
+    });
+
+    // No se debería haber llamado set en metricsRef porque el país no cambió
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it('carga perfil con fechaNacimiento como timestamp de Firestore', async () => {
+    const firestoreMock = require('@react-native-firebase/firestore');
+    firestoreMock.mockImplementation(() => ({
+      collection: jest.fn(() => ({
+        doc: jest.fn(() => ({
+          update: jest.fn().mockResolvedValue(true),
+          get: jest.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({
+              genero: 'female',
+              pais: 'co',
+              fechaNacimiento: { toDate: () => new Date(1995, 6, 20) },
+            }),
+          }),
+        })),
+      })),
+      runTransaction: jest.fn(async (cb) => {
+        await cb({
+          get: jest.fn().mockResolvedValue({ exists: false, data: () => ({}) }),
+          set: jest.fn(),
+          update: jest.fn(),
+        });
+      }),
+    }));
+
+    const { getByTestId } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('select-country')).toBeTruthy();
     });
   });
 

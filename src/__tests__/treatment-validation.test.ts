@@ -119,28 +119,16 @@ describe('Treatment Validation Logic', () => {
       expect(result.errors.status).toBe('errors.statusRequired');
     });
 
-    it('debe invalidar si el costo estimado está vacío', () => {
-      const invalidForm = { ...validForm, estimatedCost: '' };
+    it.each([
+      { description: 'está vacío', value: '', expectedError: 'errors.costRequired' },
+      { description: 'es negativo', value: '-50', expectedError: 'errors.costInvalid' },
+      { description: 'no es un número', value: 'abc', expectedError: 'errors.costInvalid' },
+    ])('debe invalidar si el costo estimado $description', ({ value, expectedError }) => {
+      const invalidForm = { ...validForm, estimatedCost: value };
       const result = validateTreatmentForm(invalidForm, 'patient-123');
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.estimatedCost).toBe('errors.costRequired');
-    });
-
-    it('debe invalidar si el costo estimado es negativo', () => {
-      const invalidForm = { ...validForm, estimatedCost: '-50' };
-      const result = validateTreatmentForm(invalidForm, 'patient-123');
-
-      expect(result.isValid).toBe(false);
-      expect(result.errors.estimatedCost).toBe('errors.costInvalid');
-    });
-
-    it('debe invalidar si el costo estimado no es un número', () => {
-      const invalidForm = { ...validForm, estimatedCost: 'abc' };
-      const result = validateTreatmentForm(invalidForm, 'patient-123');
-
-      expect(result.isValid).toBe(false);
-      expect(result.errors.estimatedCost).toBe('errors.costInvalid');
+      expect(result.errors.estimatedCost).toBe(expectedError);
     });
   });
 });

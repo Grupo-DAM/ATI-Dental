@@ -1,5 +1,4 @@
 import { firestore } from '@/config/firebase';
-import { PatientGender, PatientBloodType } from '@/constants/patient';
 
 // ─── Unified Patient interfaces ───
 
@@ -8,12 +7,12 @@ export interface PatientInput {
   fullName: string;
   documentId?: string;
   birthDate?: string;
-  gender?: PatientGender | string;
+  gender?: string;
   phone?: string;
   email?: string;
   address?: string;
   photoUri?: string | null;
-  bloodType?: PatientBloodType | string;
+  bloodType?: string;
   allergies?: string;
   conditions?: string;
   notes?: string;

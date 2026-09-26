@@ -54,23 +54,27 @@ function useBaseFiltering<T>(
 /**
  * Shared Name & ID Comparators
  */
+function compareNullableStrings(strA: string, strB: string): number {
+  if (strA && !strB) return -1;
+  if (!strA && strB) return 1;
+  return strA.localeCompare(strB);
+}
+
+function compareLastName(nameA: string, nameB: string): number {
+  const lastNameA = nameA?.toLowerCase().split(' ').slice(1).join(' ') || '';
+  const lastNameB = nameB?.toLowerCase().split(' ').slice(1).join(' ') || '';
+  return compareNullableStrings(lastNameA, lastNameB);
+}
+
 function sortByNameOrId(a: any, b: any, orderBy: string, nameKey: string, idKey: string) {
   if (orderBy === 'name' || orderBy === 'ID') {
-    const keyA = orderBy === 'name' ? a[nameKey] : a[idKey];
-    const keyB = orderBy === 'name' ? b[nameKey] : b[idKey];
-    const strA = keyA?.toLowerCase() || '';
-    const strB = keyB?.toLowerCase() || '';
-    if (strA && !strB) return -1;
-    if (!strA && strB) return 1;
-    return strA.localeCompare(strB);
+    const keyA = (orderBy === 'name' ? a[nameKey] : a[idKey])?.toLowerCase() || '';
+    const keyB = (orderBy === 'name' ? b[nameKey] : b[idKey])?.toLowerCase() || '';
+    return compareNullableStrings(keyA, keyB);
   }
 
   if (orderBy === 'lastname') {
-    const lastNameA = a[nameKey]?.toLowerCase().split(' ').slice(1).join(' ') || '';
-    const lastNameB = b[nameKey]?.toLowerCase().split(' ').slice(1).join(' ') || '';
-    if (lastNameA && !lastNameB) return -1;
-    if (!lastNameA && lastNameB) return 1;
-    return lastNameA.localeCompare(lastNameB);
+    return compareLastName(a[nameKey], b[nameKey]);
   }
 
   return 0;
@@ -112,6 +116,32 @@ export function usePatientFiltering(data: any[]) {
 }
 
 /**
+ * Helper predicates to reduce cognitive complexity
+ */
+function matchesUserSearch(item: any, query: string): boolean {
+  if (!query) return true;
+  const matchesName = item.nombre?.toLowerCase().includes(query);
+  const matchesEmail = item.email?.toLowerCase().includes(query);
+  const matchesID = (item.pid || item.id)?.toLowerCase().includes(query);
+  return Boolean(matchesName || matchesEmail || matchesID);
+}
+
+function matchesUserRole(itemRole: string, selectedRoles: string[]): boolean {
+  if (selectedRoles.length === 0) return true;
+  return selectedRoles.some(role => {
+    if (role === USER_ROLES.ADMIN) {
+      return itemRole === USER_ROLES.ADMIN || itemRole === LEGACY_ADMIN_ROLE;
+    }
+    return itemRole === role;
+  });
+}
+
+function matchesUserStatus(itemStatus: string, selectedStatus: string[]): boolean {
+  if (selectedStatus.length === 0) return true;
+  return selectedStatus.includes(itemStatus);
+}
+
+/**
  * 3. User Filtering Hook
  */
 export function useUserFiltering(data: any[]) {
@@ -128,21 +158,11 @@ export function useUserFiltering(data: any[]) {
 
   const filterFn = useMemo(() => {
     return (item: any, query: string) => {
-      const matchesName = item.nombre?.toLowerCase().includes(query);
-      const matchesEmail = item.email?.toLowerCase().includes(query);
-      const matchesID = (item.pid || item.id)?.toLowerCase().includes(query);
-      const matchesSearch = !query || matchesName || matchesEmail || matchesID;
-
-      const matchesRole = selectedRoles.length === 0 || selectedRoles.some(role => {
-        if (role === USER_ROLES.ADMIN) {
-          return item.rol === USER_ROLES.ADMIN || item.rol === LEGACY_ADMIN_ROLE;
-        }
-        return item.rol === role;
-      });
-
-      const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(item.estado);
-
-      return matchesSearch && matchesRole && matchesStatus;
+      return (
+        matchesUserSearch(item, query) &&
+        matchesUserRole(item.rol, selectedRoles) &&
+        matchesUserStatus(item.estado, selectedStatus)
+      );
     };
   }, [selectedRoles, selectedStatus]);
 

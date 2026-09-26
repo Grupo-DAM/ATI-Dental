@@ -2,26 +2,7 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
-# 1. Esperamos a que la app termine de arrancar y muestre la pantalla de Login
-- extendedWaitUntil:
-    visible:
-      id: "login-title"
-    timeout: 60000
-
-- tapOn:
-    id: "email-input"
-- inputText: "soamaia03@gmail.com"
-- tapOn:
-    id: "password-input"
-- inputText: "Robin123456"
-- hideKeyboard
-- tapOn:
-    id: "login-button"
-
-- extendedWaitUntil:
-    visible:
-      id: "welcome-header"
-    timeout: 10000
+- runFlow: common/login-admin.yaml
 
 - tapOn:
     id: "profile-tab"
@@ -55,6 +36,7 @@ appId: com.proyect1.ATIDental
 - tapOn:
    id: "input-name"
 - inputText: "Valeria"
+- hideKeyboard
 
 # Validar Apellido Vacío
 - tapOn:
@@ -81,6 +63,7 @@ appId: com.proyect1.ATIDental
 - tapOn:
     id: "input-lastname"
 - inputText: "Smith"
+- hideKeyboard
 
 # Género
 - scrollUntilVisible:

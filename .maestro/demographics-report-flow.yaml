@@ -1,28 +1,9 @@
 appId: com.proyect1.ATIDental
 ---
 # stopApp: false evita matar Expo (pantalla en blanco sin Metro).
-- launchApp:
-    stopApp: false
+- launchApp
 
-- extendedWaitUntil:
-    visible:
-      id: "email-input"
-    timeout: 60000
-
-- tapOn:
-    id: "email-input"
-- inputText: "jesusecova73@gmail.com"
-- tapOn:
-    id: "password-input"
-- inputText: "123456"
-- hideKeyboard
-- tapOn:
-    id: "login-button"
-
-- extendedWaitUntil:
-    visible:
-      id: "welcome-header"
-    timeout: 15000
+- runFlow: common/login-admin.yaml
 
 - extendedWaitUntil:
     visible:

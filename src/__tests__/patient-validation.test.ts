@@ -45,7 +45,7 @@ describe('Patient Validation', () => {
         documentId: 'V-12345678',
       });
       expect(result.isValid).toBe(true);
-      expect(Object.keys(result.errors).length).toBe(0);
+      expect(Object.keys(result.errors)).toHaveLength(0);
     });
   });
 });

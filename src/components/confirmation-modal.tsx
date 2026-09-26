@@ -37,7 +37,7 @@ export function ConfirmationModal({
   isDestructive = false,
   onConfirm,
   onCancel,
-}: ConfirmationModalProps) {
+}: Readonly<ConfirmationModalProps>) {
   const iconColor = isDestructive ? Colors.light.error : Colors.light.main;
   const iconBgColor = isDestructive ? '#FEE2E2' : '#F3E8FF';
   const confirmBgColor = isDestructive ? Colors.light.error : Colors.light.main;

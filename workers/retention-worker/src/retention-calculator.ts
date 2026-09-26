@@ -10,7 +10,7 @@ function parseFirestoreTimestamp(field: any): number | null {
   const raw = field.timestampValue || field.stringValue || field.integerValue;
   if (!raw) return null;
   const parsed = Date.parse(raw);
-  return isNaN(parsed) ? null : parsed;
+  return Number.isNaN(parsed) ? null : parsed;
 }
 
 /**
@@ -21,6 +21,46 @@ function parseFirestoreString(field: any): string | null {
   return field.stringValue || null;
 }
 
+interface CohortMetric {
+  eligible: number;
+  returned: number;
+}
+
+function groupSessionsByUser(sessions: SessionEntity[]): Map<string, number[]> {
+  const sessionsByUser = new Map<string, number[]>();
+  for (const session of sessions) {
+    if (!session.userId || !session.timestamp) continue;
+    const list = sessionsByUser.get(session.userId) || [];
+    list.push(session.timestamp);
+    sessionsByUser.set(session.userId, list);
+  }
+  return sessionsByUser;
+}
+
+function hasSessionInRange(sessions: number[], min: number, max: number): boolean {
+  return sessions.some((ts) => ts >= min && ts <= max);
+}
+
+function processCohort(
+  cohort: CohortMetric,
+  userAgeMs: number,
+  minAgeMs: number,
+  sessions: number[],
+  minWindow: number,
+  maxWindow: number
+) {
+  if (userAgeMs >= minAgeMs) {
+    cohort.eligible++;
+    if (hasSessionInRange(sessions, minWindow, maxWindow)) {
+      cohort.returned++;
+    }
+  }
+}
+
+function calculateRate(cohort: CohortMetric): number {
+  return cohort.eligible > 0 ? Math.round((cohort.returned / cohort.eligible) * 100) : 0;
+}
+
 /**
  * Calcula la retención por cohortes a partir de entidades de usuarios y sesiones.
  */
@@ -29,23 +69,11 @@ export function calculateRetentionFromEntities(
   sessions: SessionEntity[],
   nowMs: number = Date.now()
 ): RetentionResponse {
-  // Agrupar sesiones por ID de usuario
-  const sessionsByUser = new Map<string, number[]>();
-  for (const session of sessions) {
-    if (!session.userId || !session.timestamp) continue;
-    const list = sessionsByUser.get(session.userId) || [];
-    list.push(session.timestamp);
-    sessionsByUser.set(session.userId, list);
-  }
+  const sessionsByUser = groupSessionsByUser(sessions);
 
-  let day1Eligible = 0;
-  let day1Returned = 0;
-
-  let day7Eligible = 0;
-  let day7Returned = 0;
-
-  let day30Eligible = 0;
-  let day30Returned = 0;
+  const day1: CohortMetric = { eligible: 0, returned: 0 };
+  const day7: CohortMetric = { eligible: 0, returned: 0 };
+  const day30: CohortMetric = { eligible: 0, returned: 0 };
 
   for (const user of users) {
     const t0 = user.createdAt;
@@ -54,43 +82,19 @@ export function calculateRetentionFromEntities(
     const userAgeMs = nowMs - t0;
     const userSessions = sessionsByUser.get(user.id) || [];
 
-    // Cohorte Día 1 (24h transcurridas; ventana de retorno entre 20h y 48h)
-    if (userAgeMs >= ONE_DAY_MS) {
-      day1Eligible++;
-      const hasD1Session = userSessions.some(
-        (ts) => ts >= t0 + 20 * 3600 * 1000 && ts <= t0 + 48 * 3600 * 1000
-      );
-      if (hasD1Session) day1Returned++;
-    }
-
-    // Cohorte Día 7 (7 días transcurridos; ventana entre día 6 y 8)
-    if (userAgeMs >= 7 * ONE_DAY_MS) {
-      day7Eligible++;
-      const hasD7Session = userSessions.some(
-        (ts) => ts >= t0 + 6 * ONE_DAY_MS && ts <= t0 + 8 * ONE_DAY_MS
-      );
-      if (hasD7Session) day7Returned++;
-    }
-
-    // Cohorte Día 30 (30 días transcurridos; ventana entre día 28 y 32)
-    if (userAgeMs >= 30 * ONE_DAY_MS) {
-      day30Eligible++;
-      const hasD30Session = userSessions.some(
-        (ts) => ts >= t0 + 28 * ONE_DAY_MS && ts <= t0 + 32 * ONE_DAY_MS
-      );
-      if (hasD30Session) day30Returned++;
-    }
+    processCohort(day1, userAgeMs, ONE_DAY_MS, userSessions, t0 + 20 * 3600 * 1000, t0 + 48 * 3600 * 1000);
+    processCohort(day7, userAgeMs, 7 * ONE_DAY_MS, userSessions, t0 + 6 * ONE_DAY_MS, t0 + 8 * ONE_DAY_MS);
+    processCohort(day30, userAgeMs, 30 * ONE_DAY_MS, userSessions, t0 + 28 * ONE_DAY_MS, t0 + 32 * ONE_DAY_MS);
   }
 
-  const d1Rate = day1Eligible > 0 ? Math.round((day1Returned / day1Eligible) * 100) : 0;
-  const d7Rate = day7Eligible > 0 ? Math.round((day7Returned / day7Eligible) * 100) : 0;
-  const d30Rate = day30Eligible > 0 ? Math.round((day30Returned / day30Eligible) * 100) : 0;
+  const d1Rate = calculateRate(day1);
+  const d7Rate = calculateRate(day7);
+  const d30Rate = calculateRate(day30);
 
-  // Tasa global de retención (promedio de cohortes con usuarios elegibles)
   const rates = [
-    day1Eligible > 0 ? d1Rate : null,
-    day7Eligible > 0 ? d7Rate : null,
-    day30Eligible > 0 ? d30Rate : null,
+    day1.eligible > 0 ? d1Rate : null,
+    day7.eligible > 0 ? d7Rate : null,
+    day30.eligible > 0 ? d30Rate : null,
   ].filter((r): r is number => r !== null);
 
   const overall = rates.length > 0 ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) : 0;
@@ -108,12 +112,12 @@ export function calculateRetentionFromEntities(
     calculatedAt: new Date(nowMs).toISOString(),
     source: 'computed-cohort',
     breakdown: {
-      day1Eligible,
-      day1Returned,
-      day7Eligible,
-      day7Returned,
-      day30Eligible,
-      day30Returned,
+      day1Eligible: day1.eligible,
+      day1Returned: day1.returned,
+      day7Eligible: day7.eligible,
+      day7Returned: day7.returned,
+      day30Eligible: day30.eligible,
+      day30Returned: day30.returned,
     },
   };
 }

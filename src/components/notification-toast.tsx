@@ -2,19 +2,21 @@ import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated as RNAnimated, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+export interface NotificationToastProps {
+  visible: boolean;
+  type?: 'success' | 'error';
+  message: string;
+  title: string;
+  onDismiss: () => void;
+}
+
 export function NotificationToast({
   visible,
   type = 'success',
   message,
   title,
   onDismiss,
-}: {
-  visible: boolean;
-  type?: 'success' | 'error';
-  message: string;
-  title: string;
-  onDismiss: () => void;
-}) {
+}: Readonly<NotificationToastProps>) {
   const translateY = useRef(new RNAnimated.Value(-100)).current;
 
   useEffect(() => {

@@ -1,0 +1,100 @@
+import { RegionBucket } from '@/components/reports/types';
+
+export interface CountryInfo {
+  code: string;
+  name: string;
+  flag: string;
+  region: RegionBucket;
+}
+
+export const COUNTRIES: CountryInfo[] = [
+  { code: 'af', name: 'Afganistán', flag: '🇦🇫', region: 'otros' },
+  { code: 'al', name: 'Albania', flag: '🇦🇱', region: 'otros' },
+  { code: 'de', name: 'Alemania', flag: '🇩🇪', region: 'otros' },
+  { code: 'ad', name: 'Andorra', flag: '🇦🇩', region: 'otros' },
+  { code: 'ao', name: 'Angola', flag: '🇦🇴', region: 'otros' },
+  { code: 'ag', name: 'Antigua y Barbuda', flag: '🇦🇬', region: 'caribe' },
+  { code: 'sa', name: 'Arabia Saudita', flag: '🇸🇦', region: 'otros' },
+  { code: 'dz', name: 'Argelia', flag: '🇩🇿', region: 'otros' },
+  { code: 'ar', name: 'Argentina', flag: '🇦🇷', region: 'otros' },
+  { code: 'am', name: 'Armenia', flag: '🇦🇲', region: 'otros' },
+  { code: 'au', name: 'Australia', flag: '🇦🇺', region: 'otros' },
+  { code: 'at', name: 'Austria', flag: '🇦🇹', region: 'otros' },
+  { code: 'bs', name: 'Bahamas', flag: '🇧🇸', region: 'caribe' },
+  { code: 'bd', name: 'Bangladés', flag: '🇧🇩', region: 'otros' },
+  { code: 'bb', name: 'Barbados', flag: '🇧🇧', region: 'caribe' },
+  { code: 'be', name: 'Bélgica', flag: '🇧🇪', region: 'otros' },
+  { code: 'bz', name: 'Belice', flag: '🇧🇿', region: 'otros' },
+  { code: 'bo', name: 'Bolivia', flag: '🇧🇴', region: 'andina' },
+  { code: 'ba', name: 'Bosnia y Herzegovina', flag: '🇧🇦', region: 'otros' },
+  { code: 'br', name: 'Brasil', flag: '🇧🇷', region: 'otros' },
+  { code: 'bg', name: 'Bulgaria', flag: '🇧🇬', region: 'otros' },
+  { code: 'cv', name: 'Cabo Verde', flag: '🇨🇻', region: 'otros' },
+  { code: 'kh', name: 'Camboya', flag: '🇰🇭', region: 'otros' },
+  { code: 'cm', name: 'Camerún', flag: '🇨🇲', region: 'otros' },
+  { code: 'ca', name: 'Canadá', flag: '🇨🇦', region: 'otros' },
+  { code: 'qa', name: 'Catar', flag: '🇶🇦', region: 'otros' },
+  { code: 'cl', name: 'Chile', flag: '🇨🇱', region: 'pacifica' },
+  { code: 'cn', name: 'China', flag: '🇨🇳', region: 'otros' },
+  { code: 'cy', name: 'Chipre', flag: '🇨🇾', region: 'otros' },
+  { code: 'co', name: 'Colombia', flag: '🇨🇴', region: 'andina' },
+  { code: 'kr', name: 'Corea del Sur', flag: '🇰🇷', region: 'otros' },
+  { code: 'cr', name: 'Costa Rica', flag: '🇨🇷', region: 'caribe' },
+  { code: 'hr', name: 'Croacia', flag: '🇭🇷', region: 'otros' },
+  { code: 'cu', name: 'Cuba', flag: '🇨🇺', region: 'caribe' },
+  { code: 'dk', name: 'Dinamarca', flag: '🇩🇰', region: 'otros' },
+  { code: 'ec', name: 'Ecuador', flag: '🇪🇨', region: 'andina' },
+  { code: 'eg', name: 'Egipto', flag: '🇪🇬', region: 'otros' },
+  { code: 'sv', name: 'El Salvador', flag: '🇸🇻', region: 'otros' },
+  { code: 'ae', name: 'Emiratos Árabes Unidos', flag: '🇦🇪', region: 'otros' },
+  { code: 'es', name: 'España', flag: '🇪🇸', region: 'otros' },
+  { code: 'us', name: 'Estados Unidos', flag: '🇺🇸', region: 'otros' },
+  { code: 'ph', name: 'Filipinas', flag: '🇵🇭', region: 'otros' },
+  { code: 'fi', name: 'Finlandia', flag: '🇫🇮', region: 'otros' },
+  { code: 'fr', name: 'Francia', flag: '🇫🇷', region: 'otros' },
+  { code: 'gr', name: 'Grecia', flag: '🇬🇷', region: 'otros' },
+  { code: 'gt', name: 'Guatemala', flag: '🇬🇹', region: 'otros' },
+  { code: 'hn', name: 'Honduras', flag: '🇭🇳', region: 'caribe' },
+  { code: 'in', name: 'India', flag: '🇮🇳', region: 'otros' },
+  { code: 'id', name: 'Indonesia', flag: '🇮🇩', region: 'otros' },
+  { code: 'iq', name: 'Irak', flag: '🇮🇶', region: 'otros' },
+  { code: 'ir', name: 'Irán', flag: '🇮🇷', region: 'otros' },
+  { code: 'ie', name: 'Irlanda', flag: '🇮🇪', region: 'otros' },
+  { code: 'il', name: 'Israel', flag: '🇮🇱', region: 'otros' },
+  { code: 'it', name: 'Italia', flag: '🇮🇹', region: 'otros' },
+  { code: 'jm', name: 'Jamaica', flag: '🇯🇲', region: 'caribe' },
+  { code: 'jp', name: 'Japón', flag: '🇯🇵', region: 'otros' },
+  { code: 'ma', name: 'Marruecos', flag: '🇲🇦', region: 'otros' },
+  { code: 'mx', name: 'México', flag: '🇲🇽', region: 'pacifica' },
+  { code: 'ni', name: 'Nicaragua', flag: '🇳🇮', region: 'caribe' },
+  { code: 'ng', name: 'Nigeria', flag: '🇳🇬', region: 'otros' },
+  { code: 'no', name: 'Noruega', flag: '🇳🇴', region: 'otros' },
+  { code: 'nz', name: 'Nueva Zelanda', flag: '🇳🇿', region: 'otros' },
+  { code: 'nl', name: 'Países Bajos', flag: '🇳🇱', region: 'otros' },
+  { code: 'pa', name: 'Panamá', flag: '🇵🇦', region: 'caribe' },
+  { code: 'py', name: 'Paraguay', flag: '🇵🇾', region: 'otros' },
+  { code: 'pe', name: 'Perú', flag: '🇵🇪', region: 'andina' },
+  { code: 'pl', name: 'Polonia', flag: '🇵🇱', region: 'otros' },
+  { code: 'pt', name: 'Portugal', flag: '🇵🇹', region: 'otros' },
+  { code: 'pr', name: 'Puerto Rico', flag: '🇵🇷', region: 'caribe' },
+  { code: 'gb', name: 'Reino Unido', flag: '🇬🇧', region: 'otros' },
+  { code: 'do', name: 'República Dominicana', flag: '🇩🇴', region: 'caribe' },
+  { code: 'ru', name: 'Rusia', flag: '🇷🇺', region: 'otros' },
+  { code: 'se', name: 'Suecia', flag: '🇸🇪', region: 'otros' },
+  { code: 'ch', name: 'Suiza', flag: '🇨🇭', region: 'otros' },
+  { code: 'th', name: 'Tailandia', flag: '🇹🇭', region: 'otros' },
+  { code: 'tw', name: 'Taiwán', flag: '🇹🇼', region: 'otros' },
+  { code: 'tr', name: 'Turquía', flag: '🇹🇷', region: 'otros' },
+  { code: 'ua', name: 'Ucrania', flag: '🇺🇦', region: 'otros' },
+  { code: 'uy', name: 'Uruguay', flag: '🇺🇾', region: 'otros' },
+  { code: 've', name: 'Venezuela', flag: '🇻🇪', region: 'caribe' },
+  { code: 'other', name: 'Otro', flag: '🌍', region: 'otros' },
+].sort((a, b) => {
+  if (a.code === 'other') return 1;
+  if (b.code === 'other') return -1;
+  return a.name.localeCompare(b.name);
+});
+
+export function getCountryByCode(code: string): CountryInfo | undefined {
+  return COUNTRIES.find((c) => c.code === code);
+}

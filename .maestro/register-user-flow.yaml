@@ -1,0 +1,75 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+- extendedWaitUntil:
+    visible:
+      id: "login-title"
+    timeout: 60000
+
+# 1. Navegar desde Login hacia Registro
+- tapOn:
+    id: "signIn-link"
+
+- extendedWaitUntil:
+    visible: "Registro"
+    timeout: 10000
+
+# ESCENARIO 1: Validación de campos obligatorios vacíos
+- tapOn:
+    id: "signIn-button"
+- assertVisible: "Por favor, rellena todos los campos."
+
+# ESCENARIO 2: Formato de correo inválido
+- tapOn:
+    id: "email-input"
+- inputText: "correoInvalido"
+- hideKeyboard
+- tapOn:
+    id: "password-input"
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn:
+    id: "confirm-password-input"
+- inputText: "Password123!"
+- hideKeyboard
+- tapOn:
+    id: "signIn-button"
+- assertVisible: "El formato de correo no es válido."
+
+# ESCENARIO 3: Contraseñas no coinciden
+- tapOn:
+    id: "email-input"
+- eraseText
+- inputText: "usuario_prueba@ejemplo.com"
+- hideKeyboard
+- tapOn:
+    id: "confirm-password-input"
+- eraseText
+- inputText: "PasswordDiferente999!"
+- hideKeyboard
+- tapOn:
+    id: "signIn-button"
+- assertVisible: "Las contraseñas no coinciden."
+
+# ESCENARIO 4: Contraseña menor a 6 caracteres
+- tapOn:
+    id: "password-input"
+- eraseText
+- inputText: "123"
+- hideKeyboard
+- tapOn:
+    id: "confirm-password-input"
+- eraseText
+- inputText: "123"
+- hideKeyboard
+- tapOn:
+    id: "signIn-button"
+- assertVisible: "La contraseña debe tener al menos 6 caracteres."
+
+# ESCENARIO 5: Navegación de vuelta a Login
+- tapOn: "Iniciar sesión"
+- extendedWaitUntil:
+    visible:
+      id: "login-title"
+    timeout: 10000
