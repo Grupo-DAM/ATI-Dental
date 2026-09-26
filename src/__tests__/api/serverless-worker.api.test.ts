@@ -1,4 +1,4 @@
-import { ApiTestClient } from './api-client';
+import { ApiTestClient } from '@/test-utils/api-client';
 import { Config } from '@/constants/config';
 
 describe('API Integration: Serverless Retention Worker', () => {

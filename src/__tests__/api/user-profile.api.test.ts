@@ -1,5 +1,5 @@
-import { ApiTestClient } from './api-client';
-import { createMockApiServer } from './mock-server';
+import { ApiTestClient } from '@/test-utils/api-client';
+import { createMockApiServer } from '@/test-utils/mock-server';
 import http from 'http';
 
 describe('API Integration: Perfil de Usuario', () => {
