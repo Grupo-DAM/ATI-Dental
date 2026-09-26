@@ -13,7 +13,7 @@ export interface RequestOptions {
 }
 
 export class ApiTestClient {
-  private baseUrl: string;
+  private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
     this.baseUrl = baseUrl || process.env.API_BASE_URL || 'http://127.0.0.1:4040';

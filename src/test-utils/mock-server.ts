@@ -1,4 +1,4 @@
-import http from 'http';
+import http from 'node:http';
 
 export function createMockApiServer(port = 4040): Promise<http.Server> {
   const server = http.createServer((req, res) => {
@@ -15,7 +15,7 @@ export function createMockApiServer(port = 4040): Promise<http.Server> {
       req.on('end', () => {
         try {
           const parsed = JSON.parse(body || '{}');
-          if (!parsed.email || !parsed.email.includes('@')) {
+          if (!parsed.email?.includes('@')) {
             res.writeHead(400);
             return res.end(JSON.stringify({ error: 'Email inválido o incompleto' }));
           }
