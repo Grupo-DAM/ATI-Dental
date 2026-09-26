@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   Alert,
@@ -12,33 +10,25 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
-import { Colors } from '@/constants/theme';
+import { EditResponsibleCard, Responsible } from '@/components/contact/responsible-card';
+import { FormField } from '@/components/contact/form-field'
+import { CardContainer } from '@/components/ui/card-container';
 import { useAuth } from '@/hooks/use-auth';
 import { isAdminUser } from '@/constants/user-roles';
 import { firestore } from '@/config/firebase';
+import { useTheme } from '@/hooks/use-theme';
+import { createUpdateContactInfoStyles } from '@/constants/styles/contact.styles';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ContactForm {
   email: string;
   telefono: string;
   whatsapp: string;
-}
-
-interface Responsible {
-  id: string;
-  title?: string;
-  name?: string;
-  role?: string;
-  description?: string;
-  email?: string;
-  phone?: string;
-  imageUrl?: string;
 }
 
 interface FormErrors {
@@ -65,298 +55,11 @@ export function validate(form: ContactForm, t: (k: string) => string): FormError
   return errors;
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
-
-/** Inline-error text input row with colored icon */
-function FormField({
-  iconName,
-  iconColor,
-  value,
-  onChangeText,
-  placeholder,
-  keyboardType = 'default',
-  autoCapitalize = 'none',
-  error,
-  testID,
-}: {
-  iconName: keyof typeof Ionicons.glyphMap;
-  iconColor: string;
-  value: string;
-  onChangeText: (t: string) => void;
-  placeholder: string;
-  keyboardType?: 'default' | 'email-address' | 'phone-pad';
-  autoCapitalize?: 'none' | 'sentences';
-  error?: string;
-  testID?: string;
-}) {
-  return (
-    <View style={fieldStyles.wrapper}>
-      <View style={[fieldStyles.row, !!error && fieldStyles.rowError]}>
-        <View style={[fieldStyles.iconBox, { backgroundColor: iconColor }]}>
-          <Ionicons name={iconName} size={20} color="white" />
-        </View>
-        <TextInput
-          testID={testID}
-          style={fieldStyles.input}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize}
-        />
-      </View>
-      {!!error && (
-        <Text style={fieldStyles.errorText}>⚠ {error}</Text>
-      )}
-    </View>
-  );
-}
-
-const fieldStyles = StyleSheet.create({
-  wrapper: { marginBottom: 14 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    overflow: 'hidden',
-  },
-  rowError: { borderColor: '#EF4444', borderWidth: 1.5 },
-  iconBox: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 4,
-  },
-  input: {
-    flex: 1,
-    height: 44,
-    paddingHorizontal: 10,
-    fontSize: 14,
-    fontFamily: 'Open Sans',
-    color: '#1F2937',
-  },
-  errorText: {
-    marginTop: 4,
-    marginLeft: 2,
-    fontSize: 11,
-    color: '#EF4444',
-    fontFamily: 'Open Sans',
-  },
-});
-
-/** Editable card for a single responsible */
-function ResponsibleCard({
-  resp,
-  index,
-  onChange,
-  onClear,
-  t,
-}: {
-  resp: Responsible;
-  index: number;
-  onChange: (index: number, field: keyof Responsible, value: string) => void;
-  onClear: (index: number) => void;
-  t: (key: string) => string;
-}) {
-  return (
-    <View style={cardStyles.card}>
-      {/* Header: photo + trash */}
-      <View style={cardStyles.header}>
-        <View style={cardStyles.photoRow}>
-          <Image
-            source={resp.imageUrl ? { uri: resp.imageUrl } : avatarFallback}
-            style={cardStyles.avatar}
-            contentFit="cover"
-          />
-          <View style={cardStyles.photoInfo}>
-            <Text style={cardStyles.photoLabel}>{t('updateContact.photoLabel')}</Text>
-            <View style={cardStyles.photoActions}>
-              <TouchableOpacity style={cardStyles.changeBtn}>
-                <Text style={cardStyles.changeTxt}>{t('updateContact.change')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Text style={cardStyles.deleteTxt}>{t('updateContact.delete')}</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={cardStyles.photoHint}>{t('updateContact.photoHint')}</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={cardStyles.trashBtn} onPress={() => onClear(index)}>
-          <Ionicons name="trash-outline" size={20} color="#EF4444" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Título + Nombre in same row */}
-      <View style={cardStyles.row}>
-        <View style={[cardStyles.col, { flex: 0.35 }]}>
-          <Text style={cardStyles.label}>{t('updateContact.fieldTitle')}</Text>
-          <TextInput
-            style={cardStyles.input}
-            value={resp.title || ''}
-            onChangeText={(v) => onChange(index, 'title', v)}
-            placeholder={t('updateContact.placeholderTitle')}
-            placeholderTextColor="#9CA3AF"
-          />
-        </View>
-        <View style={[cardStyles.col, { flex: 0.65, marginLeft: 10 }]}>
-          <Text style={cardStyles.label}>{t('updateContact.fieldName')}</Text>
-          <TextInput
-            style={cardStyles.input}
-            value={resp.name || ''}
-            onChangeText={(v) => onChange(index, 'name', v)}
-            placeholder={t('updateContact.placeholderName')}
-            placeholderTextColor="#9CA3AF"
-          />
-        </View>
-      </View>
-
-      {/* Cargo */}
-      <Text style={cardStyles.label}>{t('updateContact.fieldRole')}</Text>
-      <TextInput
-        style={[cardStyles.input, { marginBottom: 12 }]}
-        value={resp.role || ''}
-        onChangeText={(v) => onChange(index, 'role', v)}
-        placeholder={t('updateContact.placeholderRole')}
-        placeholderTextColor="#9CA3AF"
-      />
-
-      {/* Descripción */}
-      <Text style={cardStyles.label}>{t('updateContact.fieldDescription')}</Text>
-      <TextInput
-        style={[cardStyles.input, cardStyles.textarea]}
-        value={resp.description || ''}
-        onChangeText={(v) => onChange(index, 'description', v)}
-        placeholder={t('updateContact.placeholderDescription')}
-        placeholderTextColor="#9CA3AF"
-        multiline
-        numberOfLines={3}
-      />
-
-      {/* Email row */}
-      <View style={cardStyles.iconRow}>
-        <Ionicons name="mail-outline" size={18} color="#6B7280" style={cardStyles.rowIcon} />
-        <TextInput
-          style={cardStyles.iconInput}
-          value={resp.email || ''}
-          onChangeText={(v) => onChange(index, 'email', v)}
-          placeholder={t('updateContact.placeholderEmail')}
-          placeholderTextColor="#9CA3AF"
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
-
-      {/* Phone row */}
-      <View style={[cardStyles.iconRow, { marginBottom: 0 }]}>
-        <Ionicons name="call-outline" size={18} color="#6B7280" style={cardStyles.rowIcon} />
-        <TextInput
-          style={cardStyles.iconInput}
-          value={resp.phone || ''}
-          onChangeText={(v) => onChange(index, 'phone', v)}
-          placeholder={t('updateContact.placeholderPhone')}
-          placeholderTextColor="#9CA3AF"
-          keyboardType="phone-pad"
-        />
-      </View>
-    </View>
-  );
-}
-
-const cardStyles = StyleSheet.create({
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: Colors.light.main,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
-  photoRow: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    marginRight: 12,
-    backgroundColor: '#F3F4F6',
-  },
-  photoInfo: { flex: 1 },
-  photoLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-    marginBottom: 4,
-  },
-  photoActions: { flexDirection: 'row', marginBottom: 4 },
-  changeBtn: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    marginRight: 10,
-  },
-  changeTxt: { fontSize: 11, color: '#4B5563', fontFamily: 'Open Sans' },
-  deleteTxt: { fontSize: 11, color: '#EF4444', fontFamily: 'Open Sans', paddingVertical: 3 },
-  photoHint: { fontSize: 10, color: '#9CA3AF', fontFamily: 'Open Sans' },
-  trashBtn: { padding: 4 },
-  row: { flexDirection: 'row', marginBottom: 12 },
-  col: {},
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#374151',
-    fontFamily: 'Open Sans',
-    marginBottom: 5,
-  },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    fontSize: 13,
-    fontFamily: 'Open Sans',
-    color: '#1F2937',
-    backgroundColor: '#FAFAFA',
-  },
-  textarea: {
-    height: 72,
-    paddingTop: 10,
-    textAlignVertical: 'top',
-    marginBottom: 12,
-  },
-  iconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 40,
-    backgroundColor: '#FAFAFA',
-    marginBottom: 10,
-  },
-  rowIcon: { marginRight: 8 },
-  iconInput: { flex: 1, fontSize: 13, color: '#1F2937', fontFamily: 'Open Sans' },
-});
-
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function UpdateContactInfoScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createUpdateContactInfoStyles(theme), [theme]);
   const { user, loading: authLoading } = useAuth();
 
   const [dataLoading, setDataLoading] = useState(true);
@@ -529,7 +232,7 @@ export default function UpdateContactInfoScreen() {
       <AppHeader />
         <Breadcrumb parent="Administración" current="Contacto" />
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.light.main} />
+          <ActivityIndicator size="large" color={theme.main} />
           <Text style={styles.loadingText}>{t('updateContact.loading')}</Text>
         </View>
       </View>
@@ -556,39 +259,41 @@ export default function UpdateContactInfoScreen() {
         </View>
 
         {/* ── Responsables del Sitio ── */}
-        <View style={styles.sectionHeaderRow}>
-          <Ionicons name="card" size={20} color={Colors.light.main} />
-          <Text style={styles.sectionTitle}>{t('updateContact.responsibles')}</Text>
-        </View>
-
-        {responsibles.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyText}>{t('updateContact.noResponsibles')}</Text>
+          <View style={styles.sectionHeaderRow}>
+            <Ionicons name="card" size={20} color={theme.main} />
+            <Text style={styles.sectionTitle}>{t('updateContact.responsibles')}</Text>
           </View>
-        ) : (
-          responsibles.map((resp, index) => (
-            <ResponsibleCard
-              key={resp.id}
-              resp={resp}
-              index={index}
-              onChange={handleResponsibleChange}
-              onClear={handleResponsibleClear}
-              t={t}
-            />
-          ))
-        )}
+        
+        <View style={styles.sectionContainer}>
+          {responsibles.length === 0 ? (
+            <View style={styles.emptyBox}>
+              <Text style={styles.emptyText}>{t('updateContact.noResponsibles')}</Text>
+            </View>
+          ) : (
+            responsibles.map((resp, index) => (
+              <EditResponsibleCard
+                key={resp.id}
+                resp={resp}
+                index={index}
+                onChange={handleResponsibleChange}
+                onClear={handleResponsibleClear}
+                t={t}
+              />
+            ))
+          )}
+        </View>
 
         {/* ── Contacto Directo header ── outside the card */}
         <View style={[styles.sectionHeaderRow, { marginTop: 8 }]}>
-          <Ionicons name="chatbubbles" size={20} color={Colors.light.main} />
+          <Ionicons name="chatbubbles" size={20} color={theme.main} />
           <Text style={styles.sectionTitle}>{t('updateContact.directContact')}</Text>
         </View>
 
-        <View style={styles.card}>
+        <CardContainer style={styles.sectionContainer} cardStyle={styles.card}>
           <FormField
             testID="input-email"
             iconName="mail"
-            iconColor={Colors.light.main}
+            iconColor={theme.emailContactColor}
             value={formData.email}
             onChangeText={(v) => handleFieldChange('email', v)}
             placeholder={t('updateContact.placeholderEmail')}
@@ -598,7 +303,7 @@ export default function UpdateContactInfoScreen() {
           <FormField
             testID="input-telefono"
             iconName="call"
-            iconColor="#8F6BB3"
+            iconColor={theme.phoneContactColor}
             value={formData.telefono}
             onChangeText={(v) => handleFieldChange('telefono', v)}
             placeholder={t('updateContact.placeholderTelefono')}
@@ -608,13 +313,13 @@ export default function UpdateContactInfoScreen() {
           <FormField
             testID="input-whatsapp"
             iconName="logo-whatsapp"
-            iconColor="#34C759"
+            iconColor={theme.whatsAppContactColor}
             value={formData.whatsapp}
             onChangeText={(v) => handleFieldChange('whatsapp', v)}
             placeholder={t('updateContact.placeholderWhatsapp')}
             error={errors.whatsapp}
           />
-        </View>
+        </CardContainer>
 
         {/* ── Action buttons OUTSIDE the card ── */}
         <View style={styles.buttonRow}>
@@ -649,52 +354,3 @@ export default function UpdateContactInfoScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F6F8' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
-  loadingText: { color: '#6B7280', fontFamily: 'Open Sans', fontSize: 13 },
-  scrollContent: { paddingBottom: Platform.OS === 'ios' ? 100 : 80 },
-  titleSection: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12 },
-  mainTitle: {
-    fontSize: 22, fontWeight: '700', color: '#1F2937',
-    fontFamily: 'Open Sans', marginBottom: 4,
-  },
-  subtitle: { fontSize: 13, color: '#6B7280', lineHeight: 18, fontFamily: 'Open Sans' },
-  sectionHeaderRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginHorizontal: 16, marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 17, fontWeight: '600', color: '#111827', fontFamily: 'Open Sans',
-  },
-  emptyBox: {
-    marginHorizontal: 16, marginBottom: 16,
-    padding: 20, backgroundColor: '#F3F4F6',
-    borderRadius: 8, borderStyle: 'dashed', borderWidth: 1, borderColor: '#D1D5DB',
-    alignItems: 'center',
-  },
-  emptyText: { color: '#6B7280', fontFamily: 'Open Sans', textAlign: 'center' },
-  card: {
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB',
-    borderRadius: 12, marginHorizontal: 16, marginBottom: 20, padding: 16,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
-  },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 18 },
-  buttonRow: {
-    flexDirection: 'row', justifyContent: 'flex-end',
-    alignItems: 'center', gap: 10,
-    marginTop: 8, marginHorizontal: 16, marginBottom: 24,
-  },
-  btn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    height: 44, borderRadius: 8, paddingHorizontal: 16, minWidth: 110,
-  },
-  btnCancel: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#D1D5DB' },
-  btnCancelText: { color: '#4B5563', fontSize: 14, fontWeight: '600', fontFamily: 'Open Sans' },
-  btnSave: { backgroundColor: Colors.light.main, minWidth: 160 },
-  btnDisabled: { opacity: 0.6 },
-  btnSaveText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600', fontFamily: 'Open Sans' },
-});

@@ -27,7 +27,13 @@ export const createGlobalStyles = (theme: any) => StyleSheet.create({
     title: {
 
     },
-   
+    shadow: {
+      shadowColor: theme.shadowColor,
+      shadowOffset: { width: 0, height:4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 6,
+      elevation: 4,
+    },
 });
 
 export const createInputFieldStyles = (theme: any) => {
@@ -181,21 +187,21 @@ export const createAppHeaderStyles = (theme: any) => StyleSheet.create({
   },
 });
 
-export const createCardContainerStyles = (theme: any) => StyleSheet.create({
-  cardWrapper: {
-    flex: 1,
-    paddingTop: Spacing.two,
-    borderRadius: 12,
-    backgroundColor: theme.main,
-    shadowColor: theme.shadowColor,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  card: {
-    backgroundColor: theme.backgroundElement,
-    borderRadius: 12,
-    padding: Border.radius.wide,
-  }
-});
+export const createCardContainerStyles = (theme: any) => {
+  const global = createGlobalStyles(theme);
+
+  return StyleSheet.create({
+    cardWrapper: {
+      flex: 1,
+      paddingTop: Spacing.two,
+      borderRadius: 12,
+      backgroundColor: theme.main,
+      ...global.shadow,
+    },
+    card: {
+      backgroundColor: theme.backgroundElement,
+      borderRadius: 12,
+      padding: Border.radius.wide,
+    }
+  })
+};

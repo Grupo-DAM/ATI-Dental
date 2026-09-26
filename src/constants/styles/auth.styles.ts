@@ -50,7 +50,7 @@ export const createAuthStyles = (theme: any) => {
             borderWidth: Border.width.regular,
             borderColor: theme.border,
             backgroundColor: theme.backgroundElement,
-            borderRadius: Border.radius,
+            borderRadius: Border.radius.regular,
             paddingHorizontal: Spacing.three,
             height: 50,
             width: '40%',
@@ -64,7 +64,7 @@ export const createAuthStyles = (theme: any) => {
         },
         button: {
             backgroundColor: theme.main,
-            borderRadius: Border.radius,
+            borderRadius: Border.radius.regular,
             justifyContent: 'center',
             alignItems: 'center',
             height: 48,
@@ -103,7 +103,7 @@ export const createAuthStyles = (theme: any) => {
             marginBottom: Spacing.three,
         },
         errorPopup: {
-            borderRadius: Border.radius,
+            borderRadius: Border.radius.regular,
             borderWidth: Border.width.regular,
             borderColor: theme.error,
             padding: Spacing.three,

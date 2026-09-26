@@ -222,7 +222,7 @@ export const createStyles = (theme: any) => {
       backgroundColor: theme.backgroundElement,
     },
     cancelBtnText: {
-      color: theme.textNames,
+      color: theme.fieldLabel,
       fontWeight: '600',
       fontSize: 15,
     },

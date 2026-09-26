@@ -28,6 +28,7 @@ export const Colors = {
     pageSeparator: '#EDF2F7',
     cardSeparator: '#D1D5DB',
     error: '#BA1A1A',
+    alert: '#DC2626',
     logo: '#5B2D8B',
     errorBackground: '#FFDAD6',
     placeholderColor: '#9E8BAC',
@@ -43,6 +44,13 @@ export const Colors = {
     reportValueText: '#111827', //Ebony
     positive: '#10B981',
     shadowColor: '#000',
+    pfpBorderColor: '#F3F4F6', //Athens Gray
+    onlineStatus: '#22C55E',
+
+    //contact Buttons
+    emailContactColor: '#5B2D8B',
+    phoneContactColor: '#8F6BB3',
+    whatsAppContactColor: '#34C759',
   },
   dark: {
     text: '#ffffff',
@@ -64,6 +72,7 @@ export const Colors = {
     pageSeparator: '#262C36',
     cardSeparator: '#374151',
     error: '#BA1A1A',
+    alert: '#DC2626',
     logo: '#ffffff',
     errorBackground: '#FFDAD6',
     placeholderColor: '#9E8BAC',
@@ -78,7 +87,14 @@ export const Colors = {
     accentBackground: '#4D2875',
     reportValueText: '#F8FAFC',
     positive: '#10B981',
-    shadowColor: '#000',
+    shadowColor: '#fff',
+    pfpBorderColor: '#09090c',
+    onlineStatus: '#22C55E',
+    
+    //contact Buttons
+    emailContactColor: '#5B2D8B',
+    phoneContactColor: '#8F6BB3',
+    whatsAppContactColor: '#34C759',
   },
 } as const;
 
@@ -161,7 +177,10 @@ export const Border = {
     regular: 1,
     bold: 2,
   },
-  radius: 8,
+  radius: {
+    regular: 8,
+    wide: 12,
+  }
 } as const
 
 export const Icon = {
