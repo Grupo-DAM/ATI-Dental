@@ -7,60 +7,77 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
+// 1. Constantes compartidas (estáticas para ambos temas)
+const BRAND_COLORS = {
+  header: '#52287D',
+  main: '#5B2D8B',
+  overMain: '#ffffff',
+  error: '#BA1A1A',
+  alert: '#DC2626',
+  warning: '#D97706',
+  errorBackground: '#FFDAD6',
+  placeholderColor: '#9E8BAC',
+  positive: '#10B981',
+  onlineStatus: '#22C55E',
+} as const;
+
+const OFFLINE_BANNER = {
+  offlineBannerBackground: '#FEF3C7',
+  offlineBannerBorder: '#FDE68A',
+  offlineBannerText: '#B45309',
+} as const;
+
+const TOOLTIP_COLORS = {
+  tooltipBackground: '#1A202C',
+  tooltipLegend: '#E2E8F0',
+  tooltipValue: '#FFFFFF',
+} as const;
+
+const CONTACT_BUTTONS = {
+  emailContactColor: '#5B2D8B',
+  phoneContactColor: '#8F6BB3',
+  whatsAppContactColor: '#34C759',
+  facebookMainColor: '#1877F2',
+  facebookTextColor: '#ffffff',
+  instagramGradient: ['#833AB4', '#E1306C', '#F56040'],
+  instagramTextColor: '#ffffff',
+} as const;
+
+// 2. Definición estructurada de temas usando composición
 export const Colors = {
   light: {
+    ...BRAND_COLORS,
+    ...OFFLINE_BANNER,
+    ...TOOLTIP_COLORS,
+    ...CONTACT_BUTTONS,
+
     text: '#141018',
     textNames: '#4A4A4A',
     pageTitle: '#1F2937',
     pageSubtitle: '#6B7280',
     breadcrumbSeparator: '#9CA3AF',
-    fieldLabel: '#374151', //Oxford Blue
+    fieldLabel: '#374151',
     background: '#F7F6F8',
     backgroundElement: '#ffffff',
     backgroundSelected: '#E0E1E6',
-    backgroundSecondary: '#F9FAFB', // athens Gray
+    backgroundSecondary: '#F9FAFB',
     textSecondary: '#60646C',
-    header: '#52287D',
     boldAccent: '#3E1F5C',
     accentText: '#725C8A',
-    main: '#5B2D8B',
-    overMain: '#ffffff',
     border: '#DBD4E2',
     pageSeparator: '#EDF2F7',
     cardSeparator: '#D1D5DB',
-    error: '#BA1A1A',
-    alert: '#DC2626',
-    warning: '#D97706',
     logo: '#5B2D8B',
-    errorBackground: '#FFDAD6',
-    placeholderColor: '#9E8BAC',
-    offlineBannerBackground: '#FEF3C7',
-    offlineBannerBorder: '#FDE68A',
-    offlineBannerText: '#B45309',
     chartLegendText: '#A0AEC0',
     lineChartBottomLine: '#CBD5E0',
-    tooltipBackground: '#1A202C',
-    tooltipLegend: '#E2E8F0',
-    tooltipValue: '#FFFFFF',
     accentBackground: '#F3E8FF',
-    reportValueText: '#111827', //Ebony
-    positive: '#10B981',
+    reportValueText: '#111827',
     shadowColor: '#000',
-    pfpBorderColor: '#F3F4F6', //Athens Gray
-    onlineStatus: '#22C55E',
+    pfpBorderColor: '#F3F4F6',
 
-    //contact Buttons
-    emailContactColor: '#5B2D8B',
-    phoneContactColor: '#8F6BB3',
-    whatsAppContactColor: '#34C759',
-    facebookMainColor: '#1877F2',
-    facebookTextColor: '#ffffff',
-    instagramGradient: ['#833AB4', '#E1306C', '#F56040'],
-    instagramTextColor: '#ffffff',
-
-    //treatment badges colors
+    // Treatment badges
     completeBg: '#E8F5E9', completeText: '#2E7D32',
-    inProgressBg:'#FFF3E0', inProgressText: '#E65100',
+    inProgressBg: '#FFF3E0', inProgressText: '#E65100',
     pendingBg: '#FFF8E1', pendingText: '#F57F17',
     canceledBg: '#FFEBEE', canceledText: '#C62828',
     preventitiveBg: '#E8EAF6', preventitiveText: '#283593',
@@ -68,8 +85,13 @@ export const Colors = {
     defaultBg: '#F3F4F6', defaultText: '#374151',
   },
   dark: {
+    ...BRAND_COLORS,
+    ...OFFLINE_BANNER,
+    ...TOOLTIP_COLORS,
+    ...CONTACT_BUTTONS,
+
     text: '#ffffff',
-    textNames: '#E0E7FF', //tundra
+    textNames: '#E0E7FF',
     pageTitle: '#D1D5DB',
     pageSubtitle: '#9CA3AF',
     breadcrumbSeparator: '#6B7280',
@@ -79,47 +101,22 @@ export const Colors = {
     backgroundSelected: '#2E3135',
     backgroundSecondary: '#1F1F1F',
     textSecondary: '#B0B4BA',
-    header: '#52287D',
     boldAccent: '#7f53ab',
     accentText: '#725C8A',
-    main: '#5B2D8B',
-    overMain: '#ffffff',
     border: '#3d4858',
     pageSeparator: '#262C36',
     cardSeparator: '#374151',
-    error: '#BA1A1A',
-    alert: '#DC2626',
-    warning: '#D97706',
     logo: '#ffffff',
-    errorBackground: '#FFDAD6',
-    placeholderColor: '#9E8BAC',
-    offlineBannerBackground: '#FEF3C7',
-    offlineBannerBorder: '#FDE68A',
-    offlineBannerText: '#B45309',
     chartLegendText: '#6B7280',
     lineChartBottomLine: '#9CA3AF',
-    tooltipBackground: '#1A202C',
-    tooltipLegend: '#E2E8F0',
-    tooltipValue: '#FFFFFF',
     accentBackground: '#4D2875',
     reportValueText: '#F8FAFC',
-    positive: '#10B981',
     shadowColor: '#fff',
     pfpBorderColor: '#09090c',
-    onlineStatus: '#22C55E',
-    
-    //contact Buttons
-    emailContactColor: '#5B2D8B',
-    phoneContactColor: '#8F6BB3',
-    whatsAppContactColor: '#34C759',
-    facebookMainColor: '#1877F2',
-    facebookTextColor: '#ffffff',
-    instagramGradient: ['#833AB4', '#E1306C', '#F56040'],
-    instagramTextColor: '#ffffff',
-    
-    //treatment badges colors
-    completeBg:'#2E7D32', completeText:'#E8F5E9',
-    inProgressBg:'#E65100', inProgressText: '#FFF3E0',
+
+    // Treatment badges
+    completeBg: '#2E7D32', completeText: '#E8F5E9',
+    inProgressBg: '#E65100', inProgressText: '#FFF3E0',
     pendingBg: '#F57F17', pendingText: '#FFF8E1',
     canceledBg: '#C62828', canceledText: '#FFEBEE',
     preventitiveBg: '#283593', preventitiveText: '#E8EAF6',

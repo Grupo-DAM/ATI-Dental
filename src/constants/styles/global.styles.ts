@@ -10,6 +10,7 @@ import {
     LetterSpacing,
     BottomTabInset
 } from '@/constants/theme';
+import { CardContainer } from '@/components/ui/card-container';
 
 export const createGlobalStyles = (theme: any) => StyleSheet.create({
     text: {
@@ -54,6 +55,61 @@ export const createGlobalStyles = (theme: any) => StyleSheet.create({
       shadowOpacity: 0.1,
       shadowRadius: 6,
       elevation: 4,
+    },
+    cardContainer: {
+      backgroundColor: theme.backgroundElement,
+      borderTopWidth: Border.width.regular,
+      borderBottomWidth: Border.width.regular,
+      borderColor: theme.pageSeparator,
+    },
+    cardSpacing: {
+      marginTop: Spacing.threeHalf,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: Spacing.threeHalf,
+      paddingVertical: 15,
+      borderBottomWidth: Border.width.regular,
+      borderBottomColor: theme.pageSeparator,
+      backgroundColor: theme.backgroundSecondary,
+    },
+    cardHeaderIcon: {
+        marginRight: 10,
+    },
+    cardHeaderTitle: {
+      fontSize: 18,
+      fontWeight: FontWeight.semibold,
+      color: theme.pageTitle,
+    },
+    cardBody: {
+      padding: Spacing.threeHalf,
+    },
+    avatarRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: Spacing.two,
+    },
+    avatar: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: theme.backgroundSelected,
+    },
+    avatarActions: {
+      marginLeft: Spacing.three,
+      flex: 1,
+    },
+    avatarLabel: {
+      fontSize: 14,
+      fontWeight: FontWeight.semibold,
+      color: theme.textNames,
+      marginBottom: Spacing.two,
+    },
+    avatarButtonsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: Spacing.two,
     },
 });
 

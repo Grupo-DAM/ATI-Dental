@@ -1,97 +1,13 @@
 import { StyleSheet } from 'react-native';
-import { 
-    Spacing, 
-    FontWeight,
-    LineHeight, 
-    Border, 
-    FontSize,
-    Icon,
-    BottomTabInset
-} from '@/constants/theme';
 import { createGlobalStyles } from './global.styles';
 
 export const createStyles = (theme: any) => {
     const global = createGlobalStyles(theme);
 
   return StyleSheet.create({
-    screen: {
-        ...global.screen
-    },
+    ...global,
     scroll: {
       flex: 1,
-    },
-    scrollContent: {
-        ...global.scrollContent
-    },
-    titleSection: {
-      paddingHorizontal: 20,
-      paddingVertical: 20,
-    },
-    mainTitle: {
-      fontSize: 26,
-      fontWeight: '700',
-      color: theme.pageTitle,
-      marginBottom: 8,
-    },
-    subtitle: {
-      fontSize: 14,
-      color: theme.pageSubtitle,
-      lineHeight: 20,
-    },
-    cardContainer: {
-      backgroundColor: theme.backgroundElement,
-      borderTopWidth: 1,
-      borderBottomWidth: 1,
-      borderColor: theme.pageSeparator,
-    },
-    cardSpacing: {
-      marginTop: 20,
-    },
-    cardHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingVertical: 15,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.pageSeparator,
-      backgroundColor: theme.backgroundSecondary,
-    },
-    cardHeaderIcon: {
-      marginRight: 10,
-    },
-    cardHeaderTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.pageTitle,
-    },
-    cardBody: {
-      padding: 20,
-    },
-    avatarRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 25,
-    },
-    avatar: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      backgroundColor: theme.backgroundSelected,
-    },
-    avatarActions: {
-      marginLeft: 16,
-      flex: 1,
-    },
-    avatarLabel: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: theme.textNames,
-      marginBottom: 8,
-    },
-    avatarButtonsRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 8,
     },
     btnCambiar: {
       borderWidth: 1,
