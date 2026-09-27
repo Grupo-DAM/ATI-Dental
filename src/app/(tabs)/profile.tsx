@@ -3,7 +3,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { auth, firestore } from '@/config/firebase';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Image } from 'expo-image';

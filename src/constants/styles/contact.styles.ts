@@ -2,11 +2,8 @@ import { StyleSheet, Platform } from 'react-native';
 import { 
     Spacing, 
     FontWeight,
-    LineHeight, 
     Border, 
     FontSize,
-    Icon,
-    BottomTabInset,
     FontFamily
 } from '@/constants/theme';
 import { createGlobalStyles } from './global.styles';

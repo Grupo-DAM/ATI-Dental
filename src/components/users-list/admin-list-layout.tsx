@@ -1,5 +1,5 @@
 import React, { ReactNode, useMemo } from 'react';
-import { View, ScrollView, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { ThemedView } from '@/components/themed-view';
@@ -8,7 +8,6 @@ import { SearchFilter } from '@/components/users-list/search-filter-selector';
 import { ListPages } from '@/components/users-list/list-pages-viewer';
 import { NoResultSearch } from '@/components/users-list/no-results';
 import { AppHeader } from '@/components/app-header';
-import { Breadcrumb } from '@/components/breadcrumb';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useTheme } from '@/hooks/use-theme';
 import { createListStyles } from '@/constants/styles/users-list.styles';

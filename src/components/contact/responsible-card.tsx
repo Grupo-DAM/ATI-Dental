@@ -93,13 +93,13 @@ export function EditResponsibleCard({
   onChange,
   onClear,
   t,
-}: {
+}: Readonly<{
   resp: Responsible;
   index: number;
   onChange: (index: number, field: keyof Responsible, value: string) => void;
   onClear: (index: number) => void;
   t: (key: string) => string;
-}) {
+}>) {
   const theme = useTheme();
   const cardStyles = useMemo(() => createEditResponsibleCardStyles(theme), [theme]);
 

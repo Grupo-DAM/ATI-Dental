@@ -26,7 +26,7 @@ export function PageTitleLayout({
     modals,
     testID,
     scrollContainerStyle,
-}: PageTitleLayoutProps) {
+}: Readonly<PageTitleLayoutProps>) {
     const { t } = useTranslation();
     const theme = useTheme();
     const styles = useMemo(() => createGlobalStyles(theme), [theme]);

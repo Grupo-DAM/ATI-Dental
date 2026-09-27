@@ -14,7 +14,7 @@ export function FormField({
   autoCapitalize = 'none',
   error,
   testID,
-}: {
+}: Readonly<{
   iconName: keyof typeof Ionicons.glyphMap;
   iconColor: string;
   value: string;
@@ -24,7 +24,7 @@ export function FormField({
   autoCapitalize?: 'none' | 'sentences';
   error?: string;
   testID?: string;
-}) {
+}>) {
     const theme = useTheme();
     const fieldStyles = useMemo(() => createFormFieldStyles(theme), [theme]);
 

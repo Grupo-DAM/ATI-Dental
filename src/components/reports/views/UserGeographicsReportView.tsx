@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { KPICard } from '@/components/reports/KPICard';
 import { CountryBarChart } from '@/components/reports/country-bar-chart';
@@ -9,7 +9,7 @@ import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
 import { useUserGeographics } from '../hooks/useUserGeographics';
 import type { UserProfile } from '@/hooks/use-auth';
-import type { UserGeographicsMetrics } from '../types';
+// import type { UserGeographicsMetrics } from '../types';
 
 interface UserGeographicsReportViewProps {
   user: UserProfile | null;

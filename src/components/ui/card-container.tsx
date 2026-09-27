@@ -15,7 +15,7 @@ export function CardContainer({
     wrapperStyle,
     style,
     ...restProps
-}: CardContainerProps)  {
+}: Readonly<CardContainerProps>)  {
     const theme = useTheme();
     const styles = useMemo(() => createCardContainerStyles(theme), [theme]);
 
