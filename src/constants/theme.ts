@@ -21,6 +21,7 @@ export const Colors = {
     backgroundSecondary: '#F9FAFB', // athens Gray
     textSecondary: '#60646C',
     header: '#52287D',
+    boldAccent: '#3E1F5C',
     accentText: '#725C8A',
     main: '#5B2D8B',
     overMain: '#ffffff',
@@ -52,6 +53,10 @@ export const Colors = {
     emailContactColor: '#5B2D8B',
     phoneContactColor: '#8F6BB3',
     whatsAppContactColor: '#34C759',
+    facebookMainColor: '#1877F2',
+    facebookTextColor: '#ffffff',
+    instagramGradient: ['#833AB4', '#E1306C', '#F56040'],
+    instagramTextColor: '#ffffff',
   },
   dark: {
     text: '#ffffff',
@@ -66,6 +71,7 @@ export const Colors = {
     backgroundSecondary: '#1F1F1F',
     textSecondary: '#B0B4BA',
     header: '#52287D',
+    boldAccent: '#7f53ab',
     accentText: '#725C8A',
     main: '#5B2D8B',
     overMain: '#ffffff',
@@ -97,6 +103,10 @@ export const Colors = {
     emailContactColor: '#5B2D8B',
     phoneContactColor: '#8F6BB3',
     whatsAppContactColor: '#34C759',
+    facebookMainColor: '#1877F2',
+    facebookTextColor: '#ffffff',
+    instagramGradient: ['#833AB4', '#E1306C', '#F56040'],
+    instagramTextColor: '#ffffff',
   },
 } as const;
 

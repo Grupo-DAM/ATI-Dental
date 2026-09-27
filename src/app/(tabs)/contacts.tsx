@@ -220,7 +220,7 @@ export default function ContactsScreen() {
 
         {isOffline && (
           <View style={styles.offlineBanner}>
-            <Ionicons name="cloud-offline-outline" size={16} color="#B45309" style={{ marginRight: 6 }} />
+            <Ionicons name="cloud-offline-outline" size={16} color={theme.offlineBannerText} style={{ marginRight: 6 }} />
             <Text style={styles.offlineText}>{t('contacts.offlineMode')}</Text>
           </View>
         )}
@@ -256,10 +256,10 @@ export default function ContactsScreen() {
         </View>
 
         {/* Section 2: Contacto Directo */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
+        <View style={[styles.sectionContainer, styles.directContactSection]}>
+          <View style={[styles.sectionHeader, styles.directContactHeader]}>
             <Ionicons name="chatbubbles" size={20} color={Colors.light.main} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>{t('contacts.directContact')}</Text>
+            <Text style={styles.directContactTitle}>{t('contacts.directContact')}</Text>
           </View>
           <Text style={styles.directContactSubtitle}>
             {t('contacts.directContactSubtitle')}
@@ -278,6 +278,7 @@ export default function ContactsScreen() {
             <Text style={styles.sectionTitle}>{t('contacts.socialActivity')}</Text>
           </View>
 
+          <View style={styles.responsiblesList}>
           {/* Instagram Subfeed */}
           <View style={styles.socialSubfeed}>
             <TouchableOpacity
@@ -285,20 +286,22 @@ export default function ContactsScreen() {
               onPress={() => handleSocialLinkPress('instagram')}
             >
               <LinearGradient
-                colors={['#833AB4', '#E1306C', '#F56040']}
+                colors={theme.instagramGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.socialChannelHeader}
               >
-                <Ionicons name="logo-instagram" size={22} color="#FFFFFF" style={styles.socialIcon} />
+                <Ionicons name="logo-instagram" size={22} color={theme.instagramTextColor} style={styles.socialIcon} />
                 <View>
-                  <Text style={[styles.socialName, { color: '#FFFFFF' }]}>Instagram</Text>
-                  <Text style={[styles.socialTag, { color: '#FFFFFF' }]}>@ati_dental</Text>
+                  <Text style={[styles.socialName, styles.instagramHeaderText]}>Instagram</Text>
+                  <Text style={[styles.socialTag, styles.instagramHeaderText]}>@ati_dental</Text>
                 </View>
               </LinearGradient>
             </TouchableOpacity>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.instagramScroll}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} 
+              contentContainerStyle = {styles.instagramScroll}
+            >
               {instagramPosts.map((post) => (
                 <TouchableOpacity
                   key={post.id}
@@ -322,12 +325,12 @@ export default function ContactsScreen() {
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => handleSocialLinkPress('facebook')}
-              style={styles.socialChannelHeader}
+              style={[styles.socialChannelHeader, styles.facebookHeader]}
             >
-              <Ionicons name="logo-facebook" size={22} color="#1877F2" style={styles.socialIcon} />
+              <Ionicons name="logo-facebook" size={22} color={theme.facebookTextColor} style={styles.socialIcon} />
               <View>
-                <Text style={styles.socialName}>Facebook</Text>
-                <Text style={styles.socialTag}>/ATIDentalOficial</Text>
+                <Text style={[styles.socialName, styles.facebookHeaderText]}>Facebook</Text>
+                <Text style={[styles.socialTag, styles.facebookHeaderText]}>/ATIDentalOficial</Text>
               </View>
             </TouchableOpacity>
 
@@ -344,17 +347,18 @@ export default function ContactsScreen() {
                   <Text style={styles.facebookText}>{post.content}</Text>
                   <View style={styles.facebookActions}>
                     <TouchableOpacity activeOpacity={0.6} style={styles.facebookActionButton}>
-                      <Ionicons name="thumbs-up-outline" size={16} color="#65676B" style={{ marginRight: 6 }} />
+                      <Ionicons name="thumbs-up-outline" size={16} color={theme.textSecondary} style={{ marginRight: 6 }} />
                       <Text style={styles.facebookActionText}>Me gusta</Text>
                     </TouchableOpacity>
                     <TouchableOpacity activeOpacity={0.6} style={styles.facebookActionButton}>
-                      <Ionicons name="chatbubble-outline" size={16} color="#65676B" style={{ marginRight: 6 }} />
+                      <Ionicons name="chatbubble-outline" size={16} color={theme.textSecondary} style={{ marginRight: 6 }} />
                       <Text style={styles.facebookActionText}>Comentar</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
               ))}
             </View>
+          </View>
           </View>
         </View>
       </ScrollView>

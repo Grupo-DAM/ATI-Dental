@@ -55,18 +55,25 @@ export const createStyles = (theme:any) => {
         fontFamily: FontFamily.regular,
         fontWeight: FontWeight.semibold,
     },
+    directContactSection: {
+        padding: Spacing.five,
+        paddingTop: Spacing.five,
+    },
+    directContactHeader: {
+        justifyContent: 'center',
+    },
     sectionContainer: {
-        backgroundColor: theme.backgroundSecondary,
+        backgroundColor: theme.backgroundElement,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: theme.pageSeparator,
         borderRadius: Border.radius.regular,
-        marginHorizontal: Spacing.three,
         marginBottom: Spacing.three,
-        padding: Spacing.three,
+        paddingTop: Spacing.three,
     },
     sectionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginHorizontal: Spacing.four,
         marginBottom: Spacing.three,
     },
     sectionIcon: {
@@ -81,6 +88,12 @@ export const createStyles = (theme:any) => {
     responsiblesList: {
         gap: 12,
     },
+    directContactTitle: {
+        fontSize: FontSize.h3,
+        fontWeight: FontWeight.bold,
+        color: theme.boldAccent,
+        fontFamily: FontFamily.regular,
+    },
     directContactSubtitle: {
         fontSize: 12,
         color: theme.textNames,
@@ -94,14 +107,19 @@ export const createStyles = (theme:any) => {
     },
     socialSubfeed: {
         marginTop: Spacing.two,
-        marginBottom: Spacing.three,
+        marginHorizontal: Spacing.quarter,
+        paddingBottom: Spacing.three,
+        ...global.shadow,
+        borderRadius: Border.radius.regular,
+        backgroundColor: theme.backgroundElement,
     },
     socialChannelHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 12,
         padding: 12,
-        borderRadius: Border.radius.regular,
+        borderTopLeftRadius: Border.radius.regular,
+        borderTopRightRadius: Border.radius.regular,
     },
     socialIcon: {
         marginRight: 10,
@@ -117,16 +135,20 @@ export const createStyles = (theme:any) => {
         color: theme.pageSubtitle,
         fontFamily: FontFamily.regular,
     },
+    instagramHeaderText: {
+        color: theme.instagramTextColor
+    },
     instagramScroll: {
         flexDirection: 'row',
+        gap: Spacing.three,
+        paddingHorizontal: Spacing.four,
     },
     instagramCard: {
         width: 200,
         backgroundColor: theme.backgroundElement,
         borderRadius: Border.radius.regular,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
-        marginRight: 12,
+        borderColor: theme.cardSeparator,
         overflow: 'hidden',
     },
     instagramImage: {
@@ -154,14 +176,21 @@ export const createStyles = (theme:any) => {
         color: theme.breadcrumbSeparator,
         fontFamily: FontFamily.regular,
     },
+    facebookHeader: {
+        backgroundColor: theme.facebookMainColor
+    },
+    facebookHeaderText: {
+        color: theme.facebookTextColor
+    },
     facebookList: {
+        paddingHorizontal:Spacing.three,
         gap: 12,
     },
     facebookCard: {
-        backgroundColor: theme.backgroundElement,
+        backgroundColor: theme.backgroundSecondary,
         borderRadius: Border.radius.regular,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderLeftWidth: Border.width.bold,
+        borderColor: theme.facebookMainColor,
         padding: 12,
     },
     facebookCardHeader: {
@@ -196,7 +225,7 @@ export const createStyles = (theme:any) => {
     facebookActions: {
         flexDirection: 'row',
         borderTopWidth: 1,
-        borderTopColor: '#F0F2F5',
+        borderTopColor: theme.pageSeparator,
         paddingTop: Spacing.two,
     },
     facebookActionButton: {
@@ -209,7 +238,7 @@ export const createStyles = (theme:any) => {
     facebookActionText: {
         fontSize: 12,
         fontWeight: FontWeight.semibold,
-        color: '#65676B',
+        color: theme.textSecondary,
         fontFamily: FontFamily.regular,
     },
 })};
@@ -219,18 +248,9 @@ export const createResponsibleCardStyles = (theme: any) => {
   card: {
     flexDirection: 'row',
     backgroundColor: theme.backgroundElement,
-    borderTopWidth: 4,
-    borderTopColor: theme.main,
-    borderRadius: 12,
     padding: Spacing.three,
     gap: Spacing.three,
-    shadowColor: theme.shadowColor,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
     alignSelf: 'stretch',
-    marginBottom: 12,
   },
   avatarContainer: {
     width: 96,
@@ -252,7 +272,7 @@ export const createResponsibleCardStyles = (theme: any) => {
     right: 0,
     bottom: 0,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: theme.overMain,
   },
   contentContainer: {
     flex: 1,
@@ -267,7 +287,7 @@ export const createResponsibleCardStyles = (theme: any) => {
   role: {
     fontSize: 14,
     fontWeight: FontWeight.semibold,
-    color: '#3E1F5C', // Grape
+    color: theme.boldAccent, // Grape
     fontFamily: FontFamily.regular,
     marginTop: 2,
   },

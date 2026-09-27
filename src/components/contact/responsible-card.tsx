@@ -47,7 +47,7 @@ export function ResponsibleCard({
   const theme = useTheme();
   const styles = useMemo(() => createResponsibleCardStyles(theme), [theme]);
   return (
-    <View style={styles.card}>
+    <CardContainer cardStyle={styles.card}>
       <View style={styles.avatarContainer}>
         <Image source={imageUrl} style={styles.avatar} contentFit="cover" />
         <View
@@ -83,7 +83,7 @@ export function ResponsibleCard({
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </CardContainer>
   );
 }
 
