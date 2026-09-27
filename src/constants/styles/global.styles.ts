@@ -10,7 +10,6 @@ import {
     LetterSpacing,
     BottomTabInset
 } from '@/constants/theme';
-import { CardContainer } from '@/components/ui/card-container';
 
 export const createGlobalStyles = (theme: any) => StyleSheet.create({
     text: {
