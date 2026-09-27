@@ -21,11 +21,30 @@ export const createGlobalStyles = (theme: any) => StyleSheet.create({
       flex: Spacing.quarter,
       backgroundColor: theme.background,
     },
-    scrollContent: {
-      paddingBottom: BottomTabInset + 20,
+    scrollView: {
+      flex: Spacing.quarter,
     },
-    title: {
-
+    scrollContent: {
+      padding: Spacing.threeHalf,
+      paddingBottom: BottomTabInset + 40,
+    },
+    titleSection: {
+      gap: Spacing.oneHalf || 6,
+      marginBottom: Spacing.threeHalf,
+    },
+    mainTitle: {
+      fontSize: FontSize.h2,
+      fontWeight: FontWeight.bold,
+      color: theme.pageTitle,
+      fontFamily: FontFamily.regular || 'System',
+      lineHeight: LineHeight.pageTitle,
+    },
+    subtitle: {
+      fontSize: FontSize.h5,
+      fontWeight: FontWeight.regular,
+      color: theme.pageSubtitle,
+      fontFamily: FontFamily.regular || 'System',
+      lineHeight: LineHeight.pageSubtitle,
     },
     shadow: {
       shadowColor: theme.shadowColor,

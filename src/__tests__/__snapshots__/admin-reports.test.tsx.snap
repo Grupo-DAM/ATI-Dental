@@ -59,15 +59,10 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
   </View>
   <RCTScrollView
     contentContainerStyle={
-      [
-        {
-          "paddingHorizontal": 20,
-          "paddingTop": 20,
-        },
-        {
-          "paddingBottom": 90,
-        },
-      ]
+      {
+        "padding": 20,
+        "paddingBottom": 90,
+      }
     }
     showsVerticalScrollIndicator={false}
     style={
@@ -80,9 +75,8 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
       <View
         style={
           {
-            "alignSelf": "center",
-            "maxWidth": 800,
-            "width": "100%",
+            "gap": 6,
+            "marginBottom": 20,
           }
         }
       >
@@ -92,8 +86,8 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               "color": "#1F2937",
               "fontFamily": "Open Sans",
               "fontSize": 24,
-              "fontWeight": "800",
-              "marginBottom": 6,
+              "fontWeight": "700",
+              "lineHeight": 32,
             }
           }
         >
@@ -105,32 +99,332 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               "color": "#6B7280",
               "fontFamily": "Open Sans",
               "fontSize": 14,
+              "fontWeight": "400",
               "lineHeight": 20,
-              "marginBottom": 20,
             }
           }
         >
           Consulte y exporte reportes de usuarios, pacientes, citas, y actvidad del sistema
         </Text>
+      </View>
+      <View
+        style={
+          {
+            "marginBottom": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#374151",
+              "fontFamily": "Open Sans",
+              "fontSize": 14,
+              "fontWeight": "600",
+              "marginBottom": 6,
+            }
+          }
+        >
+          Tipo de reporte
+        </Text>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
+              "borderRadius": 8,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "opacity": 1,
+              "paddingHorizontal": 14,
+              "paddingVertical": 12,
+            }
+          }
+          testID="report-type-select"
+        >
+          <Text
+            numberOfLines={1}
+            style={
+              {
+                "color": "#4A4A4A",
+                "flex": 1,
+                "fontFamily": "Open Sans",
+                "fontSize": 14,
+              }
+            }
+          >
+            Visualizar tiempo de uso por usuario
+          </Text>
+          <Text
+            color="#6B7280"
+            name="chevron-down"
+            size={18}
+          >
+            chevron-down
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+            "marginBottom": 20,
+          }
+        }
+        testID="kpi-cards-container"
+      >
         <View
           style={
             {
-              "marginBottom": 20,
+              "backgroundColor": "#5B2D8B",
+              "borderRadius": 12,
+              "elevation": 2,
+              "flex": 1,
+              "paddingTop": 8,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.05,
+              "shadowRadius": 2,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#ffffff",
+                "borderRadius": 12,
+                "flex": 1,
+                "flexDirection": "row",
+                "gap": 10,
+                "padding": 12,
+              }
+            }
+            testID="kpi-total-access"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#F3E8FF",
+                  "borderRadius": 22,
+                  "height": 44,
+                  "justifyContent": "center",
+                  "width": 44,
+                }
+              }
+            >
+              <Text
+                color="#5B2D8B"
+                name="log-in-outline"
+                size={24}
+              >
+                log-in-outline
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "flex": 1,
+                }
+              }
+            >
+              <Text
+                style={
+                  {
+                    "color": "#9CA3AF",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 10,
+                    "fontWeight": "400",
+                    "letterSpacing": 0.4,
+                    "marginBottom": 2,
+                  }
+                }
+              >
+                TOTAL ACCESOS (HOY)
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#111827",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 14,
+                    "fontWeight": "700",
+                  }
+                }
+                testID="kpi-total-access-val"
+              >
+                0
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#5B2D8B",
+              "borderRadius": 12,
+              "elevation": 2,
+              "flex": 1,
+              "paddingTop": 8,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.05,
+              "shadowRadius": 2,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#ffffff",
+                "borderRadius": 12,
+                "flex": 1,
+                "flexDirection": "row",
+                "gap": 10,
+                "padding": 12,
+              }
+            }
+            testID="kpi-active-users"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#F3E8FF",
+                  "borderRadius": 22,
+                  "height": 44,
+                  "justifyContent": "center",
+                  "width": 44,
+                }
+              }
+            >
+              <Text
+                color="#5B2D8B"
+                name="people"
+                size={24}
+              >
+                people
+              </Text>
+            </View>
+            <View
+              style={
+                {
+                  "flex": 1,
+                }
+              }
+            >
+              <Text
+                style={
+                  {
+                    "color": "#9CA3AF",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 10,
+                    "fontWeight": "400",
+                    "letterSpacing": 0.4,
+                    "marginBottom": 2,
+                  }
+                }
+              >
+                USUARIOS ACTIVOS
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#111827",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 14,
+                    "fontWeight": "700",
+                  }
+                }
+                testID="kpi-active-users-val"
+              >
+                0
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "backgroundColor": "#ffffff",
+            "borderColor": "#D1D5DB",
+            "borderRadius": 12,
+            "borderWidth": 1,
+            "elevation": 2,
+            "marginBottom": 20,
+            "padding": 16,
+            "shadowColor": "#000",
+            "shadowOffset": {
+              "height": 2,
+              "width": 0,
+            },
+            "shadowOpacity": 0.04,
+            "shadowRadius": 4,
+          }
+        }
+        testID="chart-card"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginBottom": 12,
             }
           }
         >
           <Text
             style={
               {
-                "color": "#374151",
+                "color": "#5B2D8B",
                 "fontFamily": "Open Sans",
-                "fontSize": 14,
-                "fontWeight": "600",
-                "marginBottom": 6,
+                "fontSize": 16,
+                "fontWeight": "700",
               }
             }
+            testID="chart-title"
           >
-            Tipo de reporte
+            Tiempo de Uso Diario
           </Text>
           <View
             accessibilityState={
@@ -163,538 +457,238 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#ffffff",
+                "backgroundColor": "#F9FAFB",
                 "borderColor": "#D1D5DB",
-                "borderRadius": 8,
+                "borderRadius": 6,
                 "borderWidth": 1,
                 "flexDirection": "row",
-                "justifyContent": "space-between",
                 "opacity": 1,
-                "paddingHorizontal": 14,
-                "paddingVertical": 12,
+                "paddingHorizontal": 8,
+                "paddingVertical": 4,
               }
             }
-            testID="report-type-select"
+            testID="period-filter-btn"
           >
             <Text
-              numberOfLines={1}
               style={
                 {
-                  "color": "#4A4A4A",
-                  "flex": 1,
+                  "color": "#6B7280",
                   "fontFamily": "Open Sans",
-                  "fontSize": 14,
+                  "fontSize": 12,
+                  "fontWeight": "500",
                 }
               }
             >
-              Visualizar tiempo de uso por usuario
+              Últimos 30 días
             </Text>
             <Text
               color="#6B7280"
-              name="chevron-down"
-              size={18}
+              name="filter"
+              size={14}
+              style={
+                {
+                  "marginLeft": 4,
+                }
+              }
             >
-              chevron-down
+              filter
             </Text>
           </View>
         </View>
         <View
           style={
             {
-              "flexDirection": "row",
-              "gap": 12,
-              "marginBottom": 20,
+              "alignItems": "center",
+              "height": 200,
+              "justifyContent": "center",
+              "paddingHorizontal": 24,
             }
           }
-          testID="kpi-cards-container"
+          testID="chart-empty-state"
         >
           <View
             style={
               {
-                "backgroundColor": "#5B2D8B",
-                "borderRadius": 12,
-                "elevation": 2,
-                "flex": 1,
-                "paddingTop": 8,
-                "shadowColor": "#000",
-                "shadowOffset": {
-                  "height": 1,
-                  "width": 0,
-                },
-                "shadowOpacity": 0.05,
-                "shadowRadius": 2,
+                "alignItems": "center",
+                "backgroundColor": "#F9FAFB",
+                "borderColor": "#E2E8F0",
+                "borderRadius": 32,
+                "borderWidth": 1,
+                "height": 64,
+                "justifyContent": "center",
+                "marginBottom": 12,
+                "width": 64,
               }
             }
           >
-            <View
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#ffffff",
-                  "borderRadius": 12,
-                  "flex": 1,
-                  "flexDirection": "row",
-                  "gap": 10,
-                  "padding": 12,
-                }
-              }
-              testID="kpi-total-access"
+            <Text
+              color="#A0AEC0"
+              name="analytics-outline"
+              size={36}
             >
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#F3E8FF",
-                    "borderRadius": 22,
-                    "height": 44,
-                    "justifyContent": "center",
-                    "width": 44,
-                  }
-                }
-              >
-                <Text
-                  color="#5B2D8B"
-                  name="log-in-outline"
-                  size={24}
-                >
-                  log-in-outline
-                </Text>
-              </View>
-              <View
-                style={
-                  {
-                    "flex": 1,
-                  }
-                }
-              >
-                <Text
-                  style={
-                    {
-                      "color": "#9CA3AF",
-                      "fontFamily": "Open Sans",
-                      "fontSize": 10,
-                      "fontWeight": "400",
-                      "letterSpacing": 0.4,
-                      "marginBottom": 2,
-                    }
-                  }
-                >
-                  TOTAL ACCESOS (HOY)
-                </Text>
-                <Text
-                  style={
-                    {
-                      "color": "#111827",
-                      "fontFamily": "Open Sans",
-                      "fontSize": 14,
-                      "fontWeight": "700",
-                    }
-                  }
-                  testID="kpi-total-access-val"
-                >
-                  0
-                </Text>
-              </View>
-            </View>
+              analytics-outline
+            </Text>
           </View>
-          <View
+          <Text
             style={
               {
-                "backgroundColor": "#5B2D8B",
-                "borderRadius": 12,
-                "elevation": 2,
-                "flex": 1,
-                "paddingTop": 8,
-                "shadowColor": "#000",
-                "shadowOffset": {
-                  "height": 1,
-                  "width": 0,
-                },
-                "shadowOpacity": 0.05,
-                "shadowRadius": 2,
+                "color": "#9CA3AF",
+                "fontFamily": "Open Sans",
+                "fontSize": 14,
+                "lineHeight": 20,
+                "textAlign": "center",
               }
             }
           >
-            <View
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#ffffff",
-                  "borderRadius": 12,
-                  "flex": 1,
-                  "flexDirection": "row",
-                  "gap": 10,
-                  "padding": 12,
-                }
-              }
-              testID="kpi-active-users"
-            >
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "backgroundColor": "#F3E8FF",
-                    "borderRadius": 22,
-                    "height": 44,
-                    "justifyContent": "center",
-                    "width": 44,
-                  }
-                }
-              >
-                <Text
-                  color="#5B2D8B"
-                  name="people"
-                  size={24}
-                >
-                  people
-                </Text>
-              </View>
-              <View
-                style={
-                  {
-                    "flex": 1,
-                  }
-                }
-              >
-                <Text
-                  style={
-                    {
-                      "color": "#9CA3AF",
-                      "fontFamily": "Open Sans",
-                      "fontSize": 10,
-                      "fontWeight": "400",
-                      "letterSpacing": 0.4,
-                      "marginBottom": 2,
-                    }
-                  }
-                >
-                  USUARIOS ACTIVOS
-                </Text>
-                <Text
-                  style={
-                    {
-                      "color": "#111827",
-                      "fontFamily": "Open Sans",
-                      "fontSize": 14,
-                      "fontWeight": "700",
-                    }
-                  }
-                  testID="kpi-active-users-val"
-                >
-                  0
-                </Text>
-              </View>
-            </View>
-          </View>
+            No hay registros de tiempo de uso en este rango de fechas
+          </Text>
         </View>
+      </View>
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "gap": 12,
+            "justifyContent": "flex-end",
+            "marginBottom": 20,
+          }
+        }
+      >
         <View
+          accessibilityLabel="Imprimir"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
           style={
             {
+              "alignItems": "center",
               "backgroundColor": "#ffffff",
               "borderColor": "#D1D5DB",
-              "borderRadius": 12,
+              "borderRadius": 8,
               "borderWidth": 1,
-              "elevation": 2,
-              "marginBottom": 20,
-              "padding": 16,
+              "elevation": 1,
+              "height": 38,
+              "justifyContent": "center",
+              "opacity": 1,
               "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.05,
+              "shadowRadius": 2,
+              "width": 44,
+            }
+          }
+          testID="print-btn"
+        >
+          <Text
+            color="#374151"
+            name="print-outline"
+            size={20}
+          >
+            print-outline
+          </Text>
+        </View>
+        <View
+          accessibilityLabel="Exportar PDF"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "#5B2D8B",
+              "borderRadius": 8,
+              "elevation": 2,
+              "flexDirection": "row",
+              "height": 38,
+              "justifyContent": "center",
+              "opacity": 1,
+              "paddingHorizontal": 16,
+              "shadowColor": "#5B2D8B",
               "shadowOffset": {
                 "height": 2,
                 "width": 0,
               },
-              "shadowOpacity": 0.04,
-              "shadowRadius": 4,
+              "shadowOpacity": 0.2,
+              "shadowRadius": 3,
             }
           }
-          testID="chart-card"
+          testID="export-pdf-btn"
         >
-          <View
+          <Text
+            color="#ffffff"
+            name="document-text"
+            size={16}
             style={
               {
-                "alignItems": "center",
-                "flexDirection": "row",
-                "justifyContent": "space-between",
-                "marginBottom": 12,
+                "marginRight": 4,
               }
             }
           >
-            <Text
-              style={
-                {
-                  "color": "#5B2D8B",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 16,
-                  "fontWeight": "700",
-                }
-              }
-              testID="chart-title"
-            >
-              Tiempo de Uso Diario
-            </Text>
-            <View
-              accessibilityState={
-                {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
-                }
-              }
-              accessibilityValue={
-                {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                }
-              }
-              accessible={true}
-              collapsable={false}
-              focusable={true}
-              onClick={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#F9FAFB",
-                  "borderColor": "#D1D5DB",
-                  "borderRadius": 6,
-                  "borderWidth": 1,
-                  "flexDirection": "row",
-                  "opacity": 1,
-                  "paddingHorizontal": 8,
-                  "paddingVertical": 4,
-                }
-              }
-              testID="period-filter-btn"
-            >
-              <Text
-                style={
-                  {
-                    "color": "#6B7280",
-                    "fontFamily": "Open Sans",
-                    "fontSize": 12,
-                    "fontWeight": "500",
-                  }
-                }
-              >
-                Últimos 30 días
-              </Text>
-              <Text
-                color="#6B7280"
-                name="filter"
-                size={14}
-                style={
-                  {
-                    "marginLeft": 4,
-                  }
-                }
-              >
-                filter
-              </Text>
-            </View>
-          </View>
-          <View
+            document-text
+          </Text>
+          <Text
             style={
               {
-                "alignItems": "center",
-                "height": 200,
-                "justifyContent": "center",
-                "paddingHorizontal": 24,
+                "color": "#ffffff",
+                "fontSize": 13,
+                "fontWeight": "700",
+                "letterSpacing": 0.5,
               }
             }
-            testID="chart-empty-state"
           >
-            <View
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#F9FAFB",
-                  "borderColor": "#E2E8F0",
-                  "borderRadius": 32,
-                  "borderWidth": 1,
-                  "height": 64,
-                  "justifyContent": "center",
-                  "marginBottom": 12,
-                  "width": 64,
-                }
-              }
-            >
-              <Text
-                color="#A0AEC0"
-                name="analytics-outline"
-                size={36}
-              >
-                analytics-outline
-              </Text>
-            </View>
-            <Text
-              style={
-                {
-                  "color": "#9CA3AF",
-                  "fontFamily": "Open Sans",
-                  "fontSize": 14,
-                  "lineHeight": 20,
-                  "textAlign": "center",
-                }
-              }
-            >
-              No hay registros de tiempo de uso en este rango de fechas
-            </Text>
-          </View>
-        </View>
-        <View
-          style={
-            {
-              "flexDirection": "row",
-              "gap": 12,
-              "justifyContent": "flex-end",
-              "marginBottom": 20,
-            }
-          }
-        >
-          <View
-            accessibilityLabel="Imprimir"
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
-            style={
-              {
-                "alignItems": "center",
-                "backgroundColor": "#ffffff",
-                "borderColor": "#D1D5DB",
-                "borderRadius": 8,
-                "borderWidth": 1,
-                "elevation": 1,
-                "height": 38,
-                "justifyContent": "center",
-                "opacity": 1,
-                "shadowColor": "#000",
-                "shadowOffset": {
-                  "height": 1,
-                  "width": 0,
-                },
-                "shadowOpacity": 0.05,
-                "shadowRadius": 2,
-                "width": 44,
-              }
-            }
-            testID="print-btn"
-          >
-            <Text
-              color="#374151"
-              name="print-outline"
-              size={20}
-            >
-              print-outline
-            </Text>
-          </View>
-          <View
-            accessibilityLabel="Exportar PDF"
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
-            style={
-              {
-                "alignItems": "center",
-                "backgroundColor": "#5B2D8B",
-                "borderRadius": 8,
-                "elevation": 2,
-                "flexDirection": "row",
-                "height": 38,
-                "justifyContent": "center",
-                "opacity": 1,
-                "paddingHorizontal": 16,
-                "shadowColor": "#5B2D8B",
-                "shadowOffset": {
-                  "height": 2,
-                  "width": 0,
-                },
-                "shadowOpacity": 0.2,
-                "shadowRadius": 3,
-              }
-            }
-            testID="export-pdf-btn"
-          >
-            <Text
-              color="#ffffff"
-              name="document-text"
-              size={16}
-              style={
-                {
-                  "marginRight": 4,
-                }
-              }
-            >
-              document-text
-            </Text>
-            <Text
-              style={
-                {
-                  "color": "#ffffff",
-                  "fontSize": 13,
-                  "fontWeight": "700",
-                  "letterSpacing": 0.5,
-                }
-              }
-            >
-              PDF
-            </Text>
-          </View>
+            PDF
+          </Text>
         </View>
       </View>
     </View>
