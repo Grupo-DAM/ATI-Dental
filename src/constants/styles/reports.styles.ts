@@ -1,6 +1,6 @@
 // Hoja de estilos
 import { StyleSheet } from 'react-native';
-import { MaxContentWidth, BottomTabInset } from '@/constants/theme';
+import { MaxContentWidth, BottomTabInset, Spacing } from '@/constants/theme';
 
 export const createReportsStyles = (theme:any) => StyleSheet.create({
   screen: {
@@ -21,6 +21,7 @@ export const createReportsStyles = (theme:any) => StyleSheet.create({
     maxWidth: MaxContentWidth,
     width: '100%',
     alignSelf: 'center',
+    paddingHorizontal: Spacing.threeHalf,
   },
   screenTitle: {
     fontSize: 24,

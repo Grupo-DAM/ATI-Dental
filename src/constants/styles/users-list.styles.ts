@@ -4,7 +4,7 @@ import { FontFamily, Spacing, FontWeight } from '@/constants/theme';
 
 export const createListStyles = (theme: any) => StyleSheet.create({
   scrollContent: {
-    flexGrow: Spacing.quarter || 1,
+    paddingBottom: Spacing.none,
   },
   container: {
     flex: Spacing.quarter || 1,

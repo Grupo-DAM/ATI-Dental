@@ -12,6 +12,7 @@ import { Breadcrumb } from '@/components/breadcrumb';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useTheme } from '@/hooks/use-theme';
 import { createListStyles } from '@/constants/styles/users-list.styles';
+import { PageTitleLayout } from '../page-title-layout';
 
 interface AdminListLayoutProps {
   titleKey: string;
@@ -79,53 +80,49 @@ export function AdminListLayout({
 
   // 3. Renderizado Principal
   return (
-    <ThemedView testID={testID} style={styles.container}>
-      <AppHeader />
-      <Breadcrumb parent={t(parentBreadcrumbKey)} current={t(currentBreadcrumbKey)} />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* Sección Título */}
-        <View style={styles.titleSection}>
-          <ThemedText style={styles.mainTitle}>{t(titleKey)}</ThemedText>
-          <ThemedText style={styles.subtitle}>{t(subtitleKey)}</ThemedText>
-        </View>
+    <PageTitleLayout
+      titleKey={titleKey}
+      subtitleKey={subtitleKey}
+      parentBreadcrumbKey={parentBreadcrumbKey}
+      currentBreadcrumbKey={currentBreadcrumbKey}
+      testID={testID}
+      scrollContainerStyle={styles.scrollContent}
+    >
+      {/* Banner Sin Conexión */}
+      {!netInfo.isConnected && (
+        <OfflineBanner isRetrying={isRetrying} onRetry={handleRetryConnection} />
+      )}
 
-        {/* Banner Sin Conexión */}
-        {!netInfo.isConnected && (
-          <OfflineBanner isRetrying={isRetrying} onRetry={handleRetryConnection} />
-        )}
+      {/* Buscador / Filtro */}
+      <SearchFilter
+        general={isGeneralFilter}
+        value={filter.searchQuery}
+        onChangeText={(text) => {
+          filter.setSearchQuery(text);
+          filter.setCurrentPage(1);
+        }}
+        onChangeOrder={filter.setOrderBy}
+        activeRoles={filter.selectedRoles}
+        activeStatus={filter.selectedStatus}
+        onToggleFilter={filter.handleToggleFilter}
+      />
 
-        {/* Buscador / Filtro */}
-        <SearchFilter
-          general={isGeneralFilter}
-          value={filter.searchQuery}
-          onChangeText={(text) => {
-            filter.setSearchQuery(text);
-            filter.setCurrentPage(1);
-          }}
-          onChangeOrder={filter.setOrderBy}
-          activeRoles={filter.selectedRoles}
-          activeStatus={filter.selectedStatus}
-          onToggleFilter={filter.handleToggleFilter}
-        />
+      {/* Lista o Sin Resultados */}
+      {filter.filteredData.length === 0 ? (
+        <NoResultSearch general={isGeneralFilter} />
+      ) : (
+        children
+      )}
 
-        {/* Lista o Sin Resultados */}
-        {filter.filteredData.length === 0 ? (
-          <NoResultSearch general={isGeneralFilter} />
-        ) : (
-          children
-        )}
-
-        {/* Paginador */}
-        <ListPages
-          total={filter.filteredData.length}
-          maxRange={filter.maxRange}
-          minRange={filter.minRange}
-          currentPage={filter.currentPage}
-          totalPages={filter.totalPages}
-          onPageChange={filter.setCurrentPage}
-        />
-      </ScrollView>
-    </ThemedView>
+      {/* Paginador */}
+      <ListPages
+        total={filter.filteredData.length}
+        maxRange={filter.maxRange}
+        minRange={filter.minRange}
+        currentPage={filter.currentPage}
+        totalPages={filter.totalPages}
+        onPageChange={filter.setCurrentPage}
+      />
+    </PageTitleLayout>
   );
 }

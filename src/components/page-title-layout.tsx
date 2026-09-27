@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme'
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, StyleProp, ViewStyle } from 'react-native';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { createGlobalStyles } from '@/constants/styles/global.styles';
@@ -14,6 +14,7 @@ interface PageTitleLayoutProps {
     children?: React.ReactNode;
     modals?: React.ReactNode;
     testID?: string;
+    scrollContainerStyle?: StyleProp<ViewStyle>
 }
 
 export function PageTitleLayout({
@@ -24,6 +25,7 @@ export function PageTitleLayout({
     children,
     modals,
     testID,
+    scrollContainerStyle,
 }: PageTitleLayoutProps) {
     const { t } = useTranslation();
     const theme = useTheme();
@@ -37,8 +39,7 @@ export function PageTitleLayout({
             />
 
             <ScrollView 
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[styles.scrollContent, scrollContainerStyle]}
                 showsVerticalScrollIndicator={false}    
             >
                     

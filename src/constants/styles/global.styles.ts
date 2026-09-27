@@ -25,12 +25,14 @@ export const createGlobalStyles = (theme: any) => StyleSheet.create({
       flex: Spacing.quarter,
     },
     scrollContent: {
-      padding: Spacing.threeHalf,
+      flexGrow: Spacing.quarter || 1,
       paddingBottom: BottomTabInset + 40,
     },
     titleSection: {
       gap: Spacing.oneHalf || 6,
-      marginBottom: Spacing.threeHalf,
+      padding: Spacing.threeHalf,
+      paddingBottom: Spacing.none,
+      marginBottom: Spacing.threeHalf
     },
     mainTitle: {
       fontSize: FontSize.h2,

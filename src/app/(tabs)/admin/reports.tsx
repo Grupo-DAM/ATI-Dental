@@ -161,106 +161,107 @@ export default function AdminReportsScreen() {
         </>
       }
     >
+      <View style={styles.innerContainer}>
+        {/* Filtro selector de reporte */}
+        <View style={styles.filterSection}>
+          <Text style={styles.fieldLabel}>{t('reports.reportTypeLabel')}</Text>
+          <TouchableOpacity
+            style={styles.selectButton}
+            onPress={() => setShowReportTypeModal(true)}
+            activeOpacity={0.7}
+            testID="report-type-select"
+          >
+            <Text style={styles.selectButtonText} numberOfLines={1}>
+              {reportTypeLabel}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={theme.pageSubtitle} />
+          </TouchableOpacity>
+        </View>
 
-      {/* Filtro selector de reporte */}
-      <View style={styles.filterSection}>
-        <Text style={styles.fieldLabel}>{t('reports.reportTypeLabel')}</Text>
-        <TouchableOpacity
-          style={styles.selectButton}
-          onPress={() => setShowReportTypeModal(true)}
-          activeOpacity={0.7}
-          testID="report-type-select"
-        >
-          <Text style={styles.selectButtonText} numberOfLines={1}>
-            {reportTypeLabel}
-          </Text>
-          <Ionicons name="chevron-down" size={18} color={theme.pageSubtitle} />
-        </TouchableOpacity>
-      </View>
+        {/* VISTAS MODULARES */}
+        {(selectedReportType === 'usage' || selectedReportType === 'access') && (
+          <UsageReportView
+            reportType={selectedReportType}
+            sessions={sessions}
+            loading={loading}
+            queryError={queryError}
+            totalAccessToday={totalAccessToday}
+            displayedActiveUsers={displayedActiveUsers}
+            selectedPeriod={selectedPeriod}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
 
-      {/* VISTAS MODULARES */}
-      {(selectedReportType === 'usage' || selectedReportType === 'access') && (
-        <UsageReportView
-          reportType={selectedReportType}
-          sessions={sessions}
-          loading={loading}
-          queryError={queryError}
-          totalAccessToday={totalAccessToday}
-          displayedActiveUsers={displayedActiveUsers}
-          selectedPeriod={selectedPeriod}
-          periodLabel={periodLabel}
-          onOpenPeriodModal={() => setShowPeriodModal(true)}
-        />
-      )}
+        {selectedReportType === 'demographics' && (
+          <UserDemographicsReportView
+            user={user}
+            authLoading={authLoading}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
 
-      {selectedReportType === 'demographics' && (
-        <UserDemographicsReportView
-          user={user}
-          authLoading={authLoading}
-          periodLabel={periodLabel}
-          onOpenPeriodModal={() => setShowPeriodModal(true)}
-        />
-      )}
+        {selectedReportType === 'geographics' && (
+          <UserGeographicsReportView
+            user={user}
+            authLoading={authLoading}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
 
-      {selectedReportType === 'geographics' && (
-        <UserGeographicsReportView
-          user={user}
-          authLoading={authLoading}
-          periodLabel={periodLabel}
-          onOpenPeriodModal={() => setShowPeriodModal(true)}
-        />
-      )}
+        {selectedReportType === 'dau_mau' && (
+          <DauMauReportView
+            user={user}
+            authLoading={authLoading}
+            systemActiveUsersCount={displayedActiveUsers}
+            activeUsersCount={activeUsersCount}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
 
-      {selectedReportType === 'dau_mau' && (
-        <DauMauReportView
-          user={user}
-          authLoading={authLoading}
-          systemActiveUsersCount={displayedActiveUsers}
-          activeUsersCount={activeUsersCount}
-          periodLabel={periodLabel}
-          onOpenPeriodModal={() => setShowPeriodModal(true)}
-        />
-      )}
+        {selectedReportType === 'crash_rate' && (
+          <CrashRateReportView
+            user={user}
+            authLoading={authLoading}
+            selectedPeriod={selectedPeriod}
+            totalSessionsCount={sessions.length}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
 
-      {selectedReportType === 'crash_rate' && (
-        <CrashRateReportView
-          user={user}
-          authLoading={authLoading}
-          selectedPeriod={selectedPeriod}
-          totalSessionsCount={sessions.length}
-          periodLabel={periodLabel}
-          onOpenPeriodModal={() => setShowPeriodModal(true)}
-        />
-      )}
+        {selectedReportType === 'retention_rate' && (
+          <RetentionReportView
+            user={user}
+            authLoading={authLoading}
+          />
+        )}
 
-      {selectedReportType === 'retention_rate' && (
-        <RetentionReportView
-          user={user}
-          authLoading={authLoading}
-        />
-      )}
-
-      {/* Acciones de pie: Imprimir y PDF */}
-      <View style={styles.actionsRow}>
-        <TouchableOpacity
-          style={styles.printBtn}
-          onPress={handlePrint}
-          activeOpacity={0.7}
-          testID="print-btn"
-          accessibilityLabel={t('reports.print')}
-        >
-          <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.pdfBtn}
-          onPress={handleExportPdf}
-          activeOpacity={0.7}
-          testID="export-pdf-btn"
-          accessibilityLabel={t('reports.exportPdf')}
-        >
-          <Ionicons name="document-text" size={16} color={theme.overMain} style={styles.pdfBtnIcon} />
-          <Text style={styles.pdfBtnText}>PDF</Text>
-        </TouchableOpacity>
+        {/* Acciones de pie: Imprimir y PDF */}
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            style={styles.printBtn}
+            onPress={handlePrint}
+            activeOpacity={0.7}
+            testID="print-btn"
+            accessibilityLabel={t('reports.print')}
+          >
+            <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.pdfBtn}
+            onPress={handleExportPdf}
+            activeOpacity={0.7}
+            testID="export-pdf-btn"
+            accessibilityLabel={t('reports.exportPdf')}
+          >
+            <Ionicons name="document-text" size={16} color={theme.overMain} style={styles.pdfBtnIcon} />
+            <Text style={styles.pdfBtnText}>PDF</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </PageTitleLayout>
   );
