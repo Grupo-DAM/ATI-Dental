@@ -15,8 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useNetInfo } from '@react-native-community/netinfo';
 
-import { AppHeader } from '@/components/app-header';
-import { Breadcrumb } from '@/components/breadcrumb';
+import { PageTitleLayout } from '@/components/page-title-layout';
 import { ContactButton } from '@/components/contact/contact-button';
 import { ResponsibleCard } from '@/components/contact/responsible-card';
 import { Config } from '@/constants/config';
@@ -206,162 +205,153 @@ export default function ContactsScreen() {
   const isOffline = !netInfo.isConnected && isFromCache;
 
   return (
-    <View style={styles.container}>
-      <AppHeader />
-      <Breadcrumb parent={t('tabs.home')} current={t('contacts.title')} />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Title Section */}
-        <View style={styles.titleSection}>
-          <Text style={styles.mainTitle}>{t('contacts.title')}</Text>
-          <Text style={styles.subtitle}>
-            {t('contacts.subtitle')}
-          </Text>
+    <PageTitleLayout
+      titleKey='contacts.title'
+      subtitleKey='contacts.subtitle'
+      parentBreadcrumbKey='tabs.home'
+      currentBreadcrumbKey='contacts.title'
+    >
+      {isOffline && (
+        <View style={styles.offlineBanner}>
+          <Ionicons name="cloud-offline-outline" size={16} color={theme.offlineBannerText} style={{ marginRight: 6 }} />
+          <Text style={styles.offlineText}>{t('contacts.offlineMode')}</Text>
         </View>
+      )}
 
-        {isOffline && (
-          <View style={styles.offlineBanner}>
-            <Ionicons name="cloud-offline-outline" size={16} color={theme.offlineBannerText} style={{ marginRight: 6 }} />
-            <Text style={styles.offlineText}>{t('contacts.offlineMode')}</Text>
+      {/* Section 1: Responsables */}
+      <View style={styles.sectionContainer}>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="card" size={20} color={Colors.light.main} style={styles.sectionIcon} />
+          <Text style={styles.sectionTitle}>{t('contacts.responsibles')}</Text>
+        </View>
+        
+        {loading ? (
+          <ActivityIndicator size="large" color={Colors.light.main} style={{ padding: 20 }} />
+        ) : (
+          <View style={styles.responsiblesList}>
+            {responsibles.map((resp) => (
+              <ResponsibleCard
+                key={resp.id}
+                title={resp.title}
+                name={resp.name}
+                role={resp.role}
+                description={resp.description}
+                imageUrl={typeof resp.imageUrl === 'string' ? { uri: resp.imageUrl } : resp.imageUrl}
+                isOnline={resp.isOnline}
+                onEmailPress={() => handleEmailPress(resp.email)}
+                onPhonePress={() => handlePhonePress(resp.phone)}
+              />
+            ))}
           </View>
         )}
+      </View>
 
+      {/* Section 2: Contacto Directo */}
+      <View style={[styles.sectionContainer, styles.directContactSection]}>
+        <View style={[styles.sectionHeader, styles.directContactHeader]}>
+          <Ionicons name="chatbubbles" size={20} color={Colors.light.main} style={styles.sectionIcon} />
+          <Text style={styles.directContactTitle}>{t('contacts.directContact')}</Text>
+        </View>
+        <Text style={styles.directContactSubtitle}>
+          {t('contacts.directContactSubtitle')}
+        </Text>
+        <View style={styles.buttonGroup}>
+          <ContactButton type="email" onPress={() => handleEmailPress()} />
+          <ContactButton type="phone" onPress={() => handlePhonePress()} />
+          <ContactButton type="whatsapp" onPress={handleWhatsAppPress} />
+        </View>
+      </View>
 
-
-        {/* Section 1: Responsables */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="card" size={20} color={Colors.light.main} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>{t('contacts.responsibles')}</Text>
-          </View>
-          
-          {loading ? (
-            <ActivityIndicator size="large" color={Colors.light.main} style={{ padding: 20 }} />
-          ) : (
-            <View style={styles.responsiblesList}>
-              {responsibles.map((resp) => (
-                <ResponsibleCard
-                  key={resp.id}
-                  title={resp.title}
-                  name={resp.name}
-                  role={resp.role}
-                  description={resp.description}
-                  imageUrl={typeof resp.imageUrl === 'string' ? { uri: resp.imageUrl } : resp.imageUrl}
-                  isOnline={resp.isOnline}
-                  onEmailPress={() => handleEmailPress(resp.email)}
-                  onPhonePress={() => handlePhonePress(resp.phone)}
-                />
-              ))}
-            </View>
-          )}
+      {/* Section 3: Redes Sociales */}
+      <View style={styles.sectionContainer}>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="share-social" size={20} color={Colors.light.main} style={styles.sectionIcon} />
+          <Text style={styles.sectionTitle}>{t('contacts.socialActivity')}</Text>
         </View>
 
-        {/* Section 2: Contacto Directo */}
-        <View style={[styles.sectionContainer, styles.directContactSection]}>
-          <View style={[styles.sectionHeader, styles.directContactHeader]}>
-            <Ionicons name="chatbubbles" size={20} color={Colors.light.main} style={styles.sectionIcon} />
-            <Text style={styles.directContactTitle}>{t('contacts.directContact')}</Text>
-          </View>
-          <Text style={styles.directContactSubtitle}>
-            {t('contacts.directContactSubtitle')}
-          </Text>
-          <View style={styles.buttonGroup}>
-            <ContactButton type="email" onPress={() => handleEmailPress()} />
-            <ContactButton type="phone" onPress={() => handlePhonePress()} />
-            <ContactButton type="whatsapp" onPress={handleWhatsAppPress} />
-          </View>
-        </View>
-
-        {/* Section 3: Redes Sociales */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="share-social" size={20} color={Colors.light.main} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>{t('contacts.socialActivity')}</Text>
-          </View>
-
-          <View style={styles.responsiblesList}>
-          {/* Instagram Subfeed */}
-          <View style={styles.socialSubfeed}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => handleSocialLinkPress('instagram')}
+        <View style={styles.responsiblesList}>
+        {/* Instagram Subfeed */}
+        <View style={styles.socialSubfeed}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => handleSocialLinkPress('instagram')}
+          >
+            <LinearGradient
+              colors={theme.instagramGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.socialChannelHeader}
             >
-              <LinearGradient
-                colors={theme.instagramGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.socialChannelHeader}
-              >
-                <Ionicons name="logo-instagram" size={22} color={theme.instagramTextColor} style={styles.socialIcon} />
-                <View>
-                  <Text style={[styles.socialName, styles.instagramHeaderText]}>Instagram</Text>
-                  <Text style={[styles.socialTag, styles.instagramHeaderText]}>@ati_dental</Text>
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} 
-              contentContainerStyle = {styles.instagramScroll}
-            >
-              {instagramPosts.map((post) => (
-                <TouchableOpacity
-                  key={post.id}
-                  activeOpacity={0.9}
-                  onPress={() => handleSocialLinkPress('instagram')}
-                  style={styles.instagramCard}
-                >
-                  <Image source={{ uri: post.imageUrl }} style={styles.instagramImage} contentFit="cover" />
-                  <View style={styles.instagramContent}>
-                    <Text numberOfLines={1} style={styles.instagramPostTitle}>{post.title}</Text>
-                    <Text numberOfLines={2} style={styles.instagramPostDesc}>{post.description}</Text>
-                    <Text style={styles.instagramPostTime}>{post.time}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          {/* Facebook Subfeed */}
-          <View style={styles.socialSubfeed}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => handleSocialLinkPress('facebook')}
-              style={[styles.socialChannelHeader, styles.facebookHeader]}
-            >
-              <Ionicons name="logo-facebook" size={22} color={theme.facebookTextColor} style={styles.socialIcon} />
+              <Ionicons name="logo-instagram" size={22} color={theme.instagramTextColor} style={styles.socialIcon} />
               <View>
-                <Text style={[styles.socialName, styles.facebookHeaderText]}>Facebook</Text>
-                <Text style={[styles.socialTag, styles.facebookHeaderText]}>/ATIDentalOficial</Text>
+                <Text style={[styles.socialName, styles.instagramHeaderText]}>Instagram</Text>
+                <Text style={[styles.socialTag, styles.instagramHeaderText]}>@ati_dental</Text>
               </View>
-            </TouchableOpacity>
+            </LinearGradient>
+          </TouchableOpacity>
 
-            <View style={styles.facebookList}>
-              {facebookPosts.map((post) => (
-                <View key={post.id} style={styles.facebookCard}>
-                  <View style={styles.facebookCardHeader}>
-                    <Image source={avatarFallback} style={styles.facebookAvatar} contentFit="cover" />
-                    <View>
-                      <Text style={styles.facebookAuthor}>{post.author}</Text>
-                      <Text style={styles.facebookTime}>{post.time}</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.facebookText}>{post.content}</Text>
-                  <View style={styles.facebookActions}>
-                    <TouchableOpacity activeOpacity={0.6} style={styles.facebookActionButton}>
-                      <Ionicons name="thumbs-up-outline" size={16} color={theme.textSecondary} style={{ marginRight: 6 }} />
-                      <Text style={styles.facebookActionText}>Me gusta</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity activeOpacity={0.6} style={styles.facebookActionButton}>
-                      <Ionicons name="chatbubble-outline" size={16} color={theme.textSecondary} style={{ marginRight: 6 }} />
-                      <Text style={styles.facebookActionText}>Comentar</Text>
-                    </TouchableOpacity>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} 
+            contentContainerStyle = {styles.instagramScroll}
+          >
+            {instagramPosts.map((post) => (
+              <TouchableOpacity
+                key={post.id}
+                activeOpacity={0.9}
+                onPress={() => handleSocialLinkPress('instagram')}
+                style={styles.instagramCard}
+              >
+                <Image source={{ uri: post.imageUrl }} style={styles.instagramImage} contentFit="cover" />
+                <View style={styles.instagramContent}>
+                  <Text numberOfLines={1} style={styles.instagramPostTitle}>{post.title}</Text>
+                  <Text numberOfLines={2} style={styles.instagramPostDesc}>{post.description}</Text>
+                  <Text style={styles.instagramPostTime}>{post.time}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Facebook Subfeed */}
+        <View style={styles.socialSubfeed}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => handleSocialLinkPress('facebook')}
+            style={[styles.socialChannelHeader, styles.facebookHeader]}
+          >
+            <Ionicons name="logo-facebook" size={22} color={theme.facebookTextColor} style={styles.socialIcon} />
+            <View>
+              <Text style={[styles.socialName, styles.facebookHeaderText]}>Facebook</Text>
+              <Text style={[styles.socialTag, styles.facebookHeaderText]}>/ATIDentalOficial</Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.facebookList}>
+            {facebookPosts.map((post) => (
+              <View key={post.id} style={styles.facebookCard}>
+                <View style={styles.facebookCardHeader}>
+                  <Image source={avatarFallback} style={styles.facebookAvatar} contentFit="cover" />
+                  <View>
+                    <Text style={styles.facebookAuthor}>{post.author}</Text>
+                    <Text style={styles.facebookTime}>{post.time}</Text>
                   </View>
                 </View>
-              ))}
-            </View>
-          </View>
+                <Text style={styles.facebookText}>{post.content}</Text>
+                <View style={styles.facebookActions}>
+                  <TouchableOpacity activeOpacity={0.6} style={styles.facebookActionButton}>
+                    <Ionicons name="thumbs-up-outline" size={16} color={theme.textSecondary} style={{ marginRight: 6 }} />
+                    <Text style={styles.facebookActionText}>Me gusta</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity activeOpacity={0.6} style={styles.facebookActionButton}>
+                    <Ionicons name="chatbubble-outline" size={16} color={theme.textSecondary} style={{ marginRight: 6 }} />
+                    <Text style={styles.facebookActionText}>Comentar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
           </View>
         </View>
-      </ScrollView>
-    </View>
+        </View>
+      </View>
+    </PageTitleLayout>
   );
 }
