@@ -15,6 +15,7 @@ jest.mock('@/hooks/use-theme', () => ({
     text: '#141018',
     textSecondary: '#60646C',
     header: '#52287D',
+    instagramGradient: ['#833AB4', '#E1306C', '#F56040'],
   }),
 }));
 
