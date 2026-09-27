@@ -456,3 +456,435 @@ export const createBreadCrumbStyle = (theme: any) => {
         },
     });
 };
+
+export const createActionBarStyles = (theme: any) => {
+    return StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+        },
+        actions: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+        },
+        clinicalHistoryButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 12,
+            height: 40,
+            borderRadius: 8,
+            backgroundColor: theme.accentBackground,
+            gap: 6,
+        },
+        clinicalHistoryText: {
+            fontSize: 13,
+            fontWeight: '600',
+            color: Colors.light.main,
+            fontFamily: 'Open Sans',
+        },
+        iconButton: {
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+            backgroundColor: theme.accentBackground,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+    });
+};
+
+export const createBadgeStyles = (theme: any) => {
+    return StyleSheet.create({
+        row: {
+            flexDirection: 'row',
+            gap: 12,
+            paddingHorizontal: 16,
+            marginBottom: 16,
+        },
+        badge: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.backgroundElement,
+            borderRadius: 10,
+            paddingVertical: 12,
+            paddingHorizontal: 14,
+            borderWidth: 1,
+            borderColor: theme.cardSeparator,
+        },
+        badgeLabel: {
+            fontSize: 11,
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+            fontWeight: '500',
+        },
+        badgeValue: {
+            fontSize: 13,
+            color: theme.pageTitle,
+            fontFamily: 'Open Sans',
+            fontWeight: '600',
+        },
+    });
+};
+
+export const createPatientFileSectionStyles = (theme: any) => {
+    return StyleSheet.create({
+      container: {
+        backgroundColor: theme.backgroundElement,
+        borderRadius: 10,
+        marginHorizontal: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: theme.cardSeparator,
+        overflow: 'hidden',
+      },
+      header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+      },
+      headerLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+      },
+      headerTitle: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: theme.pageTitle,
+        fontFamily: 'Open Sans',
+      },
+      content: {
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+      },
+    });
+};
+
+export const createDetailStyles = (theme: any) => {
+    return StyleSheet.create({
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingVertical: 8,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.pfpBorderColor,
+        },
+        label: {
+            fontSize: 13,
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+            fontWeight: '500',
+        },
+        value: {
+            fontSize: 13,
+            color: theme.pageTitle,
+            fontFamily: 'Open Sans',
+            fontWeight: '600',
+            maxWidth: '55%',
+            textAlign: 'right',
+        },
+    });
+};
+
+export const createTreatmentStyles = (theme: any) => {
+    return StyleSheet.create({
+        card: {
+            flexDirection: 'row',
+            marginBottom: 4,
+        },
+        timelineColumn: {
+            alignItems: 'center',
+            width: 32,
+            marginRight: 12,
+        },
+        iconDot: {
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            marginTop: 4,
+        },
+        line: {
+            flex: 1,
+            width: 2,
+            backgroundColor: theme.cardSeparator,
+            marginTop: 4,
+        },
+        content: {
+            flex: 1,
+            backgroundColor: theme.backgroundElement,
+            borderRadius: 10,
+            padding: 14,
+            borderWidth: 1,
+            borderColor: theme.cardSeparator,
+            marginBottom: 12,
+        },
+        dateRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 6,
+            flexWrap: 'wrap',
+            gap: 4,
+        },
+        date: {
+            fontSize: 12,
+            color: Colors.light.main,
+            fontFamily: 'Open Sans',
+            fontWeight: '600',
+        },
+        statusBadge: {
+            paddingHorizontal: 8,
+            paddingVertical: 3,
+            borderRadius: 10,
+        },
+        statusText: {
+            fontSize: 10,
+            fontWeight: '600',
+            fontFamily: 'Open Sans',
+        },
+        name: {
+            fontSize: 15,
+            fontWeight: '700',
+            color: theme.pageTitle,
+            fontFamily: 'Open Sans',
+            marginBottom: 4,
+        },
+        notes: {
+            fontSize: 12,
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+            lineHeight: 17,
+            marginBottom: 8,
+        },
+        metaRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+            gap: 4,
+        },
+        metaText: {
+            fontSize: 12,
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+        },
+        metaDot: {
+            fontSize: 12,
+            color: theme.cardSeparator,
+        },
+        actionsRow: {
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            gap: 16,
+            borderTopWidth: 1,
+            borderTopColor: theme.pfpBorderColor,
+            paddingTop: 10,
+        },
+        actionButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+        },
+        actionText: {
+            fontSize: 12,
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+        },
+    });
+};
+
+export const createTreatmentSectionStyles = (theme: any) =>  {
+    return StyleSheet.create({
+        container: {
+            marginHorizontal: 16,
+            marginBottom: 16,
+            backgroundColor: theme.backgroundElement,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: theme.cardSeparator,
+            padding: 16,
+        },
+        header: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 16,
+        },
+        title: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: theme.pageTitle,
+            fontFamily: 'Open Sans',
+        },
+        addButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+            backgroundColor: theme.accentBackground,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 8,
+        },
+        addButtonText: {
+            fontSize: 13,
+            color: Colors.light.main,
+            fontWeight: '600',
+            fontFamily: 'Open Sans',
+        },
+        emptyState: {
+            alignItems: 'center',
+            paddingVertical: 32,
+        },
+        emptyTitle: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+            marginTop: 12,
+        },
+        emptyMessage: {
+            fontSize: 12,
+            color: theme.placeholderColor,
+            fontFamily: 'Open Sans',
+            textAlign: 'center',
+            marginTop: 4,
+            paddingHorizontal: 32,
+        },
+    });
+};
+
+export const createMedicalRowStyles = (theme:any) => {
+    return StyleSheet.create({
+        row: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.pfpBorderColor,
+        },
+        iconContainer: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: theme.accentBackground,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
+            marginTop: 2,
+        },
+        textContainer: {
+            flex: 1,
+        },
+        label: {
+            fontSize: 13,
+            color: theme.pageTitle,
+            fontFamily: 'Open Sans',
+            fontWeight: '600',
+            marginBottom: 2,
+        },
+        value: {
+            fontSize: 13,
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+        },
+        noteText: {
+            fontSize: 12,
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+            lineHeight: 18,
+            marginTop: 2,
+        },
+    });
+};
+
+export const createExamStyles = (theme: any) => {
+    return StyleSheet.create({
+        row: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 10,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.pfpBorderColor,
+        },
+        name: {
+            fontSize: 13,
+            color: theme.pageTitle,
+            fontFamily: 'Open Sans',
+            fontWeight: '500',
+            flex: 1,
+        },
+        date: {
+            fontSize: 12,
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+            marginLeft: 12,
+        },
+        emptyState: {
+            paddingVertical: 16,
+            alignItems: 'center',
+        },
+        emptyText: {
+            fontSize: 13,
+            color: theme.placeholderColor,
+            fontFamily: 'Open Sans',
+        },
+    });
+};
+
+export const createPatientFileStyles = (theme: any) => {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        scrollContent: {
+            paddingBottom: Platform.OS === 'ios' ? 100 : 80,
+        },
+        centerState: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 32,
+        },
+        stateTitle: {
+            fontSize: 18,
+            fontWeight: '700',
+            color: theme.pageTitle,
+            fontFamily: 'Open Sans',
+            marginTop: 16,
+            textAlign: 'center',
+        },
+        stateMessage: {
+            fontSize: 14,
+            color: theme.pageSubtitle,
+            fontFamily: 'Open Sans',
+            marginTop: 8,
+            textAlign: 'center',
+            lineHeight: 20,
+        },
+        retryButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            marginTop: 20,
+            backgroundColor: theme.main,
+            paddingHorizontal: 24,
+            paddingVertical: 12,
+            borderRadius: 10,
+        },
+        retryText: {
+            fontSize: 14,
+            color: theme.overMain,
+            fontWeight: '600',
+            fontFamily: 'Open Sans',
+        },
+    });
+};

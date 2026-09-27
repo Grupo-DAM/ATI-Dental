@@ -57,6 +57,15 @@ export const Colors = {
     facebookTextColor: '#ffffff',
     instagramGradient: ['#833AB4', '#E1306C', '#F56040'],
     instagramTextColor: '#ffffff',
+
+    //treatment badges colors
+    completeBg: '#E8F5E9', completeText: '#2E7D32',
+    inProgressBg:'#FFF3E0', inProgressText: '#E65100',
+    pendingBg: '#FFF8E1', pendingText: '#F57F17',
+    canceledBg: '#FFEBEE', canceledText: '#C62828',
+    preventitiveBg: '#E8EAF6', preventitiveText: '#283593',
+    categoryBg: '#F3E8FF', categoryText: '#6B21A8',
+    defaultBg: '#F3F4F6', defaultText: '#374151',
   },
   dark: {
     text: '#ffffff',
@@ -107,6 +116,15 @@ export const Colors = {
     facebookTextColor: '#ffffff',
     instagramGradient: ['#833AB4', '#E1306C', '#F56040'],
     instagramTextColor: '#ffffff',
+    
+    //treatment badges colors
+    completeBg:'#2E7D32', completeText:'#E8F5E9',
+    inProgressBg:'#E65100', inProgressText: '#FFF3E0',
+    pendingBg: '#F57F17', pendingText: '#FFF8E1',
+    canceledBg: '#C62828', canceledText: '#FFEBEE',
+    preventitiveBg: '#283593', preventitiveText: '#E8EAF6',
+    categoryBg: '#6B21A8', categoryText: '#F3E8FF',
+    defaultBg: '#374151', defaultText: '#F3F4F6',
   },
 } as const;
 

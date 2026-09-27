@@ -426,13 +426,13 @@ exports[`PatientFileScreen matches snapshot 1`] = `
           source={1}
           style={
             {
-              "backgroundColor": "#F3F4F6",
-              "borderColor": "rgba(255,255,255,0.3)",
-              "borderRadius": 36,
+              "backgroundColor": "#ffffff",
+              "borderColor": "#ffffff",
+              "borderRadius": 32,
               "borderWidth": 2,
-              "height": 72,
+              "height": 64,
               "marginRight": 14,
-              "width": 72,
+              "width": 64,
             }
           }
         />
@@ -446,9 +446,9 @@ exports[`PatientFileScreen matches snapshot 1`] = `
           <Text
             style={
               {
-                "color": "#FFFFFF",
+                "color": "#ffffff",
                 "fontFamily": "Open Sans",
-                "fontSize": 18,
+                "fontSize": 17,
                 "fontWeight": "700",
                 "marginBottom": 2,
               }
@@ -459,7 +459,7 @@ exports[`PatientFileScreen matches snapshot 1`] = `
           <Text
             style={
               {
-                "color": "rgba(255,255,255,0.85)",
+                "color": "#ffffff",
                 "fontFamily": "Open Sans",
                 "fontSize": 12,
                 "marginBottom": 6,
@@ -486,7 +486,7 @@ exports[`PatientFileScreen matches snapshot 1`] = `
               style={
                 [
                   {
-                    "color": "#FFFFFF",
+                    "color": "#ffffff",
                     "fontSize": 14,
                   },
                   {
@@ -506,7 +506,7 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             <Text
               style={
                 {
-                  "color": "rgba(255,255,255,0.9)",
+                  "color": "#ffffff",
                   "fontFamily": "Open Sans",
                   "fontSize": 13,
                 }
@@ -532,8 +532,8 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             [
               {
                 "alignItems": "center",
-                "backgroundColor": "#FFFFFF",
-                "borderColor": "#E5E7EB",
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
                 "borderRadius": 10,
                 "borderWidth": 1,
                 "flex": 1,
@@ -613,8 +613,8 @@ exports[`PatientFileScreen matches snapshot 1`] = `
             [
               {
                 "alignItems": "center",
-                "backgroundColor": "#FFFFFF",
-                "borderColor": "#E5E7EB",
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
                 "borderRadius": 10,
                 "borderWidth": 1,
                 "flex": 1,
@@ -694,8 +694,8 @@ exports[`PatientFileScreen matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#FFFFFF",
-              "borderColor": "#E5E7EB",
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
               "borderRadius": 10,
               "borderWidth": 1,
               "marginBottom": 12,
@@ -822,8 +822,8 @@ exports[`PatientFileScreen matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#FFFFFF",
-              "borderColor": "#E5E7EB",
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
               "borderRadius": 10,
               "borderWidth": 1,
               "marginBottom": 12,
@@ -950,8 +950,8 @@ exports[`PatientFileScreen matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#FFFFFF",
-              "borderColor": "#E5E7EB",
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
               "borderRadius": 10,
               "borderWidth": 1,
               "marginBottom": 12,
@@ -1078,8 +1078,8 @@ exports[`PatientFileScreen matches snapshot 1`] = `
         style={
           [
             {
-              "backgroundColor": "#FFFFFF",
-              "borderColor": "#E5E7EB",
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
               "borderRadius": 10,
               "borderWidth": 1,
               "marginBottom": 16,
@@ -1245,7 +1245,7 @@ exports[`PatientFileScreen matches snapshot 1`] = `
                   style={
                     [
                       {
-                        "color": "#FFF",
+                        "color": "#ffffff",
                         "fontSize": 14,
                       },
                       undefined,
@@ -1265,7 +1265,7 @@ exports[`PatientFileScreen matches snapshot 1`] = `
                 style={
                   [
                     {
-                      "backgroundColor": "#E5E7EB",
+                      "backgroundColor": "#D1D5DB",
                       "flex": 1,
                       "marginTop": 4,
                       "width": 2,
@@ -1281,8 +1281,8 @@ exports[`PatientFileScreen matches snapshot 1`] = `
               style={
                 [
                   {
-                    "backgroundColor": "#FFFFFF",
-                    "borderColor": "#E5E7EB",
+                    "backgroundColor": "#ffffff",
+                    "borderColor": "#D1D5DB",
                     "borderRadius": 10,
                     "borderWidth": 1,
                     "flex": 1,
