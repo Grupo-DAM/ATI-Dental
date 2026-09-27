@@ -61,6 +61,7 @@ jest.mock('@/hooks/use-theme', () => ({
     breadcrumbSeparator: '#999',
     chartLegendText: '#aaa',
     error: '#c00',
+    shadowColor: '#000'
   }),
 }));
 

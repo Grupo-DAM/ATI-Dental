@@ -7,13 +7,12 @@ import { useTranslation } from 'react-i18next';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { ModalOptionList, ModalOptionProp } from '@/components/ui/modal-option-list';
-import { BottomTabInset } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { isAdminUser } from '@/constants/user-roles';
 
 // 1. Estilos, Tipos y Utilidades
-import { createReportsStyles } from '@/components/reports/styles/reports.styles';
+import { createReportsStyles } from '@/constants/styles/reports.styles';
 import { PeriodOption, ReportType } from '@/components/reports/types';
 import { generatePeriodOptions } from '@/components/reports/utils/reports-utils';
 
@@ -43,7 +42,7 @@ export type { SessionRecord, RetentionDataPoint, RetentionMetricsDoc } from '@/c
 export default function AdminReportsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const styles = createReportsStyles(theme);
+  const styles = useMemo(() => createReportsStyles(theme), [theme]);
   const { user, loading: authLoading } = useAuth();
 
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>(30);
@@ -142,7 +141,7 @@ export default function AdminReportsScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: BottomTabInset + 40 }]}
+        contentContainerStyle={[styles.scrollContent, styles.scrollContentPadding]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.innerContainer}>
@@ -245,7 +244,7 @@ export default function AdminReportsScreen() {
               testID="export-pdf-btn"
               accessibilityLabel={t('reports.exportPdf')}
             >
-              <Ionicons name="document-text" size={16} color={theme.overMain} style={{ marginRight: 4 }} />
+              <Ionicons name="document-text" size={16} color={theme.overMain} style={styles.pdfBtnIcon} />
               <Text style={styles.pdfBtnText}>PDF</Text>
             </TouchableOpacity>
           </View>

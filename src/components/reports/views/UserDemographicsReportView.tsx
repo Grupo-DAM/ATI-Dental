@@ -5,7 +5,7 @@ import { KPICard } from '@/components/reports/KPICard';
 import { AgeBarChart } from '@/components/reports/age-bar-chart';
 import { GenderDonutChart } from '@/components/reports/gender-donut-chart';
 import { useTheme } from '@/hooks/use-theme';
-import { createReportsStyles } from '../styles/reports.styles';
+import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
 import { useUserDemographics } from '../hooks/useUserDemographics';
 import type { UserProfile } from '@/hooks/use-auth';

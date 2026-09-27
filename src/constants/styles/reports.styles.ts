@@ -1,6 +1,6 @@
 // Hoja de estilos
 import { StyleSheet } from 'react-native';
-import { MaxContentWidth } from '@/constants/theme';
+import { MaxContentWidth, BottomTabInset } from '@/constants/theme';
 
 export const createReportsStyles = (theme:any) => StyleSheet.create({
   screen: {
@@ -13,6 +13,9 @@ export const createReportsStyles = (theme:any) => StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
+  },
+  scrollContentPadding: {
+    paddingBottom: BottomTabInset + 40 
   },
   innerContainer: {
     maxWidth: MaxContentWidth,
@@ -80,7 +83,7 @@ export const createReportsStyles = (theme:any) => StyleSheet.create({
     borderColor: theme.cardSeparator,
     padding: 16,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: theme.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
@@ -186,6 +189,9 @@ export const createReportsStyles = (theme:any) => StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 2,
+  },
+  pdfBtnIcon: {
+    marginRight: 4
   },
   pdfBtnText: {
     color: theme.overMain,
