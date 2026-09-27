@@ -4,7 +4,7 @@
     "slug": "ATI-Dental",
     "version": "1.4.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/ATI-dental-icon.png",
     "scheme": "atidental",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -14,9 +14,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/ATI-dental-android-icon-foreground.png",
+        "backgroundImage": "./assets/images/ATI-dental-android-icon-background.png",
+        "monochromeImage": "./assets/images/ATI-dental-android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.proyect1.ATIDental",
@@ -35,9 +35,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#52287D",
           "android": {
-            "image": "./assets/images/splash-icon.png",
+            "image": "./assets/images/ATI-dental-android-icon-foreground.png",
             "imageWidth": 76
           }
         }
