@@ -64,6 +64,15 @@ appId: com.proyect1.ATIDental
     id: "kpi-average-age"
 - assertVisible:
     id: "reports-age-bar-chart"
+
+
+- scrollUntilVisible:
+    element:
+      id: "reports-gender-donut-chart"
+    direction: DOWN
+    timeout: 15000
+    speed: 40
+
 - assertVisible:
     id: "reports-gender-donut-chart"
 

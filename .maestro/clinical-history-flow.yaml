@@ -71,3 +71,10 @@ appId: com.proyect1.ATIDental
 
 - assertVisible:
     id: "btn-add-treatment"
+
+# -----------------------------------
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"
