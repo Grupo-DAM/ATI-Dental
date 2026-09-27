@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
@@ -14,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
-import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
 import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
@@ -29,11 +27,12 @@ import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { deleteTreatment } from '@/services/treatment-service';
 import { Consultation } from '@/types/clinical-record';
+import { createClinicalHistoryStyles } from '@/constants/styles/patients.style';
 
 export default function ClinicalHistoryScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const styles = createStyles(theme);
+  const styles = useMemo(() => createClinicalHistoryStyles(theme), [theme]);
   const { user, loading: authLoading } = useAuth();
   const { patientId } = useLocalSearchParams<{ patientId?: string }>();
 
@@ -243,7 +242,7 @@ export default function ClinicalHistoryScreen() {
             activeOpacity={0.7}
             testID="btn-retry-clinical-history"
           >
-            <Ionicons name="refresh" size={18} color="#FFFFFF" />
+            <Ionicons name="refresh" size={18} color={theme.overMain}/>
             <Text style={styles.retryButtonText}>
               {t('clinicalHistory.retry', 'Reintentar')}
             </Text>
@@ -387,52 +386,3 @@ export default function ClinicalHistoryScreen() {
     </View>
   );
 }
-
-const createStyles = (theme: ReturnType<typeof useTheme>) =>
-  StyleSheet.create({
-    screen: {
-      flex: 1,
-      backgroundColor: theme.background,
-    },
-    scrollContent: {
-      paddingBottom: Platform.OS === 'ios' ? 100 : 80,
-    },
-    centerContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 32,
-    },
-    stateTitle: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: theme.pageTitle,
-      fontFamily: 'Open Sans',
-      marginTop: 16,
-      textAlign: 'center',
-    },
-    stateMessage: {
-      fontSize: 14,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-      marginTop: 8,
-      textAlign: 'center',
-      lineHeight: 20,
-    },
-    retryButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginTop: 20,
-      backgroundColor: theme.main,
-      paddingHorizontal: 22,
-      paddingVertical: 12,
-      borderRadius: 10,
-    },
-    retryButtonText: {
-      color: '#FFFFFF',
-      fontSize: 14,
-      fontWeight: '600',
-      fontFamily: 'Open Sans',
-    },
-  });
