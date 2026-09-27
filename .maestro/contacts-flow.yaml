@@ -44,6 +44,12 @@ appId: com.proyect1.ATIDental
     element: ".*(Actividad en Redes Sociales|Social Media Activity).*"
     direction: DOWN
 
+
+- scrollUntilVisible:
+    element:
+        id: "btn-contact-email"
+    direction: UP
+
 # -----------------------------------
 # Probar la pulsación del botón de Email y validar el flujo alternativo
 # Presiona el botón de contacto por Email
