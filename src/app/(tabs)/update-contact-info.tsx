@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
+import { PageTitleLayout } from '@/components/page-title-layout';
 import { EditResponsibleCard, Responsible } from '@/components/contact/responsible-card';
 import { FormField } from '@/components/contact/form-field'
 import { CardContainer } from '@/components/ui/card-container';
@@ -241,116 +242,106 @@ export default function UpdateContactInfoScreen() {
 
   // ── Form ─────────────────────────────────────────────────────────────────────
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    
+    <PageTitleLayout
+      titleKey='updateContact.title'
+      subtitleKey='updateContact.subtitle'
+      parentBreadcrumbKey='navigation.administration'
+      currentBreadcrumbKey='navigation.contact'
     >
-      <AppHeader />
-      <Breadcrumb parent={t('navigation.administration')} current={t('navigation.contact')} />
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Title */}
-        <View style={styles.titleSection}>
-          <Text style={styles.mainTitle}>{t('updateContact.title')}</Text>
-          <Text style={styles.subtitle}>{t('updateContact.subtitle')}</Text>
-        </View>
-
-        {/* ── Responsables del Sitio ── */}
-          <View style={styles.sectionHeaderRow}>
-            <Ionicons name="card" size={20} color={theme.main} />
-            <Text style={styles.sectionTitle}>{t('updateContact.responsibles')}</Text>
+      {/* ── Responsables del Sitio ── */}
+      <View style={styles.sectionHeaderRow}>
+        <Ionicons name="card" size={20} color={theme.main} />
+        <Text style={styles.sectionTitle}>{t('updateContact.responsibles')}</Text>
+      </View>
+      
+      <View style={styles.sectionContainer}>
+        {responsibles.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyText}>{t('updateContact.noResponsibles')}</Text>
           </View>
-        
-        <View style={styles.sectionContainer}>
-          {responsibles.length === 0 ? (
-            <View style={styles.emptyBox}>
-              <Text style={styles.emptyText}>{t('updateContact.noResponsibles')}</Text>
-            </View>
+        ) : (
+          responsibles.map((resp, index) => (
+            <EditResponsibleCard
+              key={resp.id}
+              resp={resp}
+              index={index}
+              onChange={handleResponsibleChange}
+              onClear={handleResponsibleClear}
+              t={t}
+            />
+          ))
+        )}
+      </View>
+
+      {/* ── Contacto Directo header ── outside the card */}
+      <View style={[styles.sectionHeaderRow, { marginTop: 8 }]}>
+        <Ionicons name="chatbubbles" size={20} color={theme.main} />
+        <Text style={styles.sectionTitle}>{t('updateContact.directContact')}</Text>
+      </View>
+
+      <CardContainer style={styles.sectionContainer} cardStyle={styles.card}>
+        <FormField
+          testID="input-email"
+          iconName="mail"
+          iconColor={theme.emailContactColor}
+          value={formData.email}
+          onChangeText={(v) => handleFieldChange('email', v)}
+          placeholder={t('updateContact.placeholderEmail')}
+          keyboardType="email-address"
+          error={errors.email}
+        />
+        <FormField
+          testID="input-telefono"
+          iconName="call"
+          iconColor={theme.phoneContactColor}
+          value={formData.telefono}
+          onChangeText={(v) => handleFieldChange('telefono', v)}
+          placeholder={t('updateContact.placeholderTelefono')}
+          keyboardType="phone-pad"
+          error={errors.telefono}
+        />
+        <FormField
+          testID="input-whatsapp"
+          iconName="logo-whatsapp"
+          iconColor={theme.whatsAppContactColor}
+          value={formData.whatsapp}
+          onChangeText={(v) => handleFieldChange('whatsapp', v)}
+          placeholder={t('updateContact.placeholderWhatsapp')}
+          error={errors.whatsapp}
+        />
+      </CardContainer>
+
+      {/* ── Action buttons OUTSIDE the card ── */}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          testID="btn-cancel"
+          style={[styles.btn, styles.btnCancel]}
+          onPress={handleCancel}
+          disabled={saving}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.btnCancelText}>{t('updateContact.cancel')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          testID="btn-save"
+          style={[styles.btn, styles.btnSave, saving && styles.btnDisabled]}
+          onPress={handleSave}
+          disabled={saving}
+          activeOpacity={0.8}
+        >
+          {saving ? (
+            <ActivityIndicator size="small" color="white" />
           ) : (
-            responsibles.map((resp, index) => (
-              <EditResponsibleCard
-                key={resp.id}
-                resp={resp}
-                index={index}
-                onChange={handleResponsibleChange}
-                onClear={handleResponsibleClear}
-                t={t}
-              />
-            ))
+            <>
+              <Ionicons name="save-outline" size={18} color="white" style={{ marginRight: 8 }} />
+              <Text style={styles.btnSaveText}>{t('updateContact.saveChanges')}</Text>
+            </>
           )}
-        </View>
-
-        {/* ── Contacto Directo header ── outside the card */}
-        <View style={[styles.sectionHeaderRow, { marginTop: 8 }]}>
-          <Ionicons name="chatbubbles" size={20} color={theme.main} />
-          <Text style={styles.sectionTitle}>{t('updateContact.directContact')}</Text>
-        </View>
-
-        <CardContainer style={styles.sectionContainer} cardStyle={styles.card}>
-          <FormField
-            testID="input-email"
-            iconName="mail"
-            iconColor={theme.emailContactColor}
-            value={formData.email}
-            onChangeText={(v) => handleFieldChange('email', v)}
-            placeholder={t('updateContact.placeholderEmail')}
-            keyboardType="email-address"
-            error={errors.email}
-          />
-          <FormField
-            testID="input-telefono"
-            iconName="call"
-            iconColor={theme.phoneContactColor}
-            value={formData.telefono}
-            onChangeText={(v) => handleFieldChange('telefono', v)}
-            placeholder={t('updateContact.placeholderTelefono')}
-            keyboardType="phone-pad"
-            error={errors.telefono}
-          />
-          <FormField
-            testID="input-whatsapp"
-            iconName="logo-whatsapp"
-            iconColor={theme.whatsAppContactColor}
-            value={formData.whatsapp}
-            onChangeText={(v) => handleFieldChange('whatsapp', v)}
-            placeholder={t('updateContact.placeholderWhatsapp')}
-            error={errors.whatsapp}
-          />
-        </CardContainer>
-
-        {/* ── Action buttons OUTSIDE the card ── */}
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            testID="btn-cancel"
-            style={[styles.btn, styles.btnCancel]}
-            onPress={handleCancel}
-            disabled={saving}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.btnCancelText}>{t('updateContact.cancel')}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            testID="btn-save"
-            style={[styles.btn, styles.btnSave, saving && styles.btnDisabled]}
-            onPress={handleSave}
-            disabled={saving}
-            activeOpacity={0.8}
-          >
-            {saving ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <>
-                <Ionicons name="save-outline" size={18} color="white" style={{ marginRight: 8 }} />
-                <Text style={styles.btnSaveText}>{t('updateContact.saveChanges')}</Text>
-              </>
-            )}
-          </TouchableOpacity>
-    </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </TouchableOpacity>
+      </View>
+    </PageTitleLayout>
   );
 }
