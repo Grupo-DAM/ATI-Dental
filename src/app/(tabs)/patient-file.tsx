@@ -86,8 +86,7 @@ function formatAntecedente(raw: string): string {
 }
 
 /** Return colour for treatment status badges */
-function getStatusColor(status: string): { bg: string; text: string } {
-  const theme = useTheme();
+function getStatusColor(status: string, theme: any): { bg: string; text: string } {
   const s = status.toLowerCase();
   if (s === 'completado') return { bg: theme.completeBg, text: theme.completeText };
   if (s === 'en progreso') return { bg: theme.inProgressBg, text: theme.inProgressText };
@@ -98,8 +97,7 @@ function getStatusColor(status: string): { bg: string; text: string } {
 }
 
 /** Resolve the category badge colour */
-function getCategoryColor(category: string): { bg: string; text: string } {
-  const theme = useTheme();
+function getCategoryColor(category: string, theme: any): { bg: string; text: string } {
   if (!category) return { bg: theme.defaultBg, text: theme.defaultText };
   return { bg: theme.categoryBg, text: theme.categoryText };
 }
@@ -247,8 +245,7 @@ function DetailRow({ label, value }: Readonly<{ label: string; value: string }>)
 }
 
 /** Determine timeline icon styles based on treatment name */
-function getTimelineIconProps(treatmentName: string) {
-  const theme =useTheme();
+function getTimelineIconProps(treatmentName: string, theme: any) {
   const name = (treatmentName || '').toLowerCase();
   if (name.includes('limpieza') || name.includes('profilaxis') || name.includes('preventivo')) {
     return { icon: 'beaker' as const, bg: theme.main, color: theme.overMain, borderColor: theme.main };
@@ -274,9 +271,9 @@ function TreatmentCard({
 }>) {
   const theme = useTheme(); 
   const treatmentStyles = useMemo(() => createTreatmentStyles(theme), [theme]);
-  const statusColor = getStatusColor(treatment.status);
-  const categoryColor = getCategoryColor(treatment.category);
-  const iconProps = getTimelineIconProps(treatment.treatmentName);
+  const statusColor = getStatusColor(treatment.status, theme);
+  const categoryColor = getCategoryColor(treatment.category, theme);
+  const iconProps = getTimelineIconProps(treatment.treatmentName, theme);
 
   return (
     <View style={treatmentStyles.card}>
