@@ -1,13 +1,14 @@
 import { Tabs } from 'expo-router';
-import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { useTheme } from '@/hooks/use-theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { createTabBarStyles } from '@/constants/styles/global.styles';
 
 export default function AppTabs() {
-    const renderTabBar = useCallback((props: any) => <CustomTabBar {...props} />, []);
+  const renderTabBar = useCallback((props: any) => <CustomTabBar {...props} />, []);
   return (
     <Tabs
       screenOptions={{
@@ -44,6 +45,7 @@ interface CustomTabBarProps {
 
 function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
   const colors = useTheme();
+  const styles = useMemo(() => createTabBarStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const activeRouteName = state.routes[state.index].name;
@@ -69,12 +71,12 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
     <View
       testID='tabBar'
       style={[
-          styles.tabBar,
-          {
-            backgroundColor: colors.backgroundElement,
-            paddingBottom: dynamicPaddingBottom,
-            borderTopColor: colors.pageSeparator,
-          }
+        styles.tabBar,
+        {
+          backgroundColor: colors.backgroundElement,
+          paddingBottom: dynamicPaddingBottom,
+          borderTopColor: colors.pageSeparator,
+        }
     ]}>
       {/* 1. HOME TAB */}
       <TouchableOpacity
@@ -171,54 +173,3 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  tabBar: {
-    flexDirection: 'row',
-    minHeight: Platform.OS === 'ios' ? 76 : 64,
-    paddingTop: 12,
-    borderTopWidth: 0.5,
-    alignItems: 'center',
-    justifyContent: 'space-around',
-  },
-  tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-  },
-  // We replaced the fixed spacer width with a layout wrapper for the floating button
-  floatingButtonContainer: {
-    width: 68,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  floatingButton: {
-    position: 'absolute',
-    // Shifts the button upward out of the tabbar boundary slightly
-    top: -50,
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
-    elevation: 8,
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    marginBottom: 4,
-  },
-  plusIcon: {
-    width: 18,
-    height: 18,
-  },
-  label: {
-    fontSize: 11,
-    fontWeight: '500',
-  },
-});

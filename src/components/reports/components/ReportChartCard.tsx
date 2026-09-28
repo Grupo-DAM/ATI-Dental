@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
-import { createReportsStyles } from '../styles/reports.styles';
+import { createReportsStyles } from '../../../constants/styles/reports.styles';
 
 interface ReportChartCardProps {
   readonly title: string;
@@ -91,4 +91,4 @@ export function ReportChartCard({
       {renderContent()}
     </View>
   );
-}
+}
