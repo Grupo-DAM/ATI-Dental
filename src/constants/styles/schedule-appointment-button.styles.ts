@@ -9,6 +9,7 @@ export const createScheduleAppointmentButtonStyles = (theme: { main: string }) =
       paddingHorizontal: 12,
       paddingVertical: 7,
       borderRadius: 8,
+      height: 44,
       gap: 6,
     },
     label: {
