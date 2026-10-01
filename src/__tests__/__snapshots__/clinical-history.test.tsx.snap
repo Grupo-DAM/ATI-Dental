@@ -942,6 +942,7 @@ exports[`ClinicalHistoryScreen coincide con el snapshot estructural 1`] = `
                 "borderRadius": 8,
                 "flexDirection": "row",
                 "gap": 6,
+                "height": 44,
                 "opacity": 1,
                 "paddingHorizontal": 12,
                 "paddingVertical": 7,
