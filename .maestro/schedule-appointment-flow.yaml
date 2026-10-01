@@ -1,0 +1,142 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+- runFlow: common/login-admin.yaml
+
+# =======================================================
+# NAVEGACIÓN: FICHA -> HISTORIA CLÍNICA -> CREAR CITA
+# El paciente queda bloqueado porque la cita sale de su ficha.
+# =======================================================
+- tapOn:
+    id: "center-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "patient-info-card"
+    timeout: 10000
+
+- tapOn:
+    id: "btn-open-clinical-history"
+
+- extendedWaitUntil:
+    visible:
+      id: "clinical-history-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "tab-consultas"
+
+- extendedWaitUntil:
+    visible:
+      id: "btn-schedule-appointment"
+    timeout: 5000
+
+- tapOn:
+    id: "btn-schedule-appointment"
+
+- extendedWaitUntil:
+    visible:
+      id: "schedule-appointment-screen"
+    timeout: 10000
+
+- assertVisible: ".*(Crear cita|Create appointment).*"
+
+# =======================================================
+# COMPLETAR LOS CAMPOS DE LA CITA
+# =======================================================
+- scrollUntilVisible:
+    element:
+      id: "appointment-type"
+    direction: UP
+    timeout: 8000
+
+- tapOn:
+    id: "appointment-type"
+- tapOn: "Consulta general"
+
+- scrollUntilVisible:
+    element:
+      id: "appointment-date"
+    direction: DOWN
+    timeout: 5000
+
+# El calendario abre el día de hoy ya seleccionado.
+- tapOn:
+    id: "appointment-date"
+
+- extendedWaitUntil:
+    visible: "(?i).*(Aceptar|OK).*"
+    timeout: 5000
+
+- tapOn: "(?i).*(Aceptar|OK).*"
+
+- tapOn:
+    id: "appointment-time"
+- eraseText: 20
+- inputText: "06:45 AM"
+- hideKeyboard
+
+- scrollUntilVisible:
+    element:
+      id: "appointment-reason"
+    direction: DOWN
+    timeout: 5000
+
+- tapOn:
+    id: "appointment-reason"
+- inputText: "Control de rutina"
+- hideKeyboard
+
+- scrollUntilVisible:
+    element:
+      id: "save-appointment-btn"
+    direction: DOWN
+    timeout: 8000
+
+# =======================================================
+# CANCELAR EL MODAL Y LUEGO CONFIRMAR
+# =======================================================
+- tapOn:
+    id: "save-appointment-btn"
+
+- extendedWaitUntil:
+    visible: ".*(¿Deseas guardar esta cita en la ficha del paciente?|Do you want to save this appointment).*"
+    timeout: 5000
+
+- tapOn:
+    id: "modal-cancel-btn"
+
+- assertNotVisible: ".*(¿Deseas guardar esta cita en la ficha del paciente?|Do you want to save this appointment).*"
+- assertVisible:
+    id: "schedule-appointment-screen"
+
+- tapOn:
+    id: "save-appointment-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "modal-confirm-btn"
+    timeout: 5000
+
+- tapOn:
+    id: "modal-confirm-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "agenda-screen"
+    timeout: 15000
+
+- assertVisible: ".*(Agenda Semanal|Weekly Agenda).*"
+- scrollUntilVisible:
+    element: "Consulta general"
+    direction: DOWN
+    timeout: 8000
+- assertVisible: "Consulta general"
+- assertVisible: "06:45"
+
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"
