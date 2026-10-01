@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { AccessDeniedView } from '@/components/access-denied-view';
 import { AppHeader } from '@/components/app-header';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
@@ -414,15 +415,10 @@ export default function AgendaScreen() {
     return (
       <ThemedView testID="agenda-screen" style={styles.container}>
         <AppHeader />
-        <View style={styles.accessDeniedContainer}>
-          <Ionicons name="lock-closed-outline" size={48} color={colors.breadcrumbSeparator} />
-          <ThemedText type="subtitle" style={styles.accessDeniedTitle}>
-            {t('agenda.accessDeniedTitle')}
-          </ThemedText>
-          <ThemedText style={styles.accessDeniedDesc}>
-            {t('agenda.accessDeniedMessage')}
-          </ThemedText>
-        </View>
+        <AccessDeniedView
+          title={t('agenda.accessDeniedTitle')}
+          message={t('agenda.accessDeniedMessage')}
+        />
       </ThemedView>
     );
   }

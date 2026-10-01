@@ -351,8 +351,8 @@
     "noResultsQuestion": "¿Nuevo paciente?",
     "registerPatient": "Registrar Paciente",
     "accessDeniedTitle": "Acceso Denegado",
-    "adminOnlyView": "No tienes permisos de administrador para acceder a esta pantalla.",
-    "adminOnlyViewAlert": "No tienes permisos de administrador para ver esta sección."
+    "odontologoOnlyView": "No tienes permisos de odontólogo para acceder al listado de pacientes.",
+    "odontologoOnlyViewAlert": "Solo el personal odontológico puede acceder a esta sección."
   },
   "admin-users": {
     "title": "Listado de Usuarios",
