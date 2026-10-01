@@ -1,4 +1,5 @@
 import NetInfo from '@react-native-community/netinfo';
+import { recordScheduledAppointment } from '@/services/clinical-record-service';
 import { firestore } from '@/config/firebase';
 import {
   AppointmentConflict,
@@ -347,6 +348,8 @@ export interface CreateAppointmentInput {
   readonly duration: string;
   readonly reason: string;
   readonly notes?: string;
+  readonly nextDate?: string;
+  readonly nextTime?: string;
 }
 
 export class AppointmentConflictError extends Error {
@@ -487,6 +490,23 @@ export async function createAppointment(input: CreateAppointmentInput): Promise<
     });
     const stored = { ...appointment, id: docRef?.id || appointment.id };
     savedAppointments.push(stored);
+    try {
+      await recordScheduledAppointment({
+        patientId: input.patientId,
+        dentistName: stored.dentistName || input.dentistName,
+        appointmentType: input.appointmentType,
+        date: stored.date,
+        time: `${stored.time} ${stored.period}`,
+        duration: input.duration,
+        reason: input.reason,
+        notes: input.notes,
+        nextDate: input.nextDate,
+        nextTime: input.nextTime,
+        appointmentId: stored.id,
+      });
+    } catch (syncError) {
+      console.warn('[agenda-service] La cita quedó en la agenda, pero no se copió a consultas:', syncError);
+    }
     return stored;
   } catch (error) {
     throw new AppointmentRequestError(readStatusCode(error), 'SAVE_FAILED');

@@ -4,6 +4,8 @@ import {
   updateConsultation,
   getConsultationsByPatientId,
   CONSULTATIONS_COLLECTION,
+  recordScheduledAppointment,
+  resolvePatientVisitDates,
 } from '@/services/clinical-record-service';
 import { firestore } from '@/config/firebase';
 import { getSessionToken } from '@/utils/secure-storage';
@@ -317,6 +319,91 @@ describe('Clinical Record Service', () => {
 
       const result = await updateConsultation('c-error', { title: 'Test' });
       expect(result).toBe(true);
+    });
+  });
+
+  describe('citas en consultas', () => {
+    it('muestra en consultas la cita guardada en la agenda', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      (getPatientById as jest.Mock).mockResolvedValueOnce(mockPatient);
+      (getTreatmentsByPatientId as jest.Mock).mockResolvedValueOnce([]);
+      (mockFirestoreInstance.get as jest.Mock)
+        .mockResolvedValueOnce({ empty: true, docs: [] })
+        .mockResolvedValueOnce({
+          empty: false,
+          docs: [{
+            id: 'cita-1',
+            data: () => ({
+              patientId: 'p-100',
+              date: '2026-10-20',
+              treatmentName: 'Control',
+              reason: 'Revisión',
+              dentistName: 'Dr. Smith',
+              durationMinutes: 30,
+              status: 'EN ESPERA',
+              notes: 'Traer estudios',
+              time: '09:30',
+              period: 'AM',
+            }),
+          }],
+        });
+
+      const res = await fetchClinicalRecord('p-100');
+      const visit = res.data?.consultations.find((item) => item.title === 'Control');
+      expect(visit?.motivo).toBe('Revisión');
+      expect(visit?.doctor).toBe('Dr. Smith');
+      expect(visit?.appointmentId).toBe('cita-1');
+    });
+  });
+
+  describe('recordScheduledAppointment', () => {
+    it('deja la cita pasada como última visita y la fecha indicada como próxima', () => {
+      const dates = resolvePatientVisitDates(
+        '2026-06-20',
+        '01/11/2026',
+        {},
+        new Date(2026, 9, 1),
+      );
+      expect(dates.lastVisit).toBe('2026-06-20');
+      expect(dates.nextAppointment).toBe('2026-11-01');
+    });
+
+    it('toma una cita futura como próxima cita', () => {
+      const dates = resolvePatientVisitDates('2026-10-15', undefined, {}, new Date(2026, 9, 1));
+      expect(dates.lastVisit).toBeUndefined();
+      expect(dates.nextAppointment).toBe('2026-10-15');
+    });
+
+    it('escribe la consulta y las fechas del paciente', async () => {
+      const expected = resolvePatientVisitDates('2026-06-20', '01/11/2026', {});
+      await recordScheduledAppointment({
+        patientId: 'p-100',
+        dentistName: 'Dr. Smith',
+        appointmentType: 'Control',
+        date: '2026-06-20',
+        time: '09:30 AM',
+        duration: '45 minutos',
+        reason: 'Control',
+        notes: 'Notas',
+        nextDate: '01/11/2026',
+        nextTime: '10:00 AM',
+        appointmentId: 'apt-1',
+      });
+
+      expect(mockFirestoreInstance.add).toHaveBeenCalledWith(expect.objectContaining({
+        patientId: 'p-100',
+        title: 'Control',
+        motivo: 'Control',
+        proximaCita: '01 Nov 2026 · 10:00 AM',
+        appointmentId: 'apt-1',
+      }));
+      expect(mockFirestoreInstance.update).toHaveBeenCalledWith(expect.objectContaining({
+        nextAppointment: '2026-11-01',
+        proxima_vista: '2026-11-01',
+        ...(expected.lastVisit
+          ? { lastVisit: expected.lastVisit, ultima_visita: expected.lastVisit }
+          : {}),
+      }));
     });
   });
 });

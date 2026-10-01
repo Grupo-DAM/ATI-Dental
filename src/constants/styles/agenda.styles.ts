@@ -38,22 +38,9 @@ export const createAgendaStyles = (theme: any) => {
             fontWeight: '700',
             color: theme.text,
         },
-        scheduleButton: {
-            flexDirection: 'row',
-            alignItems: 'center',
+        scheduleButtonSlot: {
             alignSelf: 'flex-start',
-            minHeight: 36,
             marginTop: 10,
-            marginHorizontal: 20,
-            paddingHorizontal: 12,
-            borderRadius: 8,
-            backgroundColor: theme.main,
-            gap: 6,
-        },
-        scheduleButtonText: {
-            color: theme.overMain,
-            fontSize: 13,
-            fontWeight: '600',
         },
         dentistName: {
             fontSize: 12,

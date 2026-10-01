@@ -27,6 +27,7 @@ import {
 } from '@/services/agenda-service';
 import { getAllowedStatusTransitions } from '@/utils/appointment-schedule';
 import { NotificationToast } from '@/components/notification-toast';
+import { ScheduleAppointmentButton } from '@/components/schedule-appointment-button';
 import { createAgendaStyles } from '@/constants/styles/agenda.styles';
 
 interface WeekHeaderProps {
@@ -34,6 +35,7 @@ interface WeekHeaderProps {
   readonly title: string;
   readonly onPrevWeek: () => void;
   readonly onNextWeek: () => void;
+  readonly onScheduleAppointment: () => void;
 }
 
 function WeekHeader({
@@ -41,6 +43,7 @@ function WeekHeader({
   title,
   onPrevWeek,
   onNextWeek,
+  onScheduleAppointment,
 }: Readonly<WeekHeaderProps>) {
   const colors = useTheme();
   const styles = useMemo(() => createAgendaStyles(colors), [colors]);
@@ -72,6 +75,9 @@ function WeekHeader({
             <Ionicons name="chevron-forward" size={18} color={colors.text} />
           </TouchableOpacity>
         </View>
+      </View>
+      <View style={styles.scheduleButtonSlot}>
+        <ScheduleAppointmentButton onPress={onScheduleAppointment} />
       </View>
     </View>
   );
@@ -504,16 +510,8 @@ export default function AgendaScreen() {
         title={t('agenda.weeklySchedule')}
         onPrevWeek={handlePrevWeek}
         onNextWeek={handleNextWeek}
+        onScheduleAppointment={() => router.push('/(tabs)/patients/schedule-appointment' as any)}
       />
-      <TouchableOpacity
-        testID="schedule-from-agenda-btn"
-        style={styles.scheduleButton}
-        activeOpacity={0.8}
-        onPress={() => router.push('/(tabs)/patients/schedule-appointment' as any)}
-      >
-        <Ionicons name="add" size={16} color={colors.overMain} />
-        <Text style={styles.scheduleButtonText}>{t('agenda.scheduleAppointment')}</Text>
-      </TouchableOpacity>
 
       {/* Week Days Strip */}
       {agenda && (

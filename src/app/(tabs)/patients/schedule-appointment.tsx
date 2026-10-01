@@ -15,6 +15,8 @@ import { useTranslation } from 'react-i18next';
 import { AppHeader } from '@/components/app-header';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { NotificationToast } from '@/components/notification-toast';
+import { BirthDatePicker, formatBirthDate } from '@/components/ui/birth-date-picker';
+import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
 import {
   DateField,
   DENTISTS,
@@ -25,7 +27,7 @@ import {
   SectionHeader,
   SelectField,
 } from '@/app/(tabs)/patients/register-treatment';
-import { createScheduleAppointmentStyles } from '@/constants/styles/patients.style';
+import { createInputStyles, createScheduleAppointmentStyles } from '@/constants/styles/patients.style';
 import { useTheme } from '@/hooks/use-theme';
 import { getPatients } from '@/services/patient-service';
 import {
@@ -86,8 +88,65 @@ const EMPTY_FORM: AppointmentFormData = {
   nextTime: '09:30 AM',
 };
 
+function startOfToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+function dateFromFormValue(value: string): Date {
+  const key = parseAppointmentDateKey(value);
+  if (!key) return startOfToday();
+  const [year, month, day] = key.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function AppointmentDateField({
+  testID,
+  label,
+  value,
+  placeholder,
+  error,
+  onPress,
+}: Readonly<{
+  testID: string;
+  label: string;
+  value: string;
+  placeholder: string;
+  error?: string;
+  onPress: () => void;
+}>) {
+  const theme = useTheme();
+  const inputStyles = useMemo(() => createInputStyles(theme), [theme]);
+
+  return (
+    <View style={inputStyles.fieldGroup}>
+      <Text style={inputStyles.label}>{label}</Text>
+      <TouchableOpacity
+        testID={testID}
+        activeOpacity={0.7}
+        onPress={onPress}
+        style={[inputStyles.inputContainer, error ? inputStyles.errorBorder : null]}
+      >
+        <Text
+          style={[inputStyles.selectText, !value && inputStyles.placeholder]}
+          numberOfLines={1}
+        >
+          {value || placeholder}
+        </Text>
+        <Ionicons name="calendar-outline" size={20} color={theme.pageSubtitle} style={inputStyles.icon} />
+      </TouchableOpacity>
+      {error ? (
+        <Text style={inputStyles.errorText} testID={`${testID}-error`}>
+          {error}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 export default function ScheduleAppointmentScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createScheduleAppointmentStyles(theme), [theme]);
   const params = useLocalSearchParams<{
@@ -117,6 +176,7 @@ export default function ScheduleAppointmentScreen() {
     : patientOptions.find((item) => item.id === selectedPatientId) || EMPTY_PATIENT;
 
   const [form, setForm] = useState<AppointmentFormData>(EMPTY_FORM);
+  const [datePickerField, setDatePickerField] = useState<'date' | 'nextDate' | null>(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -224,6 +284,8 @@ export default function ScheduleAppointmentScreen() {
         duration: form.duration,
         reason: form.reason,
         notes: form.notes,
+        nextDate: form.nextDate,
+        nextTime: form.nextTime,
       });
       setShowConfirmModal(false);
       setToastConfig({
@@ -255,6 +317,14 @@ export default function ScheduleAppointmentScreen() {
         message: t('scheduleAppointment.toast.errorMessage'),
       });
     }
+  };
+
+  const openDatePicker = (field: 'date' | 'nextDate') => {
+    if (!isSystemDatePickerAvailable()) {
+      Alert.alert(t('profile.alerts.errorTitle'), t('profile.datePickerUnavailable'));
+      return;
+    }
+    setDatePickerField(field);
   };
 
   const handleCancel = () => {
@@ -326,12 +396,12 @@ export default function ScheduleAppointmentScreen() {
             />
             <View style={styles.fieldRow}>
               <View style={styles.fieldHalf}>
-                <DateField
+                <AppointmentDateField
                   testID="appointment-date"
                   label={t('scheduleAppointment.fields.date')}
                   value={form.date}
-                  onChangeText={(value) => updateForm('date', value)}
                   placeholder="dd/mm/yyyy"
+                  onPress={() => openDatePicker('date')}
                   error={fieldError('date')}
                 />
               </View>
@@ -371,7 +441,6 @@ export default function ScheduleAppointmentScreen() {
                 activeOpacity={0.7}
                 onPress={() => Alert.alert(t('scheduleAppointment.odontogramTitle'), t('scheduleAppointment.odontogramMessage'))}
               >
-                <Ionicons name="refresh-outline" size={18} color={theme.main} />
                 <Text style={styles.outlineButtonText}>{t('scheduleAppointment.updateOdontogram')}</Text>
               </TouchableOpacity>
             </View>
@@ -394,12 +463,12 @@ export default function ScheduleAppointmentScreen() {
             <SectionHeader icon="calendar-number-outline" title={t('scheduleAppointment.sections.next')} />
             <View style={styles.fieldRow}>
               <View style={styles.fieldHalf}>
-                <DateField
+                <AppointmentDateField
                   testID="next-appointment-date"
                   label={t('scheduleAppointment.fields.date')}
                   value={form.nextDate}
-                  onChangeText={(value) => updateForm('nextDate', value)}
                   placeholder="dd/mm/yyyy"
+                  onPress={() => openDatePicker('nextDate')}
                 />
               </View>
               <View style={styles.fieldHalf}>
@@ -438,6 +507,27 @@ export default function ScheduleAppointmentScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
+      <BirthDatePicker
+        visible={datePickerField !== null}
+        value={dateFromFormValue(datePickerField === 'nextDate' ? form.nextDate : form.date)}
+        title={t('scheduleAppointment.fields.date')}
+        confirmLabel={t('profile.confirmDate')}
+        pickerTestID="appointment-date-picker"
+        modalTestID="appointment-date-modal"
+        confirmTestID="confirm-appointment-date-modal"
+        locale={i18n?.language === 'en' ? 'en-US' : 'es-ES'}
+        limitToBirthRange={false}
+        minimumDate={startOfToday()}
+        onClose={() => setDatePickerField(null)}
+        onSelect={(date) => {
+          if (!datePickerField) return;
+          if (datePickerField === 'date') {
+            updateForm('date', formatBirthDate(date));
+          } else {
+            updateForm('nextDate', formatBirthDate(date));
+          }
+        }}
+      />
       <ConfirmationModal
         visible={showConfirmModal}
         title={t('scheduleAppointment.modal.title')}

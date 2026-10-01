@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { AppHeader } from '@/components/app-header';
@@ -69,6 +69,18 @@ export default function ClinicalHistoryScreen() {
     deleteConsultation,
     updateConsultation,
   } = useClinicalRecord(hasAccess ? patientId : undefined);
+
+  const skipInitialFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasAccess || !patientId) return;
+      if (skipInitialFocus.current) {
+        skipInitialFocus.current = false;
+        return;
+      }
+      refetch();
+    }, [hasAccess, patientId, refetch]),
+  );
 
   const [isEditingConsultation, setIsEditingConsultation] = useState(false);
 

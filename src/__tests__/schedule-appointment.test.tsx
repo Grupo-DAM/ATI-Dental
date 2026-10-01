@@ -4,6 +4,22 @@ import NetInfo from '@react-native-community/netinfo';
 import ScheduleAppointmentScreen from '../app/(tabs)/patients/schedule-appointment';
 import { resetAppointmentStore } from '@/services/agenda-service';
 
+jest.mock('@react-native-community/datetimepicker', () => {
+  const { Pressable, View } = require('react-native');
+  const DateTimePicker = (props: {
+    testID?: string;
+    onChange?: (event: { type?: string }, date?: Date) => void;
+  }) => (
+    <View testID={props.testID ?? 'appointment-date-picker'}>
+      <Pressable
+        testID="confirm-appointment-date"
+        onPress={() => props.onChange?.({ type: 'set' }, globalThis.__appointmentPickerDate || new Date(2026, 5, 20))}
+      />
+    </View>
+  );
+  return { __esModule: true, default: DateTimePicker };
+});
+
 jest.mock('@expo/vector-icons', () => {
   const React = require('react');
   const { Text } = require('react-native');
@@ -44,7 +60,13 @@ describe('ScheduleAppointmentScreen', () => {
     resetAppointmentStore();
     mockLocalSearchParams = {};
     (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: true, isInternetReachable: true });
+    globalThis.__appointmentPickerDate = new Date(2026, 5, 20);
   });
+
+  const chooseAppointmentDate = (getByTestId: (id: string) => any) => {
+    fireEvent.press(getByTestId('appointment-date'));
+    fireEvent.press(getByTestId('confirm-appointment-date'));
+  };
 
   it('muestra la cita con el paciente recibido por navegación', () => {
     mockLocalSearchParams = {
@@ -86,7 +108,7 @@ describe('ScheduleAppointmentScreen', () => {
 
     fireEvent.press(getByTestId('appointment-type'));
     fireEvent.press(getByText('Consulta general'));
-    fireEvent.changeText(getByTestId('appointment-date'), '20/06/2026');
+    chooseAppointmentDate(getByTestId);
     fireEvent.changeText(getByTestId('appointment-reason'), 'Control');
     fireEvent.press(getByTestId('save-appointment-btn'));
 
@@ -110,9 +132,10 @@ describe('ScheduleAppointmentScreen', () => {
     };
     const { getByTestId, getByText, getAllByText, queryByText } = render(<ScheduleAppointmentScreen />);
 
+    globalThis.__appointmentPickerDate = new Date(2026, 5, 16);
     fireEvent.press(getByTestId('appointment-type'));
     fireEvent.press(getByText('Consulta general'));
-    fireEvent.changeText(getByTestId('appointment-date'), '16/06/2026');
+    chooseAppointmentDate(getByTestId);
     fireEvent.changeText(getByTestId('appointment-time'), '09:30 AM');
     fireEvent.changeText(getByTestId('appointment-reason'), 'Control');
     fireEvent.press(getByTestId('save-appointment-btn'));
@@ -131,14 +154,14 @@ describe('ScheduleAppointmentScreen', () => {
 
     fireEvent.press(getByTestId('appointment-type'));
     fireEvent.press(getByText('Consulta general'));
-    fireEvent.changeText(getByTestId('appointment-date'), '20/06/2026');
+    chooseAppointmentDate(getByTestId);
     fireEvent.changeText(getByTestId('appointment-reason'), 'Control');
     fireEvent.press(getByTestId('save-appointment-btn'));
     fireEvent.press(getByTestId('modal-confirm-btn'));
 
     expect(await findByText('scheduleAppointment.toast.errorTitle')).toBeTruthy();
     expect(getByTestId('appointment-reason').props.value).toBe('Control');
-    expect(getByTestId('appointment-date').props.value).toBe('20/06/2026');
+    expect(getByText('20/06/2026')).toBeTruthy();
   });
 
   it('cancela hacia la agenda cuando la cita no viene de una ficha', () => {
