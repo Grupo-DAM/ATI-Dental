@@ -82,7 +82,7 @@ function ChannelHeader({
           style={styles.socialChannelHeader}
         >
           <ChannelTitles
-            icon="camera-outline"
+            icon="logo-instagram"
             title="Instagram"
             handle="@atidental_"
             iconColor={theme.instagramTextColor}

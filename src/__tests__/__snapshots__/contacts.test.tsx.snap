@@ -1669,7 +1669,7 @@ exports[`ContactsScreen Coincide con la instantánea (Snapshot Test) 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
               <View
                 style={
