@@ -166,15 +166,7 @@ export const createStyles = (theme:any) => {
     instagramHeaderText: {
         color: theme.instagramTextColor
     },
-    instagramHeaderRow: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    instagramHeaderLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    socialChannelTitles: {
         flexShrink: 1,
     },
     instagramList: {

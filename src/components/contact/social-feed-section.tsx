@@ -30,6 +30,32 @@ async function openSocialUrl(url: string, title: string, message: string) {
 type FeedStyles = ReturnType<typeof createStyles>;
 type AppTheme = ReturnType<typeof useTheme>;
 
+function ChannelTitles({
+  icon,
+  title,
+  handle,
+  iconColor,
+  textStyle,
+  styles,
+}: Readonly<{
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  handle: string;
+  iconColor: string;
+  textStyle: FeedStyles['instagramHeaderText'];
+  styles: FeedStyles;
+}>) {
+  return (
+    <>
+      <Ionicons name={icon} size={22} color={iconColor} style={styles.socialIcon} />
+      <View style={styles.socialChannelTitles}>
+        <Text style={[styles.socialName, textStyle]}>{title}</Text>
+        <Text style={[styles.socialTag, textStyle]}>{handle}</Text>
+      </View>
+    </>
+  );
+}
+
 function ChannelHeader({
   network,
   onPress,
@@ -55,13 +81,14 @@ function ChannelHeader({
           end={{ x: 1, y: 0 }}
           style={styles.socialChannelHeader}
         >
-          <View style={styles.instagramHeaderRow}>
-            <View style={styles.instagramHeaderLeft}>
-              <Ionicons name="camera-outline" size={22} color={theme.instagramTextColor} style={styles.socialIcon} />
-              <Text style={[styles.socialName, styles.instagramHeaderText]}>Instagram</Text>
-            </View>
-            <Text style={[styles.socialTag, styles.instagramHeaderText]}>@atidental_</Text>
-          </View>
+          <ChannelTitles
+            icon="camera-outline"
+            title="Instagram"
+            handle="@atidental_"
+            iconColor={theme.instagramTextColor}
+            textStyle={styles.instagramHeaderText}
+            styles={styles}
+          />
         </LinearGradient>
       </Pressable>
     );
@@ -74,23 +101,28 @@ function ChannelHeader({
       accessibilityRole="button"
       style={[styles.socialChannelHeader, styles.facebookHeader, styles.socialHitTarget]}
     >
-      <Ionicons name="logo-facebook" size={22} color={theme.facebookTextColor} style={styles.socialIcon} />
-      <View>
-        <Text style={[styles.socialName, styles.facebookHeaderText]}>Facebook</Text>
-        <Text style={[styles.socialTag, styles.facebookHeaderText]}>/ATI Dental</Text>
-      </View>
+      <ChannelTitles
+        icon="logo-facebook"
+        title="Facebook"
+        handle="/ATI Dental"
+        iconColor={theme.facebookTextColor}
+        textStyle={styles.facebookHeaderText}
+        styles={styles}
+      />
     </Pressable>
   );
 }
 
 function SocialPostList({
   testID,
+  network,
   posts,
   styles,
   language,
   onPress,
 }: Readonly<{
   testID: string;
+  network: SocialNetwork;
   posts: SocialPost[];
   styles: FeedStyles;
   language: string;
@@ -98,10 +130,10 @@ function SocialPostList({
 }>) {
   return (
     <View testID={testID} style={styles.instagramList}>
-      {posts.map((item) => (
+      {posts.map((item, index) => (
         <Pressable
           key={item.id}
-          testID={`social-post-${item.id}`}
+          testID={`social-${network}-post-${index}`}
           accessibilityRole="button"
           onPress={() => onPress(item)}
           style={styles.instagramCard}
@@ -183,6 +215,7 @@ export function SocialFeedSection() {
             <ChannelHeader network="instagram" onPress={() => openNetwork('instagram')} styles={styles} theme={theme} />
             <SocialPostList
               testID="social-instagram-list"
+              network="instagram"
               posts={grouped.instagram}
               styles={styles}
               language={i18n.language}
@@ -194,6 +227,7 @@ export function SocialFeedSection() {
             <ChannelHeader network="facebook" onPress={() => openNetwork('facebook')} styles={styles} theme={theme} />
             <SocialPostList
               testID="social-facebook-list"
+              network="facebook"
               posts={grouped.facebook}
               styles={styles}
               language={i18n.language}

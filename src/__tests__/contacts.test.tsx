@@ -280,7 +280,7 @@ describe('ContactsScreen', () => {
 
   it('debe abrir la URL de Instagram al presionar una tarjeta de publicación de Instagram', async () => {
     const { findByTestId } = render(<ContactsScreen />);
-    fireEvent.press(await findByTestId('social-post-ig-1'));
+    fireEvent.press(await findByTestId('social-instagram-post-0'));
 
     await waitFor(() => {
       expect(Linking.openURL).toHaveBeenCalledWith(
