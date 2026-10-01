@@ -6,6 +6,7 @@ import {
   CONSULTATIONS_COLLECTION,
   recordScheduledAppointment,
   resolvePatientVisitDates,
+  getVisitDatesByPatient,
 } from '@/services/clinical-record-service';
 import { firestore } from '@/config/firebase';
 import { getSessionToken } from '@/utils/secure-storage';
@@ -404,6 +405,114 @@ describe('Clinical Record Service', () => {
           ? { lastVisit: expected.lastVisit, ultima_visita: expected.lastVisit }
           : {}),
       }));
+    });
+
+    it('agrupa las citas guardadas por paciente', async () => {
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          { id: '1', data: () => ({ patientId: 'p-100', date: '2026-01-10', status: 'COMPLETADO' }) },
+          { id: '2', data: () => ({ patientId: 'p-100', date: '2026-12-01', status: 'EN ESPERA' }) },
+          { id: '3', data: () => ({ date: '' }) },
+        ],
+      });
+
+      const dates = await getVisitDatesByPatient();
+
+      expect(dates.get('p-100')?.lastVisit).toBe('2026-01-10');
+      expect(dates.get('p-100')?.nextAppointment).toBe('2026-12-01');
+    });
+
+    it('conserva la cita si no puede escribir la consulta', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      (mockFirestoreInstance.get as jest.Mock)
+        .mockResolvedValueOnce({ empty: true, docs: [] })
+        .mockResolvedValueOnce({
+          exists: () => true,
+          data: () => ({ ultima_visita: '2020-01-01', proxima_vista: '2026-12-01' }),
+        });
+      (mockFirestoreInstance.update as jest.Mock).mockRejectedValueOnce(new Error('no doc'));
+      (mockFirestoreInstance.set as jest.Mock).mockRejectedValueOnce(new Error('set fail'));
+      (mockFirestoreInstance.add as jest.Mock).mockRejectedValueOnce(new Error('consultas'));
+
+      await recordScheduledAppointment({
+        patientId: 'p-100',
+        dentistName: 'Dr. Smith',
+        appointmentType: 'Control',
+        date: '2026-06-20',
+        time: '09:30 AM',
+        duration: '45 minutos',
+        reason: 'Control',
+        appointmentId: 'apt-2',
+      });
+
+      expect(mockFirestoreInstance.set).toHaveBeenCalled();
+      expect(warn).toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
+    it('une consultas locales y omite citas canceladas o ajenas', async () => {
+      (getSessionToken as jest.Mock).mockResolvedValueOnce('mock-jwt-token');
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          patient: mockPatient,
+          consultations: [{
+            id: 'server-1',
+            consultationDate: '2026-01-01T12:00:00',
+            title: 'Server',
+            appointmentId: 'cita-1',
+          }],
+        }),
+      });
+      (getPatientById as jest.Mock).mockResolvedValueOnce({
+        id: 'p-100',
+        nextAppointment: '2026-12-01',
+        lastVisit: '2026-01-10',
+      });
+      (mockFirestoreInstance.get as jest.Mock)
+        .mockResolvedValueOnce({
+          empty: false,
+          docs: [{
+            id: 'local-1',
+            data: () => ({
+              patientId: 'p-100',
+              consultationDate: '2026-03-01T12:00:00',
+              title: 'Local',
+            }),
+          }],
+        })
+        .mockResolvedValueOnce({
+          empty: false,
+          docs: [
+            { id: 'cita-1', data: () => ({ patientId: 'p-100', date: '2026-10-20', status: 'EN ESPERA', treatmentName: 'Control' }) },
+            { id: 'cancel', data: () => ({ patientId: 'p-100', date: '2026-10-20', status: 'CANCELADO', treatmentName: 'X' }) },
+            { id: 'other', data: () => ({ patientId: 'otro', date: '2026-10-20', status: 'EN ESPERA' }) },
+            { id: 'bare', data: () => ({ patientId: 'p-100', date: '2026-10-21', status: 'EN ESPERA' }) },
+          ],
+        });
+
+      const res = await fetchClinicalRecord('p-100');
+      const titles = res.data?.consultations.map((item) => item.title);
+      expect(titles).toEqual(expect.arrayContaining(['Server', 'Local', 'Consulta Odontológica']));
+      expect(res.data?.patient.lastVisit).toBe('2026-01-10');
+      expect(res.data?.consultations.some((item) => item.title === 'X')).toBe(false);
+    });
+
+    it('sigue mostrando la historia si no puede leer las citas', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      (getPatientById as jest.Mock).mockResolvedValueOnce(mockPatient);
+      (getTreatmentsByPatientId as jest.Mock).mockResolvedValueOnce([]);
+      (mockFirestoreInstance.get as jest.Mock)
+        .mockResolvedValueOnce({ empty: true, docs: [] })
+        .mockRejectedValueOnce(new Error('citas down'));
+
+      const res = await fetchClinicalRecord('p-100');
+
+      expect(res.success).toBe(true);
+      expect(warn).toHaveBeenCalled();
+      warn.mockRestore();
     });
   });
 });

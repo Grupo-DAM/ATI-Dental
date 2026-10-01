@@ -451,7 +451,7 @@ export default function AgendaScreen() {
       text: t(STATUS_ACTION[status]),
       style: status === 'CANCELADO' ? 'destructive' as const : 'default' as const,
       onPress: () => {
-        applyStatus(appointment, status);
+        void applyStatus(appointment, status);
       },
     }));
     Alert.alert(

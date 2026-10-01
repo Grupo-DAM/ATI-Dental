@@ -1,6 +1,7 @@
 import {
   isAdminUser,
   isOdontologoUser,
+  isAsistenteUser,
   getRoleLabelKey,
   USER_ROLES,
   LEGACY_ADMIN_ROLE,
@@ -54,6 +55,14 @@ describe('user-roles', () => {
       expect(isOdontologoUser(null)).toBe(false);
       expect(isOdontologoUser(undefined)).toBe(false);
       expect(isOdontologoUser({ uid: '1', email: 'o@test.com', rol: undefined })).toBe(false);
+    });
+  });
+
+  describe('isAsistenteUser', () => {
+    it('detecta el rol de asistente', () => {
+      expect(isAsistenteUser({ uid: '1', email: 'a@test.com', rol: USER_ROLES.ASISTENTE })).toBe(true);
+      expect(isAsistenteUser({ uid: '1', email: 'a@test.com', rol: USER_ROLES.ODONTOLOGO })).toBe(false);
+      expect(isAsistenteUser(null)).toBe(false);
     });
   });
 

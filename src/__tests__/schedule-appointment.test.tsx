@@ -1,8 +1,15 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import NetInfo from '@react-native-community/netinfo';
 import ScheduleAppointmentScreen from '../app/(tabs)/patients/schedule-appointment';
 import { resetAppointmentStore } from '@/services/agenda-service';
+import { getPatients } from '@/services/patient-service';
+import { firestore } from '@/config/firebase';
+
+jest.mock('@/services/patient-service', () => ({
+  getPatients: jest.fn(() => Promise.resolve([])),
+}));
 
 jest.mock('@react-native-community/datetimepicker', () => {
   const { Pressable, View } = require('react-native');
@@ -61,6 +68,7 @@ describe('ScheduleAppointmentScreen', () => {
     mockLocalSearchParams = {};
     (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: true, isInternetReachable: true });
     globalThis.__appointmentPickerDate = new Date(2026, 5, 20);
+    (getPatients as jest.Mock).mockResolvedValue([]);
   });
 
   const chooseAppointmentDate = (getByTestId: (id: string) => any) => {
@@ -220,5 +228,114 @@ describe('ScheduleAppointmentScreen', () => {
     const { getByTestId } = render(<ScheduleAppointmentScreen />);
     fireEvent.press(getByTestId('cancel-appointment-btn'));
     expect(mockPush).toHaveBeenCalledWith('/(tabs)/agenda');
+  });
+
+  it('cancela hacia la ficha cuando el paciente viene bloqueado', () => {
+    mockLocalSearchParams = { patientId: 'pat-1', patientName: 'Ana Gómez' };
+    const { getByTestId } = render(<ScheduleAppointmentScreen />);
+    fireEvent.press(getByTestId('cancel-appointment-btn'));
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/(tabs)/patient-file',
+      params: { patientId: 'pat-1' },
+    });
+  });
+
+  it('permite elegir paciente, odontólogo, duración, notas y próxima fecha', async () => {
+    (getPatients as jest.Mock).mockResolvedValue([
+      { id: 'p-empty', fullName: 'Sin Datos' },
+      { id: 'p-bad', fullName: 'Fecha Mala', birthDate: 'no-es-fecha' },
+      { id: 'p-future', fullName: 'Futuro', birthDate: '2030-01-01' },
+      {
+        id: 'p-1',
+        fullName: 'Ana Gómez',
+        documentId: 'V-1',
+        gender: 'Mujer',
+        birthDate: '2010-12-31',
+        phone: '0412',
+        photoUri: 'http://img',
+      },
+    ]);
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    const { getByTestId, findByText, getByText, getAllByText } = render(<ScheduleAppointmentScreen />);
+
+    fireEvent.press(getByTestId('appointment-patient'));
+    fireEvent.press(await findByText('Ana Gómez'));
+    fireEvent.press(getByTestId('appointment-dentist'));
+    fireEvent.press(getByText('Dra. García'));
+    fireEvent.press(getByTestId('appointment-duration'));
+    fireEvent.press(getByText('60 minutos'));
+    fireEvent.changeText(getByTestId('appointment-notes'), 'Traer estudios');
+    fireEvent.changeText(getByTestId('next-appointment-time'), '10:00 AM');
+    fireEvent.press(getByTestId('next-appointment-date'));
+    fireEvent.press(getByTestId('confirm-appointment-date'));
+    fireEvent.press(getByTestId('update-odontogram-btn'));
+
+    expect(getAllByText('Ana Gómez').length).toBeGreaterThan(0);
+    expect(getAllByText('Dra. García').length).toBeGreaterThan(0);
+    expect(getAllByText('60 minutos').length).toBeGreaterThan(0);
+    expect(getByTestId('appointment-notes').props.value).toBe('Traer estudios');
+    expect(alertSpy).toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+
+  it('limpia el error del campo al corregirlo', () => {
+    mockLocalSearchParams = { patientId: 'pat-1', patientName: 'Ana Gómez' };
+    const { getByTestId, getByText, queryByText } = render(<ScheduleAppointmentScreen />);
+
+    fireEvent.press(getByTestId('save-appointment-btn'));
+    expect(getByText('scheduleAppointment.errors.typeRequired')).toBeTruthy();
+
+    fireEvent.press(getByTestId('appointment-type'));
+    fireEvent.press(getByText('Consulta general'));
+    expect(queryByText('scheduleAppointment.errors.typeRequired')).toBeNull();
+  });
+
+  it('marca el conflicto que aparece al confirmar', async () => {
+    mockLocalSearchParams = { patientId: 'pat-1', patientName: 'Ana Gómez' };
+    firestore().collection('citas').get
+      .mockResolvedValueOnce({ empty: true, docs: [] })
+      .mockResolvedValueOnce({
+        empty: false,
+        docs: [{
+          id: 'cita-remota',
+          data: () => ({
+            date: '2026-06-20',
+            time: '09:30',
+            period: 'AM',
+            patientName: 'Otra',
+            patientId: 'otra',
+            dentistName: 'Dr. Smith',
+            status: 'EN ESPERA',
+            durationMinutes: 45,
+            treatmentName: 'Control',
+          }),
+        }],
+      });
+    const { getByTestId, getByText, findByTestId } = render(<ScheduleAppointmentScreen />);
+
+    fireEvent.press(getByTestId('appointment-type'));
+    fireEvent.press(getByText('Consulta general'));
+    chooseAppointmentDate(getByTestId);
+    fireEvent.changeText(getByTestId('appointment-reason'), 'Control');
+    fireEvent.press(getByTestId('save-appointment-btn'));
+    fireEvent.press(await findByTestId('modal-confirm-btn'));
+
+    expect(await findByTestId('appointment-conflict')).toBeTruthy();
+  });
+
+  it('cierra el aviso de error', async () => {
+    mockLocalSearchParams = { patientId: 'pat-1', patientName: 'Ana Gómez' };
+    (NetInfo.fetch as jest.Mock).mockResolvedValueOnce({ isConnected: false });
+    const { getByTestId, getByText, findByText, findByTestId } = render(<ScheduleAppointmentScreen />);
+
+    fireEvent.press(getByTestId('appointment-type'));
+    fireEvent.press(getByText('Consulta general'));
+    chooseAppointmentDate(getByTestId);
+    fireEvent.changeText(getByTestId('appointment-reason'), 'Control');
+    fireEvent.press(getByTestId('save-appointment-btn'));
+    fireEvent.press(await findByTestId('modal-confirm-btn'));
+
+    expect(await findByText('scheduleAppointment.toast.errorTitle')).toBeTruthy();
+    fireEvent.press(await findByTestId('btn-dismiss-toast'));
   });
 });
