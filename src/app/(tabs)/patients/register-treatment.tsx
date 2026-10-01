@@ -192,6 +192,12 @@ export function SelectField({
   const [open, setOpen] = useState(false);
   const theme = useTheme();
   const inputStyles = useMemo(() => createInputStyles(theme), [theme]);
+  let iconName: 'lock-closed' | 'chevron-up' | 'chevron-down' = 'chevron-down';
+  if (disabled) {
+    iconName = 'lock-closed';
+  } else if (open) {
+    iconName = 'chevron-up';
+  }
 
   return (
     <View style={inputStyles.fieldGroup}>
@@ -214,7 +220,7 @@ export function SelectField({
           {value || placeholder}
         </Text>
         <Ionicons
-          name={disabled ? 'lock-closed' : open ? 'chevron-up' : 'chevron-down'}
+          name={iconName}
           size={18}
           color={theme.pageSubtitle}
         />
@@ -430,7 +436,7 @@ export default function RegisterTreatmentScreen() {
         setIsLoading(false);
       }
     }
-    loadTreatment();
+    void loadTreatment();
   }, [params.treatmentId]);
 
   // Validation errors & submitting guard

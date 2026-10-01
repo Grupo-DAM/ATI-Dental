@@ -457,9 +457,15 @@ export async function recordScheduledAppointment(input: ScheduledVisitInput): Pr
   };
   await persistVisitDates(input.patientId, dates);
 
-  const proximaCita = input.nextDate?.trim()
-    ? formatVisitLabel(input.nextDate, input.nextTime)
-    : formatVisitLabel(dates.nextAppointment, dates.nextAppointment === input.date ? input.time : undefined);
+  const scheduledNext = input.nextDate?.trim() ?? '';
+  const labelDate = scheduledNext || dates.nextAppointment;
+  let labelTime: string | undefined;
+  if (scheduledNext) {
+    labelTime = input.nextTime;
+  } else if (dates.nextAppointment === input.date) {
+    labelTime = input.time;
+  }
+  const proximaCita = formatVisitLabel(labelDate, labelTime);
 
   try {
     await firestore().collection(CONSULTATIONS_COLLECTION).add({

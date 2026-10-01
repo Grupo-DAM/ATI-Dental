@@ -63,7 +63,7 @@ function ageFromBirthDate(birthDate?: string): number {
     today.getMonth() > born.getMonth() ||
     (today.getMonth() === born.getMonth() && today.getDate() >= born.getDate());
   if (!hadBirthday) years -= 1;
-  return years >= 0 ? years : 0;
+  return Math.max(years, 0);
 }
 
 const EMPTY_PATIENT: PatientInfo = {
