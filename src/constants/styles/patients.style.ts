@@ -210,6 +210,12 @@ export const createScheduleAppointmentStyles = (theme: any) => {
       fontWeight: '600',
       fontFamily: 'Open Sans',
     },
+    conflictMessage: {
+      color: theme.error,
+      fontSize: 13,
+      fontFamily: 'Open Sans',
+      marginBottom: 12,
+    },
   });
   return { ...base, ...extra };
 };

@@ -104,7 +104,7 @@ describe('ScheduleAppointmentScreen', () => {
       patientId: 'pat-1',
       patientName: 'Ana Gómez',
     };
-    const { getByTestId, getByText } = render(<ScheduleAppointmentScreen />);
+    const { getByTestId, getByText, queryByText, findByText } = render(<ScheduleAppointmentScreen />);
 
     fireEvent.press(getByTestId('appointment-type'));
     fireEvent.press(getByText('Consulta general'));
@@ -112,8 +112,22 @@ describe('ScheduleAppointmentScreen', () => {
     fireEvent.changeText(getByTestId('appointment-reason'), 'Control');
     fireEvent.press(getByTestId('save-appointment-btn'));
 
-    expect(getByText('scheduleAppointment.modal.title')).toBeTruthy();
+    expect(await findByText('scheduleAppointment.modal.title')).toBeTruthy();
     fireEvent.press(getByTestId('modal-confirm-btn'));
+
+    await waitFor(() => {
+      expect(getByTestId('appointment-reason').props.value).toBe('');
+      expect(getByTestId('save-appointment-btn').props.accessibilityState.disabled).toBe(false);
+    });
+    expect(queryByText('20/06/2026')).toBeNull();
+
+    fireEvent.press(getByTestId('appointment-type'));
+    fireEvent.press(getByText('Limpieza dental'));
+    chooseAppointmentDate(getByTestId);
+    fireEvent.changeText(getByTestId('appointment-time'), '11:00 AM');
+    fireEvent.changeText(getByTestId('appointment-reason'), 'Segunda cita');
+    fireEvent.press(getByTestId('save-appointment-btn'));
+    expect(await findByText('scheduleAppointment.modal.title')).toBeTruthy();
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith(
@@ -125,12 +139,12 @@ describe('ScheduleAppointmentScreen', () => {
     }, { timeout: 3000 });
   });
 
-  it('bloquea un horario que ya tiene el paciente', () => {
+  it('bloquea un horario que ya tiene el paciente', async () => {
     mockLocalSearchParams = {
       patientId: 'pat-mariana',
       patientName: 'Mariana López',
     };
-    const { getByTestId, getByText, getAllByText, queryByText } = render(<ScheduleAppointmentScreen />);
+    const { getByTestId, getByText, findAllByText, queryByText } = render(<ScheduleAppointmentScreen />);
 
     globalThis.__appointmentPickerDate = new Date(2026, 5, 16);
     fireEvent.press(getByTestId('appointment-type'));
@@ -140,7 +154,44 @@ describe('ScheduleAppointmentScreen', () => {
     fireEvent.changeText(getByTestId('appointment-reason'), 'Control');
     fireEvent.press(getByTestId('save-appointment-btn'));
 
-    expect(getAllByText('scheduleAppointment.errors.conflictPatient').length).toBeGreaterThan(0);
+    expect((await findAllByText('scheduleAppointment.errors.conflictPatient')).length).toBeGreaterThan(0);
+    expect(queryByText('scheduleAppointment.modal.title')).toBeNull();
+    expect(getByTestId('appointment-date-error')).toBeTruthy();
+    expect(getByTestId('appointment-time-error')).toBeTruthy();
+  });
+
+  it('bloquea al odontólogo si la cita ya está en la agenda', async () => {
+    mockLocalSearchParams = {
+      patientId: 'pat-2',
+      patientName: 'Pedro Ramírez',
+    };
+    const { firestore } = require('@/config/firebase');
+    firestore().collection('citas').get.mockResolvedValueOnce({
+      empty: false,
+      docs: [{
+        id: 'cita-remota',
+        data: () => ({
+          date: '2026-06-20',
+          time: '09:30',
+          period: 'AM',
+          patientName: 'Ana Gómez',
+          patientId: 'pat-1',
+          dentistName: 'Dr. Smith',
+          status: 'EN ESPERA',
+          durationMinutes: 45,
+          treatmentName: 'Consulta general',
+        }),
+      }],
+    });
+    const { getByTestId, getByText, findByTestId, queryByText } = render(<ScheduleAppointmentScreen />);
+
+    fireEvent.press(getByTestId('appointment-type'));
+    fireEvent.press(getByText('Consulta general'));
+    chooseAppointmentDate(getByTestId);
+    fireEvent.changeText(getByTestId('appointment-reason'), 'Control');
+    fireEvent.press(getByTestId('save-appointment-btn'));
+
+    expect(await findByTestId('appointment-conflict')).toBeTruthy();
     expect(queryByText('scheduleAppointment.modal.title')).toBeNull();
   });
 
@@ -157,6 +208,7 @@ describe('ScheduleAppointmentScreen', () => {
     chooseAppointmentDate(getByTestId);
     fireEvent.changeText(getByTestId('appointment-reason'), 'Control');
     fireEvent.press(getByTestId('save-appointment-btn'));
+    expect(await findByText('scheduleAppointment.modal.title')).toBeTruthy();
     fireEvent.press(getByTestId('modal-confirm-btn'));
 
     expect(await findByText('scheduleAppointment.toast.errorTitle')).toBeTruthy();

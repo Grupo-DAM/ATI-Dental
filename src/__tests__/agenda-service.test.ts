@@ -155,6 +155,28 @@ describe('Agenda Service', () => {
       })).rejects.toBeInstanceOf(AppointmentConflictError);
     });
 
+    it('rechaza el solapamiento de una cita ya guardada en la agenda', async () => {
+      const { firestore } = require('@/config/firebase');
+      firestore().collection('citas').get.mockResolvedValueOnce({
+        empty: false,
+        docs: [{
+          id: 'cita-1',
+          data: () => ({
+            date: '20/06/2026',
+            time: '09:30 AM',
+            patientName: 'Otra Persona',
+            patientId: 'pat-otra',
+            dentistName: 'Dra. Única',
+            status: 'EN ESPERA',
+            duration: '45 minutos',
+            treatmentName: 'Control',
+          }),
+        }],
+      });
+
+      await expect(createAppointment(input)).rejects.toBeInstanceOf(AppointmentConflictError);
+    });
+
     it('no guarda la cita si no hay conexión', async () => {
       (NetInfo.fetch as jest.Mock).mockResolvedValueOnce({ isConnected: false });
       await expect(createAppointment(input)).rejects.toBeInstanceOf(AppointmentRequestError);

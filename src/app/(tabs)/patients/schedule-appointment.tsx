@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -33,7 +33,7 @@ import { getPatients } from '@/services/patient-service';
 import {
   AppointmentConflictError,
   createAppointment,
-  listAppointmentsOnDate,
+  listAppointmentsForConflict,
 } from '@/services/agenda-service';
 import { AppointmentFormData, validateAppointmentForm } from '@/utils/appointment-validation';
 import {
@@ -175,6 +175,9 @@ export default function ScheduleAppointmentScreen() {
     ? lockedPatient
     : patientOptions.find((item) => item.id === selectedPatientId) || EMPTY_PATIENT;
 
+  const scrollRef = useRef<ScrollView>(null);
+  const detailsCardOffset = useRef(0);
+  const dateRowOffset = useRef(0);
   const [form, setForm] = useState<AppointmentFormData>(EMPTY_FORM);
   const [datePickerField, setDatePickerField] = useState<'date' | 'nextDate' | null>(null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
@@ -221,6 +224,13 @@ export default function ScheduleAppointmentScreen() {
     });
   }, []);
 
+  const resetForm = () => {
+    setForm({ ...EMPTY_FORM });
+    setErrors({});
+    setDatePickerField(null);
+    if (!patientLocked) setSelectedPatientId('');
+  };
+
   const fieldError = (key: string) => (errors[key] ? t(errors[key]) : undefined);
 
   const clearError = (key: string) => {
@@ -232,7 +242,20 @@ export default function ScheduleAppointmentScreen() {
     });
   };
 
-  const handleSavePress = () => {
+  const showConflict = (party: 'patient' | 'dentist') => {
+    const key = party === 'patient'
+      ? 'scheduleAppointment.errors.conflictPatient'
+      : 'scheduleAppointment.errors.conflictDentist';
+    setErrors({ date: key, time: key });
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({
+        y: detailsCardOffset.current + dateRowOffset.current,
+        animated: true,
+      });
+    });
+  };
+
+  const handleSavePress = async () => {
     const result = validateAppointmentForm(form, patient.id);
     if (!result.isValid) {
       setErrors(result.errors);
@@ -257,13 +280,10 @@ export default function ScheduleAppointmentScreen() {
         start,
         end: start + durationMinutes,
       },
-      listAppointmentsOnDate(dateKey),
+      await listAppointmentsForConflict(dateKey),
     );
     if (conflict) {
-      const key = conflict.party === 'patient'
-        ? 'scheduleAppointment.errors.conflictPatient'
-        : 'scheduleAppointment.errors.conflictDentist';
-      setErrors({ date: key, time: key });
+      showConflict(conflict.party);
       return;
     }
     setErrors({});
@@ -288,6 +308,7 @@ export default function ScheduleAppointmentScreen() {
         nextTime: form.nextTime,
       });
       setShowConfirmModal(false);
+      resetForm();
       setToastConfig({
         visible: true,
         type: 'success',
@@ -301,13 +322,9 @@ export default function ScheduleAppointmentScreen() {
         });
       }, 1500);
     } catch (error) {
-      setIsSubmitting(false);
       setShowConfirmModal(false);
       if (error instanceof AppointmentConflictError) {
-        const key = error.party === 'patient'
-          ? 'scheduleAppointment.errors.conflictPatient'
-          : 'scheduleAppointment.errors.conflictDentist';
-        setErrors({ date: key, time: key });
+        showConflict(error.party);
         return;
       }
       setToastConfig({
@@ -316,6 +333,8 @@ export default function ScheduleAppointmentScreen() {
         title: t('scheduleAppointment.toast.errorTitle'),
         message: t('scheduleAppointment.toast.errorMessage'),
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -351,7 +370,11 @@ export default function ScheduleAppointmentScreen() {
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.titleSection}>
             <Text style={styles.mainTitle}>{t('scheduleAppointment.title')}</Text>
             <Text style={styles.subtitle}>{t('scheduleAppointment.subtitle')}</Text>
@@ -359,7 +382,12 @@ export default function ScheduleAppointmentScreen() {
 
           {patient.name ? <PatientInfoCard patient={patient} t={t} /> : null}
 
-          <View style={styles.card}>
+          <View
+            style={styles.card}
+            onLayout={(event) => {
+              detailsCardOffset.current = event.nativeEvent.layout.y;
+            }}
+          >
             <SectionHeader icon="calendar-outline" title={t('scheduleAppointment.sections.details')} />
             <SelectField
               testID="appointment-patient"
@@ -394,7 +422,12 @@ export default function ScheduleAppointmentScreen() {
               onSelect={(value) => updateForm('appointmentType', value)}
               error={fieldError('appointmentType')}
             />
-            <View style={styles.fieldRow}>
+            <View
+              style={styles.fieldRow}
+              onLayout={(event) => {
+                dateRowOffset.current = event.nativeEvent.layout.y;
+              }}
+            >
               <View style={styles.fieldHalf}>
                 <AppointmentDateField
                   testID="appointment-date"
@@ -483,6 +516,12 @@ export default function ScheduleAppointmentScreen() {
               </View>
             </View>
           </View>
+
+          {errors.date?.includes('conflict') ? (
+            <Text style={styles.conflictMessage} testID="appointment-conflict">
+              {t(errors.date)}
+            </Text>
+          ) : null}
 
           <View style={styles.buttonRow}>
             <TouchableOpacity

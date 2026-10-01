@@ -410,6 +410,12 @@ export function listAppointmentsOnDate(dateKey: string): Appointment[] {
   return mergeAppointmentsForDate(dateKey, date.getDay());
 }
 
+export async function listAppointmentsForConflict(dateKey: string): Promise<Appointment[]> {
+  const local = listAppointmentsOnDate(dateKey);
+  const remote = (await loadRemoteAppointments()).filter((item) => item.date === dateKey);
+  return sortAppointments(mergeUnique(local, remote));
+}
+
 function findAppointmentById(id: string): Appointment | null {
   const saved = savedAppointments.find((item) => item.id === id);
   if (saved) return withStatus(saved);
@@ -462,7 +468,7 @@ export async function createAppointment(input: CreateAppointmentInput): Promise<
       start,
       end: start + durationMinutes,
     },
-    listAppointmentsOnDate(dateKey).map(toScheduleSlot),
+    (await listAppointmentsForConflict(dateKey)).map(toScheduleSlot),
   );
   if (conflict) throw new AppointmentConflictError(conflict.party);
 
@@ -555,23 +561,39 @@ async function loadRemoteAppointments(): Promise<Appointment[]> {
   }
 }
 
+function readRemoteClock(time: string, periodValue: unknown): { time: string; period: 'AM' | 'PM' } {
+  const marker = periodValue === 'PM' || periodValue === 'AM' ? periodValue : undefined;
+  const minutes = parseAppointmentMinutes(time, marker);
+  if (minutes == null) return { time, period: periodValue === 'PM' ? 'PM' : 'AM' };
+  return formatAgendaClock(minutes);
+}
+
+function readRemoteDuration(data: Record<string, unknown>): number {
+  if (typeof data.durationMinutes === 'number' && data.durationMinutes > 0) return data.durationMinutes;
+  if (typeof data.duration === 'string') {
+    const parsed = parseDurationMinutes(data.duration);
+    if (parsed > 0) return parsed;
+  }
+  return 30;
+}
+
 function mapRemoteAppointment(id: string, data: Record<string, unknown>): Appointment | null {
-  const date = typeof data.date === 'string' ? data.date : '';
-  const time = typeof data.time === 'string' ? data.time : '';
+  const date = parseAppointmentDateKey(typeof data.date === 'string' ? data.date : '') ?? '';
+  const rawTime = typeof data.time === 'string' ? data.time : '';
   const patientName = typeof data.patientName === 'string' ? data.patientName : '';
-  if (!date || !time || !patientName) return null;
-  const period = data.period === 'PM' ? 'PM' : 'AM';
+  if (!date || !rawTime || !patientName) return null;
+  const clock = readRemoteClock(rawTime, data.period);
   const status = isAppointmentStatus(data.status) ? data.status : 'EN ESPERA';
   return {
     id,
     date,
-    time,
-    period,
+    time: clock.time,
+    period: clock.period,
     patientName,
     treatmentName: typeof data.treatmentName === 'string' ? data.treatmentName : '',
     status,
     chair: typeof data.chair === 'string' ? data.chair : 'SILLÓN 1',
-    durationMinutes: typeof data.durationMinutes === 'number' ? data.durationMinutes : 30,
+    durationMinutes: readRemoteDuration(data),
     dentistName: typeof data.dentistName === 'string' ? data.dentistName : undefined,
     patientId: typeof data.patientId === 'string' ? data.patientId : undefined,
     notes: typeof data.notes === 'string' ? data.notes : undefined,
