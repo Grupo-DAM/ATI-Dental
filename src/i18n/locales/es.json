@@ -139,6 +139,18 @@
     "directContact": "Contacto Directo",
     "directContactSubtitle": "Canales de comunicación oficiales para consultas urgentes.",
     "socialActivity": "Actividad en Redes Sociales",
+    "socialFallback": "No pudimos cargar las publicaciones recientes. Entra a los perfiles oficiales para ver la actividad.",
+    "openInstagram": "Abrir Instagram",
+    "openFacebook": "Abrir Facebook",
+    "timeAgo": {
+      "justNow": "Hace un momento",
+      "minute": "Hace 1 minuto",
+      "minutes": "Hace {{count}} minutos",
+      "hour": "Hace 1 hora",
+      "hours": "Hace {{count}} horas",
+      "day": "Hace 1 día",
+      "days": "Hace {{count}} días"
+    },
     "offlineMode": "Mostrando datos en modo offline",
     "alerts": {
       "emailTitle": "Contacto por Email",

@@ -139,6 +139,18 @@
     "directContact": "Direct Contact",
     "directContactSubtitle": "Official communication channels for urgent inquiries.",
     "socialActivity": "Social Media Activity",
+    "socialFallback": "We could not load recent posts. Open the official profiles to see activity.",
+    "openInstagram": "Open Instagram",
+    "openFacebook": "Open Facebook",
+    "timeAgo": {
+      "justNow": "Just now",
+      "minute": "1 minute ago",
+      "minutes": "{{count}} minutes ago",
+      "hour": "1 hour ago",
+      "hours": "{{count}} hours ago",
+      "day": "1 day ago",
+      "days": "{{count}} days ago"
+    },
     "offlineMode": "Showing data in offline mode",
     "alerts": {
       "emailTitle": "Contact by Email",
