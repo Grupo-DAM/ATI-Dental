@@ -9,28 +9,6 @@ jest.mock('expo-image', () => ({
   Image: 'Image',
 }));
 
-jest.mock('@/hooks/use-theme', () => ({
-  useTheme: () => ({
-    main: '#5B2D8B',
-    text: '#141018',
-    textSecondary: '#60646C',
-    header: '#52287D',
-    instagramGradient: ['#833AB4', '#E1306C', '#F56040'],
-    instagramTextColor: '#FFFFFF',
-    facebookMainColor: '#1877F2',
-    facebookTextColor: '#FFFFFF',
-    offlineBannerText: '#B45309',
-  }),
-}));
-
-jest.mock('@/components/page-title-layout', () => ({
-  PageTitleLayout: ({ children }: { children: React.ReactNode }) => children,
-}));
-
-jest.mock('@/constants/styles/contact.styles', () => ({
-  createStyles: () => new Proxy({}, { get: () => ({}) }),
-}));
-
 jest.mock('@react-native-community/netinfo', () => ({
   useNetInfo: () => ({ isConnected: true }),
 }));
