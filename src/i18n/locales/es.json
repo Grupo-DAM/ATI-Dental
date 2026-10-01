@@ -572,5 +572,20 @@
     "saveChanges": "Guardar Cambios",
     "updateSuccessTitle": "Consulta actualizada",
     "updateSuccessMessage": "La consulta ha sido actualizada exitosamente."
+  },
+  "odontogram": {
+    "toothStatus": {
+      "cavity": "Caries",
+      "filled": "Obturado",            
+      "missing": "Ausente",   
+      "implant": "Implante",           
+      "root_canal": "Endodoncia",         
+      "fixed_dental_prosthesis": "Protesis",      
+      "retained_root": "Remanente Radicular",
+      "in_eruption": "En Erupción",         
+      "temporal": "Temporal"
+    },
+    "adult": "Adulto",
+    "pediatric": "Infantil"
   }
 }

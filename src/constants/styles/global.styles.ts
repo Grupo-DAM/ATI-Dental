@@ -110,6 +110,14 @@ export const createGlobalStyles = (theme: any) => StyleSheet.create({
       alignItems: 'center',
       marginBottom: Spacing.two,
     },
+    inputShell: {
+      backgroundColor: theme.backgroundElement,
+      borderColor: theme.cardSeparator,
+      borderWidth: Border.width.regular,
+      borderRadius: Border.radius.tiny,
+      paddingHorizontal: Spacing.three,
+      paddingVertical: Spacing.two,
+    }
 });
 
 export const createInputFieldStyles = (theme: any) => {
@@ -283,7 +291,7 @@ export const createCardContainerStyles = (theme: any) => {
 };
 
 export const createFormFieldStyles = (theme: any) => {
-
+  const global = createGlobalStyles(theme);
   return StyleSheet.create({
     label: {
       fontSize: 14,
@@ -297,13 +305,10 @@ export const createFormFieldStyles = (theme: any) => {
       fontWeight: '700',
     },
     inputShell: {
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      borderRadius: 6,
+      ...global.inputShell,
       paddingHorizontal: 12,
       minHeight: 46,
       justifyContent: 'center',
-      backgroundColor: theme.backgroundElement,
     },
     inputWithIcon: {
       flexDirection: 'row',

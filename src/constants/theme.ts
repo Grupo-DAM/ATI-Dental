@@ -19,6 +19,17 @@ const BRAND_COLORS = {
   placeholderColor: '#9E8BAC',
   positive: '#10B981',
   onlineStatus: '#22C55E',
+
+  //tooth states:
+  cavity: "#F05C5E",
+  filled: "#2E7CEE",            
+  missing: "#A5A8B1",   
+  implant: "#de8bd0",           
+  root_canal: "#FCA04B",         
+  fixed_dental_prosthesis: "#B18DF4",      
+  retained_root: "#e37c44",
+  in_eruption: "#4d814f",         
+  temporal: "#deed5c"
 } as const;
 
 const OFFLINE_BANNER = {
@@ -206,6 +217,8 @@ export const Border = {
     bold: 2,
   },
   radius: {
+    tiny: 4,
+    narrow: 6,
     regular: 8,
     wide: 12,
   }

@@ -574,5 +574,20 @@
     "saveChanges": "Save Changes",
     "updateSuccessTitle": "Consultation updated",
     "updateSuccessMessage": "The consultation has been updated successfully."
+  },
+  "odontogram": {
+    "toothStatus": {
+      "cavity": "Cavity",
+      "filled": "Filled",            
+      "missing": "Missing",   
+      "implant": "Implant",           
+      "root_canal": "Root Canal",         
+      "fixed_dental_prosthesis": "Prosthesis",      
+      "retained_root": "Retained Root",
+      "in_eruption": "In Eruption",         
+      "temporal": "Temporal"
+    },
+    "adult": "Adult",
+    "pediatric": "Pediatric"
   }
 }
