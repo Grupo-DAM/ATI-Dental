@@ -11,6 +11,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { AccessDeniedView } from '@/components/access-denied-view';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { useAuth } from '@/hooks/use-auth';
@@ -536,11 +537,10 @@ export default function PatientFileScreen() {
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <AppHeader />
         <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
-        <View style={styles.centerState}>
-          <Ionicons name="lock-closed-outline" size={56} color={theme.pageSubtitle} />
-          <Text style={[styles.stateTitle, { color: theme.pageTitle }]}>{t('patientFile.accessDenied')}</Text>
-          <Text style={[styles.stateMessage, { color: theme.pageSubtitle }]}>{t('patientFile.accessDeniedMessage')}</Text>
-        </View>
+        <AccessDeniedView
+          title={t('patientFile.accessDenied')}
+          message={t('patientFile.accessDeniedMessage')}
+        />
       </View>
     );
   }

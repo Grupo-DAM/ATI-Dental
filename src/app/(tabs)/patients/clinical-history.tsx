@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { AccessDeniedView } from '@/components/access-denied-view';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { useTheme } from '@/hooks/use-theme';
@@ -183,18 +184,13 @@ export default function ClinicalHistoryScreen() {
           parent={t('patientFile.title', 'Ficha del Paciente')}
           current={t('clinicalHistory.title', 'Historia Clínica')}
         />
-        <View style={styles.centerContainer}>
-          <Ionicons name="lock-closed-outline" size={56} color={theme.pageSubtitle} />
-          <Text style={styles.stateTitle}>
-            {t('clinicalHistory.accessDenied', 'Acceso Restringido a Odontólogos')}
-          </Text>
-          <Text style={styles.stateMessage}>
-            {t(
-              'clinicalHistory.accessDeniedMessage',
-              'Solo el personal con rol de Odontólogo o Administrador está autorizado para consultar la historia clínica y diagnósticos de los pacientes.'
-            )}
-          </Text>
-        </View>
+        <AccessDeniedView
+          title={t('clinicalHistory.accessDenied', 'Acceso Restringido a Odontólogos')}
+          message={t(
+            'clinicalHistory.accessDeniedMessage',
+            'Solo el personal con rol de Odontólogo o Administrador está autorizado para consultar la historia clínica y diagnósticos de los pacientes.'
+          )}
+        />
       </View>
     );
   }
