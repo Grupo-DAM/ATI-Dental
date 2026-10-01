@@ -1,78 +1,25 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Alert,
   Clipboard,
   Linking,
-  ScrollView,
   Text,
-  TouchableOpacity,
   View,
   ActivityIndicator,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useNetInfo } from '@react-native-community/netinfo';
 
 import { PageTitleLayout } from '@/components/page-title-layout';
 import { ContactButton } from '@/components/contact/contact-button';
 import { ResponsibleCard } from '@/components/contact/responsible-card';
+import { SocialFeedSection } from '@/components/contact/social-feed-section';
 import { Config } from '@/constants/config';
 import { Colors } from '@/constants/theme';
-import { createStyles } from '@/constants/styles/contact.styles'
+import { createStyles } from '@/constants/styles/contact.styles';
 import { useTheme } from '@/hooks/use-theme';
 import { firestore } from '@/config/firebase';
-
-// Mock images representing local assets or high-quality photos
-const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
-
-const instagramPosts = [
-  {
-    id: 'ig-1',
-    title: '¡Nueva tecnología en clínica!',
-    description: 'Incorporamos escáneres 3D para mejorar diagnósticos y tratamientos de ortodoncia.',
-    time: 'Hace 2 horas',
-    imageUrl: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=300&h=300&q=80',
-  },
-  {
-    id: 'ig-2',
-    title: 'Sonrisas que inspiran',
-    description: 'La felicidad de nuestros pacientes es nuestro mayor logro. ¡Gracias por confiar!',
-    time: 'Hace 1 día',
-    imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&h=300&q=80',
-  },
-  {
-    id: 'ig-3',
-    title: 'Horarios extendidos',
-    description: 'Ahora atendemos los sábados hasta las 2:00 PM.',
-    time: 'Hace 3 días',
-    imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=300&h=300&q=80',
-  },
-];
-
-const facebookPosts = [
-  {
-    id: 'fb-1',
-    author: 'ATI Dental',
-    time: 'Hoy',
-    content: 'Recuerden que la prevención es la clave. Agenda tu limpieza dental semestral hoy mismo llamando al 555-0199.',
-  },
-  {
-    id: 'fb-2',
-    author: 'ATI Dental',
-    time: 'Ayer',
-    content: '¡Feliz día del odontólogo a todo nuestro increíble equipo! Su dedicación hace sonreír al mundo. 🎉🦷',
-  },
-  {
-    id: 'fb-3',
-    author: 'ATI Dental',
-    time: '30 Oct',
-    content: 'Compartimos un artículo interesante sobre la importancia de la salud gingival en pacientes diabéticos. [Enlace]',
-  },
-];
-
-
 
 export default function ContactsScreen() {
   const { t } = useTranslation();
@@ -123,8 +70,6 @@ export default function ContactsScreen() {
       );
     return () => unsubscribe();
   }, []);
-
-
 
   const handleEmailPress = async (customEmail?: string) => {
     const targetEmail = customEmail || globalContact?.email || Config.contact.email;
@@ -193,15 +138,6 @@ export default function ContactsScreen() {
     }
   };
 
-  const handleSocialLinkPress = async (platform: 'instagram' | 'facebook') => {
-    const url = platform === 'instagram' ? Config.social.instagram : Config.social.facebook;
-    try {
-      await Linking.openURL(url);
-    } catch (error) {
-      Alert.alert(t('contacts.alerts.error'), t('contacts.alerts.socialError', { platform }));
-    }
-  };
-
   const isOffline = !netInfo.isConnected && isFromCache;
 
   return (
@@ -218,7 +154,6 @@ export default function ContactsScreen() {
         </View>
       )}
 
-      {/* Section 1: Responsables */}
       <View style={styles.sectionContainer}>
         <View style={styles.sectionHeader}>
           <Ionicons name="card" size={20} color={Colors.light.main} style={styles.sectionIcon} />
@@ -246,7 +181,6 @@ export default function ContactsScreen() {
         )}
       </View>
 
-      {/* Section 2: Contacto Directo */}
       <View style={[styles.sectionContainer, styles.directContactSection]}>
         <View style={[styles.sectionHeader, styles.directContactHeader]}>
           <Ionicons name="chatbubbles" size={20} color={Colors.light.main} style={styles.sectionIcon} />
@@ -262,96 +196,7 @@ export default function ContactsScreen() {
         </View>
       </View>
 
-      {/* Section 3: Redes Sociales */}
-      <View style={styles.sectionContainer}>
-        <View style={styles.sectionHeader}>
-          <Ionicons name="share-social" size={20} color={Colors.light.main} style={styles.sectionIcon} />
-          <Text style={styles.sectionTitle}>{t('contacts.socialActivity')}</Text>
-        </View>
-
-        <View style={styles.responsiblesList}>
-        {/* Instagram Subfeed */}
-        <View style={styles.socialSubfeed}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => handleSocialLinkPress('instagram')}
-          >
-            <LinearGradient
-              colors={theme.instagramGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.socialChannelHeader}
-            >
-              <Ionicons name="logo-instagram" size={22} color={theme.instagramTextColor} style={styles.socialIcon} />
-              <View>
-                <Text style={[styles.socialName, styles.instagramHeaderText]}>Instagram</Text>
-                <Text style={[styles.socialTag, styles.instagramHeaderText]}>@ati_dental</Text>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} 
-            contentContainerStyle = {styles.instagramScroll}
-          >
-            {instagramPosts.map((post) => (
-              <TouchableOpacity
-                key={post.id}
-                activeOpacity={0.9}
-                onPress={() => handleSocialLinkPress('instagram')}
-                style={styles.instagramCard}
-              >
-                <Image source={{ uri: post.imageUrl }} style={styles.instagramImage} contentFit="cover" />
-                <View style={styles.instagramContent}>
-                  <Text numberOfLines={1} style={styles.instagramPostTitle}>{post.title}</Text>
-                  <Text numberOfLines={2} style={styles.instagramPostDesc}>{post.description}</Text>
-                  <Text style={styles.instagramPostTime}>{post.time}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Facebook Subfeed */}
-        <View style={styles.socialSubfeed}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => handleSocialLinkPress('facebook')}
-            style={[styles.socialChannelHeader, styles.facebookHeader]}
-          >
-            <Ionicons name="logo-facebook" size={22} color={theme.facebookTextColor} style={styles.socialIcon} />
-            <View>
-              <Text style={[styles.socialName, styles.facebookHeaderText]}>Facebook</Text>
-              <Text style={[styles.socialTag, styles.facebookHeaderText]}>/ATIDentalOficial</Text>
-            </View>
-          </TouchableOpacity>
-
-          <View style={styles.facebookList}>
-            {facebookPosts.map((post) => (
-              <View key={post.id} style={styles.facebookCard}>
-                <View style={styles.facebookCardHeader}>
-                  <Image source={avatarFallback} style={styles.facebookAvatar} contentFit="cover" />
-                  <View>
-                    <Text style={styles.facebookAuthor}>{post.author}</Text>
-                    <Text style={styles.facebookTime}>{post.time}</Text>
-                  </View>
-                </View>
-                <Text style={styles.facebookText}>{post.content}</Text>
-                <View style={styles.facebookActions}>
-                  <TouchableOpacity activeOpacity={0.6} style={styles.facebookActionButton}>
-                    <Ionicons name="thumbs-up-outline" size={16} color={theme.textSecondary} style={{ marginRight: 6 }} />
-                    <Text style={styles.facebookActionText}>Me gusta</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity activeOpacity={0.6} style={styles.facebookActionButton}>
-                    <Ionicons name="chatbubble-outline" size={16} color={theme.textSecondary} style={{ marginRight: 6 }} />
-                    <Text style={styles.facebookActionText}>Comentar</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-        </View>
-      </View>
+      <SocialFeedSection />
     </PageTitleLayout>
   );
 }

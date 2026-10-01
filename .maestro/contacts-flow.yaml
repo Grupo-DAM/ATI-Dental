@@ -41,8 +41,10 @@ appId: com.proyect1.ATIDental
     element: ".*(Contacto Directo|Direct Contact).*"
     direction: DOWN
 - scrollUntilVisible:
-    element: ".*(Actividad en Redes Sociales|Social Media Activity).*"
+    element:
+      id: "social-feed-section"
     direction: DOWN
+    timeout: 10000
 
 
 - scrollUntilVisible:

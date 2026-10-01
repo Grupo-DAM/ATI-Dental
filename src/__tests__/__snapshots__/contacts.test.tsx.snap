@@ -1,3 +1,2541 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ContactsScreen Coincide con la instantánea (Snapshot Test) 1`] = `null`;
+exports[`ContactsScreen Coincide con la instantánea (Snapshot Test) 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "#F7F6F8",
+      "flex": 1,
+    }
+  }
+>
+  <View
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#52287D",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "paddingBottom": 16,
+          "paddingHorizontal": 24,
+        },
+        {
+          "paddingTop": 12,
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 8,
+        }
+      }
+    >
+      <Image
+        contentFit="contain"
+        source={1}
+        style={
+          {
+            "height": 28,
+            "width": 28,
+          }
+        }
+        tintColor="white"
+      />
+      <Text
+        style={
+          {
+            "color": "white",
+            "fontSize": 20,
+            "fontWeight": "700",
+            "letterSpacing": 0.5,
+          }
+        }
+      >
+        ATI Dental
+      </Text>
+    </View>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "opacity": 1,
+          "padding": 4,
+        }
+      }
+      testID="menu-btn"
+    >
+      <Text
+        allowFontScaling={false}
+        selectable={false}
+        style={
+          [
+            {
+              "color": "white",
+              "fontSize": 36,
+            },
+            undefined,
+            {
+              "fontFamily": "ionicons",
+              "fontStyle": "normal",
+              "fontWeight": "normal",
+            },
+            {},
+          ]
+        }
+      >
+        
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": undefined,
+        "borderBottomColor": undefined,
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "paddingHorizontal": 20,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <Text
+      style={
+        {
+          "color": undefined,
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+        }
+      }
+    >
+      tabs.home
+    </Text>
+    <Text
+      style={
+        {
+          "color": undefined,
+          "fontSize": 14,
+        }
+      }
+    >
+         ›   
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#52287D",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+    >
+      Información y Contacto
+    </Text>
+  </View>
+  <RCTScrollView
+    contentContainerStyle={
+      {
+        "paddingBottom": 100,
+      }
+    }
+  >
+    <View>
+      <View
+        style={
+          {
+            "paddingHorizontal": 20,
+            "paddingVertical": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#1F2937",
+              "fontFamily": "Open Sans",
+              "fontSize": 24,
+              "fontWeight": "700",
+              "marginBottom": 6,
+            }
+          }
+        >
+          Información y Contacto
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#6B7280",
+              "fontFamily": "Open Sans",
+              "fontSize": 14,
+              "lineHeight": 20,
+            }
+          }
+        >
+          contacts.subtitle
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "backgroundColor": "#F9FAFB",
+            "borderColor": "#E5E7EB",
+            "borderRadius": 8,
+            "borderWidth": 1,
+            "marginBottom": 16,
+            "marginHorizontal": 16,
+            "padding": 16,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#5B2D8B",
+                  "fontSize": 20,
+                },
+                {
+                  "marginRight": 8,
+                },
+                {
+                  "fontFamily": "ionicons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+          <Text
+            style={
+              {
+                "color": "#111827",
+                "fontFamily": "Open Sans",
+                "fontSize": 18,
+                "fontWeight": "600",
+              }
+            }
+          >
+            Responsables del Sitio
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "gap": 12,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignSelf": "stretch",
+                "backgroundColor": "#FFFFFF",
+                "borderRadius": 12,
+                "borderTopColor": "#5B2D8B",
+                "borderTopWidth": 4,
+                "elevation": 4,
+                "flexDirection": "row",
+                "gap": 16,
+                "marginBottom": 12,
+                "padding": 16,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 4,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.1,
+                "shadowRadius": 6,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "height": 96,
+                  "position": "relative",
+                  "width": 96,
+                }
+              }
+            >
+              <Image
+                contentFit="cover"
+                source={
+                  {
+                    "uri": "http://",
+                  }
+                }
+                style={
+                  {
+                    "borderColor": "#F3F4F6",
+                    "borderRadius": 48,
+                    "borderWidth": 2,
+                    "height": 96,
+                    "width": 96,
+                  }
+                }
+              />
+              <View
+                style={
+                  [
+                    {
+                      "borderColor": "#FFFFFF",
+                      "borderRadius": 10,
+                      "borderWidth": 2,
+                      "bottom": 0,
+                      "height": 20,
+                      "position": "absolute",
+                      "right": 0,
+                      "width": 20,
+                    },
+                    {
+                      "backgroundColor": "#9CA3AF",
+                    },
+                  ]
+                }
+                testID="status-offline"
+              />
+            </View>
+            <View
+              style={
+                {
+                  "flex": 1,
+                  "justifyContent": "space-between",
+                }
+              }
+            >
+              <Text
+                style={
+                  {
+                    "color": "#5B2D8B",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 20,
+                    "fontWeight": "700",
+                  }
+                }
+              >
+                Dr. Alejandro V.
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#3E1F5C",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 14,
+                    "fontWeight": "600",
+                    "marginTop": 2,
+                  }
+                }
+              >
+                Director Médico
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#4A4A4A",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 12,
+                    "lineHeight": 16,
+                    "marginVertical": 6,
+                  }
+                }
+              />
+              <View
+                style={
+                  {
+                    "flexDirection": "row",
+                    "gap": 12,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                <View
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onClick={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "alignItems": "center",
+                      "backgroundColor": "#F3F4F6",
+                      "borderRadius": 22,
+                      "elevation": 1,
+                      "height": 44,
+                      "justifyContent": "center",
+                      "opacity": 1,
+                      "shadowColor": "#000",
+                      "shadowOffset": {
+                        "height": 1,
+                        "width": 0,
+                      },
+                      "shadowOpacity": 0.05,
+                      "shadowRadius": 2,
+                      "width": 44,
+                    }
+                  }
+                  testID="btn-quick-email"
+                >
+                  <Text
+                    allowFontScaling={false}
+                    selectable={false}
+                    style={
+                      [
+                        {
+                          "color": "#4A4A4A",
+                          "fontSize": 18,
+                        },
+                        undefined,
+                        {
+                          "fontFamily": "ionicons",
+                          "fontStyle": "normal",
+                          "fontWeight": "normal",
+                        },
+                        {},
+                      ]
+                    }
+                  >
+                    
+                  </Text>
+                </View>
+                <View
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onClick={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "alignItems": "center",
+                      "backgroundColor": "#F3F4F6",
+                      "borderRadius": 22,
+                      "elevation": 1,
+                      "height": 44,
+                      "justifyContent": "center",
+                      "opacity": 1,
+                      "shadowColor": "#000",
+                      "shadowOffset": {
+                        "height": 1,
+                        "width": 0,
+                      },
+                      "shadowOpacity": 0.05,
+                      "shadowRadius": 2,
+                      "width": 44,
+                    }
+                  }
+                  testID="btn-quick-phone"
+                >
+                  <Text
+                    allowFontScaling={false}
+                    selectable={false}
+                    style={
+                      [
+                        {
+                          "color": "#4A4A4A",
+                          "fontSize": 18,
+                        },
+                        undefined,
+                        {
+                          "fontFamily": "ionicons",
+                          "fontStyle": "normal",
+                          "fontWeight": "normal",
+                        },
+                        {},
+                      ]
+                    }
+                  >
+                    
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "alignSelf": "stretch",
+                "backgroundColor": "#FFFFFF",
+                "borderRadius": 12,
+                "borderTopColor": "#5B2D8B",
+                "borderTopWidth": 4,
+                "elevation": 4,
+                "flexDirection": "row",
+                "gap": 16,
+                "marginBottom": 12,
+                "padding": 16,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 4,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.1,
+                "shadowRadius": 6,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "height": 96,
+                  "position": "relative",
+                  "width": 96,
+                }
+              }
+            >
+              <Image
+                contentFit="cover"
+                source={
+                  {
+                    "uri": "http://",
+                  }
+                }
+                style={
+                  {
+                    "borderColor": "#F3F4F6",
+                    "borderRadius": 48,
+                    "borderWidth": 2,
+                    "height": 96,
+                    "width": 96,
+                  }
+                }
+              />
+              <View
+                style={
+                  [
+                    {
+                      "borderColor": "#FFFFFF",
+                      "borderRadius": 10,
+                      "borderWidth": 2,
+                      "bottom": 0,
+                      "height": 20,
+                      "position": "absolute",
+                      "right": 0,
+                      "width": 20,
+                    },
+                    {
+                      "backgroundColor": "#9CA3AF",
+                    },
+                  ]
+                }
+                testID="status-offline"
+              />
+            </View>
+            <View
+              style={
+                {
+                  "flex": 1,
+                  "justifyContent": "space-between",
+                }
+              }
+            >
+              <Text
+                style={
+                  {
+                    "color": "#5B2D8B",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 20,
+                    "fontWeight": "700",
+                  }
+                }
+              >
+                Dra. Sofia M.
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#3E1F5C",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 14,
+                    "fontWeight": "600",
+                    "marginTop": 2,
+                  }
+                }
+              >
+                Gerente de Operaciones
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#4A4A4A",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 12,
+                    "lineHeight": 16,
+                    "marginVertical": 6,
+                  }
+                }
+              />
+              <View
+                style={
+                  {
+                    "flexDirection": "row",
+                    "gap": 12,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                <View
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onClick={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "alignItems": "center",
+                      "backgroundColor": "#F3F4F6",
+                      "borderRadius": 22,
+                      "elevation": 1,
+                      "height": 44,
+                      "justifyContent": "center",
+                      "opacity": 1,
+                      "shadowColor": "#000",
+                      "shadowOffset": {
+                        "height": 1,
+                        "width": 0,
+                      },
+                      "shadowOpacity": 0.05,
+                      "shadowRadius": 2,
+                      "width": 44,
+                    }
+                  }
+                  testID="btn-quick-email"
+                >
+                  <Text
+                    allowFontScaling={false}
+                    selectable={false}
+                    style={
+                      [
+                        {
+                          "color": "#4A4A4A",
+                          "fontSize": 18,
+                        },
+                        undefined,
+                        {
+                          "fontFamily": "ionicons",
+                          "fontStyle": "normal",
+                          "fontWeight": "normal",
+                        },
+                        {},
+                      ]
+                    }
+                  >
+                    
+                  </Text>
+                </View>
+                <View
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onClick={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "alignItems": "center",
+                      "backgroundColor": "#F3F4F6",
+                      "borderRadius": 22,
+                      "elevation": 1,
+                      "height": 44,
+                      "justifyContent": "center",
+                      "opacity": 1,
+                      "shadowColor": "#000",
+                      "shadowOffset": {
+                        "height": 1,
+                        "width": 0,
+                      },
+                      "shadowOpacity": 0.05,
+                      "shadowRadius": 2,
+                      "width": 44,
+                    }
+                  }
+                  testID="btn-quick-phone"
+                >
+                  <Text
+                    allowFontScaling={false}
+                    selectable={false}
+                    style={
+                      [
+                        {
+                          "color": "#4A4A4A",
+                          "fontSize": 18,
+                        },
+                        undefined,
+                        {
+                          "fontFamily": "ionicons",
+                          "fontStyle": "normal",
+                          "fontWeight": "normal",
+                        },
+                        {},
+                      ]
+                    }
+                  >
+                    
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "alignSelf": "stretch",
+                "backgroundColor": "#FFFFFF",
+                "borderRadius": 12,
+                "borderTopColor": "#5B2D8B",
+                "borderTopWidth": 4,
+                "elevation": 4,
+                "flexDirection": "row",
+                "gap": 16,
+                "marginBottom": 12,
+                "padding": 16,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 4,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.1,
+                "shadowRadius": 6,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "height": 96,
+                  "position": "relative",
+                  "width": 96,
+                }
+              }
+            >
+              <Image
+                contentFit="cover"
+                source={
+                  {
+                    "uri": "http://",
+                  }
+                }
+                style={
+                  {
+                    "borderColor": "#F3F4F6",
+                    "borderRadius": 48,
+                    "borderWidth": 2,
+                    "height": 96,
+                    "width": 96,
+                  }
+                }
+              />
+              <View
+                style={
+                  [
+                    {
+                      "borderColor": "#FFFFFF",
+                      "borderRadius": 10,
+                      "borderWidth": 2,
+                      "bottom": 0,
+                      "height": 20,
+                      "position": "absolute",
+                      "right": 0,
+                      "width": 20,
+                    },
+                    {
+                      "backgroundColor": "#9CA3AF",
+                    },
+                  ]
+                }
+                testID="status-offline"
+              />
+            </View>
+            <View
+              style={
+                {
+                  "flex": 1,
+                  "justifyContent": "space-between",
+                }
+              }
+            >
+              <Text
+                style={
+                  {
+                    "color": "#5B2D8B",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 20,
+                    "fontWeight": "700",
+                  }
+                }
+              >
+                Ing. Carlos R.
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#3E1F5C",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 14,
+                    "fontWeight": "600",
+                    "marginTop": 2,
+                  }
+                }
+              >
+                Soporte Técnico
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#4A4A4A",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 12,
+                    "lineHeight": 16,
+                    "marginVertical": 6,
+                  }
+                }
+              />
+              <View
+                style={
+                  {
+                    "flexDirection": "row",
+                    "gap": 12,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                <View
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onClick={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "alignItems": "center",
+                      "backgroundColor": "#F3F4F6",
+                      "borderRadius": 22,
+                      "elevation": 1,
+                      "height": 44,
+                      "justifyContent": "center",
+                      "opacity": 1,
+                      "shadowColor": "#000",
+                      "shadowOffset": {
+                        "height": 1,
+                        "width": 0,
+                      },
+                      "shadowOpacity": 0.05,
+                      "shadowRadius": 2,
+                      "width": 44,
+                    }
+                  }
+                  testID="btn-quick-email"
+                >
+                  <Text
+                    allowFontScaling={false}
+                    selectable={false}
+                    style={
+                      [
+                        {
+                          "color": "#4A4A4A",
+                          "fontSize": 18,
+                        },
+                        undefined,
+                        {
+                          "fontFamily": "ionicons",
+                          "fontStyle": "normal",
+                          "fontWeight": "normal",
+                        },
+                        {},
+                      ]
+                    }
+                  >
+                    
+                  </Text>
+                </View>
+                <View
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onClick={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "alignItems": "center",
+                      "backgroundColor": "#F3F4F6",
+                      "borderRadius": 22,
+                      "elevation": 1,
+                      "height": 44,
+                      "justifyContent": "center",
+                      "opacity": 1,
+                      "shadowColor": "#000",
+                      "shadowOffset": {
+                        "height": 1,
+                        "width": 0,
+                      },
+                      "shadowOpacity": 0.05,
+                      "shadowRadius": 2,
+                      "width": 44,
+                    }
+                  }
+                  testID="btn-quick-phone"
+                >
+                  <Text
+                    allowFontScaling={false}
+                    selectable={false}
+                    style={
+                      [
+                        {
+                          "color": "#4A4A4A",
+                          "fontSize": 18,
+                        },
+                        undefined,
+                        {
+                          "fontFamily": "ionicons",
+                          "fontStyle": "normal",
+                          "fontWeight": "normal",
+                        },
+                        {},
+                      ]
+                    }
+                  >
+                    
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "backgroundColor": "#F9FAFB",
+            "borderColor": "#E5E7EB",
+            "borderRadius": 8,
+            "borderWidth": 1,
+            "marginBottom": 16,
+            "marginHorizontal": 16,
+            "padding": 16,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#5B2D8B",
+                  "fontSize": 20,
+                },
+                {
+                  "marginRight": 8,
+                },
+                {
+                  "fontFamily": "ionicons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+          <Text
+            style={
+              {
+                "color": "#111827",
+                "fontFamily": "Open Sans",
+                "fontSize": 18,
+                "fontWeight": "600",
+              }
+            }
+          >
+            contacts.directContact
+          </Text>
+        </View>
+        <Text
+          style={
+            {
+              "color": "#4A4A4A",
+              "fontFamily": "Open Sans",
+              "fontSize": 12,
+              "marginBottom": 16,
+              "textAlign": "center",
+            }
+          }
+        >
+          contacts.directContactSubtitle
+        </Text>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "gap": 12,
+            }
+          }
+        >
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "alignSelf": "stretch",
+                "backgroundColor": "#5B2D8B",
+                "borderRadius": 8,
+                "elevation": 3,
+                "flexDirection": "row",
+                "height": 44,
+                "justifyContent": "center",
+                "minWidth": 240,
+                "opacity": 1,
+                "paddingHorizontal": 20,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 2,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.1,
+                "shadowRadius": 3,
+              }
+            }
+            testID="btn-contact-email"
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "white",
+                    "fontSize": 20,
+                  },
+                  {
+                    "marginRight": 12,
+                  },
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#FFFFFF",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 14,
+                  "fontWeight": "600",
+                  "textAlign": "center",
+                }
+              }
+            >
+              Enviar Correo
+            </Text>
+          </View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "alignSelf": "stretch",
+                "backgroundColor": "#8F6BB3",
+                "borderRadius": 8,
+                "elevation": 3,
+                "flexDirection": "row",
+                "height": 44,
+                "justifyContent": "center",
+                "minWidth": 240,
+                "opacity": 1,
+                "paddingHorizontal": 20,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 2,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.1,
+                "shadowRadius": 3,
+              }
+            }
+            testID="btn-contact-phone"
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "white",
+                    "fontSize": 20,
+                  },
+                  {
+                    "marginRight": 12,
+                  },
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#FFFFFF",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 14,
+                  "fontWeight": "600",
+                  "textAlign": "center",
+                }
+              }
+            >
+              Llamada
+            </Text>
+          </View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "alignSelf": "stretch",
+                "backgroundColor": "#34C759",
+                "borderRadius": 8,
+                "elevation": 3,
+                "flexDirection": "row",
+                "height": 44,
+                "justifyContent": "center",
+                "minWidth": 240,
+                "opacity": 1,
+                "paddingHorizontal": 20,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 2,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.1,
+                "shadowRadius": 3,
+              }
+            }
+            testID="btn-contact-whatsapp"
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "white",
+                    "fontSize": 20,
+                  },
+                  {
+                    "marginRight": 12,
+                  },
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#FFFFFF",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 14,
+                  "fontWeight": "600",
+                  "textAlign": "center",
+                }
+              }
+            >
+              WhatsApp
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "backgroundColor": "#F9FAFB",
+            "borderColor": "#E5E7EB",
+            "borderRadius": 8,
+            "borderWidth": 1,
+            "marginBottom": 16,
+            "marginHorizontal": 16,
+            "padding": 16,
+          }
+        }
+        testID="social-feed-section"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "marginBottom": 12,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#5B2D8B",
+                  "fontSize": 20,
+                },
+                {
+                  "marginRight": 8,
+                },
+                {
+                  "fontFamily": "ionicons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+          <Text
+            style={
+              {
+                "color": "#1F2937",
+                "flexShrink": 1,
+                "fontFamily": "Open Sans",
+                "fontSize": 16,
+                "fontWeight": "700",
+              }
+            }
+          >
+            Actividad en Redes Sociales
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "marginBottom": 16,
+              "marginTop": 8,
+            }
+          }
+        >
+          <View
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "minHeight": 44,
+                "minWidth": 44,
+              }
+            }
+            testID="social-channel-instagram"
+          >
+            <ViewManagerAdapter_ExpoLinearGradient
+              colors={
+                [
+                  4286790324,
+                  4292948076,
+                  4294271040,
+                ]
+              }
+              endPoint={
+                [
+                  1,
+                  0,
+                ]
+              }
+              startPoint={
+                [
+                  0,
+                  0,
+                ]
+              }
+              style={
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "flexDirection": "row",
+                  "marginBottom": 12,
+                  "minHeight": 44,
+                  "padding": 12,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#FFFFFF",
+                      "fontSize": 22,
+                    },
+                    {
+                      "marginRight": 10,
+                    },
+                    {
+                      "fontFamily": "ionicons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+              <View>
+                <Text
+                  style={
+                    [
+                      {
+                        "color": "#1F2937",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 15,
+                        "fontWeight": "600",
+                      },
+                      {
+                        "color": "#FFFFFF",
+                      },
+                    ]
+                  }
+                >
+                  Instagram
+                </Text>
+                <Text
+                  style={
+                    [
+                      {
+                        "color": "#6B7280",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 12,
+                      },
+                      {
+                        "color": "#FFFFFF",
+                      },
+                    ]
+                  }
+                >
+                  @odontosalud_official
+                </Text>
+              </View>
+            </ViewManagerAdapter_ExpoLinearGradient>
+          </View>
+          <RCTScrollView
+            data={
+              [
+                {
+                  "author": undefined,
+                  "content": "Incorporamos escáneres 3D.",
+                  "id": "ig-1",
+                  "imageUrl": "http://ig1",
+                  "network": "instagram",
+                  "publishedAt": "Hace 2 horas",
+                  "title": "¡Nueva tecnología en clínica!",
+                  "url": "https://instagram.com/ati_dental",
+                },
+                {
+                  "author": undefined,
+                  "content": "Gracias por confiar.",
+                  "id": "ig-2",
+                  "imageUrl": "http://ig2",
+                  "network": "instagram",
+                  "publishedAt": "Hace 1 día",
+                  "title": "Sonrisas que inspiran",
+                  "url": "https://instagram.com/p/2",
+                },
+                {
+                  "author": undefined,
+                  "content": "Sábados hasta las 2:00 PM.",
+                  "id": "ig-3",
+                  "imageUrl": "http://ig3",
+                  "network": "instagram",
+                  "publishedAt": "Hace 3 días",
+                  "title": "Horarios extendidos",
+                  "url": "https://instagram.com/p/3",
+                },
+              ]
+            }
+            getItem={[Function]}
+            getItemCount={[Function]}
+            horizontal={true}
+            keyExtractor={[Function]}
+            onContentSizeChange={[Function]}
+            onLayout={[Function]}
+            onMomentumScrollBegin={[Function]}
+            onMomentumScrollEnd={[Function]}
+            onScroll={[Function]}
+            onScrollBeginDrag={[Function]}
+            onScrollEndDrag={[Function]}
+            removeClippedSubviews={false}
+            renderItem={[Function]}
+            scrollEventThrottle={0.0001}
+            showsHorizontalScrollIndicator={false}
+            stickyHeaderIndices={[]}
+            testID="social-instagram-list"
+            viewabilityConfigCallbackPairs={[]}
+          >
+            <View>
+              <View
+                onFocusCapture={[Function]}
+                onLayout={[Function]}
+                style={
+                  [
+                    {
+                      "flexDirection": "row",
+                    },
+                    null,
+                  ]
+                }
+              >
+                <View
+                  accessibilityRole="button"
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "backgroundColor": "#FFFFFF",
+                      "borderColor": "#E5E7EB",
+                      "borderRadius": 8,
+                      "borderWidth": 1,
+                      "marginRight": 12,
+                      "minHeight": 44,
+                      "overflow": "hidden",
+                      "width": 200,
+                    }
+                  }
+                  testID="social-post-ig-1"
+                >
+                  <Image
+                    contentFit="cover"
+                    source={
+                      {
+                        "uri": "http://ig1",
+                      }
+                    }
+                    style={
+                      {
+                        "height": 120,
+                        "width": "100%",
+                      }
+                    }
+                  />
+                  <View
+                    style={
+                      {
+                        "padding": 10,
+                      }
+                    }
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={
+                        {
+                          "color": "#4A4A4A",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 13,
+                          "fontWeight": "700",
+                        }
+                      }
+                    >
+                      ¡Nueva tecnología en clínica!
+                    </Text>
+                    <Text
+                      numberOfLines={2}
+                      style={
+                        {
+                          "color": "#6B7280",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 11,
+                          "lineHeight": 14,
+                          "marginVertical": 4,
+                        }
+                      }
+                    >
+                      Incorporamos escáneres 3D.
+                    </Text>
+                    <Text
+                      style={
+                        {
+                          "color": "#9CA3AF",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 10,
+                        }
+                      }
+                    >
+                      Hace 2 horas
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View
+                onFocusCapture={[Function]}
+                onLayout={[Function]}
+                style={
+                  [
+                    {
+                      "flexDirection": "row",
+                    },
+                    null,
+                  ]
+                }
+              >
+                <View
+                  accessibilityRole="button"
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "backgroundColor": "#FFFFFF",
+                      "borderColor": "#E5E7EB",
+                      "borderRadius": 8,
+                      "borderWidth": 1,
+                      "marginRight": 12,
+                      "minHeight": 44,
+                      "overflow": "hidden",
+                      "width": 200,
+                    }
+                  }
+                  testID="social-post-ig-2"
+                >
+                  <Image
+                    contentFit="cover"
+                    source={
+                      {
+                        "uri": "http://ig2",
+                      }
+                    }
+                    style={
+                      {
+                        "height": 120,
+                        "width": "100%",
+                      }
+                    }
+                  />
+                  <View
+                    style={
+                      {
+                        "padding": 10,
+                      }
+                    }
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={
+                        {
+                          "color": "#4A4A4A",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 13,
+                          "fontWeight": "700",
+                        }
+                      }
+                    >
+                      Sonrisas que inspiran
+                    </Text>
+                    <Text
+                      numberOfLines={2}
+                      style={
+                        {
+                          "color": "#6B7280",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 11,
+                          "lineHeight": 14,
+                          "marginVertical": 4,
+                        }
+                      }
+                    >
+                      Gracias por confiar.
+                    </Text>
+                    <Text
+                      style={
+                        {
+                          "color": "#9CA3AF",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 10,
+                        }
+                      }
+                    >
+                      Hace 1 día
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View
+                onFocusCapture={[Function]}
+                onLayout={[Function]}
+                style={
+                  [
+                    {
+                      "flexDirection": "row",
+                    },
+                    null,
+                  ]
+                }
+              >
+                <View
+                  accessibilityRole="button"
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "backgroundColor": "#FFFFFF",
+                      "borderColor": "#E5E7EB",
+                      "borderRadius": 8,
+                      "borderWidth": 1,
+                      "marginRight": 12,
+                      "minHeight": 44,
+                      "overflow": "hidden",
+                      "width": 200,
+                    }
+                  }
+                  testID="social-post-ig-3"
+                >
+                  <Image
+                    contentFit="cover"
+                    source={
+                      {
+                        "uri": "http://ig3",
+                      }
+                    }
+                    style={
+                      {
+                        "height": 120,
+                        "width": "100%",
+                      }
+                    }
+                  />
+                  <View
+                    style={
+                      {
+                        "padding": 10,
+                      }
+                    }
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={
+                        {
+                          "color": "#4A4A4A",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 13,
+                          "fontWeight": "700",
+                        }
+                      }
+                    >
+                      Horarios extendidos
+                    </Text>
+                    <Text
+                      numberOfLines={2}
+                      style={
+                        {
+                          "color": "#6B7280",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 11,
+                          "lineHeight": 14,
+                          "marginVertical": 4,
+                        }
+                      }
+                    >
+                      Sábados hasta las 2:00 PM.
+                    </Text>
+                    <Text
+                      style={
+                        {
+                          "color": "#9CA3AF",
+                          "fontFamily": "Open Sans",
+                          "fontSize": 10,
+                        }
+                      }
+                    >
+                      Hace 3 días
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </RCTScrollView>
+        </View>
+        <View
+          style={
+            {
+              "marginBottom": 16,
+              "marginTop": 8,
+            }
+          }
+        >
+          <View
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "minHeight": 44,
+                  "minWidth": 44,
+                },
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "flexDirection": "row",
+                  "marginBottom": 12,
+                  "minHeight": 44,
+                  "padding": 12,
+                },
+              ]
+            }
+            testID="social-channel-facebook"
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#1877F2",
+                    "fontSize": 22,
+                  },
+                  {
+                    "marginRight": 10,
+                  },
+                  {
+                    "fontFamily": "ionicons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+            <View>
+              <Text
+                style={
+                  {
+                    "color": "#1F2937",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                  }
+                }
+              >
+                Facebook
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#6B7280",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 12,
+                  }
+                }
+              >
+                /OdontosaludOfficial
+              </Text>
+            </View>
+          </View>
+          <RCTScrollView
+            data={
+              [
+                {
+                  "author": "ATI Dental",
+                  "content": "Agenda tu limpieza dental.",
+                  "id": "fb-1",
+                  "imageUrl": undefined,
+                  "network": "facebook",
+                  "publishedAt": "Hoy",
+                  "title": undefined,
+                  "url": "https://facebook.com/ATIDentalOficial",
+                },
+                {
+                  "author": "ATI Dental",
+                  "content": "Feliz día del odontólogo.",
+                  "id": "fb-2",
+                  "imageUrl": undefined,
+                  "network": "facebook",
+                  "publishedAt": "Ayer",
+                  "title": undefined,
+                  "url": "https://facebook.com/ATIDentalOficial/posts/2",
+                },
+                {
+                  "author": "ATI Dental",
+                  "content": "Artículo de salud gingival.",
+                  "id": "fb-3",
+                  "imageUrl": undefined,
+                  "network": "facebook",
+                  "publishedAt": "30 Oct",
+                  "title": undefined,
+                  "url": "https://facebook.com/ATIDentalOficial/posts/3",
+                },
+              ]
+            }
+            getItem={[Function]}
+            getItemCount={[Function]}
+            keyExtractor={[Function]}
+            onContentSizeChange={[Function]}
+            onLayout={[Function]}
+            onMomentumScrollBegin={[Function]}
+            onMomentumScrollEnd={[Function]}
+            onScroll={[Function]}
+            onScrollBeginDrag={[Function]}
+            onScrollEndDrag={[Function]}
+            removeClippedSubviews={false}
+            renderItem={[Function]}
+            scrollEnabled={false}
+            scrollEventThrottle={0.0001}
+            stickyHeaderIndices={[]}
+            testID="social-facebook-list"
+            viewabilityConfigCallbackPairs={[]}
+          >
+            <View>
+              <View
+                onFocusCapture={[Function]}
+                onLayout={[Function]}
+                style={null}
+              >
+                <View
+                  accessibilityRole="button"
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "backgroundColor": "#FFFFFF",
+                      "borderColor": "#E5E7EB",
+                      "borderRadius": 8,
+                      "borderWidth": 1,
+                      "marginBottom": 12,
+                      "minHeight": 44,
+                      "padding": 12,
+                    }
+                  }
+                  testID="social-post-fb-1"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "center",
+                        "flexDirection": "row",
+                        "marginBottom": 10,
+                      }
+                    }
+                  >
+                    <Image
+                      contentFit="cover"
+                      source={1}
+                      style={
+                        {
+                          "borderRadius": 18,
+                          "height": 36,
+                          "marginRight": 10,
+                          "width": 36,
+                        }
+                      }
+                    />
+                    <View>
+                      <Text
+                        style={
+                          {
+                            "color": "#4A4A4A",
+                            "fontFamily": "Open Sans",
+                            "fontSize": 14,
+                            "fontWeight": "600",
+                          }
+                        }
+                      >
+                        ATI Dental
+                      </Text>
+                      <Text
+                        style={
+                          {
+                            "color": "#9CA3AF",
+                            "fontFamily": "Open Sans",
+                            "fontSize": 11,
+                          }
+                        }
+                      >
+                        Hoy
+                      </Text>
+                    </View>
+                  </View>
+                  <Text
+                    style={
+                      {
+                        "color": "#1F2937",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 13,
+                        "lineHeight": 18,
+                      }
+                    }
+                  >
+                    Agenda tu limpieza dental.
+                  </Text>
+                </View>
+              </View>
+              <View
+                onFocusCapture={[Function]}
+                onLayout={[Function]}
+                style={null}
+              >
+                <View
+                  accessibilityRole="button"
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "backgroundColor": "#FFFFFF",
+                      "borderColor": "#E5E7EB",
+                      "borderRadius": 8,
+                      "borderWidth": 1,
+                      "marginBottom": 12,
+                      "minHeight": 44,
+                      "padding": 12,
+                    }
+                  }
+                  testID="social-post-fb-2"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "center",
+                        "flexDirection": "row",
+                        "marginBottom": 10,
+                      }
+                    }
+                  >
+                    <Image
+                      contentFit="cover"
+                      source={1}
+                      style={
+                        {
+                          "borderRadius": 18,
+                          "height": 36,
+                          "marginRight": 10,
+                          "width": 36,
+                        }
+                      }
+                    />
+                    <View>
+                      <Text
+                        style={
+                          {
+                            "color": "#4A4A4A",
+                            "fontFamily": "Open Sans",
+                            "fontSize": 14,
+                            "fontWeight": "600",
+                          }
+                        }
+                      >
+                        ATI Dental
+                      </Text>
+                      <Text
+                        style={
+                          {
+                            "color": "#9CA3AF",
+                            "fontFamily": "Open Sans",
+                            "fontSize": 11,
+                          }
+                        }
+                      >
+                        Ayer
+                      </Text>
+                    </View>
+                  </View>
+                  <Text
+                    style={
+                      {
+                        "color": "#1F2937",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 13,
+                        "lineHeight": 18,
+                      }
+                    }
+                  >
+                    Feliz día del odontólogo.
+                  </Text>
+                </View>
+              </View>
+              <View
+                onFocusCapture={[Function]}
+                onLayout={[Function]}
+                style={null}
+              >
+                <View
+                  accessibilityRole="button"
+                  accessibilityState={
+                    {
+                      "busy": undefined,
+                      "checked": undefined,
+                      "disabled": undefined,
+                      "expanded": undefined,
+                      "selected": undefined,
+                    }
+                  }
+                  accessibilityValue={
+                    {
+                      "max": undefined,
+                      "min": undefined,
+                      "now": undefined,
+                      "text": undefined,
+                    }
+                  }
+                  accessible={true}
+                  collapsable={false}
+                  focusable={true}
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onResponderGrant={[Function]}
+                  onResponderMove={[Function]}
+                  onResponderRelease={[Function]}
+                  onResponderTerminate={[Function]}
+                  onResponderTerminationRequest={[Function]}
+                  onStartShouldSetResponder={[Function]}
+                  style={
+                    {
+                      "backgroundColor": "#FFFFFF",
+                      "borderColor": "#E5E7EB",
+                      "borderRadius": 8,
+                      "borderWidth": 1,
+                      "marginBottom": 12,
+                      "minHeight": 44,
+                      "padding": 12,
+                    }
+                  }
+                  testID="social-post-fb-3"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "center",
+                        "flexDirection": "row",
+                        "marginBottom": 10,
+                      }
+                    }
+                  >
+                    <Image
+                      contentFit="cover"
+                      source={1}
+                      style={
+                        {
+                          "borderRadius": 18,
+                          "height": 36,
+                          "marginRight": 10,
+                          "width": 36,
+                        }
+                      }
+                    />
+                    <View>
+                      <Text
+                        style={
+                          {
+                            "color": "#4A4A4A",
+                            "fontFamily": "Open Sans",
+                            "fontSize": 14,
+                            "fontWeight": "600",
+                          }
+                        }
+                      >
+                        ATI Dental
+                      </Text>
+                      <Text
+                        style={
+                          {
+                            "color": "#9CA3AF",
+                            "fontFamily": "Open Sans",
+                            "fontSize": 11,
+                          }
+                        }
+                      >
+                        30 Oct
+                      </Text>
+                    </View>
+                  </View>
+                  <Text
+                    style={
+                      {
+                        "color": "#1F2937",
+                        "fontFamily": "Open Sans",
+                        "fontSize": 13,
+                        "lineHeight": 18,
+                      }
+                    }
+                  >
+                    Artículo de salud gingival.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </RCTScrollView>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;
