@@ -110,6 +110,7 @@ export const createAgendaStyles = (theme: any) => {
         },
         dayNumberContainerSelected: {
             backgroundColor: theme.main,
+            borderRadius: 14,
         },
         dayNumberText: {
             fontSize: 13,
