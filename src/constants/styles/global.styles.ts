@@ -117,7 +117,11 @@ export const createGlobalStyles = (theme: any) => StyleSheet.create({
       borderRadius: Border.radius.tiny,
       paddingHorizontal: Spacing.three,
       paddingVertical: Spacing.two,
-    }
+    },
+    overlay: {
+      flex: Spacing.quarter,
+      backgroundColor: theme.overlayOpacity,
+    },
 });
 
 export const createInputFieldStyles = (theme: any) => {
@@ -278,7 +282,7 @@ export const createCardContainerStyles = (theme: any) => {
     cardWrapper: {
       flex: 1,
       paddingTop: Spacing.two,
-      borderRadius: 12,
+      borderRadius: Border.radius.wide,
       backgroundColor: theme.main,
       ...global.shadow,
     },
@@ -383,4 +387,34 @@ export const createFormFieldStyles = (theme: any) => {
       fontSize: 15,
     },
   });
+}
+
+export const createSlidingModalStyles = (theme: any) => {
+  const global = createGlobalStyles(theme);
+  return StyleSheet.create({
+      overlay: {
+          ...global.overlay,
+          justifyContent: 'flex-end',
+      },
+      wrapper: {
+        paddingTop: Spacing.two,
+        borderRadius: Border.radius.big,
+      },
+      sheet: {
+          backgroundColor: theme.backgroundElement,
+          borderTopLeftRadius: Border.radius.big,
+          borderTopRightRadius: Border.radius.big,
+          paddingHorizontal: Spacing.four,
+          paddingTop: Spacing.three,
+          paddingBottom: BottomTabInset,
+          alignItems: 'center',
+      },
+      handle: {
+          width: 40,
+          height: 4,
+          backgroundColor: theme.cardSeparator,
+          borderRadius: Border.radius.regular,
+          marginBottom: Spacing.four,
+      },
+  })
 }

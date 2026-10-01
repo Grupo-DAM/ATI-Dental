@@ -19,6 +19,8 @@ const BRAND_COLORS = {
   placeholderColor: '#9E8BAC',
   positive: '#10B981',
   onlineStatus: '#22C55E',
+  overlayOpacity: 'rgba(0,0,0,0.4)',
+  mainGradient: ['#622D8D', '#DBB4FF'],
 
   //tooth states:
   cavity: "#F05C5E",
@@ -221,6 +223,7 @@ export const Border = {
     narrow: 6,
     regular: 8,
     wide: 12,
+    big: 24,
   }
 } as const
 
