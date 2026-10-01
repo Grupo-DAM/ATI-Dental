@@ -34,35 +34,43 @@ function isAbsoluteTimestamp(value: unknown): boolean {
   return value != null && typeof value === 'object';
 }
 
+function keptLabel(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed || !ABSOLUTE_TIMESTAMP.test(trimmed)) return trimmed;
+  if (ALREADY_RELATIVE.test(trimmed) || RELATIVE_WORD.test(trimmed)) return trimmed;
+  return null;
+}
+
+function relativeUnit(count: number, singular: string, plural: string): string {
+  if (count === 1) return singular;
+  return plural.replace('{{count}}', String(count));
+}
+
+function relativeLabel(diff: number, language: string): string {
+  const copy = timeAgoCopy(language);
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return copy.justNow;
+  if (minutes < 60) return relativeUnit(minutes, copy.minute, copy.minutes);
+  const hours = Math.floor(diff / 3_600_000);
+  if (hours < 24) return relativeUnit(hours, copy.hour, copy.hours);
+  const days = Math.max(1, Math.floor(diff / 86_400_000));
+  return relativeUnit(days, copy.day, copy.days);
+}
+
 export function formatSocialTimeAgo(value: unknown, now = Date.now(), language = 'es'): string {
   if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (!trimmed) return '';
-    if (!ABSOLUTE_TIMESTAMP.test(trimmed) || ALREADY_RELATIVE.test(trimmed) || RELATIVE_WORD.test(trimmed)) {
-      return trimmed;
-    }
+    const kept = keptLabel(value);
+    if (kept != null) return kept;
   }
-
-  if (!isAbsoluteTimestamp(value)) {
-    return '';
-  }
+  if (!isAbsoluteTimestamp(value)) return '';
 
   const ms = parseFlexibleTimestamp(value);
-  if (ms == null) {
-    return typeof value === 'string' ? value.trim() : '';
-  }
+  if (ms == null) return '';
+  return relativeLabel(Math.max(0, now - ms), language);
+}
 
-  const diff = Math.max(0, now - ms);
-  const minutes = Math.floor(diff / 60_000);
-  const hours = Math.floor(diff / 3_600_000);
-  const days = Math.floor(diff / 86_400_000);
-  const copy = timeAgoCopy(language);
-  const withCount = (template: string, count: number) => template.replace('{{count}}', String(count));
-
-  if (minutes < 1) return copy.justNow;
-  if (minutes < 60) return minutes === 1 ? copy.minute : withCount(copy.minutes, minutes);
-  if (hours < 24) return hours === 1 ? copy.hour : withCount(copy.hours, hours);
-  return days === 1 ? copy.day : withCount(copy.days, days);
+function asText(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
 }
 
 export function parseSocialPostsFromApi(payload: unknown): SocialPost[] {
@@ -91,8 +99,8 @@ export function parseSocialPost(id: string, data: Record<string, unknown> | unde
   const network = data.network === 'facebook' || data.network === 'instagram' ? data.network : null;
   if (!network) return null;
 
-  const title = typeof data.title === 'string' ? data.title : undefined;
-  const content = String(data.content ?? data.description ?? title ?? '').trim();
+  const title = asText(data.title) || undefined;
+  const content = asText(data.content) || asText(data.description) || title || '';
   if (!content) return null;
 
   const fallbackUrl = network === 'instagram' ? Config.social.instagram : Config.social.facebook;

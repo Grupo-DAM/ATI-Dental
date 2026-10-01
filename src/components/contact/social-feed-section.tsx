@@ -27,17 +27,20 @@ async function openSocialUrl(url: string, title: string, message: string) {
   }
 }
 
+type FeedStyles = ReturnType<typeof createStyles>;
+type AppTheme = ReturnType<typeof useTheme>;
+
 function ChannelHeader({
   network,
   onPress,
   styles,
   theme,
-}: {
+}: Readonly<{
   network: SocialNetwork;
   onPress: () => void;
-  styles: ReturnType<typeof createStyles>;
-  theme: ReturnType<typeof useTheme>;
-}) {
+  styles: FeedStyles;
+  theme: AppTheme;
+}>) {
   if (network === 'instagram') {
     return (
       <Pressable
@@ -80,6 +83,53 @@ function ChannelHeader({
   );
 }
 
+function SocialPostList({
+  testID,
+  posts,
+  styles,
+  language,
+  onPress,
+}: Readonly<{
+  testID: string;
+  posts: SocialPost[];
+  styles: FeedStyles;
+  language: string;
+  onPress: (post: SocialPost) => void;
+}>) {
+  return (
+    <View testID={testID} style={styles.instagramList}>
+      {posts.map((item) => (
+        <Pressable
+          key={item.id}
+          testID={`social-post-${item.id}`}
+          accessibilityRole="button"
+          onPress={() => onPress(item)}
+          style={styles.instagramCard}
+        >
+          <Image
+            source={item.imageUrl ? { uri: item.imageUrl } : avatarFallback}
+            style={styles.instagramImage}
+            contentFit="cover"
+          />
+          <View style={styles.instagramContent}>
+            <Text numberOfLines={1} style={styles.instagramPostTitle}>
+              {item.title ?? item.content}
+            </Text>
+            <Text numberOfLines={2} style={styles.instagramPostDesc}>
+              {item.content}
+            </Text>
+            {item.publishedAt ? (
+              <Text style={styles.instagramPostTime}>
+                {formatSocialTimeAgo(item.publishedAt, Date.now(), language)}
+              </Text>
+            ) : null}
+          </View>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
 export function SocialFeedSection() {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
@@ -109,24 +159,21 @@ export function SocialFeedSection() {
       {status === 'fallback' ? (
         <View testID="social-feed-fallback" style={styles.socialFallbackBox}>
           <Text style={styles.directContactSubtitle}>{t('contacts.socialFallback')}</Text>
-          <Pressable
-            testID="social-fallback-instagram"
-            accessibilityRole="button"
-            style={[styles.socialFallbackButton, styles.socialFallbackInstagram]}
-            onPress={() => openNetwork('instagram')}
-          >
-            <Ionicons name="logo-instagram" size={18} color={theme.instagramTextColor} />
-            <Text style={styles.socialFallbackLabel}>{t('contacts.openInstagram')}</Text>
-          </Pressable>
-          <Pressable
-            testID="social-fallback-facebook"
-            accessibilityRole="button"
-            style={[styles.socialFallbackButton, styles.socialFallbackFacebook]}
-            onPress={() => openNetwork('facebook')}
-          >
-            <Ionicons name="logo-facebook" size={18} color={theme.facebookTextColor} />
-            <Text style={styles.socialFallbackLabel}>{t('contacts.openFacebook')}</Text>
-          </Pressable>
+          {([
+            ['social-fallback-instagram', 'instagram', 'logo-instagram', t('contacts.openInstagram'), styles.socialFallbackInstagram, theme.instagramTextColor],
+            ['social-fallback-facebook', 'facebook', 'logo-facebook', t('contacts.openFacebook'), styles.socialFallbackFacebook, theme.facebookTextColor],
+          ] as const).map(([testID, network, icon, label, buttonStyle, color]) => (
+            <Pressable
+              key={testID}
+              testID={testID}
+              accessibilityRole="button"
+              style={[styles.socialFallbackButton, buttonStyle]}
+              onPress={() => openNetwork(network)}
+            >
+              <Ionicons name={icon} size={18} color={color} />
+              <Text style={styles.socialFallbackLabel}>{label}</Text>
+            </Pressable>
+          ))}
         </View>
       ) : null}
 
@@ -134,70 +181,24 @@ export function SocialFeedSection() {
         <>
           <View style={styles.socialSubfeed}>
             <ChannelHeader network="instagram" onPress={() => openNetwork('instagram')} styles={styles} theme={theme} />
-            <View testID="social-instagram-list" style={styles.instagramList}>
-              {grouped.instagram.map((item) => (
-                <Pressable
-                  key={item.id}
-                  testID={`social-post-${item.id}`}
-                  accessibilityRole="button"
-                  onPress={() => openPost(item)}
-                  style={styles.instagramCard}
-                >
-                  <Image
-                    source={item.imageUrl ? { uri: item.imageUrl } : avatarFallback}
-                    style={styles.instagramImage}
-                    contentFit="cover"
-                  />
-                  <View style={styles.instagramContent}>
-                    <Text numberOfLines={1} style={styles.instagramPostTitle}>
-                      {item.title ?? item.content}
-                    </Text>
-                    <Text numberOfLines={2} style={styles.instagramPostDesc}>
-                      {item.content}
-                    </Text>
-                    {item.publishedAt ? (
-                      <Text style={styles.instagramPostTime}>
-                        {formatSocialTimeAgo(item.publishedAt, Date.now(), i18n.language)}
-                      </Text>
-                    ) : null}
-                  </View>
-                </Pressable>
-              ))}
-            </View>
+            <SocialPostList
+              testID="social-instagram-list"
+              posts={grouped.instagram}
+              styles={styles}
+              language={i18n.language}
+              onPress={openPost}
+            />
           </View>
 
           <View style={styles.socialSubfeed}>
             <ChannelHeader network="facebook" onPress={() => openNetwork('facebook')} styles={styles} theme={theme} />
-            <View testID="social-facebook-list" style={styles.instagramList}>
-              {grouped.facebook.map((item) => (
-                <Pressable
-                  key={item.id}
-                  testID={`social-post-${item.id}`}
-                  accessibilityRole="button"
-                  onPress={() => openPost(item)}
-                  style={styles.instagramCard}
-                >
-                  <Image
-                    source={item.imageUrl ? { uri: item.imageUrl } : avatarFallback}
-                    style={styles.instagramImage}
-                    contentFit="cover"
-                  />
-                  <View style={styles.instagramContent}>
-                    <Text numberOfLines={1} style={styles.instagramPostTitle}>
-                      {item.title ?? item.content}
-                    </Text>
-                    <Text numberOfLines={2} style={styles.instagramPostDesc}>
-                      {item.content}
-                    </Text>
-                    {item.publishedAt ? (
-                      <Text style={styles.instagramPostTime}>
-                        {formatSocialTimeAgo(item.publishedAt, Date.now(), i18n.language)}
-                      </Text>
-                    ) : null}
-                  </View>
-                </Pressable>
-              ))}
-            </View>
+            <SocialPostList
+              testID="social-facebook-list"
+              posts={grouped.facebook}
+              styles={styles}
+              language={i18n.language}
+              onPress={openPost}
+            />
           </View>
         </>
       ) : null}
