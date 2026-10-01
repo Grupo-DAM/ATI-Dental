@@ -505,7 +505,18 @@
     "retry": "Reintentar",
     "confirmed": "CONFIRMADO",
     "pending": "EN ESPERA",
+    "inProgress": "EN PROGRESO",
+    "completed": "COMPLETADO",
     "cancelled": "CANCELADO",
+    "scheduleAppointment": "Agendar cita",
+    "markConfirmed": "Confirmar",
+    "markInProgress": "En progreso",
+    "markCompleted": "Completar",
+    "markCancelled": "Cancelar cita",
+    "statusUpdatedTitle": "Estado actualizado",
+    "statusUpdatedMessage": "La cita ahora está {{status}}.",
+    "statusErrorTitle": "No se pudo actualizar",
+    "statusErrorMessage": "Revisa la conexión e inténtalo de nuevo.",
     "lunchBreak": "HORA DE ALMUERZO",
     "minutes": "MIN",
     "chair": "SILLÓN {{number}}",
@@ -584,5 +595,64 @@
     "saveChanges": "Guardar Cambios",
     "updateSuccessTitle": "Consulta actualizada",
     "updateSuccessMessage": "La consulta ha sido actualizada exitosamente."
+  },
+  "scheduleAppointment": {
+    "title": "Crear cita",
+    "subtitle": "Registra una nueva cita dentro de su ficha clínica y completa los datos del procedimiento.",
+    "breadcrumb": {
+      "patients": "Pacientes",
+      "patientRecord": "Ficha del paciente",
+      "current": "Crear cita"
+    },
+    "sections": {
+      "details": "Detalles de la cita",
+      "notes": "Notas adicionales",
+      "next": "Proxima Cita"
+    },
+    "fields": {
+      "patient": "Paciente",
+      "dentist": "Odontólogo Responsable",
+      "type": "Tipo de cita",
+      "date": "Fecha",
+      "time": "Hora",
+      "reason": "Motivo de la cita",
+      "duration": "Duración Estimada"
+    },
+    "placeholders": {
+      "patient": "Seleccione el paciente...",
+      "dentist": "Seleccione el odontólogo...",
+      "type": "Seleccione el tipo de cita...",
+      "reason": "Ej. Consulta general",
+      "duration": "Seleccione la duración...",
+      "notes": ""
+    },
+    "updateOdontogram": "Actualizar Odontograma",
+    "odontogramTitle": "Odontograma",
+    "odontogramMessage": "El odontograma se actualiza desde la historia clínica del paciente.",
+    "cancel": "Cancelar",
+    "save": "Guardar Cita",
+    "modal": {
+      "title": "Confirmar cita",
+      "message": "¿Deseas guardar esta cita en la ficha del paciente?",
+      "confirm": "Guardar",
+      "cancel": "Cancelar"
+    },
+    "toast": {
+      "title": "Cita guardada",
+      "message": "La cita quedó en espera y ya aparece en la agenda.",
+      "errorTitle": "No se pudo guardar la cita",
+      "errorMessage": "Revisa tu conexión e inténtalo de nuevo. Los datos del formulario se mantienen."
+    },
+    "errors": {
+      "patientRequired": "Selecciona un paciente.",
+      "conflictPatient": "Este paciente ya tiene un compromiso programado en ese horario.",
+      "conflictDentist": "Este odontólogo ya tiene un compromiso programado en ese horario.",
+      "dentistRequired": "Selecciona el odontólogo responsable.",
+      "typeRequired": "Selecciona el tipo de cita.",
+      "dateRequired": "Indica la fecha de la cita.",
+      "timeRequired": "Indica la hora de la cita.",
+      "reasonRequired": "Indica el motivo de la cita.",
+      "durationRequired": "Selecciona la duración estimada."
+    }
   }
 }

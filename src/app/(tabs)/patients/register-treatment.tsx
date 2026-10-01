@@ -99,30 +99,40 @@ export const STATUSES = [
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-/** Three-level breadcrumb for Pacientes > Ficha del paciente > Tratamiento */
-function TreatmentBreadcrumb({ t, patientId }: Readonly<{ t: (k: string) => string; patientId: string }>) {
+/** Three-level breadcrumb: Pacientes > Ficha del paciente > pantalla actual */
+export function PatientRecordBreadcrumb({
+  patientsLabel,
+  recordLabel,
+  currentLabel,
+  patientId,
+}: Readonly<{
+  patientsLabel: string;
+  recordLabel: string;
+  currentLabel: string;
+  patientId: string;
+}>) {
   const theme = useTheme();
   const breadcrumbStyles = useMemo(() => createBreadCrumbStyle(theme), [theme]);
   return (
     <View style={breadcrumbStyles.container}>
       <TouchableOpacity onPress={() => router.push('/(tabs)/explore')} activeOpacity={0.7}>
-        <Text style={breadcrumbStyles.parentText}>{t('registerTreatment.breadcrumb.patients')}</Text>
+        <Text style={breadcrumbStyles.parentText}>{patientsLabel}</Text>
       </TouchableOpacity>
       <Text style={breadcrumbStyles.chevron}>   ›   </Text>
-      <TouchableOpacity 
-        onPress={() => router.push({ pathname: '/(tabs)/patient-file' as any, params: { patientId } })} 
+      <TouchableOpacity
+        onPress={() => router.push({ pathname: '/(tabs)/patient-file' as any, params: { patientId } })}
         activeOpacity={0.7}
       >
-        <Text style={breadcrumbStyles.parentText}>{t('registerTreatment.breadcrumb.patientRecord')}</Text>
+        <Text style={breadcrumbStyles.parentText}>{recordLabel}</Text>
       </TouchableOpacity>
       <Text style={breadcrumbStyles.chevron}>   ›   </Text>
-      <Text style={breadcrumbStyles.currentText}>{t('registerTreatment.breadcrumb.treatment')}</Text>
+      <Text style={breadcrumbStyles.currentText}>{currentLabel}</Text>
     </View>
   );
 }
 
 /** Patient info card with gradient-style background */
-function PatientInfoCard({ patient, t }: Readonly<{ patient: PatientInfo; t: (k: string) => string }>) {
+export function PatientInfoCard({ patient, t }: Readonly<{ patient: PatientInfo; t: (k: string) => string }>) {
   const theme = useTheme();
   const patientCardStyles = useMemo(() => createPatientCardStyles(theme), [theme]);
  
@@ -148,7 +158,7 @@ function PatientInfoCard({ patient, t }: Readonly<{ patient: PatientInfo; t: (k:
 }
 
 /** Section header with icon */
-function SectionHeader({ icon, title }: Readonly<{ icon: keyof typeof Ionicons.glyphMap; title: string }>) {
+export function SectionHeader({ icon, title }: Readonly<{ icon: keyof typeof Ionicons.glyphMap; title: string }>) {
   const theme = useTheme();
   const sectionStyles = useMemo(() => createSectionStyles(theme), [theme]);
   return (
@@ -160,7 +170,7 @@ function SectionHeader({ icon, title }: Readonly<{ icon: keyof typeof Ionicons.g
 }
 
 /** Dropdown select field */
-function SelectField({
+export function SelectField({
   label,
   value,
   placeholder,
@@ -168,6 +178,7 @@ function SelectField({
   onSelect,
   error,
   testID,
+  disabled = false,
 }: Readonly<{
   label: string;
   value: string;
@@ -176,10 +187,17 @@ function SelectField({
   onSelect: (val: string) => void;
   error?: string;
   testID?: string;
+  disabled?: boolean;
 }>) {
   const [open, setOpen] = useState(false);
   const theme = useTheme();
   const inputStyles = useMemo(() => createInputStyles(theme), [theme]);
+  let iconName: 'lock-closed' | 'chevron-up' | 'chevron-down' = 'chevron-down';
+  if (disabled) {
+    iconName = 'lock-closed';
+  } else if (open) {
+    iconName = 'chevron-up';
+  }
 
   return (
     <View style={inputStyles.fieldGroup}>
@@ -188,15 +206,24 @@ function SelectField({
         testID={testID}
         style={[
           inputStyles.selectTrigger,
+          disabled ? inputStyles.lockedTrigger : null,
           error ? inputStyles.errorBorder : null,
         ]}
-        onPress={() => setOpen(!open)}
+        onPress={() => {
+          if (!disabled) setOpen(!open);
+        }}
+        disabled={disabled}
+        accessibilityState={{ disabled }}
         activeOpacity={0.7}
       >
         <Text style={[inputStyles.selectText, !value && inputStyles.placeholder]}>
           {value || placeholder}
         </Text>
-        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={theme.pageSubtitle} />
+        <Ionicons
+          name={iconName}
+          size={18}
+          color={theme.pageSubtitle}
+        />
       </TouchableOpacity>
       {error ? (
         <Text style={inputStyles.errorText} testID={testID ? `${testID}-error` : undefined}>
@@ -239,7 +266,7 @@ function SelectField({
 }
 
 /** Text input field */
-function InputField({
+export function InputField({
   label,
   value,
   onChangeText,
@@ -267,10 +294,10 @@ function InputField({
 
   return (
     <View style={inputStyles.fieldGroup}>
-      <Text style={inputStyles.label}>{label}</Text>
+      {label ? <Text style={inputStyles.label}>{label}</Text> : null}
       <View style={[
         inputStyles.inputContainer,
-        multiline && { height: 80, alignItems: 'flex-start' },
+        multiline ? inputStyles.multilineContainer : null,
         error ? inputStyles.errorBorder : null,
       ]}>
         {prefix && <Text style={inputStyles.prefix}>{prefix}</Text>}
@@ -299,13 +326,14 @@ function InputField({
 }
 
 /** Date input field with calendar icon */
-function DateField({
+export function DateField({
   label,
   value,
   onChangeText,
   placeholder,
   error,
   testID,
+  iconName = 'calendar-outline',
 }: Readonly<{
   label: string;
   value: string;
@@ -313,6 +341,7 @@ function DateField({
   placeholder: string;
   error?: string;
   testID?: string;
+  iconName?: keyof typeof Ionicons.glyphMap;
 }>) {
   const theme = useTheme();
   const inputStyles = useMemo(() => createInputStyles(theme), [theme]);
@@ -331,7 +360,7 @@ function DateField({
           placeholder={placeholder}
           placeholderTextColor={theme.placeholderColor}
         />
-        <Ionicons name="calendar-outline" size={20} color={theme.pageSubtitle} style={inputStyles.icon} />
+        <Ionicons name={iconName} size={20} color={theme.pageSubtitle} style={inputStyles.icon} />
       </View>
       {error ? (
         <Text style={inputStyles.errorText} testID={testID ? `${testID}-error` : undefined}>
@@ -407,7 +436,7 @@ export default function RegisterTreatmentScreen() {
         setIsLoading(false);
       }
     }
-    loadTreatment();
+    void loadTreatment();
   }, [params.treatmentId]);
 
   // Validation errors & submitting guard
@@ -544,7 +573,12 @@ export default function RegisterTreatmentScreen() {
   return (
     <View style={styles.container}>
       <AppHeader />
-      <TreatmentBreadcrumb t={t} patientId={patient.id} />
+      <PatientRecordBreadcrumb
+        patientId={patient.id}
+        patientsLabel={t('registerTreatment.breadcrumb.patients')}
+        recordLabel={t('registerTreatment.breadcrumb.patientRecord')}
+        currentLabel={t('registerTreatment.breadcrumb.treatment')}
+      />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}

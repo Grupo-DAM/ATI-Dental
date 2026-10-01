@@ -12,6 +12,7 @@ import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
 import { createAccessDeniedStyles } from '@/constants/styles/access-denied.styles';
 import { useRouter } from 'expo-router';
 import { AdminListLayout } from '@/components/users-list/admin-list-layout';
+import { formatVisitDay } from '@/utils/patient-visits';
 
 export default function AdminUserList() {
   const { t } = useTranslation();
@@ -80,8 +81,8 @@ export default function AdminUserList() {
           name={user.fullName}
           email={user.email}
           type="patient"
-          lastVisit={user.ultima_visita}
-          nextVisit={user.proxima_vista}
+          lastVisit={formatVisitDay(user.ultima_visita || user.lastVisit || user.ultimaVisita)}
+          nextVisit={formatVisitDay(user.proxima_vista || user.proxima_visita || user.nextAppointment || user.proximaCita)}
           onEdit={() => handleEditPatient(user)}
           onPress={() => handleViewPatient(user)}
           onLongPress={() => handleLongPress(user)}

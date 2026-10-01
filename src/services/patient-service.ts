@@ -77,8 +77,8 @@ function mapDocToPatient(id: string, data: any): Patient {
     // Extra clinical fields
     medicalHistory: data.medicalHistory ?? data.antecedentesMedicos ?? [],
     knownAllergies: data.knownAllergies ?? data.alergiasConocidas ?? [],
-    nextAppointment: data.nextAppointment ?? data.proximaCita,
-    lastVisit: data.lastVisit ?? data.ultimaVisita,
+    nextAppointment: data.nextAppointment ?? data.proximaCita ?? data.proxima_visita ?? data.proxima_vista,
+    lastVisit: data.lastVisit ?? data.ultimaVisita ?? data.ultima_visita,
   };
 }
 

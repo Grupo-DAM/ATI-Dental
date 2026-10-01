@@ -17,6 +17,8 @@ import { Breadcrumb } from '@/components/breadcrumb';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { getPatientById, getPatientByEmail, Patient } from '@/services/patient-service';
+import { getStoredPatientVisitDates } from '@/services/clinical-record-service';
+import { formatVisitDay } from '@/utils/patient-visits';
 import { getTreatmentsByPatientId, deleteTreatment, Treatment } from '@/services/treatment-service';
 import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
@@ -44,6 +46,7 @@ const ALLOWED_ROLES = new Set(['odontologo', 'admin', 'asistente', 'medico']);
 /** Format an ISO date string to a readable locale date */
 function formatDate(dateInput: any): string {
   if (!dateInput) return '—';
+  if (typeof dateInput === 'string') return formatVisitDay(dateInput);
   try {
     const date = parseDateRobustly(dateInput);
     if (!date) return typeof dateInput === 'string' ? dateInput : '—';
@@ -425,6 +428,13 @@ export default function PatientFileScreen() {
       }
 
       if (!patientData) throw new Error('PATIENT_NOT_FOUND');
+
+      const visits = await getStoredPatientVisitDates(patientData.id);
+      patientData = {
+        ...patientData,
+        lastVisit: visits.lastVisit ?? patientData.lastVisit,
+        nextAppointment: visits.nextAppointment ?? patientData.nextAppointment,
+      };
 
       const treatmentData = await getTreatmentsByPatientId(patientData.id);
       

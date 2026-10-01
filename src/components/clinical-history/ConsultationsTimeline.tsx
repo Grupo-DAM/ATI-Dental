@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -15,6 +14,7 @@ import {
   TimelineItemActions,
   TimelineEmptyState,
 } from './TimelineComponents';
+import { ScheduleAppointmentButton } from '@/components/schedule-appointment-button';
 
 function formatTimelineDate(dateStr?: string): { day: string; monthYear: string } {
   if (!dateStr) return { day: '—', monthYear: '—' };
@@ -63,17 +63,7 @@ export function ConsultationsTimeline({
         <Text style={styles.sectionTitle}>
           {t('clinicalHistory.tabs.consultations', 'Consultas')}
         </Text>
-        <TouchableOpacity
-          style={styles.scheduleButton}
-          onPress={onScheduleAppointment}
-          activeOpacity={0.7}
-          testID="btn-schedule-appointment"
-        >
-          <Ionicons name="calendar" size={14} color="#FFFFFF" />
-          <Text style={styles.scheduleButtonText}>
-            {t('clinicalHistory.scheduleAppointment', 'Agendar Cita')}
-          </Text>
-        </TouchableOpacity>
+        <ScheduleAppointmentButton onPress={onScheduleAppointment} />
       </View>
 
       {/* Reusable Search Input */}
@@ -170,21 +160,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       fontSize: 18,
       fontWeight: '700',
       color: theme.pageTitle,
-      fontFamily: 'Open Sans',
-    },
-    scheduleButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.main,
-      paddingHorizontal: 12,
-      paddingVertical: 7,
-      borderRadius: 8,
-      gap: 6,
-    },
-    scheduleButtonText: {
-      color: '#FFFFFF',
-      fontSize: 12,
-      fontWeight: '600',
       fontFamily: 'Open Sans',
     },
     timelineItem: {
