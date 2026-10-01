@@ -90,6 +90,7 @@ describe('social-feed', () => {
     expect(formatSocialTimeAgo(new Date(now - 2 * 3_600_000).toISOString(), now)).toBe('Hace 2 horas');
     expect(formatSocialTimeAgo(new Date(now - 3 * 86_400_000).toISOString(), now)).toBe('Hace 3 días');
     expect(formatSocialTimeAgo('Hace 2 horas', now)).toBe('Hace 2 horas');
+    expect(formatSocialTimeAgo('30 Oct', now)).toBe('30 Oct');
   });
 
   it('devuelve vacío si el Worker falla', async () => {

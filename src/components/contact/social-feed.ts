@@ -5,6 +5,7 @@ import es from '@/i18n/locales/es.json';
 
 const ALREADY_RELATIVE = /^(hace|ago)\s/i;
 const RELATIVE_WORD = /^(hoy|ayer|today|yesterday)$/i;
+const ABSOLUTE_TIMESTAMP = /^\d{4}-\d{2}-\d{2}/;
 
 export type SocialNetwork = 'instagram' | 'facebook';
 
@@ -27,13 +28,23 @@ function timeAgoCopy(language: string) {
   return language.startsWith('en') ? en.contacts.timeAgo : es.contacts.timeAgo;
 }
 
+function isAbsoluteTimestamp(value: unknown): boolean {
+  if (typeof value === 'number' || value instanceof Date) return true;
+  if (typeof value === 'string') return ABSOLUTE_TIMESTAMP.test(value.trim());
+  return value != null && typeof value === 'object';
+}
+
 export function formatSocialTimeAgo(value: unknown, now = Date.now(), language = 'es'): string {
   if (typeof value === 'string') {
     const trimmed = value.trim();
     if (!trimmed) return '';
-    if (ALREADY_RELATIVE.test(trimmed) || RELATIVE_WORD.test(trimmed)) {
+    if (!ABSOLUTE_TIMESTAMP.test(trimmed) || ALREADY_RELATIVE.test(trimmed) || RELATIVE_WORD.test(trimmed)) {
       return trimmed;
     }
+  }
+
+  if (!isAbsoluteTimestamp(value)) {
+    return '';
   }
 
   const ms = parseFlexibleTimestamp(value);
