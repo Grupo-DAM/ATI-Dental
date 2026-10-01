@@ -16,6 +16,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
 import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
 import { useClinicalRecord } from '@/hooks/use-clinical-record';
+import { useFetchOdontogram } from '@/hooks/use-fetch-odontogram';
 import { PatientSummaryCard } from '@/components/clinical-history/PatientSummaryCard';
 import { ClinicalHistoryTabs } from '@/components/clinical-history/ClinicalHistoryTabs';
 import { ConsultationsTimeline } from '@/components/clinical-history/ConsultationsTimeline';
@@ -83,6 +84,14 @@ export default function ClinicalHistoryScreen() {
     type: 'success',
     title: '',
     message: '',
+  });
+
+  // Carga el odontograma 
+  const [selectedConsultationDate, setSelectedConsultationDate] = useState<string | null>(null);
+
+  const { odontogram, loading, odontogramError } = useFetchOdontogram({
+    patientId: patientId ?? '',
+    selectedDate: selectedConsultationDate, // Si es null, el hook trae el último odontograma
   });
 
   const handleEditPatient = () => {
@@ -301,7 +310,13 @@ export default function ClinicalHistoryScreen() {
 
         {/* Pestaña: Odontograma (Escenario 2 - Contenedor Preparado) */}
         {activeTab === 'odontograma' && (
-          <OdontogramContainer odontogram={record.odontogram} />
+          loading ? (
+            <ActivityIndicator size="large" />
+          ) : (
+            // Se renderiza el odontograma real de la base de datos.
+            // Si viene undefined, el contenedor usará de forma segura su DEFAULT_ODONTOGRAM.
+            <OdontogramContainer odontogram={odontogram} />
+          )
         )}
 
         {/* Pestaña: Tratamientos */}

@@ -65,7 +65,7 @@ export function DentalCuadrant({
   const styles = createDentalCuadrantStyles();
   return (
     <View style={[styles.cuadrantRow, isLeftCuadrant && styles.leftCuadrantRow]}>
-      {teeth.map((tooth: ToothCondition)=>(
+      {teeth?.map((tooth: ToothCondition)=>(
         <DentalPiece 
             key={tooth.number}
             tooth={tooth} 

@@ -213,7 +213,9 @@ export async function fetchClinicalRecord(patientId: string): Promise<ClinicalRe
     const odontogram: OdontogramData = {
       patientId: patient.id,
       updatedAt: new Date().toISOString(),
+      isAdult: true,
       status: 'placeholder',
+      teeth: {},
       notes: 'Contenedor preparado para inyección del componente de odontograma interactivo.',
     };
 

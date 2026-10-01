@@ -20,6 +20,28 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
+jest.mock('@/hooks/use-theme', () => ({
+  useTheme: () => ({
+    backgroundElement: '#ffffff',
+    overMain: '#000000',
+    pageSubtitle: '#888888',
+    breadcrumbSeparator: '#cccccc',
+    // Agrega aquí los estados de ALL_TOOTH_STATES si getToothStateColor los busca del tema
+    cavity: '#ff0000',
+    filled: '#0000ff',
+  }),
+}));
+
+// Mock del hook que calcula las piezas dentales por cuadrante
+jest.mock('@/hooks/use-dental-pieces-per-cuadrant', () => ({
+  useDentalPiecesPerCuadrant: jest.fn((isAdult) => {
+    // Retornamos una estructura mockeada básica para los cuadrantes correspondientes
+    return isAdult 
+      ? { 1: [], 2: [], 3: [], 4: [] }
+      : { 5: [], 6: [], 7: [], 8: [] };
+  }),
+}));
+
 describe('Clinical History Sub-Components - Unit & Branch Coverage', () => {
   describe('TreatmentsTimeline', () => {
     const mockTreatments: Treatment[] = [
@@ -327,28 +349,50 @@ describe('Clinical History Sub-Components - Unit & Branch Coverage', () => {
   });
 
   describe('OdontogramContainer', () => {
-    it('renderiza con datos de odontograma específicos y en modo oscuro', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('renderiza con datos de odontograma específicos y muestra opciones de adulto', () => {
       jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('dark');
 
-      render(
+        render(
         <OdontogramContainer
           odontogram={{
-            patientId: 'p-1',
-            status: 'activo',
-            updatedAt: '2023-10-01',
+            patientId: 'paciente_cova_123',
+            status: 'ready',
+            isAdult: true,
+            teeth: {},
+            updatedAt: '2026-06-09T19:00:00.000Z',
           }}
         />
       );
 
-      expect(screen.getByText(/Estructura lista \(activo\)/)).toBeTruthy();
-      expect(screen.getByText('32 Piezas Dentales (FDI)')).toBeTruthy();
+      // Verificamos que el contenedor principal exista por su testID
+      expect(screen.getByTestId('odontogram-container')).toBeTruthy();
 
+      // Verificamos que aparezcan los botones de tipo de odontograma (traducción mockeada retorna el nodo final)
+      expect(screen.getByText(/adult/i)).toBeTruthy();
+      expect(screen.getByText(/pediatric/i)).toBeTruthy();
+
+      // Verificamos que la leyenda de estados se renderice (ejemplo con 'cavity' y 'filled')
+      expect(screen.getByText(/cavity/i)).toBeTruthy();
+      expect(screen.getByText(/filled/i)).toBeTruthy();
+
+      // Restauramos el esquema de color
       jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('light');
     });
 
-    it('renderiza con status por defecto placeholder', () => {
-      render(<OdontogramContainer />);
-      expect(screen.getByText(/Estructura lista \(placeholder\)/)).toBeTruthy();
+    it('renderiza correctamente usando el objeto por defecto (DEFAULT_ODONTOGRAM) cuando es undefined', () => {
+      render(<OdontogramContainer odontogram={undefined} />);
+
+      // Al ser undefined, el componente asume DEFAULT_ODONTOGRAM el cual es Adulto (isAdult: true)
+      expect(screen.getByTestId('odontogram-container')).toBeTruthy();
+      expect(screen.getByText(/adult/i)).toBeTruthy();
+      expect(screen.getByText(/pediatric/i)).toBeTruthy();
+      
+      // Verifica que se dibuje al menos un estado de la leyenda para confirmar el renderizado del bucle
+      expect(screen.getByText(/missing/i)).toBeTruthy();
     });
   });
 

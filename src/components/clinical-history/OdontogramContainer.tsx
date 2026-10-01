@@ -4,10 +4,10 @@ import Svg, { Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
-import { ALL_TOOTH_STATES, OdontogramData, ToothCondition } from '@/types/clinical-record';
+import { ALL_TOOTH_STATES, OdontogramData } from '@/types/clinical-record';
 import { useDentalPiecesPerCuadrant } from '@/hooks/use-dental-pieces-per-cuadrant';
 import { createOdontogramStyles } from '@/constants/styles/patients.style';
-import { DentalCuadrant, DentalPiece } from '@/components/clinical-history/DentalPiece';
+import { DentalCuadrant } from '@/components/clinical-history/DentalPiece';
 import { FontSize } from '@/constants/theme';
 
 interface Props {
@@ -18,116 +18,42 @@ function getToothStateColor(theme: any, state: string) {
   return theme[state] || theme.backgroundElement;
 }
 
+const DEFAULT_ODONTOGRAM: OdontogramData = {
+  patientId: '',
+  status: 'placeholder',
+  isAdult: true,
+  teeth: {}, 
+};
+
 export function OdontogramContainer({ odontogram }: Readonly<Props>) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createOdontogramStyles(theme), [theme]);
   const [selectedTooth, setSelectedTooth] = useState<number | null>(null);
 
-  const mockOdontogramData: OdontogramData = {
-  patientId: "pat_98231405",
-  updatedAt: new Date().toISOString(),
-  status: "ready",
-  isAdult: true,
-  notes: "Paciente adulto con restauraciones previas y caries activas interproximales.",
-  teeth: {
-    // =========================================================================
-    // CUADRANTE 1: Superior Derecho (Requiere flip: true en el hook de assets)
-    // =========================================================================
-    11: {
-      number: 11,
-      generalStates: [], // El arreglo vacío significa Diente Sano (isHealthy = true)
-    },
-    12: {
-      number: 12,
-      generalStates: ['cavity'], // Estado general: Caries (Punto Rojo)
-      surfacesStates: {
-        oclusal: 'caries',
-        mesial: 'caries',
-      },
-    },
-    13: {
-      number: 13,
-      generalStates: ['filled'], // Estado general: Obturado / Resina (Punto Azul)
-      surfacesStates: {
-        distal: 'obturado',
-      },
-    },
-
-    // =========================================================================
-    // CUADRANTE 2: Superior Izquierdo (Requiere flip: false en el hook de assets)
-    // =========================================================================
-    21: {
-      number: 21,
-      generalStates: [], // Sano
-    },
-    24: {
-      number: 24,
-      generalStates: ['missing'], // Diente ausente (Punto Gris)
-    },
-    26: {
-      number: 26,
-      generalStates: ['root_canal', 'fixed_dental_prosthesis'], // Múltiples estados (Endodoncia + Corona)
-    },
-
-    // =========================================================================
-    // CUADRANTE 3: Inferior Izquierdo (Requiere flip: false en el hook de assets)
-    // =========================================================================
-    31: {
-      number: 31,
-      generalStates: [], // Sano
-    },
-    36: {
-      number: 36,
-      generalStates: ['implant'], // Implante dental colocado
-    },
-    37: {
-      number: 37,
-      generalStates: ['retained_root'], // Solo queda la raíz
-    },
-
-    // =========================================================================
-    // CUADRANTE 4: Inferior Derecho (Requiere flip: true en el hook de assets)
-    // =========================================================================
-    41: {
-      number: 41,
-      generalStates: [], // Sano
-    },
-    46: {
-      number: 46,
-      generalStates: ['in_eruption'], // Diente en erupción
-    },
-    48: {
-      number: 48,
-      generalStates: ['temporal'], // Tratamiento o corona temporal
-      surfacesStates: {
-        vestibular: 'temporal',
-      },
-    },
-  },
-};
+  const safeOdontogram = odontogram || DEFAULT_ODONTOGRAM;
 
   const cuadrantsData = useDentalPiecesPerCuadrant(
-    mockOdontogramData.isAdult ?? true, 
-    mockOdontogramData.teeth
+    safeOdontogram.isAdult ?? true, 
+    safeOdontogram.teeth
   );
 
-  const leftCuadrants = mockOdontogramData.isAdult ? [ 1, 4 ] : [ 5, 8 ];
-  const rightCuadrants = mockOdontogramData.isAdult ? [ 2, 3 ] : [ 6, 7 ];
+  const leftCuadrants = safeOdontogram.isAdult ? [ 1, 4 ] : [ 5, 8 ];
+  const rightCuadrants = safeOdontogram.isAdult ? [ 2, 3 ] : [ 6, 7 ];
 
   return (
     <View style={styles.container} testID="odontogram-container">
       {/* New odontogram action buttons */}
       <View style={styles.actionBtnsContainer}>
-        <TouchableOpacity style={[styles.actionBtnShell, mockOdontogramData.isAdult && styles.actionBtnShellActive]}>
-          <Ionicons name="add" size={FontSize.h5} color={mockOdontogramData.isAdult? theme.overMain : theme.pageSubtitle} />
-          <Text style={[styles.actionBtnText, mockOdontogramData.isAdult && styles.actionBtnTextActive]}>
+        <TouchableOpacity style={[styles.actionBtnShell, safeOdontogram.isAdult && styles.actionBtnShellActive]}>
+          <Ionicons name="add" size={FontSize.h5} color={safeOdontogram.isAdult? theme.overMain : theme.pageSubtitle} />
+          <Text style={[styles.actionBtnText, safeOdontogram.isAdult && styles.actionBtnTextActive]}>
             {t('odontogram.adult')}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtnShell, !mockOdontogramData.isAdult && styles.actionBtnShellActive]}>
-          <Ionicons name="add" size={FontSize.h5} color={mockOdontogramData.isAdult? theme.pageSubtitle : theme.overMain} />
-          <Text style={[styles.actionBtnText, !mockOdontogramData.isAdult && styles.actionBtnTextActive]}>
+        <TouchableOpacity style={[styles.actionBtnShell, !safeOdontogram.isAdult && styles.actionBtnShellActive]}>
+          <Ionicons name="add" size={FontSize.h5} color={safeOdontogram.isAdult? theme.pageSubtitle : theme.overMain} />
+          <Text style={[styles.actionBtnText, !safeOdontogram.isAdult && styles.actionBtnTextActive]}>
             {t('odontogram.pediatric')}
           </Text>
         </TouchableOpacity>
@@ -151,7 +77,8 @@ export function OdontogramContainer({ odontogram }: Readonly<Props>) {
         <View key={'leftCuadrants'} style={styles.halfOdontogram}>
           {leftCuadrants.map((cuadrant, index: number) => (
             <DentalCuadrant 
-              teeth={cuadrantsData[cuadrant]} 
+              key={`cuadrant-${cuadrant}`}
+              teeth={cuadrantsData[cuadrant] ?? []} 
               isLeftCuadrant = {true}
               isBottomCuadrant = {index === 1}
               selectedTooth={selectedTooth} 
@@ -174,16 +101,13 @@ export function OdontogramContainer({ odontogram }: Readonly<Props>) {
         <View key={'rightCuadrants'} style={styles.halfOdontogram}>
           {rightCuadrants.map((cuadrant, index: number) => (
             <DentalCuadrant 
-              teeth={cuadrantsData[cuadrant]} 
+              key={`cuadrant-${cuadrant}`}
+              teeth={cuadrantsData[cuadrant] ?? []} 
               isLeftCuadrant = {false}
               isBottomCuadrant = {index === 1}
               selectedTooth={selectedTooth} 
               setSelectedTooth={setSelectedTooth}/>
           ))}
-        </View>
-
-        <View>
-
         </View>
       </ScrollView>
 

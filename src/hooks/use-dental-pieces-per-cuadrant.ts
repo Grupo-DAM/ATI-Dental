@@ -22,18 +22,18 @@ export function useDentalPiecesPerCuadrant(isAdult:boolean, teeth?: Record<numbe
         cuadrants.forEach((cuadrant) => {
             result[cuadrant] = [];
             for (let i = 1; i <= teethCount; i++) {
-            const toothNumber = (cuadrant * 10 + i) as ToothNumber;
+                const toothNumber = (cuadrant * 10 + i) as ToothNumber;
 
-            // Si no existe, asumimos que está sano creando la estructura por defecto.
-            if (safeTeeth[toothNumber]) {
-            result[cuadrant].push(safeTeeth[toothNumber]);
-            } else {
-            result[cuadrant].push({
-                number: toothNumber,
-                generalStates: [], // Arreglo vacío = Sano
-            });
+                // Si no existe, asumimos que está sano creando la estructura por defecto.
+                if (safeTeeth[toothNumber]) {
+                    result[cuadrant].push(safeTeeth[toothNumber]);
+                } else {
+                    result[cuadrant].push({
+                        number: toothNumber,
+                        generalStates: [], // Arreglo vacío = Sano
+                    });
+                }
             }
-        }
         });
 
         return result

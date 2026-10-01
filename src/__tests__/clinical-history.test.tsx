@@ -165,8 +165,7 @@ describe('ClinicalHistoryScreen', () => {
     });
   });
 
-  // ── Escenario 2: Visualización del contenedor preparado para el odontograma futuro ──
-  it('Escenario 2: Muestra el contenedor preparado para el odontograma futuro con badge Próximamente', async () => {
+  it('Escenario 2: Muestra el contenedor para el odontograma', async () => {
     render(<ClinicalHistoryScreen />);
 
     await waitFor(() => {
@@ -178,9 +177,6 @@ describe('ClinicalHistoryScreen', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('odontogram-container')).toBeTruthy();
-      expect(screen.getByText('Próximamente')).toBeTruthy();
-      expect(screen.getByText('Odontograma Dental')).toBeTruthy();
-      expect(screen.getByText(/Módulo de Odontograma Digital/i)).toBeTruthy();
     });
   });
 
