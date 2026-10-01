@@ -4,9 +4,19 @@ import {
   getMonthYearLabel,
   buildWeeklyAgenda,
   fetchWeeklyAgenda,
+  createAppointment,
+  updateAppointmentStatus,
+  resetAppointmentStore,
+  AppointmentConflictError,
+  AppointmentRequestError,
 } from '@/services/agenda-service';
+import NetInfo from '@react-native-community/netinfo';
 
 describe('Agenda Service', () => {
+  beforeEach(() => {
+    resetAppointmentStore();
+    (NetInfo.fetch as jest.Mock).mockResolvedValue({ isConnected: true, isInternetReachable: true });
+  });
   describe('getMondayOfWeek', () => {
     it('returns the Monday for a Wednesday', () => {
       // Wednesday June 17, 2026
@@ -109,6 +119,55 @@ describe('Agenda Service', () => {
     it('rejects when shouldFail is true', async () => {
       const baseDate = new Date(2026, 5, 16);
       await expect(fetchWeeklyAgenda(baseDate, true)).rejects.toThrow('NETWORK_ERROR');
+    });
+  });
+
+  describe('createAppointment', () => {
+    const input = {
+      patientId: 'pat-nueva',
+      patientName: 'Paciente Nueva',
+      dentistName: 'Dra. Única',
+      appointmentType: 'Control',
+      date: '20/06/2026',
+      time: '09:30 AM',
+      duration: '30 minutos',
+      reason: 'Control',
+      notes: 'Traer estudios',
+    };
+
+    it('registra la cita en espera y la muestra en la agenda de ese día', async () => {
+      const saved = await createAppointment(input);
+
+      expect(saved.status).toBe('EN ESPERA');
+      expect(saved.dentistName).toBe('Dra. Única');
+      expect(saved.date).toBe('2026-06-20');
+
+      const saturday = buildWeeklyAgenda(new Date(2026, 5, 20)).days[5];
+      expect(saturday.appointments.some((item) => item.patientName === 'Paciente Nueva')).toBe(true);
+    });
+
+    it('rechaza el solapamiento del odontólogo', async () => {
+      await createAppointment(input);
+      await expect(createAppointment({
+        ...input,
+        patientId: 'pat-otra',
+        patientName: 'Otra Persona',
+      })).rejects.toBeInstanceOf(AppointmentConflictError);
+    });
+
+    it('no guarda la cita si no hay conexión', async () => {
+      (NetInfo.fetch as jest.Mock).mockResolvedValueOnce({ isConnected: false });
+      await expect(createAppointment(input)).rejects.toBeInstanceOf(AppointmentRequestError);
+      const saturday = buildWeeklyAgenda(new Date(2026, 5, 20)).days[5];
+      expect(saturday.appointments).toHaveLength(0);
+    });
+
+    it('permite confirmar y bloquea en progreso fuera del horario', async () => {
+      const saved = await createAppointment(input);
+      const confirmed = await updateAppointmentStatus(saved.id, 'CONFIRMADO', new Date(2026, 5, 20, 8, 0));
+      expect(confirmed.status).toBe('CONFIRMADO');
+      await expect(updateAppointmentStatus(saved.id, 'EN PROGRESO', new Date(2026, 5, 20, 8, 0)))
+        .rejects.toBeInstanceOf(AppointmentRequestError);
     });
   });
 });

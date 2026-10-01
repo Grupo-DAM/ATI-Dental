@@ -3,12 +3,17 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import AgendaScreen from '@/app/(tabs)/agenda';
 import * as agendaService from '@/services/agenda-service';
+import { resetAppointmentStore } from '@/services/agenda-service';
 
 // Mock router
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: jest.fn(),
   }),
+  router: {
+    push: jest.fn(),
+  },
+  useLocalSearchParams: () => ({}),
 }));
 
 // Mock safe area
@@ -26,6 +31,7 @@ jest.mock('@/hooks/use-auth', () => ({
 jest.mock('@/constants/user-roles', () => ({
   isOdontologoUser: (user: any) => user?.rol === 'odontologo',
   isAdminUser: (user: any) => user?.rol === 'admin',
+  isAsistenteUser: (user: any) => user?.rol === 'asistente',
 }));
 
 // Mock theme
@@ -123,6 +129,7 @@ describe('AgendaScreen (US-36: Visualizar Agenda)', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetAppointmentStore();
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   });
 

@@ -26,6 +26,7 @@ export default function AppTabs() {
       <Tabs.Screen name="admin/reports" options={{ href: null, title: 'Admin Reportes' }} />
       <Tabs.Screen name="update-contact-info" options={{ href: null, title: 'Actualizar contacto' }} />
       <Tabs.Screen name="patients/register-treatment" options={{ href: null, title: 'Registrar Tratamiento' }} />
+      <Tabs.Screen name="patients/schedule-appointment" options={{ href: null, title: 'Crear cita' }} />
       <Tabs.Screen name="patient-file" options={{ href: null, title: 'Ficha de Paciente' }} />
       <Tabs.Screen name="patients/clinical-history" options={{ href: null, title: 'Historia Clínica' }} />
     </Tabs>

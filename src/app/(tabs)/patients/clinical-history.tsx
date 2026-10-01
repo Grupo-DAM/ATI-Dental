@@ -28,6 +28,19 @@ import { deleteTreatment } from '@/services/treatment-service';
 import { Consultation } from '@/types/clinical-record';
 import { createClinicalHistoryStyles } from '@/constants/styles/patients.style';
 
+function ageFromBirthDate(birthDate?: string): string {
+  if (!birthDate) return '';
+  const born = new Date(birthDate);
+  if (Number.isNaN(born.getTime())) return '';
+  const today = new Date();
+  let years = today.getFullYear() - born.getFullYear();
+  const hadBirthday =
+    today.getMonth() > born.getMonth() ||
+    (today.getMonth() === born.getMonth() && today.getDate() >= born.getDate());
+  if (!hadBirthday) years -= 1;
+  return years >= 0 ? String(years) : '';
+}
+
 export default function ClinicalHistoryScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -94,7 +107,23 @@ export default function ClinicalHistoryScreen() {
   };
 
   const handleScheduleAppointment = () => {
-    router.push('/(tabs)/agenda' as any);
+    const patient = record?.patient;
+    if (!patient) {
+      router.push('/(tabs)/patients/schedule-appointment' as any);
+      return;
+    }
+    router.push({
+      pathname: '/(tabs)/patients/schedule-appointment' as any,
+      params: {
+        patientId: patient.id,
+        patientName: patient.fullName,
+        patientCedula: patient.documentId ?? '',
+        patientGender: patient.gender ?? '',
+        patientAge: ageFromBirthDate(patient.birthDate),
+        patientPhone: patient.phone ?? '',
+        patientImageUrl: patient.photoUri ?? '',
+      },
+    });
   };
 
   const handleAddTreatment = () => {

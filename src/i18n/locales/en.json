@@ -495,7 +495,18 @@
     "retry": "Retry",
     "confirmed": "CONFIRMED",
     "pending": "PENDING",
+    "inProgress": "IN PROGRESS",
+    "completed": "COMPLETED",
     "cancelled": "CANCELLED",
+    "scheduleAppointment": "Schedule appointment",
+    "markConfirmed": "Confirm",
+    "markInProgress": "In progress",
+    "markCompleted": "Complete",
+    "markCancelled": "Cancel appointment",
+    "statusUpdatedTitle": "Status updated",
+    "statusUpdatedMessage": "The appointment is now {{status}}.",
+    "statusErrorTitle": "Could not update",
+    "statusErrorMessage": "Check the connection and try again.",
     "lunchBreak": "LUNCH BREAK",
     "minutes": "MIN",
     "chair": "CHAIR {{number}}",
@@ -574,5 +585,64 @@
     "saveChanges": "Save Changes",
     "updateSuccessTitle": "Consultation updated",
     "updateSuccessMessage": "The consultation has been updated successfully."
+  },
+  "scheduleAppointment": {
+    "title": "Create appointment",
+    "subtitle": "Register a new appointment in the clinical record and complete the procedure details.",
+    "breadcrumb": {
+      "patients": "Patients",
+      "patientRecord": "Patient record",
+      "current": "Create appointment"
+    },
+    "sections": {
+      "details": "Appointment details",
+      "notes": "Additional notes",
+      "next": "Next appointment"
+    },
+    "fields": {
+      "patient": "Patient",
+      "dentist": "Responsible dentist",
+      "type": "Appointment type",
+      "date": "Date",
+      "time": "Time",
+      "reason": "Reason for the appointment",
+      "duration": "Estimated duration"
+    },
+    "placeholders": {
+      "patient": "Select the patient...",
+      "dentist": "Select the dentist...",
+      "type": "Select the appointment type...",
+      "reason": "E.g. General consultation",
+      "duration": "Select the duration...",
+      "notes": ""
+    },
+    "updateOdontogram": "Update odontogram",
+    "odontogramTitle": "Odontogram",
+    "odontogramMessage": "The odontogram is updated from the patient's clinical history.",
+    "cancel": "Cancel",
+    "save": "Save appointment",
+    "modal": {
+      "title": "Confirm appointment",
+      "message": "Do you want to save this appointment in the patient record?",
+      "confirm": "Save",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "title": "Appointment saved",
+      "message": "The appointment is waiting and now appears on the agenda.",
+      "errorTitle": "Could not save the appointment",
+      "errorMessage": "Check your connection and try again. The form data is kept."
+    },
+    "errors": {
+      "patientRequired": "Select a patient.",
+      "conflictPatient": "This patient already has an appointment in that time slot.",
+      "conflictDentist": "This dentist already has an appointment in that time slot.",
+      "dentistRequired": "Select the responsible dentist.",
+      "typeRequired": "Select the appointment type.",
+      "dateRequired": "Enter the appointment date.",
+      "timeRequired": "Enter the appointment time.",
+      "reasonRequired": "Enter the reason for the appointment.",
+      "durationRequired": "Select the estimated duration."
+    }
   }
 }

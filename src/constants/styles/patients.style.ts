@@ -189,6 +189,35 @@ export const createRegisterTreatmentStyles = (theme: any) => {
     });
 };
 
+export const createScheduleAppointmentStyles = (theme: any) => {
+  const base = createRegisterTreatmentStyles(theme);
+  const extra = StyleSheet.create({
+    keyboardView: { flex: 1 },
+    fieldRow: { flexDirection: 'row', gap: 12 },
+    fieldHalf: { flex: 1 },
+    outlineWrap: { alignItems: 'center', marginTop: 4 },
+    outlineButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 44,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.main,
+      paddingHorizontal: 16,
+      gap: 8,
+      backgroundColor: theme.backgroundElement,
+    },
+    outlineButtonText: {
+      color: theme.main,
+      fontSize: 14,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
+    },
+  });
+  return { ...base, ...extra };
+};
+
 export const createInputStyles = (theme: any) => {
     return StyleSheet.create({
       fieldGroup: { marginBottom: 14 },
@@ -233,6 +262,9 @@ export const createInputStyles = (theme: any) => {
         backgroundColor: theme.backgroundElement,
         height: 44,
         paddingHorizontal: 12,
+      },
+      lockedTrigger: {
+        backgroundColor: theme.background,
       },
       selectText: {
         fontSize: 14,
@@ -287,6 +319,10 @@ export const createInputStyles = (theme: any) => {
       },
       multiLine: {
         textAlignVertical: 'top', paddingTop: 10 
+      },
+      multilineContainer: {
+        height: 80,
+        alignItems: 'flex-start',
       },
       icon: {
         marginRight: 4

@@ -21,6 +21,10 @@ export function isOdontologoUser(user: UserProfile | null | undefined): boolean 
   return user?.rol === USER_ROLES.ODONTOLOGO;
 }
 
+export function isAsistenteUser(user: UserProfile | null | undefined): boolean {
+  return user?.rol === USER_ROLES.ASISTENTE;
+}
+
 export function getRoleLabelKey(rol: AppUserRole | undefined): string {
   switch (rol) {
     case USER_ROLES.ODONTOLOGO:
