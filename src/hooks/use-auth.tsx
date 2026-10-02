@@ -1,6 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import { AppState } from 'react-native';
 import { auth, firestore } from '../config/firebase';
-import { saveSessionToken, removeSessionToken } from '../utils/secure-storage';
+import {
+  saveSessionToken,
+  removeSessionToken,
+  saveLastActiveTimestamp,
+  getLastActiveTimestamp,
+  removeLastActiveTimestamp,
+  clearSessionData,
+  isSessionExpired,
+} from '../utils/secure-storage';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
 /**
@@ -33,6 +42,10 @@ interface AuthContextType {
   register: (email: string, password: string) => Promise<FirebaseAuthTypes.UserCredential>;
   /** Verificar que el usuario haya hecho clic en el enlace de correo (US-19) */
   verifyCode: () => Promise<void>;
+  /** Registra una interacción del usuario actualizando su marca de tiempo de actividad */
+  recordActivity: () => Promise<void>;
+  /** Verifica si la sesión actual ha caducado por inactividad y expulsa si es necesario */
+  checkSessionTimeout: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -130,8 +143,32 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
 
         setUser(null);
         await removeSessionToken();
+        await removeLastActiveTimestamp();
         setLoading(false);
         return;
+      }
+
+      // Verificador de expiración por inactividad
+      try {
+        const lastActive = await getLastActiveTimestamp();
+        if (lastActive !== null && isSessionExpired(lastActive)) {
+          console.log('[useAuth] Sesión caducada por inactividad. Cerrando sesión de forma segura...');
+          if (unsubscribeProfile) {
+            unsubscribeProfile();
+            unsubscribeProfile = null;
+          }
+          await auth().signOut().catch(() => {});
+          await removeSessionToken().catch(() => {});
+          await removeLastActiveTimestamp().catch(() => {});
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        // Si la sesión es válida o es el primer inicio, actualizamos el timestamp
+        await saveLastActiveTimestamp(Date.now());
+      } catch (timeoutErr) {
+        console.warn('[useAuth] Error al verificar timeout de sesión:', timeoutErr);
       }
 
       try {
@@ -155,6 +192,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
                 console.log('[useAuth] onSnapshot detectó usuario inactivo. Expulsando sesión...');
                 auth().signOut().catch(() => {});
                 removeSessionToken().catch(() => {});
+                removeLastActiveTimestamp().catch(() => {});
                 setUser(null);
                 setLoading(false);
                 return;
@@ -214,6 +252,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
         console.log('[useAuth] Cuenta desactivada. Expulsando usuario y bloqueando login...');
         await auth().signOut();
         await removeSessionToken();
+        await removeLastActiveTimestamp();
         setUser(null);
         const deactivatedErr: any = new Error('ACCOUNT_DEACTIVATED');
         deactivatedErr.code = 'auth/account-deactivated';
@@ -232,6 +271,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     try {
       const credential = await auth().signInWithEmailAndPassword(email, password);
       if (credential?.user?.uid) {
+        await saveLastActiveTimestamp(Date.now());
         await verifyActiveStatus(credential.user);
         await recordUserSession(credential.user.uid, credential.user.email);
       }
@@ -247,12 +287,54 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     try {
       await auth().signOut();
       await removeSessionToken();
+      await removeLastActiveTimestamp();
       setUser(null);
     } catch (err: any) {
       setError(err.message);
       throw err;
     }
   }, []);
+
+  const recordActivity = useCallback(async () => {
+    if (auth().currentUser) {
+      await saveLastActiveTimestamp(Date.now());
+    }
+  }, []);
+
+  const checkSessionTimeout = useCallback(async (): Promise<boolean> => {
+    const currentUser = auth().currentUser;
+    if (!currentUser) return false;
+
+    try {
+      const lastActive = await getLastActiveTimestamp();
+      if (lastActive !== null && isSessionExpired(lastActive)) {
+        console.log('[useAuth] Sesión expirada detectada por checkSessionTimeout. Cerrando sesión...');
+        await auth().signOut().catch(() => {});
+        await clearSessionData().catch(() => {});
+        setUser(null);
+        setLoading(false);
+        return true;
+      }
+      await saveLastActiveTimestamp(Date.now());
+      return false;
+    } catch (e) {
+      console.warn('[useAuth] Error al verificar timeout en checkSessionTimeout:', e);
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState: string) => {
+      if (nextAppState === 'active' && auth().currentUser) {
+        await checkSessionTimeout();
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      subscription.remove();
+    };
+  }, [checkSessionTimeout]);
 
   const register = useCallback(async (email: string, password: string) => {
     setError(null);
@@ -321,8 +403,10 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     login,
     logout,
     register,
-    verifyCode
-  }), [user, loading, error, login, logout, register, verifyCode]);
+    verifyCode,
+    recordActivity,
+    checkSessionTimeout,
+  }), [user, loading, error, login, logout, register, verifyCode, recordActivity, checkSessionTimeout]);
 
   return (
     <AuthContext.Provider value={authValue}>
