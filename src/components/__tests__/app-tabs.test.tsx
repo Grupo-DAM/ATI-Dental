@@ -70,6 +70,19 @@ describe('AppTabs Component & CustomTabBar', () => {
     expect(screen.getByText('tabs.profile')).toBeTruthy();
   });
 
+  it('configures sceneContainerStyle with theme background on Tabs', () => {
+    render(<AppTabs />);
+
+    expect(mockTabs.mock.lastCall[0]).toEqual(
+      expect.objectContaining({
+        screenOptions: expect.objectContaining({
+          headerShown: false,
+          sceneContainerStyle: { backgroundColor: mockColors.background },
+        }),
+      })
+    );
+  });
+
   it('should call the navigation function after pressing an available Tab', () => {
     const mockNavigate = jest.fn();
 
