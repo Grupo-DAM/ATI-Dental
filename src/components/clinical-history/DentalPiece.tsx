@@ -26,7 +26,7 @@ interface DentalPieceProp {
 export function DentalPiece({ 
   tooth, isBottomRow = false, isSelected = false, onPress,
   showNumber = true, containerStyles
-} : DentalPieceProp) {
+} : Readonly<DentalPieceProp>) {
   const { dentalPieceSource, flip} = useToothAsset(tooth.number);
   const isHealthy = tooth.generalStates.length === 0;
   const theme = useTheme();
@@ -71,7 +71,7 @@ export function DentalCuadrant({
     isBottomCuadrant = false, 
     selectedTooth, 
     setSelectedTooth
-}:DentalCuadrantProp) {
+}: Readonly<DentalCuadrantProp>) {
   const styles = createDentalCuadrantStyles();
   return (
     <View style={[styles.cuadrantRow, isLeftCuadrant && styles.leftCuadrantRow]}>

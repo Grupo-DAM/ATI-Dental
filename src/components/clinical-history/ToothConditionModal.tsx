@@ -3,17 +3,15 @@ import {
     View,
     Text,
     TouchableOpacity,
-    ScrollView,
 } from 'react-native';
 import { SlidingModal } from '@/components/ui/sliding-modal';
 import { FormActionButton, FormTextField } from '@/components/ui/form-field';
 import { useTheme } from '@/hooks/use-theme';
 import { createToothConditionModalStyles } from '@/constants/styles/patients.style';
-import { ToothCondition } from '@/types/clinical-record';
 import { useTranslation } from 'react-i18next';
 import { ColorOpacity } from '@/constants/theme';
 import { DentalPiece, getToothCombinedStateColor } from './DentalPiece'
-import { ALL_TOOTH_STATES, TOOTH_SURFACE, ToothSurface, ToothState } from '@/types/clinical-record';
+import { ALL_TOOTH_STATES, TOOTH_SURFACE, ToothSurface, ToothState, ToothCondition } from '@/types/clinical-record';
 
 export interface ToothConditionModalProps {
   visible: boolean;

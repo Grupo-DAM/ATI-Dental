@@ -117,9 +117,9 @@ export default function ClinicalHistoryScreen() {
   });
 
   // Carga el odontograma 
-  const [selectedConsultationDate, setSelectedConsultationDate] = useState<string | null>(null);
+  const [selectedConsultationDate, ] = useState<string | null>(null);
 
-  const { odontogram, loading, odontogramError } = useFetchOdontogram({
+  const { odontogram, loading } = useFetchOdontogram({
     patientId: patientId ?? '',
     selectedDate: selectedConsultationDate, // Si es null, el hook trae el último odontograma
   });
@@ -247,6 +247,7 @@ export default function ClinicalHistoryScreen() {
         });
       }
     } catch (err) {
+      // We catch this to show the error in the toast modal
       setToastConfig({
         visible: true,
         type: 'error',

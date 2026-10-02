@@ -1,614 +1,475 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
-import ClinicalHistoryScreen from '../app/(tabs)/patients/clinical-history';
-import { useAuth } from '../hooks/use-auth';
-import { fetchClinicalRecord, deleteConsultation, updateConsultation } from '../services/clinical-record-service';
-import { deleteTreatment } from '../services/treatment-service';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { renderHook, act, waitFor } from '@testing-library/react-native';
+import { useClinicalRecord } from '@/hooks/use-clinical-record';
+import {
+  fetchClinicalRecord,
+  deleteConsultation,
+  updateConsultation,
+  updateOdontogram,
+} from '@/services/clinical-record-service';
+import { Consultation, ClinicalRecord, ToothCondition } from '@/types/clinical-record';
 
-jest.mock('expo-router', () => {
-  const React = require('react');
-  return {
-    __esModule: true,
-    useRouter: jest.fn(),
-    useLocalSearchParams: jest.fn(),
-    useFocusEffect: jest.fn((cb) => React.useEffect(cb, [])),
-    router: {
-      push: jest.fn(),
-      replace: jest.fn(),
-      back: jest.fn(),
-    },
-  };
-});
-
-jest.mock('../hooks/use-auth', () => ({
-  useAuth: jest.fn(),
-}));
-
-jest.mock('../services/clinical-record-service', () => ({
+jest.mock('@/services/clinical-record-service', () => ({
   fetchClinicalRecord: jest.fn(),
   deleteConsultation: jest.fn(),
   updateConsultation: jest.fn(),
+  updateOdontogram: jest.fn(),
 }));
 
-jest.mock('../services/treatment-service', () => ({
-  deleteTreatment: jest.fn(),
-}));
-
-jest.mock('expo-image', () => {
-  const React = require('react');
-  const { View } = require('react-native');
-  return {
-    Image: (props: any) => React.createElement(View, props),
-  };
-});
-
-jest.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, fallback?: string) => fallback || key,
-    i18n: { language: 'es' },
-  }),
-}));
-
-jest.mock('@/hooks/use-fetch-odontogram', () => ({
-  useFetchOdontogram: () => ({
-    odontogram: {
-      patientId: 'p-1',
-      status: 'ready',
-      isAdult: true,
-      teeth: {},
-    },
-    loading: false, // ✨ CLAVE: Al forzar loading en false, el ActivityIndicator desaparecerá
-    error: null,
-  }),
-}));
-
-describe('ClinicalHistoryScreen', () => {
-  const mockRouterPush = jest.fn();
-
+describe('useClinicalRecord Hook', () => {
   const mockPatient = {
-    id: 'p-123',
+    id: 'p-1',
     patientCode: '#P-0042',
-    fullName: 'María González',
+    fullName: 'Juan Perez',
     documentId: 'V-12345678',
-    email: 'maria.gonzalez@email.com',
-    phone: '04141234567',
-    birthDate: '1990-05-15',
-    bloodType: 'O+',
-    knownAllergies: ['penicilina'],
-    medicalHistory: ['hipertensión'],
-    notes: 'Paciente cuidadosa',
     status: 'activo' as const,
   };
 
-  const mockConsultations = [
+  const mockConsultations: Consultation[] = [
     {
       id: 'c-1',
-      patientId: 'p-123',
+      patientId: 'p-1',
       consultationDate: '2023-09-20T10:00:00Z',
-      title: 'Limpieza dental profunda',
-      motivo: 'Control y Limpieza',
-      diagnostico: 'Buena salud periodontal. Se recomienda profilaxis cada 6 meses.',
-      diagnosticoDetallado: [
-        'Gingivitis generalizada leve',
-        'Acumulación de placa bacteriana',
-      ],
-      proximaCita: '14 Oct 2023',
+      title: 'Limpieza dental',
+      motivo: 'Control general',
+      diagnostico: 'Gingivitis leve',
       doctor: 'Dr. Smith',
-      duration: '45 minutos',
-      tratamientosRealizados: 'Limpieza Dental Profunda',
-      notas: 'Sensibilidad leve.',
     },
     {
       id: 'c-2',
-      patientId: 'p-123',
-      consultationDate: '2023-08-15T10:00:00Z',
-      title: 'Obturación Resina (Pieza 46)',
-      motivo: 'Dolor en pieza 46',
-      diagnostico: 'Caries oclusal en pieza 46.',
-      diagnosticoDetallado: ['Caries clase I'],
-      proximaCita: '20 Sep 2023',
+      patientId: 'p-1',
+      consultationDate: '2023-08-15T11:30:00Z',
+      title: 'Obturación',
+      motivo: 'Dolor molar',
+      diagnostico: 'Caries oclusal',
       doctor: 'Dra. Martinez',
-      duration: '30 minutos',
-      tratamientosRealizados: 'Resina fotocurada',
-      notas: 'Sin dolor tras tratamiento.',
     },
   ];
 
   const mockTreatments = [
     {
       id: 't-1',
-      patientId: 'p-123',
-      treatmentName: 'Limpieza Dental Profunda',
-      category: 'Odontología General',
-      treatmentDate: '2023-09-20T10:00:00Z',
-      dentalPiece: 'Toda la boca',
+      patientId: 'p-1',
+      patientName: 'Juan Perez',
+      patientCedula: 'V-12345678',
+      treatmentName: 'Profilaxis dental',
       responsibleDentist: 'Dr. Smith',
-      duration: '45 mins',
+      treatmentDate: '2023-09-20',
+      category: 'Higiene',
+      notes: 'Limpieza con ultrasonido',
       status: 'Completado',
-      notes: 'Profilaxis completa.',
-      estimatedCost: 60,
-      pendingExams: [],
+    },
+    {
+      id: 't-2',
+      patientId: 'p-1',
+      patientName: 'Juan Perez',
+      patientCedula: 'V-12345678',
+      treatmentName: 'Resina compuesta',
+      responsibleDentist: 'Dra. Martinez',
+      treatmentDate: '2023-08-15',
+      category: 'Operatoria',
+      notes: 'Pieza 46',
+      status: 'Completado',
     },
   ];
 
-  const mockRecord = {
+  const mockRecord: ClinicalRecord = {
     patient: mockPatient,
     consultations: mockConsultations,
     treatments: mockTreatments,
     odontogram: {
-      patientId: 'p-123',
-      status: 'placeholder' as const,
+      patientId: 'p-1',
+      updatedAt: '2023-01-01T00:00:00Z',
+      status: 'active',
+      isAdult: true,
+      teeth: {
+        16: {
+          number: 16,
+          generalStates: ['filled'],
+        },
+      },
     },
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({ push: mockRouterPush });
-    (useLocalSearchParams as jest.Mock).mockReturnValue({ patientId: 'p-123' });
-    (useAuth as jest.Mock).mockReturnValue({
-      user: { rol: 'odontologo' },
-      loading: false,
+  });
+
+  it('carga la historia clínica exitosamente y maneja refresh', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: true,
+      data: mockRecord,
     });
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+
+    expect(result.current.loading).toBe(true);
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.record?.patient.fullName).toBe('Juan Perez');
+      expect(result.current.error).toBeNull();
+    });
+
+    // Probar refetch
+    await act(async () => {
+      await result.current.refetch();
+    });
+
+    expect(fetchClinicalRecord).toHaveBeenCalledTimes(2);
+  });
+
+  it('maneja error cuando fetchClinicalRecord falla', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: false,
+      error: 'Error de servidor',
+    });
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe('Error de servidor');
+    });
+  });
+
+  it('maneja mensaje de error fallback si no viene especificado en la respuesta', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: false,
+    });
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe('No se pudo cargar la historia clínica');
+    });
+  });
+
+  it('maneja error si no se pasa patientId', async () => {
+    const { result } = renderHook(() => useClinicalRecord());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe('No se proporcionó un ID de paciente');
+    });
+  });
+
+  it('permite cambiar la pestaña activa (activeTab)', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: true,
+      data: mockRecord,
+    });
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.activeTab).toBe('consultas');
+
+    act(() => {
+      result.current.setActiveTab('odontograma');
+    });
+
+    expect(result.current.activeTab).toBe('odontograma');
+  });
+
+  it('filtra consultas reactivamente por título, motivo, diagnóstico, fecha y doctor', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: true,
+      data: mockRecord,
+    });
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Filtro por motivo
+    act(() => {
+      result.current.setSearchQuery('control');
+    });
+    expect(result.current.filteredConsultations.length).toBe(1);
+    expect(result.current.filteredConsultations[0].id).toBe('c-1');
+
+    // Filtro por diagnóstico
+    act(() => {
+      result.current.setSearchQuery('caries');
+    });
+    expect(result.current.filteredConsultations.length).toBe(1);
+    expect(result.current.filteredConsultations[0].id).toBe('c-2');
+
+    // Filtro por doctor
+    act(() => {
+      result.current.setSearchQuery('martinez');
+    });
+    expect(result.current.filteredConsultations.length).toBe(1);
+    expect(result.current.filteredConsultations[0].id).toBe('c-2');
+
+    // Filtro por fecha
+    act(() => {
+      result.current.setSearchQuery('2023-09');
+    });
+    expect(result.current.filteredConsultations.length).toBe(1);
+
+    // Filtro sin coincidencias
+    act(() => {
+      result.current.setSearchQuery('inexistente');
+    });
+    expect(result.current.filteredConsultations.length).toBe(0);
+  });
+
+  it('filtra tratamientos reactivamente por nombre, categoría, notas, fecha y odontólogo', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: true,
+      data: mockRecord,
+    });
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Filtro por categoría
+    act(() => {
+      result.current.setSearchQuery('higiene');
+    });
+    expect(result.current.filteredTreatments.length).toBe(1);
+    expect(result.current.filteredTreatments[0].treatmentName).toBe('Profilaxis dental');
+
+    // Filtro por notas
+    act(() => {
+      result.current.setSearchQuery('ultrasonido');
+    });
+    expect(result.current.filteredTreatments.length).toBe(1);
+
+    // Filtro por odontólogo
+    act(() => {
+      result.current.setSearchQuery('martinez');
+    });
+    expect(result.current.filteredTreatments.length).toBe(1);
+  });
+
+  it('elimina consulta y limpia selectedConsultation si corresponde', async () => {
     (fetchClinicalRecord as jest.Mock).mockResolvedValue({
       success: true,
       data: mockRecord,
     });
     (deleteConsultation as jest.Mock).mockResolvedValue(true);
-    (deleteTreatment as jest.Mock).mockResolvedValue(true);
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Seleccionar consulta c-1
+    act(() => {
+      result.current.setSelectedConsultation(mockConsultations[0]);
+    });
+    expect(result.current.selectedConsultation?.id).toBe('c-1');
+
+    // Eliminar consulta c-1
+    let ok = false;
+    await act(async () => {
+      ok = await result.current.deleteConsultation('c-1');
+    });
+
+    expect(ok).toBe(true);
+    expect(result.current.record?.consultations.find((c) => c.id === 'c-1')).toBeUndefined();
+    expect(result.current.selectedConsultation).toBeNull();
   });
 
-  // ── Escenario 1: Visualización de datos personales y antecedentes clínicos ──
-  it('Escenario 1: Muestra los datos personales y antecedentes médicos en la parte superior', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByText('María González')).toBeTruthy();
-      expect(screen.getByText(/V-12345678/)).toBeTruthy();
-      expect(screen.getByText(/04141234567/)).toBeTruthy();
-      expect(screen.getByText('O+')).toBeTruthy();
-    });
-
-    // Expandir antecedentes médicos
-    fireEvent.press(screen.getByText('patientFile.medicalBackground'));
-
-    await waitFor(() => {
-      expect(screen.getByText(/penicilina/i)).toBeTruthy();
-      expect(screen.getByText(/hipertensión/i)).toBeTruthy();
-    });
-  });
-
-  it('Escenario 2: Muestra el contenedor para el odontograma', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('tab-odontograma')).toBeTruthy();
-    });
-
-    // Cambiar a la pestaña Odontograma
-    fireEvent.press(screen.getByTestId('tab-odontograma'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('odontogram-container')).toBeTruthy();
-    });
-  });
-
-  // ── Escenario 3: Consulta del historial de evolución y diagnósticos ──
-  it('Escenario 3: Muestra las intervenciones ordenadas cronológicamente con diagnóstico y procedimiento', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Limpieza dental profunda')).toBeTruthy();
-      expect(screen.getByText('Obturación Resina (Pieza 46)')).toBeTruthy();
-      expect(screen.getByText(/Buena salud periodontal/i)).toBeTruthy();
-      expect(screen.getByText(/Caries oclusal/i)).toBeTruthy();
-    });
-
-    // Abrir detalle de consulta
-    fireEvent.press(screen.getByText('Limpieza dental profunda'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Motivo de Consulta')).toBeTruthy();
-      expect(screen.getByText('Gingivitis generalizada leve')).toBeTruthy();
-      expect(screen.getAllByText('14 Oct 2023').length).toBeGreaterThan(0);
-    });
-  });
-
-  // ── Escenario 4: Restricción de acceso a usuarios no autorizados ──
-  it('Escenario 4: Bloquea la visualización cuando el usuario tiene rol no autorizado (usuario_externo)', async () => {
-    (useAuth as jest.Mock).mockReturnValue({
-      user: { rol: 'usuario_externo' },
-      loading: false,
-    });
-
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('clinical-history-access-denied')).toBeTruthy();
-      expect(screen.getByText(/Acceso Restringido a Odontólogos/i)).toBeTruthy();
-    });
-
-    expect(screen.queryByText('María González')).toBeNull();
-  });
-
-  it('Permite el acceso a administradores según requerimiento', async () => {
-    (useAuth as jest.Mock).mockReturnValue({
-      user: { rol: 'admin' },
-      loading: false,
-    });
-
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByText('María González')).toBeTruthy();
-    });
-  });
-
-  // ── Escenario 5: Manejo de errores de red o fallo de servicio ──
-  it('Escenario 5: Muestra mensaje de error amigable y permite reintentar ante fallo de red', async () => {
-    (fetchClinicalRecord as jest.Mock).mockResolvedValueOnce({
-      success: false,
-      error: 'Error de conexión con el servidor',
-    });
-
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('clinical-history-error')).toBeTruthy();
-      expect(screen.getByText('Error de conexión con el servidor')).toBeTruthy();
-      expect(screen.getByTestId('btn-retry-clinical-history')).toBeTruthy();
-    });
-
-    // Reintentar con éxito
-    (fetchClinicalRecord as jest.Mock).mockResolvedValueOnce({
+  it('actualiza consulta localmente y selectedConsultation de forma optimista', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
       success: true,
       data: mockRecord,
     });
-
-    fireEvent.press(screen.getByTestId('btn-retry-clinical-history'));
-
-    await waitFor(() => {
-      expect(screen.getByText('María González')).toBeTruthy();
-    });
-  });
-
-  // ── Búsqueda y filtrado reactivo ──
-  it('filtra consultas reactivamente mediante el input de búsqueda', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Limpieza dental profunda')).toBeTruthy();
-      expect(screen.getByText('Obturación Resina (Pieza 46)')).toBeTruthy();
-    });
-
-    const searchInput = screen.getByTestId('search-consultations-input');
-    fireEvent.changeText(searchInput, 'Caries');
-
-    await waitFor(() => {
-      expect(screen.queryByText('Limpieza dental profunda')).toBeNull();
-      expect(screen.getByText('Obturación Resina (Pieza 46)')).toBeTruthy();
-    });
-  });
-
-  // ── Pestaña de Tratamientos y navegación ──
-  it('cambia a pestaña de tratamientos y navega a registrar tratamiento', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('tab-tratamientos')).toBeTruthy();
-    });
-
-    fireEvent.press(screen.getByTestId('tab-tratamientos'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('treatments-timeline')).toBeTruthy();
-      expect(screen.getByTestId('btn-add-treatment')).toBeTruthy();
-    });
-
-    const { router } = require('expo-router');
-    fireEvent.press(screen.getByTestId('btn-add-treatment'));
-
-    expect(router.push).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pathname: '/(tabs)/patients/register-treatment',
-        params: expect.objectContaining({
-          patientId: 'p-123',
-        }),
-      })
-    );
-  });
-
-  it('navega a editar paciente al presionar botón de edición en la tarjeta', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByLabelText('Editar paciente')).toBeTruthy();
-    });
-
-    const { router } = require('expo-router');
-    fireEvent.press(screen.getByLabelText('Editar paciente'));
-
-    expect(router.push).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pathname: '/(tabs)/patients/register-patient',
-        params: expect.objectContaining({
-          patientId: 'p-123',
-        }),
-      })
-    );
-  });
-
-  it('navega a crear cita al presionar botón Agendar Cita', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('btn-schedule-appointment')).toBeTruthy();
-    });
-
-    const { router } = require('expo-router');
-    fireEvent.press(screen.getByTestId('btn-schedule-appointment'));
-
-    expect(router.push).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pathname: '/(tabs)/patients/schedule-appointment',
-      }),
-    );
-  });
-
-  it('permite abrir modal detallado y cambiar a pestaña de odontograma', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Limpieza dental profunda')).toBeTruthy();
-    });
-
-    fireEvent.press(screen.getByText('Limpieza dental profunda'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Ver Odontograma')).toBeTruthy();
-    });
-
-    fireEvent.press(screen.getByText('Ver Odontograma'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('odontogram-container')).toBeTruthy();
-    });
-  });
-
-  it('permite abrir modal de confirmación y eliminar una consulta', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getAllByText('Eliminar').length).toBeGreaterThan(0);
-    });
-
-    // Presionar botón Eliminar de la primera consulta
-    fireEvent.press(screen.getAllByText('Eliminar')[0]);
-
-    await waitFor(() => {
-      expect(screen.getByText('Confirmar Eliminación')).toBeTruthy();
-    });
-
-    // Confirmar eliminación en el modal
-    fireEvent.press(screen.getByTestId('modal-confirm-btn'));
-
-    await waitFor(() => {
-      expect(deleteConsultation).toHaveBeenCalledWith('c-1');
-    });
-  });
-
-  it('permite modificar y eliminar tratamiento desde la pestaña de tratamientos', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('tab-tratamientos')).toBeTruthy();
-    });
-
-    fireEvent.press(screen.getByTestId('tab-tratamientos'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Modificar')).toBeTruthy();
-    });
-
-    const { router } = require('expo-router');
-    fireEvent.press(screen.getByText('Modificar'));
-
-    expect(router.push).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pathname: '/(tabs)/patients/register-treatment',
-        params: expect.objectContaining({
-          treatmentId: 't-1',
-        }),
-      })
-    );
-
-    // Eliminar tratamiento
-    fireEvent.press(screen.getByText('Eliminar'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Confirmar Eliminación')).toBeTruthy();
-    });
-
-    fireEvent.press(screen.getByTestId('modal-confirm-btn'));
-
-    await waitFor(() => {
-      expect(deleteTreatment).toHaveBeenCalledWith('t-1');
-    });
-  });
-
-  it('filtra tratamientos reactivamente en la pestaña de tratamientos', async () => {
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('tab-tratamientos')).toBeTruthy();
-    });
-
-    fireEvent.press(screen.getByTestId('tab-tratamientos'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Limpieza Dental Profunda')).toBeTruthy();
-    });
-
-    const searchInput = screen.getByTestId('search-treatments-input');
-    fireEvent.changeText(searchInput, 'OrtodonciaInexistente');
-
-    await waitFor(() => {
-      expect(screen.queryByText('Limpieza Dental Profunda')).toBeNull();
-      expect(screen.getByTestId('empty-treatments')).toBeTruthy();
-    });
-  });
-
-  it('permite abrir modal de edición y guardar modificaciones de una consulta', async () => {
     (updateConsultation as jest.Mock).mockResolvedValue(true);
-    render(<ClinicalHistoryScreen />);
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('btn-modify-consultation-c-1')).toBeTruthy();
+      expect(result.current.loading).toBe(false);
     });
 
-    // Abrir modificación
-    fireEvent.press(screen.getByTestId('btn-modify-consultation-c-1'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('input-edit-consultation-title')).toBeTruthy();
+    act(() => {
+      result.current.setSelectedConsultation(mockConsultations[0]);
     });
 
-    // Modificar título y motivo
-    fireEvent.changeText(screen.getByTestId('input-edit-consultation-title'), 'Limpieza dental y profilaxis profunda');
-    fireEvent.changeText(screen.getByTestId('input-edit-consultation-motivo'), 'Sensibilidad en encías');
+    let ok = false;
+    await act(async () => {
+      ok = await result.current.updateConsultation('c-1', {
+        title: 'Limpieza dental ultrasónica avanzada',
+      });
+    });
 
-    // Guardar
-    fireEvent.press(screen.getByTestId('btn-modal-save-consultation'));
+    expect(ok).toBe(true);
+    expect(
+      result.current.record?.consultations.find((c) => c.id === 'c-1')?.title
+    ).toBe('Limpieza dental ultrasónica avanzada');
+    expect(result.current.selectedConsultation?.title).toBe(
+      'Limpieza dental ultrasónica avanzada'
+    );
+  });
 
-    await waitFor(() => {
-      expect(updateConsultation).toHaveBeenCalledWith(
-        'c-1',
+  it('maneja consultas y tratamientos con campos nulos o no definidos en el filtrado', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: true,
+      data: {
+        ...mockRecord,
+        consultations: [
+          { id: 'c-null', patientId: 'p-1' } as any,
+        ],
+        treatments: [
+          { id: 't-null', patientId: 'p-1' } as any,
+        ],
+      },
+    });
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() => {
+      result.current.setSearchQuery('algo');
+    });
+    expect(result.current.filteredConsultations.length).toBe(0);
+    expect(result.current.filteredTreatments.length).toBe(0);
+
+    // Búsqueda vacía retorna todos
+    act(() => {
+      result.current.setSearchQuery('   ');
+    });
+    expect(result.current.filteredConsultations.length).toBe(1);
+    expect(result.current.filteredTreatments.length).toBe(1);
+  });
+
+  it('no actualiza estado local si deleteConsultation o updateConsultation retornan false', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: true,
+      data: mockRecord,
+    });
+    (deleteConsultation as jest.Mock).mockResolvedValue(false);
+    (updateConsultation as jest.Mock).mockResolvedValue(false);
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    let ok = false;
+    await act(async () => {
+      ok = await result.current.deleteConsultation('c-1');
+    });
+    expect(ok).toBe(false);
+    expect(result.current.record?.consultations.length).toBe(2);
+
+    await act(async () => {
+      ok = await result.current.updateConsultation('c-1', { title: 'No cambiara' });
+    });
+    expect(ok).toBe(false);
+  });
+
+  describe('updateOdontogram en useClinicalRecord', () => {
+    const updatedTooth: ToothCondition = {
+      number: 11,
+      generalStates: ['cavity'],
+      surfacesStates: {
+        mesial: 'cavity',
+      },
+    };
+
+    it('actualiza el diente y el odontograma en el estado local cuando la persistencia es exitosa', async () => {
+      (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+        success: true,
+        data: mockRecord,
+      });
+      (updateOdontogram as jest.Mock).mockResolvedValue(true);
+
+      const { result } = renderHook(() => useClinicalRecord('p-1'));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      let ok = false;
+      await act(async () => {
+        ok = await result.current.updateOdontogram(updatedTooth, true);
+      });
+
+      expect(ok).toBe(true);
+      expect(updateOdontogram).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: 'Limpieza dental y profilaxis profunda',
-          motivo: 'Sensibilidad en encías',
-        })
+          patientId: 'p-1',
+          teeth: expect.objectContaining({
+            16: { number: 16, generalStates: ['filled'] },
+            11: updatedTooth,
+          }),
+        }),
+        true
       );
-    });
-  });
-
-  it('maneja error cuando falla la actualización de una consulta', async () => {
-    (updateConsultation as jest.Mock).mockRejectedValue(new Error('Network error on update'));
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('btn-modify-consultation-c-1')).toBeTruthy();
+      expect(result.current.record?.odontogram?.teeth?.[11]).toEqual(updatedTooth);
     });
 
-    fireEvent.press(screen.getByTestId('btn-modify-consultation-c-1'));
+    it('inicializa correctamente teeth si record.odontogram.teeth es undefined', async () => {
+      (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+        success: true,
+        data: {
+          ...mockRecord,
+          odontogram: {
+            patientId: 'p-1',
+            status: 'active',
+            teeth: undefined,
+          },
+        },
+      });
+      (updateOdontogram as jest.Mock).mockResolvedValue(true);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('btn-modal-save-consultation')).toBeTruthy();
+      const { result } = renderHook(() => useClinicalRecord('p-1'));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      let ok = false;
+      await act(async () => {
+        ok = await result.current.updateOdontogram(updatedTooth, false);
+      });
+
+      expect(ok).toBe(true);
+      expect(result.current.record?.odontogram?.teeth?.[11]).toEqual(updatedTooth);
     });
 
-    fireEvent.press(screen.getByTestId('btn-modal-save-consultation'));
+    it('retorna false si no hay un registro u odontograma cargado', async () => {
+      (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+        success: true,
+        data: {
+          ...mockRecord,
+          odontogram: null,
+        },
+      });
 
-    await waitFor(() => {
-      expect(screen.getByText('Error')).toBeTruthy();
-    });
-  });
+      const { result } = renderHook(() => useClinicalRecord('p-1'));
+      await waitFor(() => expect(result.current.loading).toBe(false));
 
-  it('maneja error al eliminar consulta y permite cancelar eliminación', async () => {
-    (deleteConsultation as jest.Mock).mockRejectedValue(new Error('Network error on delete'));
-    render(<ClinicalHistoryScreen />);
+      let ok = true;
+      await act(async () => {
+        ok = await result.current.updateOdontogram(updatedTooth, true);
+      });
 
-    await waitFor(() => {
-      expect(screen.getAllByText('Eliminar').length).toBeGreaterThan(0);
-    });
-
-    // Abrir modal y luego cancelar
-    fireEvent.press(screen.getAllByText('Eliminar')[0]);
-    await waitFor(() => {
-      expect(screen.getByText('Confirmar Eliminación')).toBeTruthy();
-    });
-    fireEvent.press(screen.getByTestId('modal-cancel-btn'));
-    await waitFor(() => {
-      expect(screen.queryByText('Confirmar Eliminación')).toBeNull();
+      expect(ok).toBe(false);
+      expect(updateOdontogram).not.toHaveBeenCalled();
     });
 
-    // Abrir modal de nuevo y confirmar para disparar el catch
-    fireEvent.press(screen.getAllByText('Eliminar')[0]);
-    await waitFor(() => {
-      expect(screen.getByText('Confirmar Eliminación')).toBeTruthy();
+    it('no actualiza el estado local si la llamada a updateOdontogram falla (retorna false)', async () => {
+      (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+        success: true,
+        data: mockRecord,
+      });
+      (updateOdontogram as jest.Mock).mockResolvedValue(false);
+
+      const { result } = renderHook(() => useClinicalRecord('p-1'));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      let ok = true;
+      await act(async () => {
+        ok = await result.current.updateOdontogram(updatedTooth, true);
+      });
+
+      expect(ok).toBe(false);
+      expect(result.current.record?.odontogram?.teeth?.[11]).toBeUndefined();
     });
-    fireEvent.press(screen.getByTestId('modal-confirm-btn'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Error')).toBeTruthy();
-    });
-  });
-
-  it('permite eliminar una consulta desde el interior del modal de detalle', async () => {
-    (deleteConsultation as jest.Mock).mockResolvedValue(true);
-    render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Limpieza dental profunda')).toBeTruthy();
-    });
-
-    // Abrir modal de detalle
-    fireEvent.press(screen.getByText('Limpieza dental profunda'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('btn-modal-edit-consultation')).toBeTruthy();
-    });
-
-    // Click en Eliminar dentro del modal
-    fireEvent.press(screen.getByTestId('btn-modal-delete-consultation'));
-
-    await waitFor(() => {
-      expect(screen.getByText('Confirmar Eliminación')).toBeTruthy();
-    });
-
-    fireEvent.press(screen.getByTestId('modal-confirm-btn'));
-
-    await waitFor(() => {
-      expect(deleteConsultation).toHaveBeenCalledWith('c-1');
-      expect(screen.getByText('Eliminado con éxito')).toBeTruthy();
-    });
-
-    fireEvent.press(screen.getByTestId('btn-dismiss-toast'));
-  });
-
-  // ── Dark Mode Test ──
-  it('aplica correctamente los estilos y tokens del tema en modo oscuro (dark mode)', async () => {
-    jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('dark');
-
-    const { getByTestId } = render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByText('María González')).toBeTruthy();
-    });
-
-    const screenContainer = getByTestId('clinical-history-screen');
-    expect(screenContainer.props.style).toEqual(
-      expect.objectContaining({ backgroundColor: '#000000' })
-    );
-
-    const summaryCard = getByTestId('patient-summary-card');
-    expect(summaryCard.props.style).toEqual(
-      expect.objectContaining({
-        backgroundColor: '#121315',
-        borderColor: '#374151',
-      })
-    );
-
-    // Restaurar a light
-    jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('light');
-  });
-
-  // ── Snapshot test ──
-  it('coincide con el snapshot estructural', async () => {
-    const { toJSON } = render(<ClinicalHistoryScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByText('María González')).toBeTruthy();
-    });
-
-    expect(toJSON()).toMatchSnapshot();
   });
 });

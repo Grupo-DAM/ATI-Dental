@@ -1,4 +1,4 @@
-import { Spacing, Colors, FontFamily, FontSize, FontWeight, LineHeight, Border, BottomTabInset, ColorOpacity} from "@/constants/theme";
+import { Spacing, Colors, FontFamily, FontSize, FontWeight, LineHeight, Border } from "@/constants/theme";
 import { StyleSheet, Platform } from "react-native";
 import { createGlobalStyles } from "./global.styles";
 

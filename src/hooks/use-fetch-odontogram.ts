@@ -21,7 +21,7 @@ function mapFirebaseToOdontogram(docData: any): OdontogramData {
 
   if (docData.estadoPiezas) {
     Object.entries(docData.estadoPiezas).forEach(([toothStr, data]: [string, any]) => {
-      const toothNumber = parseInt(toothStr, 10);
+      const toothNumber = Number.parseInt(toothStr, 10);
       
       // 1. Convertir el estado_general a tu arreglo de ToothState[]
       const generalStates: ToothState[] = [];
