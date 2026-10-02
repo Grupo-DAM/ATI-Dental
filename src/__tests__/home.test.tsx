@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import HomeScreen from '../app/(tabs)/home';
 import { USER_ROLES } from '@/constants/user-roles';
+import * as DashboardService from '@/services/dashboard-service';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
@@ -220,6 +221,91 @@ describe('HomeScreen (US-38)', () => {
     await act(async () => {
       fireEvent.press(getByTestId('retry-load-button'));
     });
+  });
+
+  it('Escenario 2: Permite limpiar la búsqueda y enfocar/desenfocar el input', async () => {
+    const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('home-search-input')).toBeTruthy();
+    });
+
+    const searchInput = getByTestId('home-search-input');
+    fireEvent(searchInput, 'focus');
+    fireEvent.changeText(searchInput, 'Ana');
+
+    await waitFor(() => {
+      expect(getByTestId('clear-search-btn')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('clear-search-btn'));
+    fireEvent(searchInput, 'blur');
+
+    await waitFor(() => {
+      expect(queryByTestId('search-results-container')).toBeNull();
+    });
+  });
+
+  it('Escenario 3: Permite alternar opciones en el modal de accesos rápidos y cerrarlo sin guardar', async () => {
+    const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('customize-quick-access-btn')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('customize-quick-access-btn'));
+
+    await waitFor(() => {
+      expect(getByTestId('toggle-quick-agenda')).toBeTruthy();
+    });
+
+    // Alternar selección
+    fireEvent.press(getByTestId('toggle-quick-agenda'));
+    fireEvent.press(getByTestId('toggle-quick-agenda'));
+
+    // Cerrar con la X
+    fireEvent.press(getByTestId('close-customize-modal'));
+
+    await waitFor(() => {
+      expect(queryByTestId('close-customize-modal')).toBeNull();
+    });
+  });
+
+  it('Escenario 4: Permite cerrar el modal de notificaciones directamente con el botón de cerrar', async () => {
+    const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('notification-item-notif-1')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('notification-item-notif-1'));
+
+    await waitFor(() => {
+      expect(getByTestId('close-notification-modal')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('close-notification-modal'));
+
+    await waitFor(() => {
+      expect(queryByTestId('close-notification-modal')).toBeNull();
+    });
+  });
+
+  it('Escenario 5: Manejo de error al cargar el dashboard muestra banner de error y reintento', async () => {
+    const fetchSpy = jest.spyOn(DashboardService, 'fetchDashboardSummary').mockRejectedValueOnce(new Error('Fallo del servidor'));
+
+    const { getByTestId } = render(<HomeScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('error-banner')).toBeTruthy();
+      expect(getByTestId('retry-error-button')).toBeTruthy();
+    });
+
+    await act(async () => {
+      fireEvent.press(getByTestId('retry-error-button'));
+    });
+
+    fetchSpy.mockRestore();
   });
 
   it('Coincide con la instantánea estructural (Snapshot Test)', async () => {
