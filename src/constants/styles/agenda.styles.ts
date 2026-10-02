@@ -38,6 +38,15 @@ export const createAgendaStyles = (theme: any) => {
             fontWeight: '700',
             color: theme.text,
         },
+        scheduleButtonSlot: {
+            alignSelf: 'flex-start',
+            marginTop: 10,
+        },
+        dentistName: {
+            fontSize: 12,
+            marginTop: 2,
+            color: theme.textSecondary,
+        },
         navButtonsRow: {
             flexDirection: 'row',
             alignItems: 'center',
@@ -101,6 +110,7 @@ export const createAgendaStyles = (theme: any) => {
         },
         dayNumberContainerSelected: {
             backgroundColor: theme.main,
+            borderRadius: 14,
         },
         dayNumberText: {
             fontSize: 13,

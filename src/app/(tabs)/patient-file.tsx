@@ -11,11 +11,14 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, router, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { AccessDeniedView } from '@/components/access-denied-view';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { getPatientById, getPatientByEmail, Patient } from '@/services/patient-service';
+import { getStoredPatientVisitDates } from '@/services/clinical-record-service';
+import { formatVisitDay } from '@/utils/patient-visits';
 import { getTreatmentsByPatientId, deleteTreatment, Treatment } from '@/services/treatment-service';
 import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
@@ -43,6 +46,7 @@ const ALLOWED_ROLES = new Set(['odontologo', 'admin', 'asistente', 'medico']);
 /** Format an ISO date string to a readable locale date */
 function formatDate(dateInput: any): string {
   if (!dateInput) return '—';
+  if (typeof dateInput === 'string') return formatVisitDay(dateInput);
   try {
     const date = parseDateRobustly(dateInput);
     if (!date) return typeof dateInput === 'string' ? dateInput : '—';
@@ -425,6 +429,13 @@ export default function PatientFileScreen() {
 
       if (!patientData) throw new Error('PATIENT_NOT_FOUND');
 
+      const visits = await getStoredPatientVisitDates(patientData.id);
+      patientData = {
+        ...patientData,
+        lastVisit: visits.lastVisit ?? patientData.lastVisit,
+        nextAppointment: visits.nextAppointment ?? patientData.nextAppointment,
+      };
+
       const treatmentData = await getTreatmentsByPatientId(patientData.id);
       
       // Sort treatments by treatmentDate descending (newest first)
@@ -536,11 +547,10 @@ export default function PatientFileScreen() {
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <AppHeader />
         <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
-        <View style={styles.centerState}>
-          <Ionicons name="lock-closed-outline" size={56} color={theme.pageSubtitle} />
-          <Text style={[styles.stateTitle, { color: theme.pageTitle }]}>{t('patientFile.accessDenied')}</Text>
-          <Text style={[styles.stateMessage, { color: theme.pageSubtitle }]}>{t('patientFile.accessDeniedMessage')}</Text>
-        </View>
+        <AccessDeniedView
+          title={t('patientFile.accessDenied')}
+          message={t('patientFile.accessDeniedMessage')}
+        />
       </View>
     );
   }

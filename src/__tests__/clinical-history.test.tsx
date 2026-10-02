@@ -338,7 +338,7 @@ describe('ClinicalHistoryScreen', () => {
     );
   });
 
-  it('navega a agenda al presionar botón Agendar Cita', async () => {
+  it('navega a crear cita al presionar botón Agendar Cita', async () => {
     render(<ClinicalHistoryScreen />);
 
     await waitFor(() => {
@@ -348,7 +348,11 @@ describe('ClinicalHistoryScreen', () => {
     const { router } = require('expo-router');
     fireEvent.press(screen.getByTestId('btn-schedule-appointment'));
 
-    expect(router.push).toHaveBeenCalledWith('/(tabs)/agenda');
+    expect(router.push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/(tabs)/patients/schedule-appointment',
+      }),
+    );
   });
 
   it('permite abrir modal detallado y cambiar a pestaña de odontograma', async () => {

@@ -1,12 +1,12 @@
 import React, { ReactNode, useMemo } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { ThemedView } from '@/components/themed-view';
-import { ThemedText } from '@/components/themed-text';
 import { SearchFilter } from '@/components/users-list/search-filter-selector';
 import { ListPages } from '@/components/users-list/list-pages-viewer';
 import { NoResultSearch } from '@/components/users-list/no-results';
+import { AccessDeniedView } from '@/components/access-denied-view';
 import { AppHeader } from '@/components/app-header';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useTheme } from '@/hooks/use-theme';
@@ -65,14 +65,10 @@ export function AdminListLayout({
     return (
       <ThemedView style={styles.container}>
         <AppHeader />
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <ThemedText type="subtitle" style={{ textAlign: 'center', marginBottom: 8 }}>
-            {t(accessDeniedTitleKey)}
-          </ThemedText>
-          <ThemedText style={{ textAlign: 'center' }}>
-            {t(accessDeniedDescKey)}
-          </ThemedText>
-        </View>
+        <AccessDeniedView
+          title={t(accessDeniedTitleKey)}
+          message={t(accessDeniedDescKey)}
+        />
       </ThemedView>
     );
   }

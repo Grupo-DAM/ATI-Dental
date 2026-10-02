@@ -1,12 +1,15 @@
 import { firestore } from '@/config/firebase';
 import { Config } from '@/constants/config';
 import { getSessionToken } from '@/utils/secure-storage';
-import { getPatientById, Patient } from '@/services/patient-service';
+import { getPatientById, PATIENTS_COLLECTION, Patient } from '@/services/patient-service';
 import { getTreatmentsByPatientId, Treatment } from '@/services/treatment-service';
 import { ClinicalRecord, ClinicalRecordResponse, Consultation, OdontogramData } from '@/types/clinical-record';
+import { parseAppointmentDateKey } from '@/utils/appointment-schedule';
 import { parseDateRobustly } from '@/utils/date-utils';
+import { summarizePatientVisits, VisitStamp } from '@/utils/patient-visits';
 
 export const CONSULTATIONS_COLLECTION = 'consultas';
+const APPOINTMENTS_COLLECTION = 'citas';
 
 const DEFAULT_SEEDS = [
   {
@@ -120,6 +123,7 @@ export async function getConsultationsByPatientId(patientId: string): Promise<Co
           duration: d.duration || '45 minutos',
           tratamientosRealizados: d.tratamientosRealizados || '',
           notas: d.notas || d.notes || '',
+          appointmentId: d.appointmentId,
         };
       });
     }
@@ -168,9 +172,14 @@ export async function fetchClinicalRecord(patientId: string): Promise<ClinicalRe
       if (response.ok) {
         const serverData = await response.json();
         if (serverData && serverData.patient) {
+          const consultations = await withAppointmentVisits(
+            patientId,
+            await appendStoredConsultations(patientId, serverData.consultations || []),
+          );
+          const patient = await withStoredVisitDates(patientId, serverData.patient);
           return {
             success: true,
-            data: serverData,
+            data: { ...serverData, patient, consultations },
           };
         }
       }
@@ -209,6 +218,7 @@ export async function fetchClinicalRecord(patientId: string): Promise<ClinicalRe
     };
     sortByDateDesc(consultations, (c) => c.consultationDate);
     sortByDateDesc(treatments, (t) => t.treatmentDate);
+    consultations = await withAppointmentVisits(patientId, consultations);
 
     const odontogram: OdontogramData = {
       patientId: patient.id,
@@ -274,6 +284,289 @@ export async function updateConsultation(
   updatedData: Partial<Consultation>
 ): Promise<boolean> {
   return mutateConsultationDoc(consultationId, 'update', updatedData);
+}
+
+const VISIT_MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+export interface ScheduledVisitInput {
+  readonly patientId: string;
+  readonly dentistName: string;
+  readonly appointmentType: string;
+  readonly date: string;
+  readonly time: string;
+  readonly duration: string;
+  readonly reason: string;
+  readonly notes?: string;
+  readonly nextDate?: string;
+  readonly nextTime?: string;
+  readonly appointmentId: string;
+}
+
+interface VisitDates {
+  lastVisit?: string;
+  nextAppointment?: string;
+}
+
+function toIsoDateKey(value: string | Date): string | null {
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return null;
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${value.getFullYear()}-${month}-${day}`;
+  }
+  return parseAppointmentDateKey(value);
+}
+
+function formatVisitLabel(date?: string, time?: string): string {
+  if (!date?.trim()) return '';
+  const key = toIsoDateKey(date);
+  if (!key) return date.trim();
+  const [year, month, day] = key.split('-');
+  const label = `${day} ${VISIT_MONTHS[Number(month) - 1]} ${year}`;
+  return time?.trim() ? `${label} · ${time.trim()}` : label;
+}
+
+export function resolvePatientVisitDates(
+  appointmentDate: string,
+  nextDate: string | undefined,
+  current: VisitDates,
+  today: Date = new Date(),
+): VisitDates {
+  const visitKey = toIsoDateKey(appointmentDate);
+  const todayKey = toIsoDateKey(today);
+  let lastVisit = current.lastVisit;
+  let nextAppointment = current.nextAppointment;
+
+  if (visitKey && todayKey && visitKey <= todayKey) {
+    const previousKey = current.lastVisit ? toIsoDateKey(current.lastVisit) : null;
+    if (!previousKey || previousKey < visitKey) lastVisit = visitKey;
+  }
+
+  const explicitNext = nextDate?.trim() ? toIsoDateKey(nextDate) : null;
+  if (explicitNext) {
+    nextAppointment = explicitNext;
+  } else if (visitKey && todayKey && visitKey > todayKey) {
+    const previousNext = current.nextAppointment ? toIsoDateKey(current.nextAppointment) : null;
+    if (!previousNext || previousNext < todayKey || visitKey < previousNext) {
+      nextAppointment = visitKey;
+    }
+  }
+
+  return { lastVisit, nextAppointment };
+}
+
+async function readVisitDates(patientId: string): Promise<VisitDates> {
+  try {
+    const docRef = await firestore().collection(PATIENTS_COLLECTION).doc(patientId).get();
+    const exists = typeof docRef.exists === 'function' ? docRef.exists() : docRef.exists;
+    if (!exists) return {};
+    const data = docRef.data?.() || {};
+    return {
+      lastVisit: data.lastVisit ?? data.ultimaVisita ?? data.ultima_visita,
+      nextAppointment: data.nextAppointment ?? data.proximaCita ?? data.proxima_visita ?? data.proxima_vista,
+    };
+  } catch {
+    return {};
+  }
+}
+
+function visitDatePayload(dates: VisitDates): Record<string, string> {
+  const payload: Record<string, string> = {};
+  if (dates.lastVisit) {
+    payload.lastVisit = dates.lastVisit;
+    payload.ultimaVisita = dates.lastVisit;
+    payload.ultima_visita = dates.lastVisit;
+  }
+  if (dates.nextAppointment) {
+    payload.nextAppointment = dates.nextAppointment;
+    payload.proximaCita = dates.nextAppointment;
+    payload.proxima_visita = dates.nextAppointment;
+    payload.proxima_vista = dates.nextAppointment;
+  }
+  return payload;
+}
+
+async function readAppointmentStamps(patientId?: string): Promise<Array<VisitStamp & { patientId: string }>> {
+  try {
+    const query = firestore().collection(APPOINTMENTS_COLLECTION);
+    const snapshot = patientId
+      ? await query.where('patientId', '==', patientId).get()
+      : await query.get();
+    if (!snapshot || snapshot.empty) return [];
+    return snapshot.docs.flatMap((doc) => {
+      const data = doc.data?.() || {};
+      const date = textValue(data.date);
+      const ownerId = textValue(data.patientId);
+      if (!date || !ownerId) return [];
+      return [{
+        patientId: ownerId,
+        date,
+        status: textValue(data.status) || undefined,
+      }];
+    });
+  } catch (error) {
+    console.warn('[clinical-record-service] Error querying citas for visit dates:', error);
+    return [];
+  }
+}
+
+export async function getVisitDatesByPatient(): Promise<Map<string, VisitDates>> {
+  const stamps = await readAppointmentStamps();
+  const grouped = new Map<string, VisitStamp[]>();
+  stamps.forEach((stamp) => {
+    const current = grouped.get(stamp.patientId) ?? [];
+    current.push(stamp);
+    grouped.set(stamp.patientId, current);
+  });
+  const dates = new Map<string, VisitDates>();
+  grouped.forEach((items, patientId) => {
+    dates.set(patientId, summarizePatientVisits(items));
+  });
+  return dates;
+}
+
+export async function getStoredPatientVisitDates(patientId: string): Promise<VisitDates> {
+  const stamps = await readAppointmentStamps(patientId);
+  return summarizePatientVisits(stamps);
+}
+
+async function persistVisitDates(patientId: string, dates: VisitDates): Promise<void> {
+  const payload = visitDatePayload(dates);
+  if (Object.keys(payload).length === 0) return;
+  const docRef = firestore().collection(PATIENTS_COLLECTION).doc(patientId);
+  try {
+    await docRef.update(payload);
+  } catch (error) {
+    try {
+      await docRef.set(payload, { merge: true });
+    } catch (mergeError) {
+      console.warn('[clinical-record-service] No se pudieron actualizar última visita y próxima cita:', mergeError);
+    }
+  }
+}
+
+export async function recordScheduledAppointment(input: ScheduledVisitInput): Promise<void> {
+  const stamps = await readAppointmentStamps(input.patientId);
+  stamps.push({ patientId: input.patientId, date: input.date, status: 'EN ESPERA' });
+  if (input.nextDate?.trim()) {
+    stamps.push({ patientId: input.patientId, date: input.nextDate, status: 'EN ESPERA' });
+  }
+  const summarized = summarizePatientVisits(stamps);
+  const current = await readVisitDates(input.patientId);
+  const dates: VisitDates = {
+    lastVisit: summarized.lastVisit ?? current.lastVisit,
+    nextAppointment: summarized.nextAppointment ?? current.nextAppointment,
+  };
+  await persistVisitDates(input.patientId, dates);
+
+  const scheduledNext = input.nextDate?.trim() ?? '';
+  const labelDate = scheduledNext || dates.nextAppointment;
+  let labelTime: string | undefined;
+  if (scheduledNext) {
+    labelTime = input.nextTime;
+  } else if (dates.nextAppointment === input.date) {
+    labelTime = input.time;
+  }
+  const proximaCita = formatVisitLabel(labelDate, labelTime);
+
+  try {
+    await firestore().collection(CONSULTATIONS_COLLECTION).add({
+      patientId: input.patientId,
+      consultationDate: `${input.date}T12:00:00`,
+      title: input.appointmentType,
+      motivo: input.reason,
+      diagnostico: input.notes?.trim() || 'Cita agendada',
+      proximaCita: proximaCita || 'No programada',
+      doctor: input.dentistName,
+      duration: input.duration,
+      notas: input.notes?.trim() || '',
+      appointmentId: input.appointmentId,
+    });
+  } catch (error) {
+    console.warn('[clinical-record-service] No se pudo copiar la cita a consultas:', error);
+  }
+}
+
+function textValue(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+async function getConsultationsFromAppointments(patientId: string): Promise<Consultation[]> {
+  try {
+    const snapshot = await firestore()
+      .collection(APPOINTMENTS_COLLECTION)
+      .where('patientId', '==', patientId)
+      .get();
+    if (!snapshot || snapshot.empty) return [];
+
+    return snapshot.docs.flatMap((doc) => {
+      const data = doc.data?.() || {};
+      if (data.status === 'CANCELADO') return [];
+      const date = textValue(data.date);
+      if (!date || textValue(data.patientId) !== patientId) return [];
+      const minutes = typeof data.durationMinutes === 'number' ? data.durationMinutes : 0;
+      return [{
+        id: `cita-${doc.id}`,
+        appointmentId: doc.id,
+        patientId,
+        consultationDate: `${date}T12:00:00`,
+        title: textValue(data.treatmentName) || 'Consulta Odontológica',
+        motivo: textValue(data.reason) || textValue(data.treatmentName) || 'Cita agendada',
+        diagnostico: textValue(data.notes) || 'Cita agendada',
+        proximaCita: 'No programada',
+        doctor: textValue(data.dentistName) || 'Dr. Smith',
+        duration: minutes > 0 ? `${minutes} minutos` : '45 minutos',
+        notas: textValue(data.notes),
+      }];
+    });
+  } catch (error) {
+    console.warn('[clinical-record-service] Error querying citas collection:', error);
+    return [];
+  }
+}
+
+async function withAppointmentVisits(patientId: string, current: Consultation[]): Promise<Consultation[]> {
+  const visits = await getConsultationsFromAppointments(patientId);
+  if (visits.length === 0) return current;
+  const linked = new Set(current.map((item) => item.appointmentId).filter((id): id is string => Boolean(id)));
+  const ids = new Set(current.map((item) => item.id));
+  const merged = [
+    ...current,
+    ...visits.filter((item) => !ids.has(item.id) && !linked.has(item.appointmentId || '')),
+  ];
+  merged.sort((left, right) => {
+    const timeA = parseDateRobustly(left.consultationDate)?.getTime() ?? 0;
+    const timeB = parseDateRobustly(right.consultationDate)?.getTime() ?? 0;
+    return timeB - timeA;
+  });
+  return merged;
+}
+
+async function appendStoredConsultations(patientId: string, current: Consultation[]): Promise<Consultation[]> {
+  const stored = await getConsultationsByPatientId(patientId);
+  if (stored.length === 0) return current;
+  const ids = new Set(current.map((item) => item.id));
+  const merged = [...current, ...stored.filter((item) => !ids.has(item.id))];
+  merged.sort((left, right) => {
+    const timeA = parseDateRobustly(left.consultationDate)?.getTime() ?? 0;
+    const timeB = parseDateRobustly(right.consultationDate)?.getTime() ?? 0;
+    return timeB - timeA;
+  });
+  return merged;
+}
+
+async function withStoredVisitDates(patientId: string, patient: Patient): Promise<Patient> {
+  try {
+    const stored = await getPatientById(patientId);
+    if (!stored?.id) return patient;
+    return {
+      ...patient,
+      nextAppointment: stored.nextAppointment ?? patient.nextAppointment,
+      lastVisit: stored.lastVisit ?? patient.lastVisit,
+    };
+  } catch {
+    return patient;
+  }
 }
 
 const INVERSE_STATE_MAP: Record<string, string> = {

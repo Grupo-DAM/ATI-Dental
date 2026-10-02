@@ -139,6 +139,18 @@
     "directContact": "Contacto Directo",
     "directContactSubtitle": "Canales de comunicación oficiales para consultas urgentes.",
     "socialActivity": "Actividad en Redes Sociales",
+    "socialFallback": "No pudimos cargar las publicaciones recientes. Entra a los perfiles oficiales para ver la actividad.",
+    "openInstagram": "Abrir Instagram",
+    "openFacebook": "Abrir Facebook",
+    "timeAgo": {
+      "justNow": "Hace un momento",
+      "minute": "Hace 1 minuto",
+      "minutes": "Hace {{count}} minutos",
+      "hour": "Hace 1 hora",
+      "hours": "Hace {{count}} horas",
+      "day": "Hace 1 día",
+      "days": "Hace {{count}} días"
+    },
     "offlineMode": "Mostrando datos en modo offline",
     "alerts": {
       "emailTitle": "Contacto por Email",
@@ -339,8 +351,8 @@
     "noResultsQuestion": "¿Nuevo paciente?",
     "registerPatient": "Registrar Paciente",
     "accessDeniedTitle": "Acceso Denegado",
-    "adminOnlyView": "No tienes permisos de administrador para acceder a esta pantalla.",
-    "adminOnlyViewAlert": "No tienes permisos de administrador para ver esta sección."
+    "odontologoOnlyView": "No tienes permisos de odontólogo para acceder al listado de pacientes.",
+    "odontologoOnlyViewAlert": "Solo el personal odontológico puede acceder a esta sección."
   },
   "admin-users": {
     "title": "Listado de Usuarios",
@@ -493,7 +505,18 @@
     "retry": "Reintentar",
     "confirmed": "CONFIRMADO",
     "pending": "EN ESPERA",
+    "inProgress": "EN PROGRESO",
+    "completed": "COMPLETADO",
     "cancelled": "CANCELADO",
+    "scheduleAppointment": "Agendar cita",
+    "markConfirmed": "Confirmar",
+    "markInProgress": "En progreso",
+    "markCompleted": "Completar",
+    "markCancelled": "Cancelar cita",
+    "statusUpdatedTitle": "Estado actualizado",
+    "statusUpdatedMessage": "La cita ahora está {{status}}.",
+    "statusErrorTitle": "No se pudo actualizar",
+    "statusErrorMessage": "Revisa la conexión e inténtalo de nuevo.",
     "lunchBreak": "HORA DE ALMUERZO",
     "minutes": "MIN",
     "chair": "SILLÓN {{number}}",
@@ -572,6 +595,104 @@
     "saveChanges": "Guardar Cambios",
     "updateSuccessTitle": "Consulta actualizada",
     "updateSuccessMessage": "La consulta ha sido actualizada exitosamente."
+  },
+  "scheduleAppointment": {
+    "title": "Crear cita",
+    "subtitle": "Registra una nueva cita dentro de su ficha clínica y completa los datos del procedimiento.",
+    "breadcrumb": {
+      "patients": "Pacientes",
+      "patientRecord": "Ficha del paciente",
+      "current": "Crear cita"
+    },
+    "sections": {
+      "details": "Detalles de la cita",
+      "notes": "Notas adicionales",
+      "next": "Proxima Cita"
+    },
+    "fields": {
+      "patient": "Paciente",
+      "dentist": "Odontólogo Responsable",
+      "type": "Tipo de cita",
+      "date": "Fecha",
+      "time": "Hora",
+      "reason": "Motivo de la cita",
+      "duration": "Duración Estimada"
+    },
+    "placeholders": {
+      "patient": "Seleccione el paciente...",
+      "dentist": "Seleccione el odontólogo...",
+      "type": "Seleccione el tipo de cita...",
+      "reason": "Ej. Consulta general",
+      "duration": "Seleccione la duración...",
+      "notes": ""
+    },
+    "updateOdontogram": "Actualizar Odontograma",
+    "odontogramTitle": "Odontograma",
+    "odontogramMessage": "El odontograma se actualiza desde la historia clínica del paciente.",
+    "cancel": "Cancelar",
+    "save": "Guardar Cita",
+    "modal": {
+      "title": "Confirmar cita",
+      "message": "¿Deseas guardar esta cita en la ficha del paciente?",
+      "confirm": "Guardar",
+      "cancel": "Cancelar"
+    },
+    "toast": {
+      "title": "Cita guardada",
+      "message": "La cita quedó en espera y ya aparece en la agenda.",
+      "errorTitle": "No se pudo guardar la cita",
+      "errorMessage": "Revisa tu conexión e inténtalo de nuevo. Los datos del formulario se mantienen."
+    },
+    "errors": {
+      "patientRequired": "Selecciona un paciente.",
+      "conflictPatient": "Este paciente ya tiene un compromiso programado en ese horario.",
+      "conflictDentist": "Este odontólogo ya tiene un compromiso programado en ese horario.",
+      "dentistRequired": "Selecciona el odontólogo responsable.",
+      "typeRequired": "Selecciona el tipo de cita.",
+      "dateRequired": "Indica la fecha de la cita.",
+      "timeRequired": "Indica la hora de la cita.",
+      "reasonRequired": "Indica el motivo de la cita.",
+      "durationRequired": "Selecciona la duración estimada."
+    }
+  },
+  "home": {
+    "greeting": "¡Hola {{name}}!",
+    "defaultName": "Dr. Ramirez",
+    "welcomeBack": "Bienvenida de nuevo",
+    "searchPlaceholder": "Buscar pacientes, citas o tratamientos",
+    "todaySummary": "Resumen de hoy",
+    "viewAgenda": "Ver agenda",
+    "pendingAppointments": "Citas\npendientes",
+    "pendingPatients": "Pacientes\npendientes",
+    "pendingExams": "Examenes\npendientes",
+    "quickAccess": "Accesos rapidos",
+    "agenda": "Agenda",
+    "patients": "Pacientes",
+    "treatments": "Tratamientos",
+    "reports": "Reportes",
+    "users": "Usuarios",
+    "registerPatient": "Registrar",
+    "contact": "Contacto",
+    "profile": "Perfil",
+    "notifications": "Notificaciones",
+    "appointmentReminder": "Recordatorio de citas",
+    "reminderDesc": "Tienes {{count}} citas pendientes para hoy",
+    "noNotifications": "No tienes notificaciones pendientes",
+    "offlineTitle": "Modo sin conexión",
+    "offlineDesc": "Mostrando datos en caché. Verifica tu conexión.",
+    "retry": "Reintentar",
+    "errorLoading": "Error al cargar el resumen del dashboard",
+    "searchResults": "Resultados de búsqueda",
+    "noResults": "No se encontraron resultados para \"{{query}}\"",
+    "customizeQuickAccess": "Personalizar accesos rápidos",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "categories": {
+      "patients": "Pacientes",
+      "appointments": "Citas",
+      "treatments": "Tratamientos",
+      "modules": "Módulos"
+    }
   },
   "odontogram": {
     "toothStatus": {

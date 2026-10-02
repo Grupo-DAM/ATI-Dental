@@ -132,8 +132,47 @@ export const createStyles = (theme:any) => {
         color: theme.pageSubtitle,
         fontFamily: FontFamily.regular,
     },
+    socialHitTarget: {
+        minHeight: 44,
+    },
+    socialLoader: {
+        padding: Spacing.threeHalf,
+    },
+    socialFallbackBox: {
+        gap: Spacing.three,
+        paddingHorizontal: Spacing.three,
+        paddingBottom: Spacing.three,
+    },
+    socialFallbackButton: {
+        minHeight: 44,
+        borderRadius: Border.radius.regular,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: Spacing.two,
+    },
+    socialFallbackInstagram: {
+        backgroundColor: theme.instagramGradient[1],
+    },
+    socialFallbackFacebook: {
+        backgroundColor: theme.facebookMainColor,
+    },
+    socialFallbackLabel: {
+        color: theme.overMain,
+        fontSize: 15,
+        fontWeight: FontWeight.semibold,
+        fontFamily: FontFamily.regular,
+    },
     instagramHeaderText: {
         color: theme.instagramTextColor
+    },
+    socialChannelTitles: {
+        flexShrink: 1,
+    },
+    instagramList: {
+        paddingHorizontal: Spacing.three,
+        paddingBottom: Spacing.two,
+        gap: Spacing.two,
     },
     instagramScroll: {
         flexDirection: 'row',
@@ -141,19 +180,24 @@ export const createStyles = (theme:any) => {
         paddingHorizontal: Spacing.four,
     },
     instagramCard: {
-        width: 200,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
         backgroundColor: theme.backgroundElement,
         borderRadius: Border.radius.regular,
-        borderWidth: 1,
-        borderColor: theme.cardSeparator,
-        overflow: 'hidden',
+        minHeight: 44,
+        paddingVertical: Spacing.two,
+        paddingHorizontal: Spacing.one,
+        gap: Spacing.three,
     },
     instagramImage: {
-        width: '100%',
-        height: 120,
+        width: 56,
+        height: 56,
+        borderRadius: Border.radius.regular,
+        backgroundColor: theme.pfpBorderColor,
     },
     instagramContent: {
-        padding: 10,
+        flex: 1,
+        paddingTop: 2,
     },
     instagramPostTitle: {
         fontSize: 13,
@@ -180,8 +224,16 @@ export const createStyles = (theme:any) => {
         color: theme.facebookTextColor
     },
     facebookList: {
-        paddingHorizontal:Spacing.three,
+        paddingHorizontal: Spacing.three,
+        paddingBottom: Spacing.three,
         gap: 12,
+    },
+    facebookImage: {
+        width: '100%',
+        aspectRatio: 1,
+        borderRadius: Border.radius.regular,
+        marginBottom: Spacing.two,
+        backgroundColor: theme.pfpBorderColor,
     },
     facebookCard: {
         backgroundColor: theme.backgroundSecondary,

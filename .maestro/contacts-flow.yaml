@@ -41,9 +41,71 @@ appId: com.proyect1.ATIDental
     element: ".*(Contacto Directo|Direct Contact).*"
     direction: DOWN
 - scrollUntilVisible:
-    element: ".*(Actividad en Redes Sociales|Social Media Activity).*"
+    element:
+      id: "social-feed-section"
     direction: DOWN
+    timeout: 10000
 
+# Abre la primera publicación de Instagram y regresa a Contacto
+- scrollUntilVisible:
+    element:
+      id: "social-instagram-post-0"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "social-instagram-post-0"
+
+- runFlow:
+    when:
+      visible: ".*(Abrir con|Open with).*"
+    commands:
+      - tapOn: "(Solo una vez|Just once)"
+
+- runFlow:
+    when:
+      visible: ".*(No se pudo abrir|Error).*"
+    commands:
+      - tapOn: "(Cerrar|CERRAR|OK)"
+
+# back se queda en Instagram. Trae ATI Dental al frente sin reiniciar Expo.
+- launchApp:
+    stopApp: false
+
+- extendedWaitUntil:
+    visible:
+      id: "social-feed-section"
+    timeout: 15000
+
+# Abre la primera publicación de Facebook y regresa a Contacto
+- scrollUntilVisible:
+    element:
+      id: "social-facebook-post-0"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "social-facebook-post-0"
+
+- runFlow:
+    when:
+      visible: ".*(Abrir con|Open with).*"
+    commands:
+      - tapOn: "(Solo una vez|Just once)"
+
+- runFlow:
+    when:
+      visible: ".*(No se pudo abrir|Error).*"
+    commands:
+      - tapOn: "(Cerrar|CERRAR|OK)"
+
+- launchApp:
+    stopApp: false
+
+- extendedWaitUntil:
+    visible:
+      id: "social-feed-section"
+    timeout: 15000
 
 - scrollUntilVisible:
     element:

@@ -8,13 +8,15 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { AccessDeniedView } from '@/components/access-denied-view';
 import { AppHeader } from '@/components/app-header';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
-import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
+import { isOdontologoUser, isAdminUser, isAsistenteUser } from '@/constants/user-roles';
 import {
   Appointment,
   AppointmentStatus,
@@ -22,7 +24,11 @@ import {
   WeeklyAgenda,
   fetchWeeklyAgenda,
   formatDateKey,
+  updateAppointmentStatus,
 } from '@/services/agenda-service';
+import { getAllowedStatusTransitions } from '@/utils/appointment-schedule';
+import { NotificationToast } from '@/components/notification-toast';
+import { ScheduleAppointmentButton } from '@/components/schedule-appointment-button';
 import { createAgendaStyles } from '@/constants/styles/agenda.styles';
 
 interface WeekHeaderProps {
@@ -30,6 +36,7 @@ interface WeekHeaderProps {
   readonly title: string;
   readonly onPrevWeek: () => void;
   readonly onNextWeek: () => void;
+  readonly onScheduleAppointment: () => void;
 }
 
 function WeekHeader({
@@ -37,6 +44,7 @@ function WeekHeader({
   title,
   onPrevWeek,
   onNextWeek,
+  onScheduleAppointment,
 }: Readonly<WeekHeaderProps>) {
   const colors = useTheme();
   const styles = useMemo(() => createAgendaStyles(colors), [colors]);
@@ -68,6 +76,9 @@ function WeekHeader({
             <Ionicons name="chevron-forward" size={18} color={colors.text} />
           </TouchableOpacity>
         </View>
+      </View>
+      <View style={styles.scheduleButtonSlot}>
+        <ScheduleAppointmentButton onPress={onScheduleAppointment} />
       </View>
     </View>
   );
@@ -133,6 +144,30 @@ function DaySelector({
   );
 }
 
+const STATUS_LABEL: Record<AppointmentStatus, string> = {
+  CONFIRMADO: 'agenda.confirmed',
+  'EN ESPERA': 'agenda.pending',
+  'EN PROGRESO': 'agenda.inProgress',
+  COMPLETADO: 'agenda.completed',
+  CANCELADO: 'agenda.cancelled',
+};
+
+const STATUS_ACTION: Record<AppointmentStatus, string> = {
+  CONFIRMADO: 'agenda.markConfirmed',
+  'EN ESPERA': 'agenda.pending',
+  'EN PROGRESO': 'agenda.markInProgress',
+  COMPLETADO: 'agenda.markCompleted',
+  CANCELADO: 'agenda.markCancelled',
+};
+
+function statusBadgeColor(status: AppointmentStatus, colors: { main: string; warning?: string; alert?: string; positive?: string; header?: string }): string {
+  if (status === 'EN ESPERA') return colors.warning || colors.main;
+  if (status === 'CANCELADO') return colors.alert || colors.main;
+  if (status === 'COMPLETADO') return colors.positive || colors.main;
+  if (status === 'EN PROGRESO') return colors.header || colors.main;
+  return colors.main;
+}
+
 interface StatusBadgeProps {
   readonly status: AppointmentStatus;
 }
@@ -142,16 +177,8 @@ function StatusBadge({ status }: Readonly<StatusBadgeProps>) {
   const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { t } = useTranslation();
 
-  let badgeBg = colors.main;
-  let labelKey = 'agenda.confirmed';
-
-  if (status === 'EN ESPERA') {
-    badgeBg = colors.warning;
-    labelKey = 'agenda.pending';
-  } else if (status === 'CANCELADO') {
-    badgeBg = colors.alert;
-    labelKey = 'agenda.cancelled';
-  }
+  const badgeBg = statusBadgeColor(status, colors);
+  const labelKey = STATUS_LABEL[status];
 
   return (
     <View style={[styles.statusBadge, { backgroundColor: badgeBg }]}>
@@ -220,6 +247,9 @@ function AppointmentCard({
             {appointment.treatmentName}
           </Text>
         </View>
+        {appointment.dentistName ? (
+          <Text style={styles.dentistName}>{appointment.dentistName}</Text>
+        ) : null}
 
         <View style={styles.badgesRow}>
           <StatusBadge status={appointment.status} />
@@ -325,16 +355,24 @@ export default function AgendaScreen() {
   const colors = useTheme();
   const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { user: authUser, loading: authLoading } = useAuth();
+  const params = useLocalSearchParams<{ date?: string; refresh?: string }>();
 
   const [currentWeekDate, setCurrentWeekDate] = useState<Date>(() => new Date());
   const [selectedDate, setSelectedDate] = useState<string>(() => formatDateKey(new Date()));
   const [agenda, setAgenda] = useState<WeeklyAgenda | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
+  const [toastConfig, setToastConfig] = useState({
+    visible: false,
+    type: 'success' as 'success' | 'error',
+    title: '',
+    message: '',
+  });
 
   const isOdontologo = authUser ? isOdontologoUser(authUser) : false;
   const isAdmin = authUser ? isAdminUser(authUser) : false;
-  const hasPermission = isOdontologo || isAdmin;
+  const isAsistente = authUser ? isAsistenteUser(authUser) : false;
+  const hasPermission = isOdontologo || isAdmin || isAsistente;
 
   const loadAgenda = useCallback(async (date: Date) => {
     try {
@@ -361,8 +399,16 @@ export default function AgendaScreen() {
   }, []);
 
   useEffect(() => {
+    if (!params.date) return;
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(params.date);
+    if (!match) return;
+    setSelectedDate(params.date);
+    setCurrentWeekDate(new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  }, [params.date, params.refresh]);
+
+  useEffect(() => {
     loadAgenda(currentWeekDate);
-  }, [currentWeekDate, loadAgenda]);
+  }, [currentWeekDate, loadAgenda, params.refresh]);
 
   const handlePrevWeek = () => {
     const prev = new Date(currentWeekDate);
@@ -380,12 +426,40 @@ export default function AgendaScreen() {
     setSelectedDate(date);
   };
 
+  const applyStatus = async (appointment: Appointment, next: AppointmentStatus) => {
+    try {
+      await updateAppointmentStatus(appointment.id, next);
+      await loadAgenda(currentWeekDate);
+      setToastConfig({
+        visible: true,
+        type: 'success',
+        title: t('agenda.statusUpdatedTitle'),
+        message: t('agenda.statusUpdatedMessage', { status: t(STATUS_LABEL[next]) }),
+      });
+    } catch {
+      setToastConfig({
+        visible: true,
+        type: 'error',
+        title: t('agenda.statusErrorTitle'),
+        message: t('agenda.statusErrorMessage'),
+      });
+    }
+  };
+
   const handleAppointmentMenu = (appointment: Appointment) => {
+    const transitions = getAllowedStatusTransitions(appointment, new Date());
+    const actions = transitions.map((status) => ({
+      text: t(STATUS_ACTION[status]),
+      style: status === 'CANCELADO' ? 'destructive' as const : 'default' as const,
+      onPress: () => {
+        void applyStatus(appointment, status);
+      },
+    }));
     Alert.alert(
       t('agenda.options'),
       t('agenda.optionsMessage', { name: appointment.patientName }),
       [
-        { text: t('agenda.viewDetails'), onPress: () => {} },
+        ...actions,
         { text: t('agenda.close'), style: 'cancel' },
       ]
     );
@@ -414,15 +488,10 @@ export default function AgendaScreen() {
     return (
       <ThemedView testID="agenda-screen" style={styles.container}>
         <AppHeader />
-        <View style={styles.accessDeniedContainer}>
-          <Ionicons name="lock-closed-outline" size={48} color={colors.breadcrumbSeparator} />
-          <ThemedText type="subtitle" style={styles.accessDeniedTitle}>
-            {t('agenda.accessDeniedTitle')}
-          </ThemedText>
-          <ThemedText style={styles.accessDeniedDesc}>
-            {t('agenda.accessDeniedMessage')}
-          </ThemedText>
-        </View>
+        <AccessDeniedView
+          title={t('agenda.accessDeniedTitle')}
+          message={t('agenda.accessDeniedMessage')}
+        />
       </ThemedView>
     );
   }
@@ -437,6 +506,7 @@ export default function AgendaScreen() {
         title={t('agenda.weeklySchedule')}
         onPrevWeek={handlePrevWeek}
         onNextWeek={handleNextWeek}
+        onScheduleAppointment={() => router.push('/(tabs)/patients/schedule-appointment' as any)}
       />
 
       {/* Week Days Strip */}
@@ -478,6 +548,13 @@ export default function AgendaScreen() {
           </>
         )}
       </ScrollView>
+      <NotificationToast
+        visible={toastConfig.visible}
+        type={toastConfig.type}
+        title={toastConfig.title}
+        message={toastConfig.message}
+        onDismiss={() => setToastConfig((prev) => ({ ...prev, visible: false }))}
+      />
     </ThemedView>
   );
 }
