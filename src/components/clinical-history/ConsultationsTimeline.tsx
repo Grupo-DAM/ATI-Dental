@@ -38,6 +38,7 @@ interface Props {
   readonly searchQuery: string;
   readonly onSearchChange: (q: string) => void;
   readonly onScheduleAppointment: () => void;
+  readonly onRegisterConsultation?: () => void;
   readonly onSelectConsultation: (consultation: Consultation) => void;
   readonly onModifyConsultation?: (consultation: Consultation) => void;
   readonly onDeleteConsultation?: (consultationId: string) => void;
@@ -48,6 +49,7 @@ export function ConsultationsTimeline({
   searchQuery,
   onSearchChange,
   onScheduleAppointment,
+  onRegisterConsultation,
   onSelectConsultation,
   onModifyConsultation,
   onDeleteConsultation,
@@ -63,17 +65,32 @@ export function ConsultationsTimeline({
         <Text style={styles.sectionTitle}>
           {t('clinicalHistory.tabs.consultations', 'Consultas')}
         </Text>
-        <TouchableOpacity
-          style={styles.scheduleButton}
-          onPress={onScheduleAppointment}
-          activeOpacity={0.7}
-          testID="btn-schedule-appointment"
-        >
-          <Ionicons name="calendar" size={14} color="#FFFFFF" />
-          <Text style={styles.scheduleButtonText}>
-            {t('clinicalHistory.scheduleAppointment', 'Agendar Cita')}
-          </Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {onRegisterConsultation && (
+            <TouchableOpacity
+              style={[styles.scheduleButton, { backgroundColor: theme.main }]}
+              onPress={onRegisterConsultation}
+              activeOpacity={0.7}
+              testID="btn-register-consultation"
+            >
+              <Ionicons name="add" size={14} color="#FFFFFF" />
+              <Text style={styles.scheduleButtonText}>
+                {t('clinicalHistory.newConsultation', 'Nueva Consulta')}
+              </Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.scheduleButton}
+            onPress={onScheduleAppointment}
+            activeOpacity={0.7}
+            testID="btn-schedule-appointment"
+          >
+            <Ionicons name="calendar" size={14} color="#FFFFFF" />
+            <Text style={styles.scheduleButtonText}>
+              {t('clinicalHistory.scheduleAppointment', 'Agendar Cita')}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Reusable Search Input */}
