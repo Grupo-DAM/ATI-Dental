@@ -6,7 +6,7 @@ import { KPICard } from '@/components/reports/KPICard';
 import { UsageLineChart } from '@/components/reports/usage-line-chart';
 import { PeriodOption } from '../types';
 import { useCrashRateMetrics } from '../hooks/useCrashRateMetrics';
-import { createReportsStyles } from '../styles/reports.styles';
+import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
 
 interface CrashRateReportViewProps {

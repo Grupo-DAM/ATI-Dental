@@ -9,21 +9,13 @@ jest.mock('expo-image', () => ({
   Image: 'Image',
 }));
 
-jest.mock('@/hooks/use-theme', () => ({
-  useTheme: () => ({
-    main: '#5B2D8B',
-    text: '#141018',
-    textSecondary: '#60646C',
-    header: '#52287D',
-  }),
-}));
-
 jest.mock('@react-native-community/netinfo', () => ({
   useNetInfo: () => ({ isConnected: true }),
 }));
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
+    i18n: { language: 'es' },
     t: (key: string, options?: any) => {
       if (key === 'contacts.title') return 'Información y Contacto';
       if (key === 'contacts.responsibles') return 'Responsables del Sitio';
@@ -38,6 +30,10 @@ jest.mock('react-i18next', () => ({
       if (key === 'contacts.alerts.error') return 'Error';
       if (key === 'contacts.alerts.whatsappError') return 'No se pudo abrir la aplicación de WhatsApp ni el navegador.';
       if (key === 'contacts.alerts.socialError') return `No se pudo abrir el enlace de ${options?.platform}`;
+      if (key === 'contacts.socialActivity') return 'Actividad en Redes Sociales';
+      if (key === 'contacts.socialFallback') return 'No pudimos cargar las publicaciones recientes.';
+      if (key === 'contacts.openInstagram') return 'Abrir Instagram';
+      if (key === 'contacts.openFacebook') return 'Abrir Facebook';
       return key;
     }
   }),
@@ -66,15 +62,34 @@ export const mockDocOnSnapshot = jest.fn((onSuccess: any, onError: any) => {
   return jest.fn();
 });
 
+const socialDocs = [
+  { id: 'ig-1', data: () => ({ network: 'instagram', title: '¡Nueva tecnología en clínica!', content: 'Incorporamos escáneres 3D.', publishedAt: 'Hace 2 horas', imageUrl: 'http://ig1', url: 'https://instagram.com/ati_dental' }) },
+  { id: 'ig-2', data: () => ({ network: 'instagram', title: 'Sonrisas que inspiran', content: 'Gracias por confiar.', publishedAt: 'Hace 1 día', imageUrl: 'http://ig2', url: 'https://instagram.com/p/2' }) },
+  { id: 'ig-3', data: () => ({ network: 'instagram', title: 'Horarios extendidos', content: 'Sábados hasta las 2:00 PM.', publishedAt: 'Hace 3 días', imageUrl: 'http://ig3', url: 'https://instagram.com/p/3' }) },
+  { id: 'fb-1', data: () => ({ network: 'facebook', author: 'ATI Dental', content: 'Agenda tu limpieza dental.', publishedAt: 'Hoy', url: 'https://facebook.com/ATIDentalOficial' }) },
+  { id: 'fb-2', data: () => ({ network: 'facebook', author: 'ATI Dental', content: 'Feliz día del odontólogo.', publishedAt: 'Ayer', url: 'https://facebook.com/ATIDentalOficial/posts/2' }) },
+  { id: 'fb-3', data: () => ({ network: 'facebook', author: 'ATI Dental', content: 'Artículo de salud gingival.', publishedAt: '30 Oct', url: 'https://facebook.com/ATIDentalOficial/posts/3' }) },
+];
+
+export const mockSocialOnSnapshot = jest.fn((onSuccess: any) => {
+  onSuccess({ docs: socialDocs, metadata: { fromCache: false } });
+  return jest.fn();
+});
+
 jest.mock('@/config/firebase', () => ({
   firestore: () => ({
-    collection: (col: string) => ({
-      onSnapshot: (...args: any[]) => mockOnSnapshot(...args),
-      doc: () => ({
-        onSnapshot: (...args: any[]) => mockDocOnSnapshot(...args)
-      })
-    })
-  })
+    collection: (col: string) => {
+      if (col === 'publicaciones_sociales') {
+        return { onSnapshot: (...args: any[]) => mockSocialOnSnapshot(...args) };
+      }
+      return {
+        onSnapshot: (...args: any[]) => mockOnSnapshot(...args),
+        doc: () => ({
+          onSnapshot: (...args: any[]) => mockDocOnSnapshot(...args),
+        }),
+      };
+    },
+  }),
 }));
 
 describe('ContactsScreen', () => {
@@ -84,6 +99,10 @@ describe('ContactsScreen', () => {
     jest.spyOn(Linking, 'canOpenURL').mockResolvedValue(true);
     jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
     jest.spyOn(Clipboard, 'setString').mockImplementation(() => {});
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ posts: [] }),
+    }) as typeof fetch;
   });
 
   it('debe renderizar correctamente todos los títulos y responsables', () => {
@@ -222,8 +241,8 @@ describe('ContactsScreen', () => {
   });
 
   it('debe abrir la URL de Instagram al presionar el canal de Instagram', async () => {
-    const { getAllByText } = render(<ContactsScreen />);
-    const instagramBtn = getAllByText('Instagram')[0];
+    const { findAllByText } = render(<ContactsScreen />);
+    const instagramBtn = (await findAllByText('Instagram'))[0];
     fireEvent.press(instagramBtn);
 
     await waitFor(() => {
@@ -234,8 +253,8 @@ describe('ContactsScreen', () => {
   });
 
   it('debe abrir la URL de Facebook al presionar el canal de Facebook', async () => {
-    const { getAllByText } = render(<ContactsScreen />);
-    const facebookBtn = getAllByText('Facebook')[0];
+    const { findAllByText } = render(<ContactsScreen />);
+    const facebookBtn = (await findAllByText('Facebook'))[0];
     fireEvent.press(facebookBtn);
 
     await waitFor(() => {
@@ -249,8 +268,8 @@ describe('ContactsScreen', () => {
     jest.spyOn(Linking, 'openURL').mockRejectedValue(new Error('Social error'));
     const alertSpy = jest.spyOn(Alert, 'alert');
     
-    const { getAllByText } = render(<ContactsScreen />);
-    const instagramBtn = getAllByText('Instagram')[0];
+    const { findAllByText } = render(<ContactsScreen />);
+    const instagramBtn = (await findAllByText('Instagram'))[0];
     fireEvent.press(instagramBtn);
 
     await waitFor(() => {
@@ -260,9 +279,8 @@ describe('ContactsScreen', () => {
   });
 
   it('debe abrir la URL de Instagram al presionar una tarjeta de publicación de Instagram', async () => {
-    const { getByText } = render(<ContactsScreen />);
-    const postTitle = getByText('¡Nueva tecnología en clínica!');
-    fireEvent.press(postTitle);
+    const { findByTestId } = render(<ContactsScreen />);
+    fireEvent.press(await findByTestId('social-instagram-post-0'));
 
     await waitFor(() => {
       expect(Linking.openURL).toHaveBeenCalledWith(
@@ -291,6 +309,18 @@ describe('ContactsScreen', () => {
     });
   });
 
+  it('muestra fallback de perfiles oficiales si el feed social falla', async () => {
+    mockSocialOnSnapshot.mockImplementationOnce((_ok: any, onError: any) => {
+      onError?.(new Error('feed down'));
+      return jest.fn();
+    });
+
+    const { findByTestId } = render(<ContactsScreen />);
+    expect(await findByTestId('social-feed-fallback')).toBeTruthy();
+    expect(await findByTestId('social-fallback-instagram')).toBeTruthy();
+    expect(await findByTestId('social-fallback-facebook')).toBeTruthy();
+  });
+
   it('debe manejar error al obtener responsables desde firestore', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     
@@ -307,11 +337,14 @@ describe('ContactsScreen', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it('Coincide con la instantánea (Snapshot Test)', () => {
+  it('Coincide con la instantánea (Snapshot Test)', async () => {
     let tree;
-    act(() => {
-      tree = renderer.create(<ContactsScreen />).toJSON();
+    await act(async () => {
+      tree = renderer.create(<ContactsScreen />);
     });
-    expect(tree).toMatchSnapshot();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(tree!.toJSON()).toMatchSnapshot();
   });
 });

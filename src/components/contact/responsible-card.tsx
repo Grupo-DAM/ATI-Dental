@@ -1,7 +1,27 @@
+import { 
+  createResponsibleCardStyles, 
+  createEditResponsibleCardStyles 
+} from '@/constants/styles/contact.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { useTheme } from '@/hooks/use-theme';
+import { CardContainer } from '@/components/ui/card-container';
+import { Text, TouchableOpacity, View, TextInput, } from 'react-native';
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+const avatarFallback = require('@/assets/expo.icon/Assets/avatar.png');
+
+export interface Responsible {
+  id: string;
+  title?: string;
+  name?: string;
+  role?: string;
+  description?: string;
+  email?: string;
+  phone?: string;
+  imageUrl?: string;
+}
 
 export type ResponsibleCardProps = {
   title?: string;
@@ -24,15 +44,17 @@ export function ResponsibleCard({
   onEmailPress,
   onPhonePress,
 }: Readonly<ResponsibleCardProps>) {
+  const theme = useTheme();
+  const styles = useMemo(() => createResponsibleCardStyles(theme), [theme]);
   return (
-    <View style={styles.card}>
+    <CardContainer cardStyle={styles.card}>
       <View style={styles.avatarContainer}>
         <Image source={imageUrl} style={styles.avatar} contentFit="cover" />
         <View
           testID={`status-${isOnline ? 'online' : 'offline'}`}
           style={[
             styles.statusDot,
-            { backgroundColor: isOnline ? '#22C55E' : '#9CA3AF' },
+            { backgroundColor: isOnline ? theme.onlineStatus : theme.breadcrumbSeparator },
           ]}
         />
       </View>
@@ -49,7 +71,7 @@ export function ResponsibleCard({
             onPress={onEmailPress}
             style={styles.circleButton}
           >
-            <Ionicons name="mail" size={18} color="#4A4A4A" />
+            <Ionicons name="mail" size={18} color={theme.textNames} />
           </TouchableOpacity>
           <TouchableOpacity
             testID="btn-quick-phone"
@@ -57,93 +79,132 @@ export function ResponsibleCard({
             onPress={onPhonePress}
             style={styles.circleButton}
           >
-            <Ionicons name="call" size={18} color="#4A4A4A" />
+            <Ionicons name="call" size={18} color={theme.textNames} />
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </CardContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 4,
-    borderTopColor: '#5B2D8B',
-    borderRadius: 12,
-    padding: 16,
-    gap: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    alignSelf: 'stretch',
-    marginBottom: 12,
-  },
-  avatarContainer: {
-    width: 96,
-    height: 96,
-    position: 'relative',
-  },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 2,
-    borderColor: '#F3F4F6',
-  },
-  statusDot: {
-    position: 'absolute',
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    right: 0,
-    bottom: 0,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  name: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#5B2D8B',
-    fontFamily: 'Open Sans',
-  },
-  role: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3E1F5C', // Grape
-    fontFamily: 'Open Sans',
-    marginTop: 2,
-  },
-  description: {
-    fontSize: 12,
-    color: '#4A4A4A', // Tundora
-    fontFamily: 'Open Sans',
-    lineHeight: 16,
-    marginVertical: 6,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 4,
-  },
-  circleButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-});
+export function EditResponsibleCard({
+  resp,
+  index,
+  onChange,
+  onClear,
+  t,
+}: Readonly<{
+  resp: Responsible;
+  index: number;
+  onChange: (index: number, field: keyof Responsible, value: string) => void;
+  onClear: (index: number) => void;
+  t: (key: string) => string;
+}>) {
+  const theme = useTheme();
+  const cardStyles = useMemo(() => createEditResponsibleCardStyles(theme), [theme]);
+
+  return (
+    <CardContainer cardStyle={cardStyles.card}>
+        {/* Header: photo + trash */}
+        <View style={cardStyles.header}>
+          <View style={cardStyles.photoRow}>
+            <Image
+              source={resp.imageUrl ? { uri: resp.imageUrl } : avatarFallback}
+              style={cardStyles.avatar}
+              contentFit="cover"
+            />
+            <View style={cardStyles.photoInfo}>
+              <Text style={cardStyles.photoLabel}>{t('updateContact.photoLabel')}</Text>
+              <View style={cardStyles.photoActions}>
+                <TouchableOpacity style={cardStyles.changeBtn}>
+                  <Text style={cardStyles.changeTxt}>{t('updateContact.change')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity>
+                  <Text style={cardStyles.deleteTxt}>{t('updateContact.delete')}</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={cardStyles.photoHint}>{t('updateContact.photoHint')}</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={cardStyles.trashBtn} onPress={() => onClear(index)}>
+            <Ionicons name="trash-outline" size={20} color={theme.alert} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Título + Nombre in same row */}
+        <View style={cardStyles.row}>
+          <View style={[cardStyles.col, { flex: 0.35 }]}>
+            <Text style={cardStyles.label}>{t('updateContact.fieldTitle')}</Text>
+            <TextInput
+              style={cardStyles.input}
+              value={resp.title || ''}
+              onChangeText={(v) => onChange(index, 'title', v)}
+              placeholder={t('updateContact.placeholderTitle')}
+              placeholderTextColor={theme.placeholderColor}
+            />
+          </View>
+          <View style={[cardStyles.col, { flex: 0.65, marginLeft: 10 }]}>
+            <Text style={cardStyles.label}>{t('updateContact.fieldName')}</Text>
+            <TextInput
+              style={cardStyles.input}
+              value={resp.name || ''}
+              onChangeText={(v) => onChange(index, 'name', v)}
+              placeholder={t('updateContact.placeholderName')}
+              placeholderTextColor={theme.placeholderColor}
+            />
+          </View>
+        </View>
+
+        {/* Cargo */}
+        <Text style={cardStyles.label}>{t('updateContact.fieldRole')}</Text>
+        <TextInput
+          style={[cardStyles.input, { marginBottom: 12 }]}
+          value={resp.role || ''}
+          onChangeText={(v) => onChange(index, 'role', v)}
+          placeholder={t('updateContact.placeholderRole')}
+          placeholderTextColor={theme.placeholderColor}
+        />
+
+        {/* Descripción */}
+        <Text style={cardStyles.label}>{t('updateContact.fieldDescription')}</Text>
+        <TextInput
+          style={[cardStyles.input, cardStyles.textarea]}
+          value={resp.description || ''}
+          onChangeText={(v) => onChange(index, 'description', v)}
+          placeholder={t('updateContact.placeholderDescription')}
+          placeholderTextColor={theme.placeholderColor}
+          multiline
+          numberOfLines={3}
+        />
+
+        {/* Email row */}
+        <View style={cardStyles.iconRow}>
+          <Ionicons name="mail-outline" size={18} color="#6B7280" style={cardStyles.rowIcon} />
+          <TextInput
+            style={cardStyles.iconInput}
+            value={resp.email || ''}
+            onChangeText={(v) => onChange(index, 'email', v)}
+            placeholder={t('updateContact.placeholderEmail')}
+            placeholderTextColor={theme.placeholderColor}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+
+        {/* Phone row */}
+        <View style={[cardStyles.iconRow, { marginBottom: 0 }]}>
+          <Ionicons name="call-outline" size={18} color="#6B7280" style={cardStyles.rowIcon} />
+          <TextInput
+            style={cardStyles.iconInput}
+            value={resp.phone || ''}
+            onChangeText={(v) => onChange(index, 'phone', v)}
+            placeholder={t('updateContact.placeholderPhone')}
+            placeholderTextColor={theme.placeholderColor}
+            keyboardType="phone-pad"
+          />
+        </View>
+    
+
+    </CardContainer>
+  );
+}

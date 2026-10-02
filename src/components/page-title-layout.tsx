@@ -1,20 +1,23 @@
-import React, { ReactNode } from 'react';
-import { View, ScrollView, ActivityIndicator } from 'react-native';
+import React, { ReactNode, useMemo } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { OfflineBanner } from '@/components/offline-banner';
-import { ThemedView } from '@/components/themed-view';
-import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import { createGlobalStyles } from '@/constants/styles/global.styles';
 
 export interface PageTitleLayoutProps {
-  readonly title: string;
+  readonly title?: string;
+  readonly titleKey?: string;
   readonly subtitle?: string;
-  readonly parentBreadcrumb: string;
-  readonly currentBreadcrumb: string;
+  readonly subtitleKey?: string;
+  readonly parentBreadcrumb?: string;
+  readonly parentBreadcrumbKey?: string;
+  readonly currentBreadcrumb?: string;
+  readonly currentBreadcrumbKey?: string;
   readonly authLoading?: boolean;
   readonly hasPermission?: boolean;
   readonly accessDeniedTitle?: string;
@@ -22,16 +25,22 @@ export interface PageTitleLayoutProps {
   readonly isRetrying?: boolean;
   readonly handleRetryConnection?: () => void;
   readonly headerRight?: ReactNode;
-  readonly children: ReactNode;
+  readonly children?: ReactNode;
+  readonly modals?: ReactNode;
   readonly scrollable?: boolean;
+  readonly scrollContainerStyle?: StyleProp<ViewStyle>;
   readonly testID?: string;
 }
 
 export function PageTitleLayout({
   title,
+  titleKey,
   subtitle,
+  subtitleKey,
   parentBreadcrumb,
+  parentBreadcrumbKey,
   currentBreadcrumb,
+  currentBreadcrumbKey,
   authLoading = false,
   hasPermission = true,
   accessDeniedTitle = 'Acceso Denegado',
@@ -40,46 +49,54 @@ export function PageTitleLayout({
   handleRetryConnection,
   headerRight,
   children,
+  modals,
   scrollable = true,
+  scrollContainerStyle,
   testID,
 }: Readonly<PageTitleLayoutProps>) {
+  const { t } = useTranslation();
   const theme = useTheme();
-  const globalStyles = createGlobalStyles(theme);
+  const styles = useMemo(() => createGlobalStyles(theme), [theme]);
   const netInfo = useNetInfo();
+
+  const finalTitle = titleKey ? t(titleKey) : (title ?? '');
+  const finalSubtitle = subtitleKey ? t(subtitleKey) : subtitle;
+  const finalParentBreadcrumb = parentBreadcrumbKey ? t(parentBreadcrumbKey) : (parentBreadcrumb ?? '');
+  const finalCurrentBreadcrumb = currentBreadcrumbKey ? t(currentBreadcrumbKey) : (currentBreadcrumb ?? '');
 
   // 1. Estado de carga de autenticación
   if (authLoading) {
     return (
-      <ThemedView style={[globalStyles.container, globalStyles.centerContent]} testID="page-title-layout-loading">
+      <View style={[styles.screen, styles.centerContent]} testID="page-title-layout-loading">
         <ActivityIndicator size="large" color={theme.main} />
-      </ThemedView>
+      </View>
     );
   }
 
   // 2. Estado de acceso denegado por rol
   if (!hasPermission) {
     return (
-      <ThemedView style={globalStyles.container} testID="page-title-layout-access-denied">
+      <View style={styles.screen} testID="page-title-layout-access-denied">
         <AppHeader />
-        <Breadcrumb parent={parentBreadcrumb} current={currentBreadcrumb} />
-        <View style={globalStyles.centerContent}>
+        <Breadcrumb parent={finalParentBreadcrumb} current={finalCurrentBreadcrumb} />
+        <View style={styles.centerContent}>
           <Ionicons name="lock-closed-outline" size={56} color="#9CA3AF" />
-          <ThemedText style={globalStyles.accessDeniedTitle}>{accessDeniedTitle}</ThemedText>
-          <ThemedText style={globalStyles.accessDeniedDesc}>{accessDeniedDesc}</ThemedText>
+          <Text style={styles.accessDeniedTitle}>{accessDeniedTitle}</Text>
+          <Text style={styles.accessDeniedDesc}>{accessDeniedDesc}</Text>
         </View>
-      </ThemedView>
+      </View>
     );
   }
 
   const renderContent = () => (
     <>
       {/* Sección Título y Subtítulo */}
-      <View style={globalStyles.titleSection}>
+      <View style={styles.titleSection}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <ThemedText style={globalStyles.mainTitle}>{title}</ThemedText>
+          <Text style={styles.mainTitle}>{finalTitle}</Text>
           {headerRight}
         </View>
-        {subtitle ? <ThemedText style={globalStyles.subtitle}>{subtitle}</ThemedText> : null}
+        {finalSubtitle ? <Text style={styles.subtitle}>{finalSubtitle}</Text> : null}
       </View>
 
       {/* Banner Sin Conexión */}
@@ -93,12 +110,13 @@ export function PageTitleLayout({
   );
 
   return (
-    <ThemedView style={globalStyles.container} testID={testID}>
+    <View style={styles.screen} testID={testID}>
       <AppHeader />
-      <Breadcrumb parent={parentBreadcrumb} current={currentBreadcrumb} />
+      <Breadcrumb parent={finalParentBreadcrumb} current={finalCurrentBreadcrumb} />
       {scrollable ? (
         <ScrollView
-          contentContainerStyle={globalStyles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, scrollContainerStyle]}
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {renderContent()}
@@ -106,6 +124,7 @@ export function PageTitleLayout({
       ) : (
         <View style={{ flex: 1 }}>{renderContent()}</View>
       )}
-    </ThemedView>
+      {modals}
+    </View>
   );
 }

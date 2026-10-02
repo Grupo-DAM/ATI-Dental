@@ -14,6 +14,7 @@ export interface Consultation {
   duration?: string;
   tratamientosRealizados?: string;
   notas?: string;
+  appointmentId?: string;
   createdAt?: any;
 }
 

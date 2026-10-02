@@ -5,7 +5,7 @@ import { KPICard } from '@/components/reports/KPICard';
 import { DauMauLineChart } from '@/components/reports/dau-mau-line-chart';
 import { DAU_MAU_TARGET_RATIO } from '../types';
 import { useDauMauMetrics } from '../hooks/useDauMauMetrics';
-import { createReportsStyles } from '../styles/reports.styles';
+import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { useTheme } from '@/hooks/use-theme';
 import { ReportChartCard } from '../components/ReportChartCard';
 

@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
-  StyleSheet,
   Text,
   TextInput,
   type TextInputProps,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 
 import { useTheme } from '@/hooks/use-theme';
+import { createFormFieldStyles } from '@/constants/styles/global.styles';
 
 type FormFieldLabelProps = {
   label: string;
@@ -19,7 +19,7 @@ type FormFieldLabelProps = {
 
 export function FormFieldLabel({ label, required = false }: Readonly<FormFieldLabelProps>) {
   const theme = useTheme();
-  const styles = createStyles(theme);
+  const styles = useMemo(() => createFormFieldStyles(theme), [theme]);
 
   return (
     <Text style={styles.label}>
@@ -46,7 +46,7 @@ export function FormTextField({
   ...inputProps
 }: Readonly<FormTextFieldProps>) {
   const theme = useTheme();
-  const styles = createStyles(theme);
+  const styles = useMemo(() => createFormFieldStyles(theme), [theme]);
   const hasError = Boolean(errorMessage);
 
   return (
@@ -94,7 +94,7 @@ export function FormSelectField({
   iconName,
 }: Readonly<FormSelectFieldProps>) {
   const theme = useTheme();
-  const styles = createStyles(theme);
+  const styles = useMemo(() => createFormFieldStyles(theme), [theme]);
   const hasError = Boolean(errorMessage);
 
   return (
@@ -137,7 +137,7 @@ export function FormActionButton({
   iconName,
 }: Readonly<FormActionButtonProps>) {
   const theme = useTheme();
-  const styles = createStyles(theme);
+  const styles = useMemo(() => createFormFieldStyles(theme), [theme]);
   const isPrimary = variant === 'primary';
 
   return (
@@ -170,99 +170,3 @@ export function FormActionButton({
     </TouchableOpacity>
   );
 }
-
-const createStyles = (theme: ReturnType<typeof useTheme>) =>
-  StyleSheet.create({
-    label: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: theme.textNames,
-      marginTop: 15,
-      marginBottom: 8,
-    },
-    requiredMark: {
-      color: theme.error,
-      fontWeight: '700',
-    },
-    inputShell: {
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      borderRadius: 6,
-      paddingHorizontal: 12,
-      minHeight: 46,
-      justifyContent: 'center',
-      backgroundColor: theme.backgroundElement,
-    },
-    inputWithIcon: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    textAreaShell: {
-      minHeight: 90,
-      alignItems: 'flex-start',
-    },
-    inputError: {
-      borderColor: theme.error,
-      borderWidth: 1.5,
-    },
-    input: {
-      flex: 1,
-      height: 46,
-      fontSize: 15,
-      color: theme.fieldLabel,
-      padding: 0,
-    },
-    textAreaInput: {
-      height: 90,
-      textAlignVertical: 'top',
-      paddingTop: 12,
-    },
-    selectText: {
-      flex: 1,
-      fontSize: 15,
-      color: theme.fieldLabel,
-    },
-    selectPlaceholder: {
-      color: theme.placeholderColor,
-    },
-    errorText: {
-      color: theme.error,
-      fontSize: 12,
-      marginTop: 6,
-    },
-    primaryButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.main,
-      borderRadius: 6,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-    },
-    secondaryButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      borderRadius: 6,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-      marginRight: 15,
-      backgroundColor: theme.backgroundElement,
-    },
-    buttonDisabled: {
-      opacity: 0.6,
-    },
-    submitIcon: {
-      marginRight: 8,
-    },
-    primaryButtonText: {
-      color: theme.overMain,
-      fontWeight: '600',
-      fontSize: 15,
-    },
-    secondaryButtonText: {
-      color: theme.textNames,
-      fontWeight: '600',
-      fontSize: 15,
-    },
-  });

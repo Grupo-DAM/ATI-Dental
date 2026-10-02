@@ -96,6 +96,42 @@
       "accountDeactivated": "Your account has been deactivated. Please contact the administrator"
     }
   },
+  "register": {
+    "title": "Register",
+    "subtitle": "Enter your credentials to create your account",
+    "emailPlaceholder": "example@email.com",
+    "emailLabel": "Email address",
+    "passwordPlaceholder": "Minimum 6 characters",
+    "passwordLabel": "Password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "confirmPasswordLabel": "Confirm Password",
+    "registerButton": "Register",
+    "hasAccount": "Already have an account?",
+    "loginLink": "Log in",
+    "errors": {
+      "noNetwork": "No internet connection. Please check your network and try again.",
+      "networkTitle": "Connection Error",
+      "networkMessage": "Server connection error. Please try again later.",
+      "empty": "Please fill in all fields.",
+      "invalidEmail": "The email address format is invalid.",
+      "match": "Passwords do not match.",
+      "shortPassword": "Password must be at least 6 characters.",
+      "emailInUse": "This email address is already registered.",
+      "generic": "An error occurred while attempting to register the user."
+    }
+  },
+  "verifyCode": {
+    "title": "Email Verification",
+    "subtitle": "We have sent a verification link to your email address. Please check your inbox or spam folder, click the link, and then press the button below.",
+    "success": "Email verified successfully! Logging into the application...",
+    "verifyButton": "I already verified my email",
+    "errors": {
+      "noNetwork": "No internet connection. Please check your network and try again.",
+      "networkTitle": "Connection Error",
+      "networkMessage": "Server connection error. Please try again later.",
+      "generic": "Error verifying email. Please try again."
+    }
+  },
   "contacts": {
     "title": "Information & Contact",
     "subtitle": "Manage communication with the team and check recent activity.",
@@ -103,6 +139,18 @@
     "directContact": "Direct Contact",
     "directContactSubtitle": "Official communication channels for urgent inquiries.",
     "socialActivity": "Social Media Activity",
+    "socialFallback": "We could not load recent posts. Open the official profiles to see activity.",
+    "openInstagram": "Open Instagram",
+    "openFacebook": "Open Facebook",
+    "timeAgo": {
+      "justNow": "Just now",
+      "minute": "1 minute ago",
+      "minutes": "{{count}} minutes ago",
+      "hour": "1 hour ago",
+      "hours": "{{count}} hours ago",
+      "day": "1 day ago",
+      "days": "{{count}} days ago"
+    },
     "offlineMode": "Showing data in offline mode",
     "alerts": {
       "emailTitle": "Contact by Email",
@@ -459,7 +507,18 @@
     "retry": "Retry",
     "confirmed": "CONFIRMED",
     "pending": "PENDING",
+    "inProgress": "IN PROGRESS",
+    "completed": "COMPLETED",
     "cancelled": "CANCELLED",
+    "scheduleAppointment": "Schedule appointment",
+    "markConfirmed": "Confirm",
+    "markInProgress": "In progress",
+    "markCompleted": "Complete",
+    "markCancelled": "Cancel appointment",
+    "statusUpdatedTitle": "Status updated",
+    "statusUpdatedMessage": "The appointment is now {{status}}.",
+    "statusErrorTitle": "Could not update",
+    "statusErrorMessage": "Check the connection and try again.",
     "lunchBreak": "LUNCH BREAK",
     "minutes": "MIN",
     "chair": "CHAIR {{number}}",
@@ -576,5 +635,64 @@
     "requiredField": "This field is required",
     "accessDeniedTitle": "Access Denied",
     "accessDeniedMessage": "Only personnel with Dentist or Administrator roles can register medical consultations."
+  },
+  "scheduleAppointment": {
+    "title": "Create appointment",
+    "subtitle": "Register a new appointment in the clinical record and complete the procedure details.",
+    "breadcrumb": {
+      "patients": "Patients",
+      "patientRecord": "Patient record",
+      "current": "Create appointment"
+    },
+    "sections": {
+      "details": "Appointment details",
+      "notes": "Additional notes",
+      "next": "Next appointment"
+    },
+    "fields": {
+      "patient": "Patient",
+      "dentist": "Responsible dentist",
+      "type": "Appointment type",
+      "date": "Date",
+      "time": "Time",
+      "reason": "Reason for the appointment",
+      "duration": "Estimated duration"
+    },
+    "placeholders": {
+      "patient": "Select the patient...",
+      "dentist": "Select the dentist...",
+      "type": "Select the appointment type...",
+      "reason": "E.g. General consultation",
+      "duration": "Select the duration...",
+      "notes": ""
+    },
+    "updateOdontogram": "Update odontogram",
+    "odontogramTitle": "Odontogram",
+    "odontogramMessage": "The odontogram is updated from the patient's clinical history.",
+    "cancel": "Cancel",
+    "save": "Save appointment",
+    "modal": {
+      "title": "Confirm appointment",
+      "message": "Do you want to save this appointment in the patient record?",
+      "confirm": "Save",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "title": "Appointment saved",
+      "message": "The appointment is waiting and now appears on the agenda.",
+      "errorTitle": "Could not save the appointment",
+      "errorMessage": "Check your connection and try again. The form data is kept."
+    },
+    "errors": {
+      "patientRequired": "Select a patient.",
+      "conflictPatient": "This patient already has an appointment in that time slot.",
+      "conflictDentist": "This dentist already has an appointment in that time slot.",
+      "dentistRequired": "Select the responsible dentist.",
+      "typeRequired": "Select the appointment type.",
+      "dateRequired": "Enter the appointment date.",
+      "timeRequired": "Enter the appointment time.",
+      "reasonRequired": "Enter the reason for the appointment.",
+      "durationRequired": "Select the estimated duration."
+    }
   }
 }

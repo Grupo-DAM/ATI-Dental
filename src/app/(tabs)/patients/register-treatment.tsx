@@ -1,29 +1,33 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Modal,
   Animated as RNAnimated,
-  Pressable,
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@/hooks/use-theme';
 
 import { AppHeader } from '@/components/app-header';
-import { Colors } from '@/constants/theme';
 import { createTreatment, getTreatmentById, updateTreatment, PendingExam } from '@/services/treatment-service';
 import { validateTreatmentForm, ValidationErrors } from '@/utils/treatment-validation';
 import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
+import { 
+  createRegisterTreatmentStyles, 
+  createInputStyles, 
+  createBreadCrumbStyle, 
+  createPatientCardStyles,
+  createSectionStyles,
+} from '@/constants/styles/patients.style';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface TreatmentForm {
@@ -95,55 +99,43 @@ export const STATUSES = [
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-/** Three-level breadcrumb for Pacientes > Ficha del paciente > Tratamiento */
-function TreatmentBreadcrumb({ t, patientId }: Readonly<{ t: (k: string) => string; patientId: string }>) {
+/** Three-level breadcrumb: Pacientes > Ficha del paciente > pantalla actual */
+export function PatientRecordBreadcrumb({
+  patientsLabel,
+  recordLabel,
+  currentLabel,
+  patientId,
+}: Readonly<{
+  patientsLabel: string;
+  recordLabel: string;
+  currentLabel: string;
+  patientId: string;
+}>) {
+  const theme = useTheme();
+  const breadcrumbStyles = useMemo(() => createBreadCrumbStyle(theme), [theme]);
   return (
     <View style={breadcrumbStyles.container}>
       <TouchableOpacity onPress={() => router.push('/(tabs)/explore')} activeOpacity={0.7}>
-        <Text style={breadcrumbStyles.parentText}>{t('registerTreatment.breadcrumb.patients')}</Text>
+        <Text style={breadcrumbStyles.parentText}>{patientsLabel}</Text>
       </TouchableOpacity>
       <Text style={breadcrumbStyles.chevron}>   ›   </Text>
-      <TouchableOpacity 
-        onPress={() => router.push({ pathname: '/(tabs)/patient-file' as any, params: { patientId } })} 
+      <TouchableOpacity
+        onPress={() => router.push({ pathname: '/(tabs)/patient-file' as any, params: { patientId } })}
         activeOpacity={0.7}
       >
-        <Text style={breadcrumbStyles.parentText}>{t('registerTreatment.breadcrumb.patientRecord')}</Text>
+        <Text style={breadcrumbStyles.parentText}>{recordLabel}</Text>
       </TouchableOpacity>
       <Text style={breadcrumbStyles.chevron}>   ›   </Text>
-      <Text style={breadcrumbStyles.currentText}>{t('registerTreatment.breadcrumb.treatment')}</Text>
+      <Text style={breadcrumbStyles.currentText}>{currentLabel}</Text>
     </View>
   );
 }
 
-const breadcrumbStyles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EDF2F7',
-  },
-  parentText: {
-    color: '#6B7280',
-    fontSize: 14,
-    fontFamily: 'Open Sans',
-  },
-  chevron: {
-    color: '#9CA3AF',
-    fontSize: 14,
-  },
-  currentText: {
-    color: Colors.light.header,
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-  },
-});
-
 /** Patient info card with gradient-style background */
-function PatientInfoCard({ patient, t }: Readonly<{ patient: PatientInfo; t: (k: string) => string }>) {
+export function PatientInfoCard({ patient, t }: Readonly<{ patient: PatientInfo; t: (k: string) => string }>) {
+  const theme = useTheme();
+  const patientCardStyles = useMemo(() => createPatientCardStyles(theme), [theme]);
+ 
   return (
     <View style={patientCardStyles.card} testID="patient-info-card">
       <Image
@@ -157,7 +149,7 @@ function PatientInfoCard({ patient, t }: Readonly<{ patient: PatientInfo; t: (k:
           {patient.cedula}  •  {patient.gender}  •  {patient.age} {t('registerTreatment.years')}
         </Text>
         <View style={patientCardStyles.phoneRow}>
-          <Ionicons name="call" size={14} color="#FFFFFF" style={{ marginRight: 6 }} />
+          <Ionicons name="call" size={14} color={theme.overMain} style={patientCardStyles.phoneIcon} />
           <Text style={patientCardStyles.phone}>{patient.phone}</Text>
         </View>
       </View>
@@ -165,74 +157,20 @@ function PatientInfoCard({ patient, t }: Readonly<{ patient: PatientInfo; t: (k:
   );
 }
 
-const patientCardStyles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.light.header,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    marginRight: 14,
-    backgroundColor: '#F3F4F6',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  info: { flex: 1 },
-  name: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    fontFamily: 'Open Sans',
-    marginBottom: 2,
-  },
-  details: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.85)',
-    fontFamily: 'Open Sans',
-    marginBottom: 6,
-  },
-  phoneRow: { flexDirection: 'row', alignItems: 'center' },
-  phone: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.9)',
-    fontFamily: 'Open Sans',
-  },
-});
-
 /** Section header with icon */
-function SectionHeader({ icon, title }: Readonly<{ icon: keyof typeof Ionicons.glyphMap; title: string }>) {
+export function SectionHeader({ icon, title }: Readonly<{ icon: keyof typeof Ionicons.glyphMap; title: string }>) {
+  const theme = useTheme();
+  const sectionStyles = useMemo(() => createSectionStyles(theme), [theme]);
   return (
     <View style={sectionStyles.header}>
-      <Ionicons name={icon} size={20} color={Colors.light.main} />
+      <Ionicons name={icon} size={20} color={theme.main} />
       <Text style={sectionStyles.title}>{title}</Text>
     </View>
   );
 }
 
-const sectionStyles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 14,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.light.main,
-    fontFamily: 'Open Sans',
-  },
-});
-
 /** Dropdown select field */
-function SelectField({
+export function SelectField({
   label,
   value,
   placeholder,
@@ -240,6 +178,7 @@ function SelectField({
   onSelect,
   error,
   testID,
+  disabled = false,
 }: Readonly<{
   label: string;
   value: string;
@@ -248,8 +187,17 @@ function SelectField({
   onSelect: (val: string) => void;
   error?: string;
   testID?: string;
+  disabled?: boolean;
 }>) {
   const [open, setOpen] = useState(false);
+  const theme = useTheme();
+  const inputStyles = useMemo(() => createInputStyles(theme), [theme]);
+  let iconName: 'lock-closed' | 'chevron-up' | 'chevron-down' = 'chevron-down';
+  if (disabled) {
+    iconName = 'lock-closed';
+  } else if (open) {
+    iconName = 'chevron-up';
+  }
 
   return (
     <View style={inputStyles.fieldGroup}>
@@ -258,15 +206,24 @@ function SelectField({
         testID={testID}
         style={[
           inputStyles.selectTrigger,
+          disabled ? inputStyles.lockedTrigger : null,
           error ? inputStyles.errorBorder : null,
         ]}
-        onPress={() => setOpen(!open)}
+        onPress={() => {
+          if (!disabled) setOpen(!open);
+        }}
+        disabled={disabled}
+        accessibilityState={{ disabled }}
         activeOpacity={0.7}
       >
         <Text style={[inputStyles.selectText, !value && inputStyles.placeholder]}>
           {value || placeholder}
         </Text>
-        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color="#6B7280" />
+        <Ionicons
+          name={iconName}
+          size={18}
+          color={theme.pageSubtitle}
+        />
       </TouchableOpacity>
       {error ? (
         <Text style={inputStyles.errorText} testID={testID ? `${testID}-error` : undefined}>
@@ -275,7 +232,7 @@ function SelectField({
       ) : null}
       {open && (
         <View style={inputStyles.optionsList}>
-          <ScrollView nestedScrollEnabled style={{ maxHeight: 180 }}>
+          <ScrollView nestedScrollEnabled style={inputStyles.scrollView}>
             {options.map((opt) => (
               <TouchableOpacity
                 key={opt}
@@ -297,7 +254,7 @@ function SelectField({
                   {opt}
                 </Text>
                 {value === opt && (
-                  <Ionicons name="checkmark" size={16} color={Colors.light.main} />
+                  <Ionicons name="checkmark" size={16} color={theme.main} />
                 )}
               </TouchableOpacity>
             ))}
@@ -309,7 +266,7 @@ function SelectField({
 }
 
 /** Text input field */
-function InputField({
+export function InputField({
   label,
   value,
   onChangeText,
@@ -332,12 +289,15 @@ function InputField({
   error?: string;
   testID?: string;
 }>) {
+  const theme = useTheme();
+  const inputStyles = useMemo(() => createInputStyles(theme), [theme]);
+
   return (
     <View style={inputStyles.fieldGroup}>
-      <Text style={inputStyles.label}>{label}</Text>
+      {label ? <Text style={inputStyles.label}>{label}</Text> : null}
       <View style={[
         inputStyles.inputContainer,
-        multiline && { height: 80, alignItems: 'flex-start' },
+        multiline ? inputStyles.multilineContainer : null,
         error ? inputStyles.errorBorder : null,
       ]}>
         {prefix && <Text style={inputStyles.prefix}>{prefix}</Text>}
@@ -345,12 +305,12 @@ function InputField({
           testID={testID}
           style={[
             inputStyles.input,
-            multiline && { textAlignVertical: 'top', paddingTop: 10 },
+            multiline && inputStyles.multiLine,
           ]}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={theme.placeholderColor}
           keyboardType={keyboardType}
           multiline={multiline}
           numberOfLines={numberOfLines}
@@ -366,13 +326,14 @@ function InputField({
 }
 
 /** Date input field with calendar icon */
-function DateField({
+export function DateField({
   label,
   value,
   onChangeText,
   placeholder,
   error,
   testID,
+  iconName = 'calendar-outline',
 }: Readonly<{
   label: string;
   value: string;
@@ -380,7 +341,10 @@ function DateField({
   placeholder: string;
   error?: string;
   testID?: string;
+  iconName?: keyof typeof Ionicons.glyphMap;
 }>) {
+  const theme = useTheme();
+  const inputStyles = useMemo(() => createInputStyles(theme), [theme]);
   return (
     <View style={inputStyles.fieldGroup}>
       <Text style={inputStyles.label}>{label}</Text>
@@ -394,9 +358,9 @@ function DateField({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={theme.placeholderColor}
         />
-        <Ionicons name="calendar-outline" size={20} color="#6B7280" style={{ marginRight: 4 }} />
+        <Ionicons name={iconName} size={20} color={theme.pageSubtitle} style={inputStyles.icon} />
       </View>
       {error ? (
         <Text style={inputStyles.errorText} testID={testID ? `${testID}-error` : undefined}>
@@ -407,104 +371,11 @@ function DateField({
   );
 }
 
-const inputStyles = StyleSheet.create({
-  fieldGroup: { marginBottom: 14 },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-    fontFamily: 'Open Sans',
-    marginBottom: 6,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    height: 44,
-    paddingHorizontal: 12,
-  },
-  input: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: 'Open Sans',
-    color: '#1F2937',
-    height: '100%',
-  },
-  prefix: {
-    fontSize: 14,
-    fontFamily: 'Open Sans',
-    color: '#6B7280',
-    marginRight: 4,
-  },
-  placeholder: { color: '#9CA3AF' },
-  selectTrigger: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    height: 44,
-    paddingHorizontal: 12,
-  },
-  selectText: {
-    fontSize: 14,
-    fontFamily: 'Open Sans',
-    color: '#1F2937',
-    flex: 1,
-  },
-  optionsList: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    marginTop: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  optionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  optionItemSelected: {
-    backgroundColor: '#F3E8FF',
-  },
-  optionText: {
-    fontSize: 14,
-    fontFamily: 'Open Sans',
-    color: '#374151',
-  },
-  optionTextSelected: {
-    color: Colors.light.main,
-    fontWeight: '600',
-  },
-  errorBorder: {
-    borderColor: '#EF4444',
-  },
-  errorText: {
-    fontSize: 12,
-    color: '#EF4444',
-    fontFamily: 'Open Sans',
-    marginTop: 4,
-  },
-});
-
-
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function RegisterTreatmentScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createRegisterTreatmentStyles(theme), [theme]);
   const params = useLocalSearchParams<{
     patientId?: string;
     patientName?: string;
@@ -565,7 +436,7 @@ export default function RegisterTreatmentScreen() {
         setIsLoading(false);
       }
     }
-    loadTreatment();
+    void loadTreatment();
   }, [params.treatmentId]);
 
   // Validation errors & submitting guard
@@ -693,8 +564,8 @@ export default function RegisterTreatmentScreen() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color={Colors.light.main} />
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color={theme.main} />
       </View>
     );
   }
@@ -702,7 +573,12 @@ export default function RegisterTreatmentScreen() {
   return (
     <View style={styles.container}>
       <AppHeader />
-      <TreatmentBreadcrumb t={t} patientId={patient.id} />
+      <PatientRecordBreadcrumb
+        patientId={patient.id}
+        patientsLabel={t('registerTreatment.breadcrumb.patients')}
+        recordLabel={t('registerTreatment.breadcrumb.patientRecord')}
+        currentLabel={t('registerTreatment.breadcrumb.treatment')}
+      />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -777,7 +653,7 @@ export default function RegisterTreatmentScreen() {
                   testID={`remove-exam-${exam.id}`}
                   onPress={() => handleRemoveExam(exam.id)}
                 >
-                  <Ionicons name="close-circle" size={20} color="#EF4444" />
+                  <Ionicons name="close-circle" size={20} color={theme.alert} />
                 </TouchableOpacity>
               </View>
             ))}
@@ -802,7 +678,7 @@ export default function RegisterTreatmentScreen() {
               placeholder="dd/mm/yyyy"
             />
 
-            <View style={{ alignItems: 'center', marginTop: 4 }}>
+            <View style={styles.addBtnContainer}>
               <TouchableOpacity
                 testID="add-exam-btn"
                 style={styles.addBtn}
@@ -810,7 +686,7 @@ export default function RegisterTreatmentScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.addBtnText}>{t('registerTreatment.addExam')}</Text>
-                <Ionicons name="add" size={16} color="#FFFFFF" />
+                <Ionicons name="add" size={16} color={theme.overMain} />
               </TouchableOpacity>
             </View>
           </View>
@@ -895,15 +771,15 @@ export default function RegisterTreatmentScreen() {
 
             <TouchableOpacity
               testID="save-treatment-btn"
-              style={[styles.btn, styles.btnSave, isSubmitting && { opacity: 0.7 }]}
+              style={[styles.btn, styles.btnSave, isSubmitting && styles.btnSaveSubmitting]}
               onPress={handleSavePress}
               activeOpacity={0.8}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 8 }} />
+                <ActivityIndicator size="small" color={theme.overMain} style={styles.btnSaveIcon} />
               ) : (
-                <Ionicons name="save-outline" size={18} color="white" style={{ marginRight: 8 }} />
+                <Ionicons name="save-outline" size={18} color="white" style={styles.btnSaveIcon} />
               )}
               <Text style={styles.btnSaveText}>
                 {isSubmitting ? t('registerTreatment.saving') : t('registerTreatment.save')}
@@ -936,68 +812,3 @@ export default function RegisterTreatmentScreen() {
     </View>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F6F8' },
-  scrollContent: { paddingBottom: Platform.OS === 'ios' ? 100 : 80 },
-  titleSection: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12 },
-  mainTitle: {
-    fontSize: 22, fontWeight: '700', color: '#1F2937',
-    fontFamily: 'Open Sans', marginBottom: 4,
-  },
-  subtitle: { fontSize: 13, color: '#6B7280', lineHeight: 18, fontFamily: 'Open Sans' },
-
-  card: {
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB',
-    borderRadius: 12, marginHorizontal: 16, marginBottom: 16, padding: 16,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
-  },
-
-  examItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F3E8FF',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 10,
-  },
-  examName: {
-    fontSize: 13, fontWeight: '600', color: Colors.light.main,
-    fontFamily: 'Open Sans',
-  },
-  examDate: {
-    fontSize: 11, color: '#6B7280', fontFamily: 'Open Sans', marginTop: 2,
-  },
-
-  addBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.light.main,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 4,
-  },
-  addBtnText: {
-    color: '#FFFFFF', fontSize: 13, fontWeight: '600', fontFamily: 'Open Sans',
-  },
-
-  buttonRow: {
-    flexDirection: 'row', justifyContent: 'center',
-    alignItems: 'center', gap: 12,
-    marginTop: 8, marginHorizontal: 16, marginBottom: 24,
-  },
-  btn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    height: 44, borderRadius: 8, paddingHorizontal: 20,
-  },
-  btnCancel: {
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#D1D5DB', minWidth: 110,
-  },
-  btnCancelText: { color: '#4B5563', fontSize: 14, fontWeight: '600', fontFamily: 'Open Sans' },
-  btnSave: { backgroundColor: Colors.light.main, minWidth: 180 },
-  btnSaveText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600', fontFamily: 'Open Sans' },
-});

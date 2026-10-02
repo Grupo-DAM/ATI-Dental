@@ -2,26 +2,7 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
-- extendedWaitUntil:
-    visible:
-      id: "email-input"
-    timeout: 60000
-
-- tapOn:
-    id: "email-input"
-- inputText: "jesusecova73@gmail.com"
-- tapOn:
-    id: "password-input"
-- inputText: "123456"
-- hideKeyboard
-- tapOn:
-    id: "login-button"
-
-# 3. Esperamos a que cargue la app (welcome-header)
-- extendedWaitUntil:
-    visible:
-      id: "welcome-header"
-    timeout: 15000
+- runFlow: common/login-admin.yaml
 
 # 4. Esperamos y tocamos la pestaña de Perfil
 - extendedWaitUntil:

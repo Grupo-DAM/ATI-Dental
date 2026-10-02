@@ -96,6 +96,42 @@
       "accountDeactivated": "Su cuenta ha sido desactivada. Póngase en contacto con el administrador"
     }
   },
+  "register": {
+    "title": "Registro",
+    "subtitle": "Ingresa tus credenciales para crear tu cuenta",
+    "emailPlaceholder": "ejemplo@correo.com",
+    "emailLabel": "Correo electrónico",
+    "passwordPlaceholder": "Mínimo 6 caracteres",
+    "passwordLabel": "Contraseña",
+    "confirmPasswordPlaceholder": "Vuelve a escribir la contraseña",
+    "confirmPasswordLabel": "Confirmar Contraseña",
+    "registerButton": "Registrarse",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "loginLink": "Iniciar sesión",
+    "errors": {
+      "noNetwork": "No hay conexión a internet. Por favor, revisa tu red e intenta de nuevo.",
+      "networkTitle":"Error de conexión",
+      "networkMessage": "Error de conexión con el servidor. Intente más tarde.",
+      "empty": "Por favor, rellena todos los campos.",
+      "invalidEmail": "El formato de correo no es válido.",
+      "match": "Las contraseñas no coinciden.",
+      "shortPassword": "La contraseña debe tener al menos 6 caracteres.",
+      "emailInUse": "El correo electrónico ya se encuentra registrado.",
+      "generic": "Error al intentar registrar el usuario."
+    }
+  },
+  "verifyCode": {
+    "title": "Verificación de correo",
+    "subtitle": "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor revisa tu bandeja de entrada o spam, haz clic en el enlace y luego presiona el botón de abajo.",
+    "success": "¡Correo verificado con éxito! Ingresando a la aplicación...",
+    "verifyButton": "Ya verifiqué mi correo",
+    "errors": {
+      "noNetwork": "No hay conexión a internet. Por favor, revisa tu red e intenta de nuevo.",
+      "networkTitle": "Error de conexión",
+      "networkMessage": "Error de conexión con el servidor. Intente más tarde.",
+      "generic": "Error al verificar el correo. Intenta nuevamente."
+    }
+  },
   "contacts": {
     "title": "Información y Contacto",
     "subtitle": "Gestione la comunicación con el equipo y revise la actividad reciente.",
@@ -103,6 +139,18 @@
     "directContact": "Contacto Directo",
     "directContactSubtitle": "Canales de comunicación oficiales para consultas urgentes.",
     "socialActivity": "Actividad en Redes Sociales",
+    "socialFallback": "No pudimos cargar las publicaciones recientes. Entra a los perfiles oficiales para ver la actividad.",
+    "openInstagram": "Abrir Instagram",
+    "openFacebook": "Abrir Facebook",
+    "timeAgo": {
+      "justNow": "Hace un momento",
+      "minute": "Hace 1 minuto",
+      "minutes": "Hace {{count}} minutos",
+      "hour": "Hace 1 hora",
+      "hours": "Hace {{count}} horas",
+      "day": "Hace 1 día",
+      "days": "Hace {{count}} días"
+    },
     "offlineMode": "Mostrando datos en modo offline",
     "alerts": {
       "emailTitle": "Contacto por Email",
@@ -303,8 +351,8 @@
     "noResultsQuestion": "¿Nuevo paciente?",
     "registerPatient": "Registrar Paciente",
     "accessDeniedTitle": "Acceso Denegado",
-    "adminOnlyView": "No tienes permisos de administrador para acceder a esta pantalla.",
-    "adminOnlyViewAlert": "No tienes permisos de administrador para ver esta sección."
+    "odontologoOnlyView": "No tienes permisos de odontólogo para acceder al listado de pacientes.",
+    "odontologoOnlyViewAlert": "Solo el personal odontológico puede acceder a esta sección."
   },
   "admin-users": {
     "title": "Listado de Usuarios",
@@ -457,7 +505,18 @@
     "retry": "Reintentar",
     "confirmed": "CONFIRMADO",
     "pending": "EN ESPERA",
+    "inProgress": "EN PROGRESO",
+    "completed": "COMPLETADO",
     "cancelled": "CANCELADO",
+    "scheduleAppointment": "Agendar cita",
+    "markConfirmed": "Confirmar",
+    "markInProgress": "En progreso",
+    "markCompleted": "Completar",
+    "markCancelled": "Cancelar cita",
+    "statusUpdatedTitle": "Estado actualizado",
+    "statusUpdatedMessage": "La cita ahora está {{status}}.",
+    "statusErrorTitle": "No se pudo actualizar",
+    "statusErrorMessage": "Revisa la conexión e inténtalo de nuevo.",
     "lunchBreak": "HORA DE ALMUERZO",
     "minutes": "MIN",
     "chair": "SILLÓN {{number}}",
@@ -574,5 +633,64 @@
     "requiredField": "Este campo es obligatorio",
     "accessDeniedTitle": "Acceso Denegado",
     "accessDeniedMessage": "Solo el personal con rol de Odontólogo o Administrador puede registrar consultas médicas."
+  },
+  "scheduleAppointment": {
+    "title": "Crear cita",
+    "subtitle": "Registra una nueva cita dentro de su ficha clínica y completa los datos del procedimiento.",
+    "breadcrumb": {
+      "patients": "Pacientes",
+      "patientRecord": "Ficha del paciente",
+      "current": "Crear cita"
+    },
+    "sections": {
+      "details": "Detalles de la cita",
+      "notes": "Notas adicionales",
+      "next": "Proxima Cita"
+    },
+    "fields": {
+      "patient": "Paciente",
+      "dentist": "Odontólogo Responsable",
+      "type": "Tipo de cita",
+      "date": "Fecha",
+      "time": "Hora",
+      "reason": "Motivo de la cita",
+      "duration": "Duración Estimada"
+    },
+    "placeholders": {
+      "patient": "Seleccione el paciente...",
+      "dentist": "Seleccione el odontólogo...",
+      "type": "Seleccione el tipo de cita...",
+      "reason": "Ej. Consulta general",
+      "duration": "Seleccione la duración...",
+      "notes": ""
+    },
+    "updateOdontogram": "Actualizar Odontograma",
+    "odontogramTitle": "Odontograma",
+    "odontogramMessage": "El odontograma se actualiza desde la historia clínica del paciente.",
+    "cancel": "Cancelar",
+    "save": "Guardar Cita",
+    "modal": {
+      "title": "Confirmar cita",
+      "message": "¿Deseas guardar esta cita en la ficha del paciente?",
+      "confirm": "Guardar",
+      "cancel": "Cancelar"
+    },
+    "toast": {
+      "title": "Cita guardada",
+      "message": "La cita quedó en espera y ya aparece en la agenda.",
+      "errorTitle": "No se pudo guardar la cita",
+      "errorMessage": "Revisa tu conexión e inténtalo de nuevo. Los datos del formulario se mantienen."
+    },
+    "errors": {
+      "patientRequired": "Selecciona un paciente.",
+      "conflictPatient": "Este paciente ya tiene un compromiso programado en ese horario.",
+      "conflictDentist": "Este odontólogo ya tiene un compromiso programado en ese horario.",
+      "dentistRequired": "Selecciona el odontólogo responsable.",
+      "typeRequired": "Selecciona el tipo de cita.",
+      "dateRequired": "Indica la fecha de la cita.",
+      "timeRequired": "Indica la hora de la cita.",
+      "reasonRequired": "Indica el motivo de la cita.",
+      "durationRequired": "Selecciona la duración estimada."
+    }
   }
 }

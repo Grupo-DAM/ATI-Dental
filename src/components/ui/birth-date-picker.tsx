@@ -23,6 +23,9 @@ type BirthDatePickerProps = {
   locale: string;
   onClose: () => void;
   onSelect: (date: Date) => void;
+  limitToBirthRange?: boolean;
+  minimumDate?: Date;
+  maximumDate?: Date;
 };
 
 export function BirthDatePicker({
@@ -36,9 +39,14 @@ export function BirthDatePicker({
   locale,
   onClose,
   onSelect,
+  limitToBirthRange = true,
+  minimumDate,
+  maximumDate,
 }: Readonly<BirthDatePickerProps>) {
   const theme = useTheme();
   const styles = createStyles(theme);
+  const resolvedMinimum = limitToBirthRange ? MIN_BIRTH_DATE : minimumDate;
+  const resolvedMaximum = limitToBirthRange ? new Date() : maximumDate;
 
   const handleChange = (event: { type?: string }, selectedDate?: Date) => {
     if (Platform.OS === 'android') {
@@ -56,8 +64,8 @@ export function BirthDatePicker({
       value={value}
       mode="date"
       display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
-      maximumDate={new Date()}
-      minimumDate={MIN_BIRTH_DATE}
+      maximumDate={resolvedMaximum}
+      minimumDate={resolvedMinimum}
       onChange={handleChange}
       locale={locale}
     />

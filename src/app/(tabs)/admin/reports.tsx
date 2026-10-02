@@ -1,19 +1,17 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { AppHeader } from '@/components/app-header';
-import { Breadcrumb } from '@/components/breadcrumb';
+import { PageTitleLayout } from '@/components/page-title-layout';
 import { ModalOptionList, ModalOptionProp } from '@/components/ui/modal-option-list';
-import { BottomTabInset } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { isAdminUser } from '@/constants/user-roles';
 
 // 1. Estilos, Tipos y Utilidades
-import { createReportsStyles } from '@/components/reports/styles/reports.styles';
+import { createReportsStyles } from '@/constants/styles/reports.styles';
 import { PeriodOption, ReportType } from '@/components/reports/types';
 import { generatePeriodOptions } from '@/components/reports/utils/reports-utils';
 
@@ -43,7 +41,7 @@ export type { SessionRecord, RetentionDataPoint, RetentionMetricsDoc } from '@/c
 export default function AdminReportsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const styles = createReportsStyles(theme);
+  const styles = useMemo(() => createReportsStyles(theme), [theme]);
   const { user, loading: authLoading } = useAuth();
 
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption>(30);
@@ -136,139 +134,135 @@ export default function AdminReportsScreen() {
   }, [t]);
 
   return (
-    <View style={styles.screen} testID="admin-reports-screen">
-      <AppHeader />
-      <Breadcrumb parent={t('reports.breadcrumbParent')} current={t('reports.breadcrumbCurrent')} />
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: BottomTabInset + 40 }]}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.innerContainer}>
-          <Text style={styles.screenTitle}>{t('reports.title')}</Text>
-          <Text style={styles.screenSubtitle}>{t('reports.subtitle')}</Text>
-
-          {/* Filtro selector de reporte */}
-          <View style={styles.filterSection}>
-            <Text style={styles.fieldLabel}>{t('reports.reportTypeLabel')}</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={() => setShowReportTypeModal(true)}
-              activeOpacity={0.7}
-              testID="report-type-select"
-            >
-              <Text style={styles.selectButtonText} numberOfLines={1}>
-                {reportTypeLabel}
-              </Text>
-              <Ionicons name="chevron-down" size={18} color={theme.pageSubtitle} />
-            </TouchableOpacity>
-          </View>
-
-          {/* VISTAS MODULARES */}
-          {(selectedReportType === 'usage' || selectedReportType === 'access') && (
-            <UsageReportView
-              reportType={selectedReportType}
-              sessions={sessions}
-              loading={loading}
-              queryError={queryError}
-              totalAccessToday={totalAccessToday}
-              displayedActiveUsers={displayedActiveUsers}
-              selectedPeriod={selectedPeriod}
-              periodLabel={periodLabel}
-              onOpenPeriodModal={() => setShowPeriodModal(true)}
-            />
-          )}
-
-          {selectedReportType === 'demographics' && (
-            <UserDemographicsReportView
-              user={user}
-              authLoading={authLoading}
-              periodLabel={periodLabel}
-              onOpenPeriodModal={() => setShowPeriodModal(true)}
-            />
-          )}
-
-          {selectedReportType === 'geographics' && (
-            <UserGeographicsReportView
-              user={user}
-              authLoading={authLoading}
-              periodLabel={periodLabel}
-              onOpenPeriodModal={() => setShowPeriodModal(true)}
-            />
-          )}
-
-          {selectedReportType === 'dau_mau' && (
-            <DauMauReportView
-              user={user}
-              authLoading={authLoading}
-              systemActiveUsersCount={displayedActiveUsers}
-              activeUsersCount={activeUsersCount}
-              periodLabel={periodLabel}
-              onOpenPeriodModal={() => setShowPeriodModal(true)}
-            />
-          )}
-
-          {selectedReportType === 'crash_rate' && (
-            <CrashRateReportView
-              user={user}
-              authLoading={authLoading}
-              selectedPeriod={selectedPeriod}
-              totalSessionsCount={sessions.length}
-              periodLabel={periodLabel}
-              onOpenPeriodModal={() => setShowPeriodModal(true)}
-            />
-          )}
-
-          {selectedReportType === 'retention_rate' && (
-            <RetentionReportView
-              user={user}
-              authLoading={authLoading}
-            />
-          )}
-
-          {/* Acciones de pie: Imprimir y PDF */}
-          <View style={styles.actionsRow}>
-            <TouchableOpacity
-              style={styles.printBtn}
-              onPress={handlePrint}
-              activeOpacity={0.7}
-              testID="print-btn"
-              accessibilityLabel={t('reports.print')}
-            >
-              <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.pdfBtn}
-              onPress={handleExportPdf}
-              activeOpacity={0.7}
-              testID="export-pdf-btn"
-              accessibilityLabel={t('reports.exportPdf')}
-            >
-              <Ionicons name="document-text" size={16} color={theme.overMain} style={{ marginRight: 4 }} />
-              <Text style={styles.pdfBtnText}>PDF</Text>
-            </TouchableOpacity>
-          </View>
+    <PageTitleLayout
+      titleKey='reports.title'
+      subtitleKey='reports.subtitle'
+      parentBreadcrumbKey='reports.breadcrumbParent'
+      currentBreadcrumbKey='reports.breadcrumbCurrent'
+      testID="admin-reports-screen"
+      modals = {
+        <>
+          <ModalOptionList
+            visible={showPeriodModal}
+            onRequestClose={() => setShowPeriodModal(false)}
+            title={t('reports.reportTypeLabel')}
+            options={generatePeriodOptions(t)}
+            selectedOption={selectedPeriod}
+            onSelectOption={setSelectedPeriod}
+          />
+          <ModalOptionList
+            visible={showReportTypeModal}
+            onRequestClose={() => setShowReportTypeModal(false)}
+            title={t('reports.reportTypeLabel')}
+            options={reportTypeOptions}
+            selectedOption={selectedReportType}
+            onSelectOption={setSelectedReportType}
+          />
+        </>
+      }
+    >
+      <View style={styles.innerContainer}>
+        {/* Filtro selector de reporte */}
+        <View style={styles.filterSection}>
+          <Text style={styles.fieldLabel}>{t('reports.reportTypeLabel')}</Text>
+          <TouchableOpacity
+            style={styles.selectButton}
+            onPress={() => setShowReportTypeModal(true)}
+            activeOpacity={0.7}
+            testID="report-type-select"
+          >
+            <Text style={styles.selectButtonText} numberOfLines={1}>
+              {reportTypeLabel}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={theme.pageSubtitle} />
+          </TouchableOpacity>
         </View>
-      </ScrollView>
 
-      {/* Modales */}
-      <ModalOptionList
-        visible={showPeriodModal}
-        onRequestClose={() => setShowPeriodModal(false)}
-        title={t('reports.reportTypeLabel')}
-        options={generatePeriodOptions(t)}
-        selectedOption={selectedPeriod}
-        onSelectOption={setSelectedPeriod}
-      />
-      <ModalOptionList
-        visible={showReportTypeModal}
-        onRequestClose={() => setShowReportTypeModal(false)}
-        title={t('reports.reportTypeLabel')}
-        options={reportTypeOptions}
-        selectedOption={selectedReportType}
-        onSelectOption={setSelectedReportType}
-      />
-    </View>
+        {/* VISTAS MODULARES */}
+        {(selectedReportType === 'usage' || selectedReportType === 'access') && (
+          <UsageReportView
+            reportType={selectedReportType}
+            sessions={sessions}
+            loading={loading}
+            queryError={queryError}
+            totalAccessToday={totalAccessToday}
+            displayedActiveUsers={displayedActiveUsers}
+            selectedPeriod={selectedPeriod}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
+
+        {selectedReportType === 'demographics' && (
+          <UserDemographicsReportView
+            user={user}
+            authLoading={authLoading}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
+
+        {selectedReportType === 'geographics' && (
+          <UserGeographicsReportView
+            user={user}
+            authLoading={authLoading}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
+
+        {selectedReportType === 'dau_mau' && (
+          <DauMauReportView
+            user={user}
+            authLoading={authLoading}
+            systemActiveUsersCount={displayedActiveUsers}
+            activeUsersCount={activeUsersCount}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
+
+        {selectedReportType === 'crash_rate' && (
+          <CrashRateReportView
+            user={user}
+            authLoading={authLoading}
+            selectedPeriod={selectedPeriod}
+            totalSessionsCount={sessions.length}
+            periodLabel={periodLabel}
+            onOpenPeriodModal={() => setShowPeriodModal(true)}
+          />
+        )}
+
+        {selectedReportType === 'retention_rate' && (
+          <RetentionReportView
+            user={user}
+            authLoading={authLoading}
+          />
+        )}
+
+        {/* Acciones de pie: Imprimir y PDF */}
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            style={styles.printBtn}
+            onPress={handlePrint}
+            activeOpacity={0.7}
+            testID="print-btn"
+            accessibilityLabel={t('reports.print')}
+          >
+            <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.pdfBtn}
+            onPress={handleExportPdf}
+            activeOpacity={0.7}
+            testID="export-pdf-btn"
+            accessibilityLabel={t('reports.exportPdf')}
+          >
+            <Ionicons name="document-text" size={16} color={theme.overMain} style={styles.pdfBtnIcon} />
+            <Text style={styles.pdfBtnText}>PDF</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </PageTitleLayout>
   );
 }

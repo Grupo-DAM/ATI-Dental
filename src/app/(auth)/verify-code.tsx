@@ -1,25 +1,43 @@
+import React, { useState, useMemo } from 'react';
+import { Pressable, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { StyleSheet, View, Button, Text, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import NetInfo from '@react-native-community/netinfo';
-import { useAuth } from '@/hooks/use-auth';
+import { useTranslation } from 'react-i18next';
+
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { AuthLayout } from '@/components/auth/auth-layout';
+import { NetworkErrorBanner } from '@/components/auth/network-error-banner';
+
+import { useTheme } from '@/hooks/use-theme';
+import { useAuth } from '@/hooks/use-auth';
+import { createAuthStyles } from '@/constants/styles/auth.styles';
 
 export default function VerifyCodeScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createAuthStyles(theme), [theme]);
   const router = useRouter();
   const { verifyCode } = useAuth();
+  const { t } = useTranslation();
+
   const [error, setError] = useState<string | null>(null);
+  const [networkError, setNetworkError] = useState(false);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleVerify = async () => {
     setError(null);
+    setNetworkError(false);
 
     const netInfo = await NetInfo.fetch();
     if (!netInfo.isConnected) {
-      setError('No hay conexión a internet. Por favor, revisa tu red e intenta de nuevo.');
+      setNetworkError(true);
+      setError(
+        t(
+          'verifyCode.errors.noNetwork',
+          'No hay conexión a internet. Por favor, revisa tu red e intenta de nuevo.'
+        )
+      );
       return;
     }
 
@@ -27,83 +45,72 @@ export default function VerifyCodeScreen() {
     try {
       await verifyCode();
       setSuccess(true);
-      // Esperamos 2 segundos para que el usuario lea el mensaje de éxito antes de enviarlo al Home
       setTimeout(() => {
         router.replace('/');
       }, 2000);
     } catch (err: any) {
-      setError(err.message || 'Error al verificar el correo. Intenta nuevamente.');
+      setError(
+        err?.message ||
+          t(
+            'verifyCode.errors.generic',
+            'Error al verificar el correo. Intenta nuevamente.'
+          )
+      );
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title" style={styles.title}>Verificación de correo</ThemedText>
-        <Text style={styles.subtitle}>Hemos enviado un enlace de verificación a tu correo electrónico. Por favor revisa tu bandeja de entrada o spam, haz clic en el enlace y luego presiona el botón de abajo.</Text>
+    <AuthLayout
+      title={t('verifyCode.title', 'Verificación de correo')}
+      subtitle={t(
+        'verifyCode.subtitle',
+        'Hemos enviado un enlace de verificación a tu correo electrónico. Por favor revisa tu bandeja de entrada o spam, haz clic en el enlace y luego presiona el botón de abajo.'
+      )}
+      topContent={networkError && (
+        <NetworkErrorBanner
+          title={t('verifyCode.errors.networkTitle', 'Error de conexión')}
+          message={t(
+            'verifyCode.errors.networkMessage',
+            'Error de conexión con el servidor. Intente más tarde.'
+          )}
+        />
+      )}
+    >
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+      <ThemedView>
+        {error && !networkError && (
+          <ThemedText style={styles.errorText}>{error}</ThemedText>
+        )}
 
         {success ? (
-          <Text style={styles.successText}>
-            ¡Correo verificado con éxito! Ingresando a la aplicación...
-          </Text>
-        ) : (
-          <View style={styles.form}>
-            {loading ? (
-              <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
-              <Button title="Ya verifiqué mi correo" onPress={handleVerify} />
+          <ThemedText style={styles.successText}>
+            {t(
+              'verifyCode.success',
+              '¡Correo verificado con éxito! Ingresando a la aplicación...'
             )}
-          </View>
+          </ThemedText>
+        ) : (
+          <Pressable
+            testID="verify-button"
+            style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+            ]}
+            onPress={handleVerify}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color={theme.overMain} />
+            ) : (
+              <ThemedText style={styles.buttonText}>
+                {t('verifyCode.verifyButton', 'Ya verifiqué mi correo')}
+              </ThemedText>
+            )}
+          </Pressable>
         )}
-      </SafeAreaView>
-    </ThemedView>
+      </ThemedView>
+    </AuthLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    textAlign: 'center',
-    marginBottom: 24,
-    color: '#666',
-  },
-  form: {
-    gap: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    textAlign: 'center',
-    fontSize: 24,
-    letterSpacing: 4,
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  successText: {
-    color: 'green',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 20,
-    textAlign: 'center',
-  },
-});

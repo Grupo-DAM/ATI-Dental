@@ -15,6 +15,7 @@ import {
   TimelineItemActions,
   TimelineEmptyState,
 } from './TimelineComponents';
+import { ScheduleAppointmentButton } from '@/components/schedule-appointment-button';
 
 function formatTimelineDate(dateStr?: string): { day: string; monthYear: string } {
   if (!dateStr) return { day: '—', monthYear: '—' };
@@ -65,31 +66,21 @@ export function ConsultationsTimeline({
         <Text style={styles.sectionTitle}>
           {t('clinicalHistory.tabs.consultations', 'Consultas')}
         </Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
           {onRegisterConsultation && (
             <TouchableOpacity
-              style={[styles.scheduleButton, { backgroundColor: theme.main }]}
+              style={[styles.actionButton, { backgroundColor: theme.main }]}
               onPress={onRegisterConsultation}
               activeOpacity={0.7}
               testID="btn-register-consultation"
             >
-              <Ionicons name="add" size={14} color="#FFFFFF" />
-              <Text style={styles.scheduleButtonText}>
+              <Ionicons name="add" size={16} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>
                 {t('clinicalHistory.newConsultation', 'Nueva Consulta')}
               </Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity
-            style={styles.scheduleButton}
-            onPress={onScheduleAppointment}
-            activeOpacity={0.7}
-            testID="btn-schedule-appointment"
-          >
-            <Ionicons name="calendar" size={14} color="#FFFFFF" />
-            <Text style={styles.scheduleButtonText}>
-              {t('clinicalHistory.scheduleAppointment', 'Agendar Cita')}
-            </Text>
-          </TouchableOpacity>
+          <ScheduleAppointmentButton onPress={onScheduleAppointment} />
         </View>
       </View>
 
@@ -189,21 +180,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       color: theme.pageTitle,
       fontFamily: 'Open Sans',
     },
-    scheduleButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.main,
-      paddingHorizontal: 12,
-      paddingVertical: 7,
-      borderRadius: 8,
-      gap: 6,
-    },
-    scheduleButtonText: {
-      color: '#FFFFFF',
-      fontSize: 12,
-      fontWeight: '600',
-      fontFamily: 'Open Sans',
-    },
     timelineItem: {
       flexDirection: 'row',
       marginBottom: 16,
@@ -281,5 +257,20 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       color: theme.text,
       fontFamily: 'Open Sans',
       flex: 1,
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 8,
+      height: 44,
+      gap: 6,
+    },
+    actionButtonText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
     },
   });

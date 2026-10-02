@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import AdminUserList from '@/app/(tabs)/patients/patients-list';
 
@@ -195,7 +195,7 @@ describe('AdminUserList (Patients List) - Criterios de Aceptación', () => {
       expect(mockRetry).toHaveBeenCalledTimes(1);
     });
 
-    it('bloquea el acceso si el usuario no tiene rol permitido', async () => {
+    it('bloquea el acceso si el usuario no tiene rol permitido', () => {
       // Simular rol no permitido
       mockUseAuth.mockReturnValue({
         user: { role: 'paciente' },
@@ -208,19 +208,14 @@ describe('AdminUserList (Patients List) - Criterios de Aceptación', () => {
         handleRetryConnection: jest.fn(),
       });
 
-      const { getByText, queryByText } = render(<AdminUserList />);
+      const { getByText, getByTestId, queryByText } = render(<AdminUserList />);
 
       // Confirmar vista de acceso denegado
+      expect(getByTestId('access-denied-view')).toBeTruthy();
       expect(getByText('Acceso Denegado')).toBeTruthy();
       expect(getByText('Solo personal autorizado puede ver este listado.')).toBeTruthy();
       expect(queryByText('Lista de Pacientes')).toBeNull();
-
-      await waitFor(() => {
-        expect(Alert.alert).toHaveBeenCalledWith(
-          'Acceso Denegado',
-          'No tienes permisos para ver esta sección.'
-        );
-      });
+      expect(Alert.alert).not.toHaveBeenCalled();
     });
   });
 });

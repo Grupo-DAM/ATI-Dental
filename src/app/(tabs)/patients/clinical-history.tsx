@@ -1,20 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { AccessDeniedView } from '@/components/access-denied-view';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
-import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
 import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
@@ -29,11 +27,25 @@ import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { deleteTreatment } from '@/services/treatment-service';
 import { Consultation } from '@/types/clinical-record';
+import { createClinicalHistoryStyles } from '@/constants/styles/patients.style';
+
+function ageFromBirthDate(birthDate?: string): string {
+  if (!birthDate) return '';
+  const born = new Date(birthDate);
+  if (Number.isNaN(born.getTime())) return '';
+  const today = new Date();
+  let years = today.getFullYear() - born.getFullYear();
+  const hadBirthday =
+    today.getMonth() > born.getMonth() ||
+    (today.getMonth() === born.getMonth() && today.getDate() >= born.getDate());
+  if (!hadBirthday) years -= 1;
+  return years >= 0 ? String(years) : '';
+}
 
 export default function ClinicalHistoryScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const styles = createStyles(theme);
+  const styles = useMemo(() => createClinicalHistoryStyles(theme), [theme]);
   const { user, loading: authLoading } = useAuth();
   const { patientId } = useLocalSearchParams<{ patientId?: string }>();
 
@@ -58,6 +70,18 @@ export default function ClinicalHistoryScreen() {
     deleteConsultation,
     updateConsultation,
   } = useClinicalRecord(hasAccess ? patientId : undefined);
+
+  const skipInitialFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasAccess || !patientId) return;
+      if (skipInitialFocus.current) {
+        skipInitialFocus.current = false;
+        return;
+      }
+      refetch();
+    }, [hasAccess, patientId, refetch]),
+  );
 
   const [isEditingConsultation, setIsEditingConsultation] = useState(false);
 
@@ -96,7 +120,23 @@ export default function ClinicalHistoryScreen() {
   };
 
   const handleScheduleAppointment = () => {
-    router.push('/(tabs)/agenda' as any);
+    const patient = record?.patient;
+    if (!patient) {
+      router.push('/(tabs)/patients/schedule-appointment' as any);
+      return;
+    }
+    router.push({
+      pathname: '/(tabs)/patients/schedule-appointment' as any,
+      params: {
+        patientId: patient.id,
+        patientName: patient.fullName,
+        patientCedula: patient.documentId ?? '',
+        patientGender: patient.gender ?? '',
+        patientAge: ageFromBirthDate(patient.birthDate),
+        patientPhone: patient.phone ?? '',
+        patientImageUrl: patient.photoUri ?? '',
+      },
+    });
   };
 
   const handleRegisterConsultation = () => {
@@ -193,18 +233,13 @@ export default function ClinicalHistoryScreen() {
           parent={t('patientFile.title', 'Ficha del Paciente')}
           current={t('clinicalHistory.title', 'Historia Clínica')}
         />
-        <View style={styles.centerContainer}>
-          <Ionicons name="lock-closed-outline" size={56} color={theme.pageSubtitle} />
-          <Text style={styles.stateTitle}>
-            {t('clinicalHistory.accessDenied', 'Acceso Restringido a Odontólogos')}
-          </Text>
-          <Text style={styles.stateMessage}>
-            {t(
-              'clinicalHistory.accessDeniedMessage',
-              'Solo el personal con rol de Odontólogo o Administrador está autorizado para consultar la historia clínica y diagnósticos de los pacientes.'
-            )}
-          </Text>
-        </View>
+        <AccessDeniedView
+          title={t('clinicalHistory.accessDenied', 'Acceso Restringido a Odontólogos')}
+          message={t(
+            'clinicalHistory.accessDeniedMessage',
+            'Solo el personal con rol de Odontólogo o Administrador está autorizado para consultar la historia clínica y diagnósticos de los pacientes.'
+          )}
+        />
       </View>
     );
   }
@@ -251,7 +286,7 @@ export default function ClinicalHistoryScreen() {
             activeOpacity={0.7}
             testID="btn-retry-clinical-history"
           >
-            <Ionicons name="refresh" size={18} color="#FFFFFF" />
+            <Ionicons name="refresh" size={18} color={theme.overMain}/>
             <Text style={styles.retryButtonText}>
               {t('clinicalHistory.retry', 'Reintentar')}
             </Text>
@@ -396,52 +431,3 @@ export default function ClinicalHistoryScreen() {
     </View>
   );
 }
-
-const createStyles = (theme: ReturnType<typeof useTheme>) =>
-  StyleSheet.create({
-    screen: {
-      flex: 1,
-      backgroundColor: theme.background,
-    },
-    scrollContent: {
-      paddingBottom: Platform.OS === 'ios' ? 100 : 80,
-    },
-    centerContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 32,
-    },
-    stateTitle: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: theme.pageTitle,
-      fontFamily: 'Open Sans',
-      marginTop: 16,
-      textAlign: 'center',
-    },
-    stateMessage: {
-      fontSize: 14,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-      marginTop: 8,
-      textAlign: 'center',
-      lineHeight: 20,
-    },
-    retryButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginTop: 20,
-      backgroundColor: theme.main,
-      paddingHorizontal: 22,
-      paddingVertical: 12,
-      borderRadius: 10,
-    },
-    retryButtonText: {
-      color: '#FFFFFF',
-      fontSize: 14,
-      fontWeight: '600',
-      fontFamily: 'Open Sans',
-    },
-  });

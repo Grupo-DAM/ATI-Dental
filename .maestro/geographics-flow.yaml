@@ -1,25 +1,8 @@
 appId: com.proyect1.ATIDental
 ---
 - launchApp
-# Esperar a que la app inicie
-- extendedWaitUntil:
-    visible:
-      id: "email-input"
-    timeout: 60000
 
-# --- Inicio de Sesión (Administrador) ---
-- tapOn:
-    id: "email-input"
-- inputText: "jesusecova73@gmail.com"
-- tapOn:
-    id: "password-input"
-- inputText: "123456"
-- hideKeyboard
-- tapOn:
-    id: "login-button"
-- extendedWaitUntil:
-    visible:
-        id: "welcome-header"
+- runFlow: common/login-admin.yaml
 
 # --- Modificar Perfil (Seleccionar País) ---
 # Vamos al tab de perfil
@@ -70,3 +53,10 @@ appId: com.proyect1.ATIDental
 - extendedWaitUntil:
     visible: ".*país.*|.*country.*" # Coincide con 'Top Países' o 'Top Countries'
 - assertVisible: "🇨🇴 Colombia"
+
+# Cierre de sesión limpio
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"
