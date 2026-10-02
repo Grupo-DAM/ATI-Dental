@@ -26,8 +26,9 @@ import { ConsultationDetailModal } from '@/components/clinical-history/Consultat
 import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { deleteTreatment } from '@/services/treatment-service';
-import { Consultation } from '@/types/clinical-record';
+import { Consultation, ToothCondition } from '@/types/clinical-record';
 import { createClinicalHistoryStyles } from '@/constants/styles/patients.style';
+import { ToothConditionModal } from '@/components/clinical-history/ToothConditionModal';
 
 export default function ClinicalHistoryScreen() {
   const { t } = useTranslation();
@@ -56,9 +57,12 @@ export default function ClinicalHistoryScreen() {
     refetch,
     deleteConsultation,
     updateConsultation,
+    updateOdontogram,
   } = useClinicalRecord(hasAccess ? patientId : undefined);
 
   const [isEditingConsultation, setIsEditingConsultation] = useState(false);
+
+  const [editingTooth, setEditingTooth] = useState<ToothCondition | null>(null);
 
   // Modal de confirmación para eliminar
   const [deleteModalConfig, setDeleteModalConfig] = useState<{
@@ -179,6 +183,33 @@ export default function ClinicalHistoryScreen() {
         type: 'error',
         title: 'Error',
         message: err?.message || 'No se pudo actualizar la consulta.',
+      });
+    }
+  };
+
+  const handleSaveToothCondition = async (updatedTooth: ToothCondition) => {
+    try {
+      console.log('Datos del diente listos para Firebase:', updatedTooth);
+      // Aquí invocarás tu servicio de actualización de Firebase en el futuro.
+       const isAdultMode = record?.odontogram?.isAdult ?? true;
+
+      // Invocamos el nuevo callback del hook expuesto
+      const success = await updateOdontogram(updatedTooth, isAdultMode);
+      if (success) {
+        setEditingTooth(null); // Cerramos el modal tras guardar con éxito
+        setToastConfig({
+          visible: true,
+          type: 'success',
+          title: t('odontogram.toast.saveSuccessTitle', 'Pieza actualizada'),
+          message: t('odontogram.toast.saveSuccessMessage', 'El estado del diente ha sido registrado correctamente.'),
+        });
+      }
+    } catch (err) {
+      setToastConfig({
+        visible: true,
+        type: 'error',
+        title: 'Error',
+        message: 'No se pudieron guardar las modificaciones de la pieza dental.',
       });
     }
   };
@@ -315,7 +346,10 @@ export default function ClinicalHistoryScreen() {
           ) : (
             // Se renderiza el odontograma real de la base de datos.
             // Si viene undefined, el contenedor usará de forma segura su DEFAULT_ODONTOGRAM.
-            <OdontogramContainer odontogram={odontogram} />
+            <OdontogramContainer 
+              odontogram={odontogram}
+              onToothSelect={(tooth) => setEditingTooth(tooth)}
+            />
           )
         )}
 
@@ -396,6 +430,15 @@ export default function ClinicalHistoryScreen() {
         title={toastConfig.title}
         message={toastConfig.message}
         onDismiss={() => setToastConfig((prev) => ({ ...prev, visible: false }))}
+      />
+
+      {/* Tooth Condition Modal */}
+      <ToothConditionModal
+        visible={Boolean(editingTooth)}
+        tooth={editingTooth ?? undefined}
+        isSubmitting={false}
+        onConfirm={handleSaveToothCondition}
+        onCancel={() => setEditingTooth(null)}
       />
     </View>
   );

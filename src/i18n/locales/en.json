@@ -597,6 +597,7 @@
       "notes": "Notes",
       "notesPlaceholder": "Additional notes...",
       "saveChange": "Save Change",
+      "cancel": "Cancel",
       "applyToSurface": "State of surface"
     }
   }

@@ -212,11 +212,19 @@ export function ToothConditionModal({
             textAlignVertical="top"
         />
             
+        <View style={modalStyles.actionBtns}>
+        <FormActionButton
+            label={t('odontogram.toothConditionModal.cancel')}
+            variant='secondary'
+            onPress={onCancel}
+        />
+
         <FormActionButton
             label={t('odontogram.toothConditionModal.saveChange')}
             variant='primary'
             onPress={handleSave}
         />
+        </View>
             
         
     </SlidingModal>

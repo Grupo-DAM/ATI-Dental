@@ -274,6 +274,10 @@ export const createToothConditionModalStyles = (theme: any) => {
             ...global.label,
             fontSize: FontSize.p,
         },
+        actionBtns: {
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+        }
     });
 }
 

@@ -37,19 +37,21 @@ export function SlidingModal({
       onRequestClose={isSubmitting ? undefined : onCancel}
     >
       <Pressable style={modalStyles.overlay} onPress={isSubmitting ? undefined : onCancel}>
-        <LinearGradient
-            colors={theme.mainGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={modalStyles.wrapper}
-        >
-        <View style={modalStyles.sheet}>
-          <View style={modalStyles.handle} />
-          <View style={innerContainerStyle}>
-            {children}
-          </View>
-        </View>
-        </LinearGradient>
+        <Pressable> 
+            <LinearGradient
+                colors={theme.mainGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={modalStyles.wrapper}
+            >
+            <View style={modalStyles.sheet}>
+            <View style={modalStyles.handle} />
+            <View style={innerContainerStyle}>
+                {children}
+            </View>
+            </View>
+            </LinearGradient>
+        </Pressable>
       </Pressable>
     </Modal>
   );

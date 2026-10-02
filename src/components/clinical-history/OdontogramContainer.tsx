@@ -4,7 +4,7 @@ import Svg, { Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
-import { ALL_TOOTH_STATES, OdontogramData } from '@/types/clinical-record';
+import { ALL_TOOTH_STATES, OdontogramData, ToothCondition } from '@/types/clinical-record';
 import { useDentalPiecesPerCuadrant } from '@/hooks/use-dental-pieces-per-cuadrant';
 import { createOdontogramStyles } from '@/constants/styles/patients.style';
 import { DentalCuadrant } from '@/components/clinical-history/DentalPiece';
@@ -12,6 +12,7 @@ import { FontSize } from '@/constants/theme';
 
 interface Props {
   readonly odontogram?: OdontogramData;
+  readonly onToothSelect?: (tooth: ToothCondition) => void;
 }
 
 function getToothStateColor(theme: any, state: string) {
@@ -25,7 +26,7 @@ const DEFAULT_ODONTOGRAM: OdontogramData = {
   teeth: {}, 
 };
 
-export function OdontogramContainer({ odontogram }: Readonly<Props>) {
+export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Props>) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createOdontogramStyles(theme), [theme]);
@@ -37,6 +38,20 @@ export function OdontogramContainer({ odontogram }: Readonly<Props>) {
     safeOdontogram.isAdult ?? true, 
     safeOdontogram.teeth
   );
+
+  React.useEffect(() => {
+    if (selectedTooth !== null && onToothSelect) {
+      // Buscamos los datos existentes en la base de datos para ese diente
+      const toothData = safeOdontogram.teeth?.[selectedTooth] || {
+        number: selectedTooth,
+        generalStates: [],
+      };
+      onToothSelect(toothData);
+      
+      // Reseteamos la selección interna para permitir volver a tocar el mismo diente luego
+      setSelectedTooth(null); 
+    }
+  }, [selectedTooth, safeOdontogram.teeth, onToothSelect]);
 
   const leftCuadrants = safeOdontogram.isAdult ? [ 1, 4 ] : [ 5, 8 ];
   const rightCuadrants = safeOdontogram.isAdult ? [ 2, 3 ] : [ 6, 7 ];

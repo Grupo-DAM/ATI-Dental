@@ -77,48 +77,50 @@ export function useFetchOdontogram({ patientId, selectedDate }: UseFetchOdontogr
         return;
     }
 
-    if (!patientId) return;
+    setLoading(true);
+    setError(null);
 
-    const fetchOdontogramData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        let baseQuery = firestore()
-          .collection(ODONTOGRAM_COLLECTION)
-          .where('pacienteId', '==', patientId);
+    // 1. Construimos la referencia del Query base exactamente igual que antes
+    let baseQuery = firestore()
+      .collection(ODONTOGRAM_COLLECTION)
+      .where('pacienteId', '==', patientId);
 
-         if (selectedDate) {
-          // Filtramos las consultas pertenecientes estrictamente al día seleccionado
-          baseQuery = baseQuery
-            .where('fechaRegistro', '>=', `${selectedDate}T00:00:00.000Z`)
-            .where('fechaRegistro', '<=', `${selectedDate}T23:59:59.999Z`)
-            .limit(1);
-        } else {
-          // Si no hay fecha especificada, recuperamos el documento más reciente del paciente
-          baseQuery = baseQuery
-            .orderBy('fechaRegistro', 'desc')
-            .limit(1);
-        }
+    if (selectedDate) {
+      baseQuery = baseQuery
+        .where('fechaRegistro', '>=', `${selectedDate}T00:00:00.000Z`)
+        .where('fechaRegistro', '<=', `${selectedDate}T23:59:59.999Z`)
+        .limit(1);
+    } else {
+      baseQuery = baseQuery
+        .orderBy('fechaRegistro', 'desc')
+        .limit(1);
+    }
 
-        const querySnapshot = await baseQuery.get();
-
-        if (!querySnapshot.empty) {
-          // En React Native Firebase, los documentos se acceden directamente por índice en .docs
+    // 2. ✨ SUSCRIPCIÓN EN TIEMPO REAL: Cambiamos .get() por .onSnapshot()
+    // Cada vez que un dato cambie en la nube, esta función se ejecutará sola instantáneamente.
+    const unsubscribe = baseQuery.onSnapshot(
+      (querySnapshot) => {
+        if (querySnapshot && !querySnapshot.empty) {
           const docData = querySnapshot.docs[0].data();
           const parsedOdontogram = mapFirebaseToOdontogram(docData);
           setOdontogram(parsedOdontogram);
         } else {
           setOdontogram(undefined);
         }
-      } catch (err) {
-        console.error("Error obteniendo el odontograma:", err);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Error en tiempo real del odontograma:", err);
         setError(err as Error);
-      } finally {
         setLoading(false);
       }
-    };
+    );
 
-    fetchOdontogramData();
+    // 3. 🧼 LIMPIEZA (SOLID & React Memory Leaks): 
+    // Cuando el usuario cambie de pestaña o salga de la pantalla, destruimos el Websocket 
+    // activo para que el teléfono no consuma datos ni batería en segundo plano.
+    return () => unsubscribe();
+
   }, [patientId, selectedDate]);
 
   return { odontogram, loading, odontogramError };
