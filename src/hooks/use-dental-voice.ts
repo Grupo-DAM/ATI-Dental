@@ -7,8 +7,8 @@ let useSpeechEvent: any = () => {};
 
 try {
   const speechPkg = require('@jamsch/expo-speech-recognition');
-  SpeechModule = speechPkg.ExpoSpeechRecognitionModule;
-  useSpeechEvent = speechPkg.useSpeechRecognitionEvent;
+  SpeechModule = speechPkg.ExpoSpeechRecognitionModule || speechPkg.default?.ExpoSpeechRecognitionModule;
+  useSpeechEvent = speechPkg.useSpeechRecognitionEvent || speechPkg.default?.useSpeechRecognitionEvent;
 } catch {
   // Fallback seguro para entorno de testing o plataformas no soportadas
 }
@@ -17,12 +17,14 @@ interface UseDentalVoiceProps {
   isAdult?: boolean;
   onCommandRecognized?: (command: ParsedVoiceCommand) => void;
   inactivityTimeoutMs?: number;
+  speechModule?: any;
 }
 
 export function useDentalVoice({
   isAdult = true,
   onCommandRecognized,
   inactivityTimeoutMs = 6000,
+  speechModule = SpeechModule,
 }: UseDentalVoiceProps = {}) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -78,9 +80,9 @@ export function useDentalVoice({
   // Verificar permisos iniciales
   useEffect(() => {
     async function checkPermission() {
-      if (!SpeechModule) return;
+      if (!speechModule) return;
       try {
-        const res = await SpeechModule.getPermissionsAsync();
+        const res = await speechModule.getPermissionsAsync();
         setHasPermission(res?.granted ?? false);
       } catch {
         setHasPermission(false);
@@ -91,12 +93,12 @@ export function useDentalVoice({
     return () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     };
-  }, []);
+  }, [speechModule]);
 
   const requestPermission = async (): Promise<boolean> => {
-    if (!SpeechModule) return false;
+    if (!speechModule) return false;
     try {
-      const res = await SpeechModule.requestPermissionsAsync();
+      const res = await speechModule.requestPermissionsAsync();
       const granted = res?.granted ?? false;
       setHasPermission(granted);
       if (!granted) {
@@ -117,7 +119,7 @@ export function useDentalVoice({
     setLastCommand(null);
 
     // Escenario 4: Verificar permisos antes de activar el micrófono en dispositivo real
-    if (SpeechModule) {
+    if (speechModule) {
       let granted = hasPermission;
       if (!granted) {
         granted = await requestPermission();
@@ -125,7 +127,7 @@ export function useDentalVoice({
       }
 
       try {
-        await SpeechModule.start({
+        await speechModule.start({
           lang: 'es-ES',
           interimResults: true,
           continuous: true,
@@ -141,9 +143,9 @@ export function useDentalVoice({
   };
 
   const stopListening = () => {
-    if (SpeechModule) {
+    if (speechModule) {
       try {
-        SpeechModule.stop();
+        speechModule.stop();
       } catch {}
     }
     setIsListening(false);
@@ -156,7 +158,7 @@ export function useDentalVoice({
     if (isListening) {
       stopListening();
     } else {
-      startListening();
+      void startListening();
     }
   };
 
