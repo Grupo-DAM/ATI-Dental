@@ -7,9 +7,9 @@ import { Breadcrumb } from '@/components/breadcrumb';
 import { createGlobalStyles } from '@/constants/styles/global.styles';
 
 interface PageTitleLayoutProps {
-    titleKey: string;
-    subtitleKey: string;
-    parentBreadcrumbKey: string;
+    titleKey?: string;
+    subtitleKey?: string;
+    parentBreadcrumbKey?: string;
     currentBreadcrumbKey: string;
     children?: React.ReactNode;
     modals?: React.ReactNode;
@@ -34,7 +34,7 @@ export function PageTitleLayout({
         <View testID={testID} style={styles.screen}>
             <AppHeader />
             <Breadcrumb 
-                parent={t(parentBreadcrumbKey)} 
+                parent={parentBreadcrumbKey ? t(parentBreadcrumbKey) : undefined} 
                 current={t(currentBreadcrumbKey)}
             />
 
@@ -44,10 +44,12 @@ export function PageTitleLayout({
             >
                     
                 {/* Sección Título */}
-                <View style={styles.titleSection}>
-                    <Text style={styles.mainTitle}>{t(titleKey)}</Text>
-                    <Text style={styles.subtitle}>{t(subtitleKey)}</Text>
-                </View>
+                {(titleKey || subtitleKey) ? (
+                    <View style={styles.titleSection}>
+                        {titleKey ? <Text style={styles.mainTitle}>{t(titleKey)}</Text> : null}
+                        {subtitleKey ? <Text style={styles.subtitle}>{t(subtitleKey)}</Text> : null}
+                    </View>
+                ) : null}
 
                 {children}
             </ScrollView>

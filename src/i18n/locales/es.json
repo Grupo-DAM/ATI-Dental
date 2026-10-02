@@ -654,5 +654,44 @@
       "reasonRequired": "Indica el motivo de la cita.",
       "durationRequired": "Selecciona la duración estimada."
     }
+  },
+  "home": {
+    "greeting": "¡Hola {{name}}!",
+    "defaultName": "Dr. Ramirez",
+    "welcomeBack": "Bienvenida de nuevo",
+    "searchPlaceholder": "Buscar pacientes, citas o tratamientos",
+    "todaySummary": "Resumen de hoy",
+    "viewAgenda": "Ver agenda",
+    "pendingAppointments": "Citas\npendientes",
+    "pendingPatients": "Pacientes\npendientes",
+    "pendingExams": "Examenes\npendientes",
+    "quickAccess": "Accesos rapidos",
+    "agenda": "Agenda",
+    "patients": "Pacientes",
+    "treatments": "Tratamientos",
+    "reports": "Reportes",
+    "users": "Usuarios",
+    "registerPatient": "Registrar",
+    "contact": "Contacto",
+    "profile": "Perfil",
+    "notifications": "Notificaciones",
+    "appointmentReminder": "Recordatorio de citas",
+    "reminderDesc": "Tienes {{count}} citas pendientes para hoy",
+    "noNotifications": "No tienes notificaciones pendientes",
+    "offlineTitle": "Modo sin conexión",
+    "offlineDesc": "Mostrando datos en caché. Verifica tu conexión.",
+    "retry": "Reintentar",
+    "errorLoading": "Error al cargar el resumen del dashboard",
+    "searchResults": "Resultados de búsqueda",
+    "noResults": "No se encontraron resultados para \"{{query}}\"",
+    "customizeQuickAccess": "Personalizar accesos rápidos",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "categories": {
+      "patients": "Pacientes",
+      "appointments": "Citas",
+      "treatments": "Tratamientos",
+      "modules": "Módulos"
+    }
   }
 }
