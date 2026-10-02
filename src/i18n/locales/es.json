@@ -586,6 +586,16 @@
       "temporal": "Temporal"
     },
     "adult": "Adulto",
-    "pediatric": "Infantil"
+    "pediatric": "Infantil",
+    "toothConditionModal": {
+      "selectedPiece": "Pieza Seleccionada",
+      "state": "Estado",
+      "dentalSurface": "Pieza Dental",
+      "optional": "(optional)",
+      "notes": "Notas",
+      "notesPlaceholder": "Notas adicionales...",
+      "saveChange": "Guardar Cambios",
+      "applyToSurface": "Estado de la superficie"
+    }
   }
 }

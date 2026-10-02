@@ -122,6 +122,12 @@ export const createGlobalStyles = (theme: any) => StyleSheet.create({
       flex: Spacing.quarter,
       backgroundColor: theme.overlayOpacity,
     },
+    label: {
+      fontSize: FontSize.h5,
+      fontWeight: FontWeight.semibold,
+      color: theme.textNames,
+      marginVertical: Spacing.two,
+    },
 });
 
 export const createInputFieldStyles = (theme: any) => {
@@ -298,11 +304,9 @@ export const createFormFieldStyles = (theme: any) => {
   const global = createGlobalStyles(theme);
   return StyleSheet.create({
     label: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: theme.textNames,
+      ...global.label,
       marginTop: 15,
-      marginBottom: 8,
+      marginBottom: Spacing.two,
     },
     requiredMark: {
       color: theme.error,

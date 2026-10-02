@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { Image } from 'expo-image';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleProp, ViewStyle } from 'react-native';
 import { createDentalPieceStyles, createDentalCuadrantStyles } from '@/constants/styles/patients.style';
 import { useToothAsset } from '@/hooks/use-tooth-asset';
 import { ToothCondition } from '@/types/clinical-record';
 import { useTheme } from '@/hooks/use-theme';
 
-function getToothCombinedStateColor(theme: any, state: string[]) {
+export function getToothCombinedStateColor(theme: any, state: string[]) {
   // in the future could return colors for a combined status component
   // for now returns the first state it finds
   if (state.length === 0) return theme.backgroundElement;
@@ -15,13 +15,18 @@ function getToothCombinedStateColor(theme: any, state: string[]) {
 
 interface DentalPieceProp {
     readonly tooth: ToothCondition,
-    isBottomRow: boolean,
+    isBottomRow?: boolean,
     isSelected?: boolean,
+    showNumber?: boolean,
+    containerStyles?: StyleProp<ViewStyle>,
     onPress?: () => void,
 }
 
 // Dental piece component
-export function DentalPiece({ tooth, isBottomRow = false, isSelected = false, onPress} : DentalPieceProp) {
+export function DentalPiece({ 
+  tooth, isBottomRow = false, isSelected = false, onPress,
+  showNumber = true, containerStyles
+} : DentalPieceProp) {
   const { dentalPieceSource, flip} = useToothAsset(tooth.number);
   const isHealthy = tooth.generalStates.length === 0;
   const theme = useTheme();
@@ -29,12 +34,15 @@ export function DentalPiece({ tooth, isBottomRow = false, isSelected = false, on
   const statusColor = useMemo(() => getToothCombinedStateColor(theme, tooth.generalStates), [theme, tooth.generalStates])
 
   return (
-    <View style={[styles.dentalPieceContainer, isBottomRow && styles.bottomDentalPieceContainer]}>
-      <View style={[styles.numberPieceContainer, isSelected && styles.numberPieceSelectedContainer]}>
-        <Text style={[styles.numberPiece, isSelected && styles.numberPieceSelected]}>{tooth.number}</Text>
-      </View>
+    <View style={[styles.dentalPieceContainer, isBottomRow && styles.bottomDentalPieceContainer, containerStyles]}>
+      { showNumber &&
+        <View style={[styles.numberPieceContainer, isSelected && styles.numberPieceSelectedContainer]}>
+          <Text style={[styles.numberPiece, isSelected && styles.numberPieceSelected]}>{tooth.number}</Text>
+        </View>
+      }
       <Pressable
         onPress={onPress}
+        style={styles.pressable}
       >
         <Image
           source={dentalPieceSource}

@@ -188,6 +188,7 @@ export const FontWeight = {
   medium: '500',
   semibold: '600',
   bold: '700',
+  extrabold: '800'
 } as const
 
 export const FontSize = {
@@ -233,6 +234,13 @@ export const Icon = {
     regular: 20,
     big: 24,
     headerLogo: 28,
+  }
+}
+
+export const ColorOpacity = {
+  hexa: {
+    half: '80',
+    low: '40'
   }
 }
 

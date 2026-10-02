@@ -49,7 +49,16 @@ export const ALL_TOOTH_STATES = [
 ] as const;
 
 export type ToothState = typeof ALL_TOOTH_STATES[number];
-export type ToothSurface = 'mesial' | 'distal' | 'vestibular' | 'lingual' | 'oclusal';
+
+export const TOOTH_SURFACE = [
+  'mesial',
+  'distal',
+  'vestibular',
+  'lingual',
+  'oclusal'
+] as const;
+
+export type ToothSurface = typeof TOOTH_SURFACE[number];
 
 export interface ToothCondition {
   number: number; // 11-48 FDI notation

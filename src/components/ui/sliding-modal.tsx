@@ -3,6 +3,8 @@ import {
   View,
   Modal,
   Pressable,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 import { createSlidingModalStyles } from '@/constants/styles/global.styles';
@@ -13,6 +15,7 @@ export interface SlidingModalProps {
   isSubmitting?: boolean;
   onCancel: () => void;
   children: React.ReactNode;
+  innerContainerStyle?: StyleProp<ViewStyle>;
 }
 
 /** Generic confirmation bottom sheet modal */
@@ -20,7 +23,8 @@ export function SlidingModal({
   visible,
   isSubmitting = false,
   onCancel,
-  children
+  children,
+  innerContainerStyle
 }: Readonly<SlidingModalProps>) {
     const theme = useTheme();
     const modalStyles = useMemo(() => createSlidingModalStyles(theme), [theme]);
@@ -41,7 +45,9 @@ export function SlidingModal({
         >
         <View style={modalStyles.sheet}>
           <View style={modalStyles.handle} />
-          {children}
+          <View style={innerContainerStyle}>
+            {children}
+          </View>
         </View>
         </LinearGradient>
       </Pressable>
