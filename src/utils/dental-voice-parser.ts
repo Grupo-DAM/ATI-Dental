@@ -152,7 +152,7 @@ export function parseDentalVoiceCommand(
   // Buscar dígitos (ej. "18", "24")
   const digitMatch = normalized.match(/\b([1-8][1-8])\b/);
   if (digitMatch) {
-    detectedNumber = parseInt(digitMatch[1], 10);
+    detectedNumber = Number.parseInt(digitMatch[1], 10);
   } else {
     // Buscar en números hablados
     for (const [word, num] of Object.entries(SPANISH_NUMBER_WORDS)) {

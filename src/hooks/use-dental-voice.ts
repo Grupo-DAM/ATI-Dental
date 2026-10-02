@@ -86,7 +86,7 @@ export function useDentalVoice({
         setHasPermission(false);
       }
     }
-    checkPermission();
+    void checkPermission();
 
     return () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
@@ -116,14 +116,14 @@ export function useDentalVoice({
     setTranscript('');
     setLastCommand(null);
 
-    // Escenario 4: Verificar permisos antes de activar el micrófono
-    let granted = hasPermission;
-    if (!granted) {
-      granted = await requestPermission();
-      if (!granted) return;
-    }
-
+    // Escenario 4: Verificar permisos antes de activar el micrófono en dispositivo real
     if (SpeechModule) {
+      let granted = hasPermission;
+      if (!granted) {
+        granted = await requestPermission();
+        if (!granted) return;
+      }
+
       try {
         await SpeechModule.start({
           lang: 'es-ES',

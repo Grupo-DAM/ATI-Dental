@@ -159,7 +159,7 @@ export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Prop
                 },
               };
               // Guarda automáticamente en Firebase Firestore
-              saveOdontogramToFirestore(
+              void saveOdontogramToFirestore(
                 currentPatientId,
                 safeOdontogram.isAdult ?? true,
                 updated
