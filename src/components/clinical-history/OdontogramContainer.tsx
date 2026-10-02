@@ -1,190 +1,137 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import Svg, { Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { OdontogramData } from '@/types/clinical-record';
+import { ALL_TOOTH_STATES, OdontogramData, ToothCondition } from '@/types/clinical-record';
+import { useDentalPiecesPerCuadrant } from '@/hooks/use-dental-pieces-per-cuadrant';
+import { createOdontogramStyles } from '@/constants/styles/patients.style';
+import { DentalCuadrant } from '@/components/clinical-history/DentalPiece';
+import { FontSize } from '@/constants/theme';
 
 interface Props {
   readonly odontogram?: OdontogramData;
+  readonly onToothSelect?: (tooth: ToothCondition) => void;
 }
 
-export function OdontogramContainer({ odontogram }: Readonly<Props>) {
+function getToothStateColor(theme: any, state: string) {
+  return theme[state] || theme.backgroundElement;
+}
+
+const DEFAULT_ODONTOGRAM: OdontogramData = {
+  patientId: '',
+  status: 'placeholder',
+  isAdult: true,
+  teeth: {}, 
+};
+
+export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Props>) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const styles = createStyles(theme);
-  const isDark = theme.background === '#000000';
-  const badgeTextColor = isDark ? '#FFFFFF' : theme.main;
+  const styles = useMemo(() => createOdontogramStyles(theme), [theme]);
+  const [selectedTooth, setSelectedTooth] = useState<number | null>(null);
+
+  const safeOdontogram = odontogram || DEFAULT_ODONTOGRAM;
+
+  const cuadrantsData = useDentalPiecesPerCuadrant(
+    safeOdontogram.isAdult ?? true, 
+    safeOdontogram.teeth
+  );
+
+  React.useEffect(() => {
+    if (selectedTooth !== null && onToothSelect) {
+      // Buscamos los datos existentes en la base de datos para ese diente
+      const toothData = safeOdontogram.teeth?.[selectedTooth] || {
+        number: selectedTooth,
+        generalStates: [],
+      };
+      onToothSelect(toothData);
+      
+      // Reseteamos la selección interna para permitir volver a tocar el mismo diente luego
+      setSelectedTooth(null); 
+    }
+  }, [selectedTooth, safeOdontogram.teeth, onToothSelect]);
+
+  const leftCuadrants = safeOdontogram.isAdult ? [ 1, 4 ] : [ 5, 8 ];
+  const rightCuadrants = safeOdontogram.isAdult ? [ 2, 3 ] : [ 6, 7 ];
 
   return (
-    <View style={styles.card} testID="odontogram-container">
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <Ionicons name="medkit" size={20} color={theme.main} />
-          <Text style={styles.title}>
-            {t('clinicalHistory.odontogramTitle', 'Odontograma Dental')}
+    <View style={styles.container} testID="odontogram-container">
+      {/* New odontogram action buttons */}
+      <View style={styles.actionBtnsContainer}>
+        <TouchableOpacity style={[styles.actionBtnShell, safeOdontogram.isAdult && styles.actionBtnShellActive]}>
+          <Ionicons name="add" size={FontSize.h5} color={safeOdontogram.isAdult? theme.overMain : theme.pageSubtitle} />
+          <Text style={[styles.actionBtnText, safeOdontogram.isAdult && styles.actionBtnTextActive]}>
+            {t('odontogram.adult')}
           </Text>
-        </View>
-        <View style={styles.badge}>
-          <Text style={[styles.badgeText, { color: badgeTextColor }]}>
-            {t('clinicalHistory.comingSoon', 'Próximamente')}
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionBtnShell, !safeOdontogram.isAdult && styles.actionBtnShellActive]}>
+          <Ionicons name="add" size={FontSize.h5} color={safeOdontogram.isAdult? theme.pageSubtitle : theme.overMain} />
+          <Text style={[styles.actionBtnText, !safeOdontogram.isAdult && styles.actionBtnTextActive]}>
+            {t('odontogram.pediatric')}
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
-      {/* Placeholder visual */}
-      <View style={styles.placeholderBox}>
-        <View style={styles.iconCircle}>
-          <Ionicons name="fitness-outline" size={40} color={isDark ? '#FFFFFF' : theme.main} />
-        </View>
-        <Text style={styles.placeholderTitle}>
-          {t('clinicalHistory.odontogramPlaceholderTitle', 'Módulo de Odontograma Digital')}
-        </Text>
-        <Text style={styles.placeholderMessage}>
-          {t(
-            'clinicalHistory.odontogramPlaceholderDesc',
-            'Este contenedor modular está preparado con la estructura de datos para la inyección del componente gráfico interactivo en el siguiente sprint.'
-          )}
-        </Text>
+      {/* Legend */}
+      <ScrollView
+        testID='odontogram-legend' 
+        horizontal showsHorizontalScrollIndicator={false}
+       contentContainerStyle={styles.legendContainer}>
+        {ALL_TOOTH_STATES.map((state, index: number) => (
+          <View style={styles.legendItem} key={'state'+index}>
+            <View style={[styles.legendDot, {backgroundColor: getToothStateColor(theme, state)}]}></View>
+            <Text style={styles.legendText}>{t(`odontogram.toothStatus.${state}`)}</Text>
+          </View>
+        ))}
+      </ScrollView>
 
-        {/* Feature Pills */}
-        <View style={styles.pillsRow}>
-          <View style={styles.pill}>
-            <Ionicons name="checkmark-circle-outline" size={14} color={theme.main} />
-            <Text style={styles.pillText}>32 Piezas Dentales (FDI)</Text>
-          </View>
-          <View style={styles.pill}>
-            <Ionicons name="layers-outline" size={14} color={theme.main} />
-            <Text style={styles.pillText}>5 Superficies por Diente</Text>
-          </View>
-          <View style={styles.pill}>
-            <Ionicons name="sync-outline" size={14} color={theme.main} />
-            <Text style={styles.pillText}>Estado Sincronizado</Text>
-          </View>
+      {/* Scroll odontogram */}
+      <ScrollView 
+        testID='odontogram-scroll'
+        horizontal showsHorizontalScrollIndicator={false}
+        contentContainerStyle = {styles.odontogramScrollContainer}
+      >
+        <View key={'leftCuadrants'} style={styles.halfOdontogram}>
+          {leftCuadrants.map((cuadrant, index: number) => (
+            <DentalCuadrant 
+              key={`cuadrant-${cuadrant}`}
+              teeth={cuadrantsData[cuadrant] ?? []} 
+              isLeftCuadrant = {true}
+              isBottomCuadrant = {index === 1}
+              selectedTooth={selectedTooth} 
+              setSelectedTooth={setSelectedTooth}/>
+          ))}
         </View>
-      </View>
 
-      {/* Metadata status footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>
-          Estado del módulo: <Text style={{ fontWeight: '700', color: isDark ? '#FFFFFF' : theme.main }}>Estructura lista ({odontogram?.status || 'placeholder'})</Text>
-        </Text>
-      </View>
+        <Svg height="100%" width="2">
+          <Line
+            x1="0"
+            y1="1"
+            x2="0"
+            y2="100%"
+            stroke={theme.breadcrumbSeparator} // Color de la línea
+            strokeWidth="4"  // Grosor de la línea
+            strokeDasharray="4, 4" // [Longitud del punto, Espacio entre puntos] 
+          />
+        </Svg>
+
+        <View key={'rightCuadrants'} style={styles.halfOdontogram}>
+          {rightCuadrants.map((cuadrant, index: number) => (
+            <DentalCuadrant 
+              key={`cuadrant-${cuadrant}`}
+              teeth={cuadrantsData[cuadrant] ?? []} 
+              isLeftCuadrant = {false}
+              isBottomCuadrant = {index === 1}
+              selectedTooth={selectedTooth} 
+              setSelectedTooth={setSelectedTooth}/>
+          ))}
+        </View>
+      </ScrollView>
+
+      {/* hint */}
+
     </View>
   );
 }
-
-const createStyles = (theme: ReturnType<typeof useTheme>) =>
-  StyleSheet.create({
-    card: {
-      backgroundColor: theme.backgroundElement,
-      borderRadius: 16,
-      marginHorizontal: 16,
-      marginBottom: 20,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      padding: 16,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    titleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    title: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: theme.pageTitle,
-      fontFamily: 'Open Sans',
-    },
-    badge: {
-      backgroundColor: theme.accentBackground,
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 12,
-    },
-    badgeText: {
-      fontSize: 11,
-      fontWeight: '700',
-      color: theme.main,
-      fontFamily: 'Open Sans',
-    },
-    placeholderBox: {
-      backgroundColor: theme.backgroundSecondary,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      borderStyle: 'dashed',
-      alignItems: 'center',
-      paddingVertical: 28,
-      paddingHorizontal: 16,
-    },
-    iconCircle: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: theme.accentBackground,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    placeholderTitle: {
-      fontSize: 15,
-      fontWeight: '700',
-      color: theme.pageTitle,
-      fontFamily: 'Open Sans',
-      marginBottom: 6,
-      textAlign: 'center',
-    },
-    placeholderMessage: {
-      fontSize: 12,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-      textAlign: 'center',
-      lineHeight: 18,
-      maxWidth: 320,
-      marginBottom: 16,
-    },
-    pillsRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      gap: 8,
-    },
-    pill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.backgroundElement,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      gap: 5,
-    },
-    pillText: {
-      fontSize: 11,
-      fontWeight: '600',
-      color: theme.fieldLabel,
-      fontFamily: 'Open Sans',
-    },
-    footer: {
-      marginTop: 14,
-      paddingTop: 10,
-      borderTopWidth: 1,
-      borderTopColor: theme.pageSeparator,
-      alignItems: 'center',
-    },
-    footerText: {
-      fontSize: 11,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-    },
-  });

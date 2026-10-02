@@ -695,5 +695,31 @@
       "treatments": "Treatments",
       "modules": "Modules"
     }
+  },
+  "odontogram": {
+    "toothStatus": {
+      "cavity": "Cavity",
+      "filled": "Filled",            
+      "missing": "Missing",   
+      "implant": "Implant",           
+      "root_canal": "Root Canal",         
+      "fixed_dental_prosthesis": "Prosthesis",      
+      "retained_root": "Retained Root",
+      "in_eruption": "In Eruption",         
+      "temporal": "Temporal"
+    },
+    "adult": "Adult",
+    "pediatric": "Pediatric",
+    "toothConditionModal": {
+      "selectedPiece": "Selected Piece",
+      "state": "State",
+      "dentalSurface": "Dental Surface",
+      "optional": "(optional)",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes...",
+      "saveChange": "Save Change",
+      "cancel": "Cancel",
+      "applyToSurface": "State of surface"
+    }
   }
 }
