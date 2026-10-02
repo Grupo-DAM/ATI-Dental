@@ -71,55 +71,54 @@ export function useFetchOdontogram({ patientId, selectedDate }: UseFetchOdontogr
   const [loading, setLoading] = useState<boolean>(true);
   const [odontogramError, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    if (!patientId) {
+    useEffect(() => {
+      if (!patientId) {
         setLoading(false);
         return;
-    }
+      }
 
-    if (!patientId) return;
-
-    const fetchOdontogramData = async () => {
       setLoading(true);
       setError(null);
-      try {
-        let baseQuery = firestore()
-          .collection(ODONTOGRAM_COLLECTION)
-          .where('pacienteId', '==', patientId);
 
-         if (selectedDate) {
-          // Filtramos las consultas pertenecientes estrictamente al día seleccionado
-          baseQuery = baseQuery
-            .where('fechaRegistro', '>=', `${selectedDate}T00:00:00.000Z`)
-            .where('fechaRegistro', '<=', `${selectedDate}T23:59:59.999Z`)
-            .limit(1);
-        } else {
-          // Si no hay fecha especificada, recuperamos el documento más reciente del paciente
-          baseQuery = baseQuery
-            .orderBy('fechaRegistro', 'desc')
-            .limit(1);
-        }
+      let baseQuery = firestore()
+        .collection(ODONTOGRAM_COLLECTION)
+        .where('pacienteId', '==', patientId);
 
-        const querySnapshot = await baseQuery.get();
-
-        if (!querySnapshot.empty) {
-          // En React Native Firebase, los documentos se acceden directamente por índice en .docs
-          const docData = querySnapshot.docs[0].data();
-          const parsedOdontogram = mapFirebaseToOdontogram(docData);
-          setOdontogram(parsedOdontogram);
-        } else {
-          setOdontogram(undefined);
-        }
-      } catch (err) {
-        console.error("Error obteniendo el odontograma:", err);
-        setError(err as Error);
-      } finally {
-        setLoading(false);
+      if (selectedDate) {
+        baseQuery = baseQuery
+          .where('fechaRegistro', '>=', `${selectedDate}T00:00:00.000Z`)
+          .where('fechaRegistro', '<=', `${selectedDate}T23:59:59.999Z`);
       }
-    };
 
-    fetchOdontogramData();
-  }, [patientId, selectedDate]);
+      // Escucha en tiempo real de Firebase (sin problemas de caché ni necesidad de reiniciar sesión)
+      const unsubscribe = baseQuery.onSnapshot(
+        (querySnapshot) => {
+          if (querySnapshot && !querySnapshot.empty) {
+            // Ordenamos en memoria el más reciente para evitar error de índice
+            const docs = [...querySnapshot.docs];
+            docs.sort((a, b) => {
+              const timeA = new Date(a.data().fechaRegistro || 0).getTime();
+              const timeB = new Date(b.data().fechaRegistro || 0).getTime();
+              return timeB - timeA;
+            });
+
+            const docData = docs[0].data();
+            const parsedOdontogram = mapFirebaseToOdontogram(docData);
+            setOdontogram(parsedOdontogram);
+          } else {
+            setOdontogram(undefined);
+          }
+          setLoading(false);
+        },
+        (err) => {
+          console.error('Error escuchando el odontograma:', err);
+          setError(err as Error);
+          setLoading(false);
+        }
+      );
+
+      return () => unsubscribe();
+    }, [patientId, selectedDate]);
 
   return { odontogram, loading, odontogramError };
 }
