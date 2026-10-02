@@ -1,11 +1,7 @@
 import React from 'react';
-import { Text } from 'react-native';
-import { render, fireEvent } from '@testing-library/react-native';
+import { Text, View } from 'react-native';
+import { render } from '@testing-library/react-native';
 import { PageTitleLayout } from '@/components/page-title-layout';
-
-jest.mock('@react-native-community/netinfo', () => ({
-  useNetInfo: jest.fn(() => ({ isConnected: true })),
-}));
 
 jest.mock('@/hooks/use-theme', () => ({
   useTheme: () => ({
@@ -43,19 +39,8 @@ jest.mock('@/components/breadcrumb', () => {
   };
 });
 
-jest.mock('@/components/offline-banner', () => {
-  const { View, Text } = require('react-native');
-  return {
-    OfflineBanner: ({ onRetry }: any) => (
-      <View testID="mock-offline-banner">
-        <Text onPress={onRetry}>Reintentar conexión</Text>
-      </View>
-    ),
-  };
-});
-
 describe('PageTitleLayout', () => {
-  it('renders title, subtitle, breadcrumb, header, and children correctly', () => {
+  it('renders title, subtitle, breadcrumb, header, and children correctly with direct strings', () => {
     const { getByText, getByTestId } = render(
       <PageTitleLayout
         title="Mi Título"
@@ -75,6 +60,23 @@ describe('PageTitleLayout', () => {
     expect(getByText('Mi Título')).toBeTruthy();
     expect(getByText('Mi Subtítulo')).toBeTruthy();
     expect(getByText('Contenido Hijo')).toBeTruthy();
+  });
+
+  it('renders title and breadcrumb keys with translation and modals', () => {
+    const { getByText } = render(
+      <PageTitleLayout
+        titleKey="tabs.home"
+        subtitleKey="tabs.explore"
+        parentBreadcrumbKey="tabs.agenda"
+        currentBreadcrumbKey="tabs.profile"
+        modals={<View testID="mock-modal"><Text>Modal Activo</Text></View>}
+      >
+        <Text>Contenido</Text>
+      </PageTitleLayout>
+    );
+
+    expect(getByText('Modal Activo')).toBeTruthy();
+    expect(getByText('Contenido')).toBeTruthy();
   });
 
   it('renders loading state when authLoading is true', () => {
@@ -111,27 +113,6 @@ describe('PageTitleLayout', () => {
     expect(getByText('Acceso Restringido')).toBeTruthy();
     expect(getByText('No tienes permisos para ver esto.')).toBeTruthy();
     expect(queryByText('Contenido Hijo')).toBeNull();
-  });
-
-  it('renders offline banner when not connected and handleRetryConnection provided', () => {
-    const netInfo = require('@react-native-community/netinfo');
-    netInfo.useNetInfo.mockReturnValueOnce({ isConnected: false });
-
-    const mockRetry = jest.fn();
-    const { getByTestId, getByText } = render(
-      <PageTitleLayout
-        title="Mi Título"
-        parentBreadcrumb="Inicio"
-        currentBreadcrumb="Módulo"
-        handleRetryConnection={mockRetry}
-      >
-        <Text>Contenido Hijo</Text>
-      </PageTitleLayout>
-    );
-
-    expect(getByTestId('mock-offline-banner')).toBeTruthy();
-    fireEvent.press(getByText('Reintentar conexión'));
-    expect(mockRetry).toHaveBeenCalled();
   });
 
   it('renders headerRight and supports scrollable=false', () => {

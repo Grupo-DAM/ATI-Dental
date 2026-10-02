@@ -1,12 +1,10 @@
-import React, { ReactNode, useMemo } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, StyleProp, ViewStyle } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNetInfo } from '@react-native-community/netinfo';
+import { useTheme } from '@/hooks/use-theme';
+import { View, Text, ScrollView, StyleProp, ViewStyle, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppHeader } from '@/components/app-header';
 import { Breadcrumb } from '@/components/breadcrumb';
-import { OfflineBanner } from '@/components/offline-banner';
-import { useTheme } from '@/hooks/use-theme';
 import { createGlobalStyles } from '@/constants/styles/global.styles';
 
 export interface PageTitleLayoutProps {
@@ -22,11 +20,9 @@ export interface PageTitleLayoutProps {
   readonly hasPermission?: boolean;
   readonly accessDeniedTitle?: string;
   readonly accessDeniedDesc?: string;
-  readonly isRetrying?: boolean;
-  readonly handleRetryConnection?: () => void;
-  readonly headerRight?: ReactNode;
-  readonly children?: ReactNode;
-  readonly modals?: ReactNode;
+  readonly headerRight?: React.ReactNode;
+  readonly children?: React.ReactNode;
+  readonly modals?: React.ReactNode;
   readonly scrollable?: boolean;
   readonly scrollContainerStyle?: StyleProp<ViewStyle>;
   readonly testID?: string;
@@ -45,8 +41,6 @@ export function PageTitleLayout({
   hasPermission = true,
   accessDeniedTitle = 'Acceso Denegado',
   accessDeniedDesc = 'No cuentas con los permisos necesarios para acceder a este módulo.',
-  isRetrying = false,
-  handleRetryConnection,
   headerRight,
   children,
   modals,
@@ -57,14 +51,12 @@ export function PageTitleLayout({
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createGlobalStyles(theme), [theme]);
-  const netInfo = useNetInfo();
 
   const finalTitle = titleKey ? t(titleKey) : (title ?? '');
   const finalSubtitle = subtitleKey ? t(subtitleKey) : subtitle;
   const finalParentBreadcrumb = parentBreadcrumbKey ? t(parentBreadcrumbKey) : (parentBreadcrumb ?? '');
   const finalCurrentBreadcrumb = currentBreadcrumbKey ? t(currentBreadcrumbKey) : (currentBreadcrumb ?? '');
 
-  // 1. Estado de carga de autenticación
   if (authLoading) {
     return (
       <View style={[styles.screen, styles.centerContent]} testID="page-title-layout-loading">
@@ -73,7 +65,6 @@ export function PageTitleLayout({
     );
   }
 
-  // 2. Estado de acceso denegado por rol
   if (!hasPermission) {
     return (
       <View style={styles.screen} testID="page-title-layout-access-denied">
@@ -88,41 +79,44 @@ export function PageTitleLayout({
     );
   }
 
-  const renderContent = () => (
-    <>
-      {/* Sección Título y Subtítulo */}
-      <View style={styles.titleSection}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Text style={styles.mainTitle}>{finalTitle}</Text>
-          {headerRight}
+  const renderTitleSection = () => {
+    if (headerRight) {
+      return (
+        <View style={styles.titleSection}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={styles.mainTitle}>{finalTitle}</Text>
+            {headerRight}
+          </View>
+          {finalSubtitle ? <Text style={styles.subtitle}>{finalSubtitle}</Text> : null}
         </View>
+      );
+    }
+    return (
+      <View style={styles.titleSection}>
+        <Text style={styles.mainTitle}>{finalTitle}</Text>
         {finalSubtitle ? <Text style={styles.subtitle}>{finalSubtitle}</Text> : null}
       </View>
-
-      {/* Banner Sin Conexión */}
-      {!netInfo.isConnected && handleRetryConnection && (
-        <OfflineBanner isRetrying={isRetrying} onRetry={handleRetryConnection} />
-      )}
-
-      {/* Contenido Principal */}
-      {children}
-    </>
-  );
+    );
+  };
 
   return (
-    <View style={styles.screen} testID={testID}>
+    <View testID={testID} style={styles.screen}>
       <AppHeader />
       <Breadcrumb parent={finalParentBreadcrumb} current={finalCurrentBreadcrumb} />
+
       {scrollable ? (
         <ScrollView
           contentContainerStyle={[styles.scrollContent, scrollContainerStyle]}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
         >
-          {renderContent()}
+          {renderTitleSection()}
+          {children}
         </ScrollView>
       ) : (
-        <View style={{ flex: 1 }}>{renderContent()}</View>
+        <View style={{ flex: 1 }}>
+          {renderTitleSection()}
+          {children}
+        </View>
       )}
       {modals}
     </View>
