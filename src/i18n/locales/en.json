@@ -588,6 +588,17 @@
       "temporal": "Temporal"
     },
     "adult": "Adult",
-    "pediatric": "Pediatric"
+    "pediatric": "Pediatric",
+    "toothConditionModal": {
+      "selectedPiece": "Selected Piece",
+      "state": "State",
+      "dentalSurface": "Dental Surface",
+      "optional": "(optional)",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes...",
+      "saveChange": "Save Change",
+      "cancel": "Cancel",
+      "applyToSurface": "State of surface"
+    }
   }
 }

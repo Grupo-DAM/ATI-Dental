@@ -19,6 +19,8 @@ const BRAND_COLORS = {
   placeholderColor: '#9E8BAC',
   positive: '#10B981',
   onlineStatus: '#22C55E',
+  overlayOpacity: 'rgba(0,0,0,0.4)',
+  mainGradient: ['#622D8D', '#DBB4FF'],
 
   //tooth states:
   cavity: "#F05C5E",
@@ -186,6 +188,7 @@ export const FontWeight = {
   medium: '500',
   semibold: '600',
   bold: '700',
+  extrabold: '800'
 } as const
 
 export const FontSize = {
@@ -221,6 +224,7 @@ export const Border = {
     narrow: 6,
     regular: 8,
     wide: 12,
+    big: 24,
   }
 } as const
 
@@ -230,6 +234,13 @@ export const Icon = {
     regular: 20,
     big: 24,
     headerLogo: 28,
+  }
+}
+
+export const ColorOpacity = {
+  hexa: {
+    half: '80',
+    low: '40'
   }
 }
 

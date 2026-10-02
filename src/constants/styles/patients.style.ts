@@ -1,4 +1,4 @@
-import { Spacing, Colors, FontFamily, FontSize, FontWeight, LineHeight, Border} from "@/constants/theme";
+import { Spacing, Colors, FontFamily, FontSize, FontWeight, LineHeight, Border, BottomTabInset, ColorOpacity} from "@/constants/theme";
 import { StyleSheet, Platform } from "react-native";
 import { createGlobalStyles } from "./global.styles";
 
@@ -55,12 +55,16 @@ export const createDentalPieceStyles = (theme: any) => {
     return StyleSheet.create({
         dentalPieceContainer: {
             alignItems: 'center',
-            gap: Spacing.two,
+            height: '100%', 
+            gap: Spacing.one,
+            maxHeight: 140,
+            width: 38,
         },
         bottomDentalPieceContainer: {
             flexDirection: 'column-reverse'
         },
         numberPieceContainer: {
+            height: '15%',
             paddingHorizontal: Spacing.two,
         },
         numberPieceSelectedContainer: {
@@ -77,18 +81,21 @@ export const createDentalPieceStyles = (theme: any) => {
             color: theme.overMain,
         },
         stateDot: {
-            width: Spacing.three,
-            height: Spacing.three,
+            height: '15%',                  
+            aspectRatio: Spacing.quarter,      // Garantiza que se mantenga como un círculo perfecto (ancho = alto)
             borderRadius: Border.radius.wide,
-            borderWidth: 0,
+            borderWidth: Spacing.none
         },
         stateDotHealthy: {
             borderWidth: Border.width.regular,
             borderColor: theme.cardSeparator
         },
+        pressable: {
+            height: '65%', justifyContent: 'center', alignItems: 'center'
+        },
         toothAsset: {
-            height:Spacing.six + Spacing.two,
-            width: Spacing.five,
+            height: '100%',                   
+            aspectRatio: 0.4,
             resizeMode: 'contain',
         },
         flipToothAsset: {
@@ -171,6 +178,105 @@ export const createOdontogramStyles = (theme: any) => {
         },
         halfOdontogram: {
             gap: Spacing.two
+        }
+    });
+}
+
+export const createToothConditionModalStyles = (theme: any) => {
+    const global = createGlobalStyles(theme);
+    const odontogram = createOdontogramStyles(theme);
+    return StyleSheet.create({
+        container:{
+            gap: Spacing.three,
+        },
+        horizontalContainer: {
+            width: '100%',
+            flexDirection: 'row',
+            gap: Spacing.three,
+            alignItems: 'flex-start', 
+            // Añadimos una posición relativa para que la sección absoluta del diente se ancle aquí
+            position: 'relative', 
+        },
+        dentalPieceSection: {
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: 80, // Asignamos un ancho fijo para que actúe como columna estable
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+        },
+        pieceNumberText: {
+            color: theme.text,
+            fontSize: FontSize.h3,
+            fontFamily: FontFamily.regular,
+            fontWeight: FontWeight.extrabold,
+            lineHeight: LineHeight.loginSubtitle,
+        },
+        textMultilineWrapper: {
+            flex: Spacing.quarter,
+
+        },
+        dentalPieceSectionText: {
+            color: theme.textNames,
+            fontSize: FontSize.p,
+            fontFamily: FontFamily.regular,
+            fontWeight: FontWeight.regular,
+            lineHeight: LineHeight.note,
+        },
+        dentalPieceContainer: {
+            marginTop: Spacing.two,
+            borderWidth: Border.width.regular,
+            borderRadius: Border.radius.regular,
+            
+            // Toma de forma restrictiva todo el espacio vertical restante 
+            // debajo del texto del número del diente, sin empujar jamás al padre.
+            flex: 1, 
+            width: '100%', // Se adapta al ancho de 80px de su sección padre
+            alignSelf: 'center', 
+            
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: Spacing.two,
+        },
+        stateSection: {
+            flex: 1,
+            // ✨ IMPORTANTE: Agregamos un margen izquierdo equivalente al ancho de la columna 
+            // absoluta (80px) + el gap (Spacing.three), para que los botones no se encimen sobre el diente.
+            marginLeft: 80 + Spacing.four,
+        },
+        label: {
+            ...global.label,
+        },
+        buttonGroupRow:{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: Spacing.one,
+        },
+        stateButton: { 
+            ...odontogram.legendItem, 
+            borderWidth: Border.width.regular,
+            borderRadius: Border.radius.regular,
+            borderColor: theme.cardSeparator,
+            paddingHorizontal: Spacing.three,
+            paddingVertical: Spacing.one,
+            marginHorizontal: Spacing.one,
+        },
+        legendDot: { ...odontogram.legendDot },
+        stateButtonText: {...odontogram.legendText,},
+        surfaceContainerRow: {},
+        surfaceButton: {},
+        surfaceButtonText: {},
+        surfaceStateSelectorBox: {
+            paddingHorizontal: Spacing.two,
+        },
+        tinyLabel: {
+            ...global.label,
+            fontSize: FontSize.p,
+        },
+        actionBtns: {
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
         }
     });
 }

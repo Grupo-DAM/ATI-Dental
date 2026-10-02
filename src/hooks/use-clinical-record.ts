@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchClinicalRecord, deleteConsultation, updateConsultation } from '@/services/clinical-record-service';
+import { fetchClinicalRecord, deleteConsultation, updateConsultation, updateOdontogram } from '@/services/clinical-record-service';
 import { ClinicalRecord, Consultation } from '@/types/clinical-record';
 import { Treatment } from '@/services/treatment-service';
 
@@ -125,6 +125,39 @@ export function useClinicalRecord(patientId?: string) {
     []
   );
 
+  const handleUpdateToothAndOdontogram = useCallback(
+    async (updatedTooth: ToothCondition, isAdult: boolean): Promise<boolean> => {
+      if (!record?.odontogram) return false;
+
+      // 1. Clonamos el odontograma actual inmutablemente e inyectamos el diente modificado
+      const currentTeeth = record.odontogram.teeth ?? {};
+      const updatedOdontogram: OdontogramData = {
+        ...record.odontogram,
+        updatedAt: new Date().toISOString(),
+        teeth: {
+          ...currentTeeth,
+          [updatedTooth.number]: updatedTooth,
+        },
+      };
+
+      // 2. Ejecutamos la llamada persistente de red/caché del servicio de infraestructura
+      const ok = await updateOdontogram(updatedOdontogram, isAdult);
+      
+      if (ok) {
+        // 3. Sincronizamos el estado local de forma reactiva instantánea para actualizar el UI
+        setRecord((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            odontogram: updatedOdontogram,
+          };
+        });
+      }
+      return ok;
+    },
+    [record?.odontogram]
+  );
+
   return {
     record,
     loading,
@@ -140,5 +173,6 @@ export function useClinicalRecord(patientId?: string) {
     refetch: loadData,
     deleteConsultation: handleDeleteConsultation,
     updateConsultation: handleUpdateConsultation,
+    updateOdontogram: handleUpdateToothAndOdontogram,
   };
 }

@@ -4,7 +4,7 @@ import Svg, { Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
-import { ALL_TOOTH_STATES, OdontogramData, ToothState } from '@/types/clinical-record';
+import { ALL_TOOTH_STATES, OdontogramData, ToothState, ToothCondition } from '@/types/clinical-record';
 import { useDentalPiecesPerCuadrant } from '@/hooks/use-dental-pieces-per-cuadrant';
 import { createOdontogramStyles } from '@/constants/styles/patients.style';
 import { DentalCuadrant } from '@/components/clinical-history/DentalPiece';
@@ -16,6 +16,7 @@ import { useLocalSearchParams } from 'expo-router';
 
 interface Props {
   readonly odontogram?: OdontogramData;
+  readonly onToothSelect?: (tooth: ToothCondition) => void;
 }
 
 function getToothStateColor(theme: any, state: string) {
@@ -73,12 +74,16 @@ async function saveOdontogramToFirestore(
     const query = await firestore()
       .collection('odontogramas')
       .where('pacienteId', '==', patientId)
-      .orderBy('fechaRegistro', 'desc')
-      .limit(1)
       .get();
 
     if (!query.empty) {
-      const docId = query.docs[0].id;
+      const docs = [...query.docs];
+      docs.sort((a, b) => {
+        const timeA = new Date(a.data().fechaRegistro || 0).getTime();
+        const timeB = new Date(b.data().fechaRegistro || 0).getTime();
+        return timeB - timeA;
+      });
+      const docId = docs[0].id;
       await firestore().collection('odontogramas').doc(docId).update({
         estadoPiezas,
         fechaRegistro: new Date().toISOString(),
@@ -97,7 +102,8 @@ async function saveOdontogramToFirestore(
   }
 }
 
-export function OdontogramContainer({ odontogram }: Readonly<Props>) {
+
+export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Props>) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createOdontogramStyles(theme), [theme]);
@@ -172,9 +178,23 @@ export function OdontogramContainer({ odontogram }: Readonly<Props>) {
     });
 
   const cuadrantsData = useDentalPiecesPerCuadrant(
-    safeOdontogram.isAdult ?? true, 
+    safeOdontogram.isAdult ?? true,
     teethData
   );
+
+  React.useEffect(() => {
+    if (selectedTooth !== null && onToothSelect) {
+      // Buscamos los datos existentes en la base de datos para ese diente
+      const toothData = safeOdontogram.teeth?.[selectedTooth] || {
+        number: selectedTooth,
+        generalStates: [],
+      };
+      onToothSelect(toothData);
+
+      // Reseteamos la selección interna para permitir volver a tocar el mismo diente luego
+      setSelectedTooth(null);
+    }
+  }, [selectedTooth, safeOdontogram.teeth, onToothSelect]);
 
   const leftCuadrants = safeOdontogram.isAdult ? [ 1, 4 ] : [ 5, 8 ];
   const rightCuadrants = safeOdontogram.isAdult ? [ 2, 3 ] : [ 6, 7 ];

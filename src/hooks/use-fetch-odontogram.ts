@@ -80,44 +80,43 @@ export function useFetchOdontogram({ patientId, selectedDate }: UseFetchOdontogr
         setLoading(true);
         setError(null);
 
-        const fetchOdontogramData = async () => {
-          try {
-            let baseQuery = firestore()
-              .collection(ODONTOGRAM_COLLECTION)
-              .where('pacienteId', '==', patientId);
+        // 1. Construimos la referencia del Query base
+        let baseQuery = firestore()
+          .collection(ODONTOGRAM_COLLECTION)
+          .where('pacienteId', '==', patientId);
 
-            if (selectedDate) {
-              baseQuery = baseQuery
-                .where('fechaRegistro', '>=', `${selectedDate}T00:00:00.000Z`)
-                .where('fechaRegistro', '<=', `${selectedDate}T23:59:59.999Z`);
-            }
+        if (selectedDate) {
+          baseQuery = baseQuery
+            .where('fechaRegistro', '>=', `${selectedDate}T00:00:00.000Z`)
+            .where('fechaRegistro', '<=', `${selectedDate}T23:59:59.999Z`)
+            .limit(1);
+        } else {
+          baseQuery = baseQuery
+            .orderBy('fechaRegistro', 'desc')
+            .limit(1);
+        }
 
-            const querySnapshot = await baseQuery.get();
-
+        // 2. Suscripción en tiempo real
+        const unsubscribe = baseQuery.onSnapshot(
+          (querySnapshot) => {
             if (querySnapshot && !querySnapshot.empty) {
-              // Ordenamos en memoria el más reciente para evitar error de índice
-              const docs = [...querySnapshot.docs];
-              docs.sort((a, b) => {
-                const timeA = new Date(a.data().fechaRegistro || 0).getTime();
-                const timeB = new Date(b.data().fechaRegistro || 0).getTime();
-                return timeB - timeA;
-              });
-
-              const docData = docs[0].data();
+              const docData = querySnapshot.docs[0].data();
               const parsedOdontogram = mapFirebaseToOdontogram(docData);
               setOdontogram(parsedOdontogram);
             } else {
               setOdontogram(undefined);
             }
-          } catch (err) {
-            console.error('Error obteniendo el odontograma:', err);
+            setLoading(false);
+          },
+          (err) => {
+            console.error('Error en tiempo real del odontograma:', err);
             setError(err as Error);
-          } finally {
             setLoading(false);
           }
-        };
+        );
 
-        fetchOdontogramData();
+        // 3. Limpieza de memoria
+        return () => unsubscribe();
       }, [patientId, selectedDate]);
 
   return { odontogram, loading, odontogramError };

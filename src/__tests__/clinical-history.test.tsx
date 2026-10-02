@@ -50,6 +50,19 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
+jest.mock('@/hooks/use-fetch-odontogram', () => ({
+  useFetchOdontogram: () => ({
+    odontogram: {
+      patientId: 'p-1',
+      status: 'ready',
+      isAdult: true,
+      teeth: {},
+    },
+    loading: false, // ✨ CLAVE: Al forzar loading en false, el ActivityIndicator desaparecerá
+    error: null,
+  }),
+}));
+
 describe('ClinicalHistoryScreen', () => {
   const mockRouterPush = jest.fn();
 
