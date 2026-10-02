@@ -1,4 +1,5 @@
 import React from 'react';
+import { AppState } from 'react-native';
 import { renderHook, act } from '@testing-library/react-native';
 import { AuthProvider, useAuth, fetchUserByEmailFallback, fetchUserDocument, recordUserSession } from '../use-auth';
 import { auth, firestore } from '../../config/firebase';
@@ -475,6 +476,206 @@ describe('useAuth Hook', () => {
 
       await expect(recordUserSession('user-1', 'test@test.com')).resolves.not.toThrow();
       expect(warnSpy).toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+  });
+
+  describe('Session Inactivity Timeout (US-191)', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <AuthProvider>{children}</AuthProvider>
+    );
+
+    it('cierra la sesión y limpia el almacenamiento si el timestamp ha vencido al iniciar', async () => {
+      const expiredTimestamp = Date.now() - (31 * 24 * 60 * 60 * 1000); // 31 días atrás
+      jest.spyOn(secureStorage, 'getLastActiveTimestamp').mockResolvedValue(expiredTimestamp);
+      const spyRemoveToken = jest.spyOn(secureStorage, 'removeSessionToken');
+      const spyRemoveTimestamp = jest.spyOn(secureStorage, 'removeLastActiveTimestamp');
+      const spySignOut = jest.spyOn(auth(), 'signOut');
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      const mockFirebaseUser = {
+        uid: 'user_expired_123',
+        email: 'expired@example.com',
+        getIdToken: jest.fn().mockResolvedValue('jwt-token'),
+      };
+
+      await act(async () => {
+        globalAny.triggerAuthStateChange(mockFirebaseUser);
+      });
+
+      expect(spySignOut).toHaveBeenCalled();
+      expect(spyRemoveToken).toHaveBeenCalled();
+      expect(spyRemoveTimestamp).toHaveBeenCalled();
+      expect(result.current.user).toBeNull();
+      expect(result.current.loading).toBe(false);
+    });
+
+    it('mantiene la sesión y actualiza el timestamp si la sesión no ha expirado', async () => {
+      const validTimestamp = Date.now() - (1 * 60 * 60 * 1000); // 1 hora atrás
+      jest.spyOn(secureStorage, 'getLastActiveTimestamp').mockResolvedValue(validTimestamp);
+      const spySaveTimestamp = jest.spyOn(secureStorage, 'saveLastActiveTimestamp');
+      const spySignOut = jest.spyOn(auth(), 'signOut');
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      const mockFirebaseUser = {
+        uid: 'user_valid_123',
+        email: 'valid@example.com',
+        getIdToken: jest.fn().mockResolvedValue('jwt-token'),
+      };
+
+      await act(async () => {
+        globalAny.triggerAuthStateChange(mockFirebaseUser);
+      });
+
+      expect(spySignOut).not.toHaveBeenCalled();
+      expect(spySaveTimestamp).toHaveBeenCalled();
+    });
+
+    it('login guarda la marca de actividad inicial', async () => {
+      const spySaveTimestamp = jest.spyOn(secureStorage, 'saveLastActiveTimestamp');
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      (auth().signInWithEmailAndPassword as jest.Mock).mockResolvedValueOnce({
+        user: { uid: 'user-login', email: 'login@test.com' },
+      });
+
+      await act(async () => {
+        await result.current.login('login@test.com', '123456');
+      });
+
+      expect(spySaveTimestamp).toHaveBeenCalled();
+    });
+
+    it('logout elimina la marca de actividad y token', async () => {
+      const spyRemoveToken = jest.spyOn(secureStorage, 'removeSessionToken');
+      const spyRemoveTimestamp = jest.spyOn(secureStorage, 'removeLastActiveTimestamp');
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        await result.current.logout();
+      });
+
+      expect(spyRemoveToken).toHaveBeenCalled();
+      expect(spyRemoveTimestamp).toHaveBeenCalled();
+      expect(result.current.user).toBeNull();
+    });
+
+    it('recordActivity actualiza el timestamp si hay un usuario autenticado', async () => {
+      const spySaveTimestamp = jest.spyOn(secureStorage, 'saveLastActiveTimestamp');
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      (auth as any)().currentUser = { uid: 'u-1', email: 'u1@test.com' };
+
+      await act(async () => {
+        await result.current.recordActivity();
+      });
+
+      expect(spySaveTimestamp).toHaveBeenCalled();
+      (auth as any)().currentUser = null;
+    });
+
+    it('checkSessionTimeout detecta timeout y cierra sesión', async () => {
+      (auth as any)().currentUser = { uid: 'u-1', email: 'u1@test.com' };
+      const expiredTimestamp = Date.now() - (35 * 24 * 60 * 60 * 1000);
+      jest.spyOn(secureStorage, 'getLastActiveTimestamp').mockResolvedValue(expiredTimestamp);
+      const spySignOut = jest.spyOn(auth(), 'signOut');
+      const spyClear = jest.spyOn(secureStorage, 'clearSessionData');
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      let wasExpired = false;
+      await act(async () => {
+        wasExpired = await result.current.checkSessionTimeout();
+      });
+
+      expect(wasExpired).toBe(true);
+      expect(spySignOut).toHaveBeenCalled();
+      expect(spyClear).toHaveBeenCalled();
+      (auth as any)().currentUser = null;
+    });
+
+    it('checkSessionTimeout retorna false si no hay usuario autenticado', async () => {
+      (auth as any)().currentUser = null;
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      let wasExpired = true;
+      await act(async () => {
+        wasExpired = await result.current.checkSessionTimeout();
+      });
+
+      expect(wasExpired).toBe(false);
+    });
+
+    it('reacciona al cambio de estado de AppState a active cerrando sesión si venció', async () => {
+      let appStateListener: ((state: string) => void) | null = null;
+      jest.spyOn(AppState, 'addEventListener').mockImplementation((event: string, handler: any) => {
+        if (event === 'change') {
+          appStateListener = handler;
+        }
+        return { remove: jest.fn() } as any;
+      });
+
+      (auth as any)().currentUser = { uid: 'u-appstate', email: 'appstate@test.com' };
+      const expiredTimestamp = Date.now() - (35 * 24 * 60 * 60 * 1000);
+      jest.spyOn(secureStorage, 'getLastActiveTimestamp').mockResolvedValue(expiredTimestamp);
+      const spySignOut = jest.spyOn(auth(), 'signOut');
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        if (appStateListener) {
+          await appStateListener('active');
+        }
+      });
+
+      expect(spySignOut).toHaveBeenCalled();
+      expect(result.current.user).toBeNull();
+      (auth as any)().currentUser = null;
+    });
+
+    it('captura errores al verificar timeout en onAuthStateChanged sin romper el flujo', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      jest.spyOn(secureStorage, 'getLastActiveTimestamp').mockRejectedValueOnce(new Error('Storage failure'));
+
+      renderHook(() => useAuth(), { wrapper });
+
+      const mockFirebaseUser = {
+        uid: 'user_err_123',
+        email: 'err@example.com',
+        getIdToken: jest.fn().mockResolvedValue('jwt-token'),
+      };
+
+      await act(async () => {
+        globalAny.triggerAuthStateChange(mockFirebaseUser);
+      });
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[useAuth] Error al verificar timeout de sesión:'),
+        expect.any(Error)
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('checkSessionTimeout captura errores y retorna false', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      (auth as any)().currentUser = { uid: 'u-1', email: 'u1@test.com' };
+      jest.spyOn(secureStorage, 'getLastActiveTimestamp').mockRejectedValueOnce(new Error('Timeout check error'));
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      let res = true;
+      await act(async () => {
+        res = await result.current.checkSessionTimeout();
+      });
+
+      expect(res).toBe(false);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[useAuth] Error al verificar timeout en checkSessionTimeout:'),
+        expect.any(Error)
+      );
+      (auth as any)().currentUser = null;
       warnSpy.mockRestore();
     });
   });
