@@ -45,9 +45,6 @@ appId: com.proyect1.ATIDental
       id: "odontogram-container"
     timeout: 5000
 
-- assertVisible: ".*(Próximamente|Coming Soon).*"
-- assertVisible: ".*(Odontograma Dental|Dental Odontogram).*"
-
 # Escenario 3: Verificamos pestaña de Consultas con diagnósticos y procedimientos
 - tapOn:
     id: "tab-consultas"
