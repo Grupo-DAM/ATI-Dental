@@ -3,12 +3,19 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import AgendaScreen from '@/app/(tabs)/agenda';
 import * as agendaService from '@/services/agenda-service';
+import { resetAppointmentStore } from '@/services/agenda-service';
 
 // Mock router
+const mockAgendaParams: Record<string, string> = {};
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: jest.fn(),
   }),
+  router: {
+    push: jest.fn(),
+  },
+  useLocalSearchParams: () => mockAgendaParams,
 }));
 
 // Mock safe area
@@ -26,6 +33,7 @@ jest.mock('@/hooks/use-auth', () => ({
 jest.mock('@/constants/user-roles', () => ({
   isOdontologoUser: (user: any) => user?.rol === 'odontologo',
   isAdminUser: (user: any) => user?.rol === 'admin',
+  isAsistenteUser: (user: any) => user?.rol === 'asistente',
 }));
 
 // Mock theme
@@ -123,6 +131,7 @@ describe('AgendaScreen (US-36: Visualizar Agenda)', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetAppointmentStore();
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   });
 
@@ -282,6 +291,34 @@ describe('AgendaScreen (US-36: Visualizar Agenda)', () => {
       'Opciones para la cita de Mariana López',
       expect.any(Array)
     );
+
+    const buttons = (Alert.alert as jest.Mock).mock.calls.at(-1)?.[2] as Array<{ text: string; onPress?: () => void }>;
+    const updateSpy = jest.spyOn(agendaService, 'updateAppointmentStatus').mockResolvedValueOnce({
+      id: `${tuesdayKey}-1`,
+      status: 'CANCELADO',
+    } as never);
+    buttons.find((button) => button.text === 'agenda.markCancelled')?.onPress?.();
+
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('abre la semana indicada al volver desde el formulario', async () => {
+    mockAgendaParams.date = tuesdayKey;
+    mockAgendaParams.refresh = '1';
+    mockUseAuth.mockReturnValue({
+      user: { id: 'dentist1', rol: 'odontologo' },
+      loading: false,
+    });
+
+    const { getByText } = render(<AgendaScreen />);
+
+    await waitFor(() => {
+      expect(getByText('Mariana López')).toBeTruthy();
+    });
+    delete mockAgendaParams.date;
+    delete mockAgendaParams.refresh;
   });
 
   it('renders error state and retries successfully when fetch fails', async () => {

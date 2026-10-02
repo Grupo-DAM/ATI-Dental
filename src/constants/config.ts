@@ -7,9 +7,9 @@ export const Config = {
     whatsAppMessage: 'Hola, deseo solicitar información...',
   },
   social: {
-    feedApi: 'https://api.ejemplo.com/v1/social-feed',
-    instagram: 'https://instagram.com/ati_dental',
-    facebook: 'https://facebook.com/ATIDentalOficial',
+    feedApi: 'https://ati-dental-social-feed.jesusecova73.workers.dev',
+    instagram: 'https://www.instagram.com/atidental_/',
+    facebook: 'https://www.facebook.com/1308722738999653',
   },
   serverless: {
     proxyUrl: 'https://secure-proxy.ati-dental-retention.workers.dev',

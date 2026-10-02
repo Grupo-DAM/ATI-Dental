@@ -3,6 +3,11 @@ import NetInfo from '@react-native-community/netinfo';
 import { Alert } from 'react-native';
 import { usePatients } from '@/hooks/user-list/use-patients-list';
 import { firestore } from '@/config/firebase';
+import { getVisitDatesByPatient } from '@/services/clinical-record-service';
+
+jest.mock('@/services/clinical-record-service', () => ({
+  getVisitDatesByPatient: jest.fn(() => Promise.resolve(new Map())),
+}));
 
 // 1. Mocks de dependencias
 jest.mock('@react-native-community/netinfo', () => ({
@@ -45,6 +50,7 @@ describe('usePatients Hook', () => {
     });
 
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    (getVisitDatesByPatient as jest.Mock).mockResolvedValue(new Map());
   });
 
   afterEach(() => {
@@ -131,6 +137,43 @@ describe('usePatients Hook', () => {
     expect(mockEnableNetwork).not.toHaveBeenCalled();
     expect(alertSpy).toHaveBeenCalledWith('Sin Conexión', 'Aún no hay acceso a internet.');
     expect(result.current.isRetrying).toBe(false);
+  });
+
+  it('completa última visita y próxima cita desde la agenda', async () => {
+    (getVisitDatesByPatient as jest.Mock).mockResolvedValue(new Map([
+      ['doc-1', { lastVisit: '2026-01-10', nextAppointment: '2026-12-01' }],
+    ]));
+    mockOnSnapshot.mockImplementation((onNext) => {
+      onNext({
+        docs: mockDocs,
+        metadata: { fromCache: false },
+      });
+      return mockUnsubscribe;
+    });
+
+    const { result } = renderHook(() => usePatients());
+
+    await waitFor(() => {
+      expect(result.current.patients[0].ultima_visita).toBe('2026-01-10');
+      expect(result.current.patients[0].proxima_visita).toBe('2026-12-01');
+      expect(result.current.patients[0].proxima_vista).toBe('2026-12-01');
+    });
+  });
+
+  it('registra el error si el reintento de conexión falla', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockOnSnapshot.mockImplementation(() => mockUnsubscribe);
+    (NetInfo.refresh as jest.Mock).mockRejectedValue(new Error('refresh'));
+
+    const { result } = renderHook(() => usePatients());
+
+    await act(async () => {
+      await result.current.handleRetryConnection();
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith('Error retrying connection: ', expect.any(Error));
+    expect(result.current.isRetrying).toBe(false);
+    consoleSpy.mockRestore();
   });
 
   it('cancela la suscripción a Firestore al desmarcar/desmontar el hook', () => {

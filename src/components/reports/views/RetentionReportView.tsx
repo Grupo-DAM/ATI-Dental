@@ -5,7 +5,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { KPICard } from '@/components/reports/KPICard';
 import { RetentionBarChart } from '@/components/reports/retention-bar-chart';
 import { useRetentionMetrics } from '../hooks/useRetentionMetrics';
-import { createReportsStyles } from '../styles/reports.styles';
+import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
 
 interface RetentionReportViewProps {

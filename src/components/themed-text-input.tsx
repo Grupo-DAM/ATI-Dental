@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
-import { StyleSheet, TextInput, TextInputProps, Pressable, Image, Linking } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { Image } from 'expo-image';
+import { TextInput, TextInputProps, Pressable, Linking } from 'react-native';
 
-import { Fonts, ThemeColor, Spacing } from '@/constants/theme';
+import { ThemeColor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
+import { createInputFieldStyles } from '@/constants/styles/global.styles';
 
-const EyeIcon = require('@/assets/icons/eye.png');
-const EyeSlashedIcon = require('@/assets/icons/eye-slashed.png');
+const EyeIcon = require('@/assets/icons/view.svg');
+const EyeSlashedIcon = require('@/assets/icons/eye-slashed.svg');
 
 export type ThemedTextInputProps = TextInputProps & {
     fieldName?: string;
     themeColor?: ThemeColor;
     isSecure?: boolean;
-    icon?: ImageSourcePropType;
+    login?: boolean;
+    icon?: any;
     error?: boolean;
     errorMessage?: string;
 };
@@ -31,15 +34,15 @@ export function ThemedTextInput({
   ...rest
 }: ThemedTextInputProps) {
   const theme = useTheme();
-  const styles = createStyles(theme);
+  const styles = useMemo(() => createInputFieldStyles(theme), [theme]);
   const [passwordVisible, setPasswordVisible] = useState(!isSecure);
 
   const activeTextColor = themeColor ? theme[themeColor] : theme.text;
-  const iconColor = '#9E8BAC';
+  const iconColor = theme.placeholderColor;
   const showErrorMessage = errorMessage !== "";
 
   return (
-      <ThemedView>
+      <ThemedView style={styles.mainContainer}>
         <ThemedView style={styles.labelContainer}>
             <ThemedText style={styles.label}>
                 {fieldName}
@@ -56,11 +59,11 @@ export function ThemedTextInput({
             error && styles.errorContainer]}>
           <TextInput
             placeholder={placeholder}
-            placeholderTextColor="#9E8BAC"
+            placeholderTextColor= {theme.placeholderColor}
             secureTextEntry={isSecure ? !passwordVisible : false}
             style={[
               styles.input,
-              { color: activeTextColor, fontFamily: Fonts.regular || 'System' }
+              {color: activeTextColor}
             ]}
             {...rest}
           />
@@ -80,6 +83,7 @@ export function ThemedTextInput({
               <Image
                   source={passwordVisible ? EyeIcon : EyeSlashedIcon}
                   style={[
+                    styles.icon,
                     {
                       tintColor: error? theme.error: iconColor,
                     }
@@ -96,60 +100,3 @@ export function ThemedTextInput({
     </ThemedView>
   );
 }
-
-const createStyles = (theme: any) => StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: theme.border,
-        backgroundColor: theme.backgroundElement,
-        borderRadius: 8,
-        paddingLeft: Spacing.three || 12,
-        paddingRight: 4,
-        marginBottom: Spacing.four || 16,
-        height: 50,
-    },
-    errorContainer: {
-        borderColor: theme.error,
-        borderWidth: 2,
-    },
-    input: {
-        flex: 1,
-        height: '100%',
-        fontSize: 16,
-        paddingVertical: 0,
-    },
-    iconButton: {
-        padding: Spacing.two || 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    icon: {
-        margin: Spacing.two || 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    pressed: {
-        opacity: 0.6,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: 500,
-        color: theme.text,
-    },
-    labelContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    forgotPassword: {
-        fontWeight: '700',
-        color: theme.main,
-        fontSize: 12
-    },
-    errorText: {
-        color: theme.error,
-        fontSize: 12,
-        marginBottom: 16,
-    }
-});

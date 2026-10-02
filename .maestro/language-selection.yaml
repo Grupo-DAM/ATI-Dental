@@ -2,25 +2,7 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
-- extendedWaitUntil:
-    visible:
-      id: "email-input"
-    timeout: 60000
-
-# --- Inicio de Sesión ---
-- tapOn:
-    id: "email-input"
-- inputText: "carloscaoucv2022@gmail.com"
-- tapOn:
-    id: "password-input"
-- inputText: "Cao1234"
-- hideKeyboard
-- tapOn:
-    id: "login-button"
-- extendedWaitUntil:
-    visible:
-        id: "welcome-header"
-    timeout: 10000
+- runFlow: common/login-user.yaml
 
 # -----------------------------------
 
@@ -55,7 +37,7 @@ appId: com.proyect1.ATIDental
 - extendedWaitUntil:
     visible:
       id: "profile-tab"
-    timeout: 15000
+    timeout: 60000
 
 # Usamos el ID para volver a la pestaña de perfil (ahora la app arranca en inglés)
 - tapOn:

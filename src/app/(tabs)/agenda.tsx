@@ -2,21 +2,21 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { AccessDeniedView } from '@/components/access-denied-view';
 import { AppHeader } from '@/components/app-header';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
-import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
+import { isOdontologoUser, isAdminUser, isAsistenteUser } from '@/constants/user-roles';
 import {
   Appointment,
   AppointmentStatus,
@@ -24,13 +24,19 @@ import {
   WeeklyAgenda,
   fetchWeeklyAgenda,
   formatDateKey,
+  updateAppointmentStatus,
 } from '@/services/agenda-service';
+import { getAllowedStatusTransitions } from '@/utils/appointment-schedule';
+import { NotificationToast } from '@/components/notification-toast';
+import { ScheduleAppointmentButton } from '@/components/schedule-appointment-button';
+import { createAgendaStyles } from '@/constants/styles/agenda.styles';
 
 interface WeekHeaderProps {
   readonly monthYear: string;
   readonly title: string;
   readonly onPrevWeek: () => void;
   readonly onNextWeek: () => void;
+  readonly onScheduleAppointment: () => void;
 }
 
 function WeekHeader({
@@ -38,12 +44,14 @@ function WeekHeader({
   title,
   onPrevWeek,
   onNextWeek,
+  onScheduleAppointment,
 }: Readonly<WeekHeaderProps>) {
   const colors = useTheme();
+  const styles = useMemo(() => createAgendaStyles(colors), [colors]);
 
   return (
     <View style={styles.headerContainer}>
-      <Text style={[styles.monthYearText, { color: colors.textSecondary }]}>
+      <Text style={styles.monthYearText}>
         {monthYear}
       </Text>
       <View style={styles.titleRow}>
@@ -53,7 +61,7 @@ function WeekHeader({
             testID="prev-week-btn"
             onPress={onPrevWeek}
             activeOpacity={0.7}
-            style={[styles.navButton, { borderColor: colors.border }]}
+            style={styles.navButton}
             accessibilityLabel="Semana anterior"
           >
             <Ionicons name="chevron-back" size={18} color={colors.text} />
@@ -62,12 +70,15 @@ function WeekHeader({
             testID="next-week-btn"
             onPress={onNextWeek}
             activeOpacity={0.7}
-            style={[styles.navButton, { borderColor: colors.border }]}
+            style={styles.navButton}
             accessibilityLabel="Semana siguiente"
           >
             <Ionicons name="chevron-forward" size={18} color={colors.text} />
           </TouchableOpacity>
         </View>
+      </View>
+      <View style={styles.scheduleButtonSlot}>
+        <ScheduleAppointmentButton onPress={onScheduleAppointment} />
       </View>
     </View>
   );
@@ -85,6 +96,7 @@ function DaySelector({
   onSelectDay,
 }: Readonly<DaySelectorProps>) {
   const colors = useTheme();
+  const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
@@ -100,16 +112,12 @@ function DaySelector({
             onPress={() => onSelectDay(day.date)}
             style={[
               styles.dayCard,
-              {
-                backgroundColor: colors.backgroundElement,
-                borderColor: isSelected ? colors.main : colors.border,
-              },
+              isSelected && styles.dayCardSelected
             ]}
           >
             <Text
               style={[
-                styles.dayNameText,
-                { color: isSelected ? colors.main : colors.textSecondary },
+                styles.dayNameText, isSelected && styles.dayNameTextSelected,
               ]}
             >
               {localizedDayName}
@@ -117,13 +125,13 @@ function DaySelector({
             <View
               style={[
                 styles.dayNumberContainer,
-                isSelected && { backgroundColor: colors.main },
+                isSelected && styles.dayNumberContainerSelected,
               ]}
             >
               <Text
                 style={[
                   styles.dayNumberText,
-                  { color: isSelected ? '#FFFFFF' : colors.text },
+                  isSelected && styles.dayNumberTextSelected,
                 ]}
               >
                 {day.dayNumber}
@@ -136,23 +144,41 @@ function DaySelector({
   );
 }
 
+const STATUS_LABEL: Record<AppointmentStatus, string> = {
+  CONFIRMADO: 'agenda.confirmed',
+  'EN ESPERA': 'agenda.pending',
+  'EN PROGRESO': 'agenda.inProgress',
+  COMPLETADO: 'agenda.completed',
+  CANCELADO: 'agenda.cancelled',
+};
+
+const STATUS_ACTION: Record<AppointmentStatus, string> = {
+  CONFIRMADO: 'agenda.markConfirmed',
+  'EN ESPERA': 'agenda.pending',
+  'EN PROGRESO': 'agenda.markInProgress',
+  COMPLETADO: 'agenda.markCompleted',
+  CANCELADO: 'agenda.markCancelled',
+};
+
+function statusBadgeColor(status: AppointmentStatus, colors: { main: string; warning?: string; alert?: string; positive?: string; header?: string }): string {
+  if (status === 'EN ESPERA') return colors.warning || colors.main;
+  if (status === 'CANCELADO') return colors.alert || colors.main;
+  if (status === 'COMPLETADO') return colors.positive || colors.main;
+  if (status === 'EN PROGRESO') return colors.header || colors.main;
+  return colors.main;
+}
+
 interface StatusBadgeProps {
   readonly status: AppointmentStatus;
 }
 
 function StatusBadge({ status }: Readonly<StatusBadgeProps>) {
+  const colors = useTheme();
+  const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { t } = useTranslation();
 
-  let badgeBg = '#5B2D8B';
-  let labelKey = 'agenda.confirmed';
-
-  if (status === 'EN ESPERA') {
-    badgeBg = '#D97706';
-    labelKey = 'agenda.pending';
-  } else if (status === 'CANCELADO') {
-    badgeBg = '#DC2626';
-    labelKey = 'agenda.cancelled';
-  }
+  const badgeBg = statusBadgeColor(status, colors);
+  const labelKey = STATUS_LABEL[status];
 
   return (
     <View style={[styles.statusBadge, { backgroundColor: badgeBg }]}>
@@ -173,35 +199,30 @@ function AppointmentCard({
   onMenuPress,
 }: Readonly<AppointmentCardProps>) {
   const colors = useTheme();
+  const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
     <View style={styles.timelineRow}>
       {/* Time and Timeline marker */}
       <View style={styles.timeColumn}>
-        <Text style={[styles.timeText, { color: colors.text }]}>
+        <Text style={styles.timeText}>
           {appointment.time}
         </Text>
-        <Text style={[styles.periodText, { color: colors.textSecondary }]}>
+        <Text style={styles.periodText}>
           {appointment.period}
         </Text>
-        <View style={[styles.timelineMarker, { borderColor: colors.main }]} />
-        {!isLast && <View style={[styles.timelineLine, { backgroundColor: colors.cardSeparator }]} />}
+        <View style={styles.timelineMarker} />
+        {!isLast && <View style={styles.timelineLine} />}
       </View>
 
       {/* Appointment Details Card */}
       <View
         testID={`appointment-card-${appointment.id}`}
-        style={[
-          styles.appointmentCard,
-          {
-            backgroundColor: colors.backgroundElement,
-            borderColor: colors.border,
-          },
-        ]}
+        style={styles.appointmentCard}
       >
         <View style={styles.cardHeader}>
-          <Text style={[styles.patientName, { color: colors.text }]}>
+          <Text style={styles.patientName}>
             {appointment.patientName}
           </Text>
           <TouchableOpacity
@@ -222,23 +243,26 @@ function AppointmentCard({
             color={colors.textSecondary}
             style={styles.treatmentIcon}
           />
-          <Text style={[styles.treatmentName, { color: colors.textSecondary }]}>
+          <Text style={styles.treatmentName}>
             {appointment.treatmentName}
           </Text>
         </View>
+        {appointment.dentistName ? (
+          <Text style={styles.dentistName}>{appointment.dentistName}</Text>
+        ) : null}
 
         <View style={styles.badgesRow}>
           <StatusBadge status={appointment.status} />
-          <View style={[styles.outlineBadge, { borderColor: colors.cardSeparator }]}>
-            <Text style={[styles.outlineBadgeText, { color: colors.textSecondary }]}>
+          <View style={styles.outlineBadge}>
+            <Text style={styles.outlineBadgeText}>
               {t('agenda.chair', {
                 number: appointment.chair.replace(/\D/g, '') || '1',
                 defaultValue: appointment.chair,
               })}
             </Text>
           </View>
-          <View style={[styles.outlineBadge, { borderColor: colors.cardSeparator }]}>
-            <Text style={[styles.outlineBadgeText, { color: colors.textSecondary }]}>
+          <View style={styles.outlineBadge}>
+            <Text style={styles.outlineBadgeText}>
               {appointment.durationMinutes} {t('agenda.minutes')}
             </Text>
           </View>
@@ -254,19 +278,20 @@ interface LunchBreakDividerProps {
 
 function LunchBreakDivider({ isLast }: Readonly<LunchBreakDividerProps>) {
   const colors = useTheme();
+  const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
     <View style={styles.timelineRow}>
       <View style={styles.timeColumn}>
-        <Text style={[styles.timeText, { color: colors.textSecondary }]}>12:00</Text>
-        <Text style={[styles.periodText, { color: colors.textSecondary }]}>PM</Text>
-        <View style={[styles.timelineMarker, { borderColor: colors.cardSeparator }]} />
-        {!isLast && <View style={[styles.timelineLine, { backgroundColor: colors.cardSeparator }]} />}
+        <Text style={styles.timeText}>12:00</Text>
+        <Text style={styles.periodText}>PM</Text>
+        <View style={styles.timelineMarker} />
+        {!isLast && <View style={styles.timelineLine} />}
       </View>
-      <View style={[styles.lunchBreakCard, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
-        <Ionicons name="restaurant-outline" size={14} color={colors.textSecondary} style={{ marginRight: 6 }} />
-        <Text style={[styles.lunchBreakText, { color: colors.textSecondary }]}>
+      <View style={styles.lunchBreakCard}>
+        <Ionicons name="restaurant-outline" size={14} color={colors.textSecondary} style={styles.treatmentIcon} />
+        <Text style={styles.lunchBreakText}>
           {t('agenda.lunchBreak')}
         </Text>
       </View>
@@ -276,17 +301,18 @@ function LunchBreakDivider({ isLast }: Readonly<LunchBreakDividerProps>) {
 
 function EmptyAgendaView() {
   const colors = useTheme();
+  const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
     <View testID="agenda-empty-state" style={styles.emptyContainer}>
-      <View style={[styles.emptyIconCircle, { backgroundColor: colors.backgroundSecondary }]}>
+      <View style={styles.emptyIconCircle}>
         <Ionicons name="calendar-outline" size={44} color={colors.main} />
       </View>
-      <Text style={[styles.emptyTitle, { color: colors.text }]}>
+      <Text style={styles.emptyTitle}>
         {t('agenda.noAppointments')}
       </Text>
-      <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+      <Text style={styles.emptySubtitle}>
         {t('agenda.noAppointmentsMessage')}
       </Text>
     </View>
@@ -299,24 +325,25 @@ interface ErrorAgendaViewProps {
 
 function ErrorAgendaView({ onRetry }: Readonly<ErrorAgendaViewProps>) {
   const colors = useTheme();
+  const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { t } = useTranslation();
 
   return (
     <View testID="agenda-error-state" style={styles.emptyContainer}>
       <Ionicons name="alert-circle-outline" size={48} color={colors.error} />
-      <Text style={[styles.emptyTitle, { color: colors.text, marginTop: 12 }]}>
+      <Text style={styles.emptyTitle}>
         {t('agenda.errorLoading')}
       </Text>
-      <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
+      <Text style={styles.emptySubtitle}>
         {t('agenda.errorLoadingSubtitle')}
       </Text>
       <TouchableOpacity
         testID="retry-agenda-btn"
         onPress={onRetry}
         activeOpacity={0.8}
-        style={[styles.retryButton, { backgroundColor: colors.main }]}
+        style={styles.retryButton}
       >
-        <Ionicons name="refresh-outline" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+        <Ionicons name="refresh-outline" size={18} color={colors.overMain} style={styles.treatmentIcon} />
         <Text style={styles.retryButtonText}>{t('agenda.retry')}</Text>
       </TouchableOpacity>
     </View>
@@ -325,17 +352,27 @@ function ErrorAgendaView({ onRetry }: Readonly<ErrorAgendaViewProps>) {
 
 export default function AgendaScreen() {
   const { t } = useTranslation();
+  const colors = useTheme();
+  const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { user: authUser, loading: authLoading } = useAuth();
+  const params = useLocalSearchParams<{ date?: string; refresh?: string }>();
 
   const [currentWeekDate, setCurrentWeekDate] = useState<Date>(() => new Date());
   const [selectedDate, setSelectedDate] = useState<string>(() => formatDateKey(new Date()));
   const [agenda, setAgenda] = useState<WeeklyAgenda | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
+  const [toastConfig, setToastConfig] = useState({
+    visible: false,
+    type: 'success' as 'success' | 'error',
+    title: '',
+    message: '',
+  });
 
   const isOdontologo = authUser ? isOdontologoUser(authUser) : false;
   const isAdmin = authUser ? isAdminUser(authUser) : false;
-  const hasPermission = isOdontologo || isAdmin;
+  const isAsistente = authUser ? isAsistenteUser(authUser) : false;
+  const hasPermission = isOdontologo || isAdmin || isAsistente;
 
   const loadAgenda = useCallback(async (date: Date) => {
     try {
@@ -362,8 +399,16 @@ export default function AgendaScreen() {
   }, []);
 
   useEffect(() => {
+    if (!params.date) return;
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(params.date);
+    if (!match) return;
+    setSelectedDate(params.date);
+    setCurrentWeekDate(new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  }, [params.date, params.refresh]);
+
+  useEffect(() => {
     loadAgenda(currentWeekDate);
-  }, [currentWeekDate, loadAgenda]);
+  }, [currentWeekDate, loadAgenda, params.refresh]);
 
   const handlePrevWeek = () => {
     const prev = new Date(currentWeekDate);
@@ -381,12 +426,40 @@ export default function AgendaScreen() {
     setSelectedDate(date);
   };
 
+  const applyStatus = async (appointment: Appointment, next: AppointmentStatus) => {
+    try {
+      await updateAppointmentStatus(appointment.id, next);
+      await loadAgenda(currentWeekDate);
+      setToastConfig({
+        visible: true,
+        type: 'success',
+        title: t('agenda.statusUpdatedTitle'),
+        message: t('agenda.statusUpdatedMessage', { status: t(STATUS_LABEL[next]) }),
+      });
+    } catch {
+      setToastConfig({
+        visible: true,
+        type: 'error',
+        title: t('agenda.statusErrorTitle'),
+        message: t('agenda.statusErrorMessage'),
+      });
+    }
+  };
+
   const handleAppointmentMenu = (appointment: Appointment) => {
+    const transitions = getAllowedStatusTransitions(appointment, new Date());
+    const actions = transitions.map((status) => ({
+      text: t(STATUS_ACTION[status]),
+      style: status === 'CANCELADO' ? 'destructive' as const : 'default' as const,
+      onPress: () => {
+        void applyStatus(appointment, status);
+      },
+    }));
     Alert.alert(
       t('agenda.options'),
       t('agenda.optionsMessage', { name: appointment.patientName }),
       [
-        { text: t('agenda.viewDetails'), onPress: () => {} },
+        ...actions,
         { text: t('agenda.close'), style: 'cancel' },
       ]
     );
@@ -415,15 +488,10 @@ export default function AgendaScreen() {
     return (
       <ThemedView testID="agenda-screen" style={styles.container}>
         <AppHeader />
-        <View style={styles.accessDeniedContainer}>
-          <Ionicons name="lock-closed-outline" size={48} color="#9CA3AF" />
-          <ThemedText type="subtitle" style={styles.accessDeniedTitle}>
-            {t('agenda.accessDeniedTitle')}
-          </ThemedText>
-          <ThemedText style={styles.accessDeniedDesc}>
-            {t('agenda.accessDeniedMessage')}
-          </ThemedText>
-        </View>
+        <AccessDeniedView
+          title={t('agenda.accessDeniedTitle')}
+          message={t('agenda.accessDeniedMessage')}
+        />
       </ThemedView>
     );
   }
@@ -438,6 +506,7 @@ export default function AgendaScreen() {
         title={t('agenda.weeklySchedule')}
         onPrevWeek={handlePrevWeek}
         onNextWeek={handleNextWeek}
+        onScheduleAppointment={() => router.push('/(tabs)/patients/schedule-appointment' as any)}
       />
 
       {/* Week Days Strip */}
@@ -479,6 +548,13 @@ export default function AgendaScreen() {
           </>
         )}
       </ScrollView>
+      <NotificationToast
+        visible={toastConfig.visible}
+        type={toastConfig.type}
+        title={toastConfig.title}
+        message={toastConfig.message}
+        onDismiss={() => setToastConfig((prev) => ({ ...prev, visible: false }))}
+      />
     </ThemedView>
   );
 }
@@ -530,274 +606,3 @@ function renderAppointmentItems(
 
   return items;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  center: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  centerPadding: {
-    paddingVertical: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  monthYearText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  agendaTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  navButtonsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  navButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  daySelectorContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    justifyContent: 'space-between',
-  },
-  dayCard: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 2,
-    marginHorizontal: 3,
-    borderRadius: 12,
-    borderWidth: 1,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 1,
-      },
-    }),
-  },
-  dayNameText: {
-    fontSize: 11,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  dayNumberContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayNumberText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 90,
-  },
-  timelineContainer: {
-    paddingTop: 4,
-  },
-  timelineRow: {
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
-  timeColumn: {
-    width: 60,
-    alignItems: 'center',
-    paddingTop: 4,
-    position: 'relative',
-  },
-  timeText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  periodText: {
-    fontSize: 10,
-    fontWeight: '600',
-    marginBottom: 6,
-  },
-  timelineMarker: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    borderWidth: 2,
-    backgroundColor: '#FFFFFF',
-    marginTop: 2,
-  },
-  timelineLine: {
-    position: 'absolute',
-    top: 50,
-    bottom: -16,
-    width: 2,
-  },
-  appointmentCard: {
-    flex: 1,
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 14,
-    marginLeft: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  patientName: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  menuIconButton: {
-    padding: 4,
-  },
-  treatmentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  treatmentIcon: {
-    marginRight: 6,
-  },
-  treatmentName: {
-    fontSize: 13,
-  },
-  badgesRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    flexWrap: 'wrap',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  statusBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  outlineBadge: {
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  outlineBadgeText: {
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  lunchBreakCard: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    paddingVertical: 10,
-    marginLeft: 8,
-  },
-  lunchBreakText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 48,
-    paddingHorizontal: 24,
-  },
-  emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 6,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  retryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  retryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  accessDeniedContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  accessDeniedTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginTop: 16,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  accessDeniedDesc: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#6B7280',
-  },
-});

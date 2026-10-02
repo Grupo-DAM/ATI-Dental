@@ -4,6 +4,12 @@ Historial de versiones del proyecto ATI-Dental siguiendo [Semantic Versioning](h
 
 Entradas más recientes arriba.
 
+## [1.5.0] - 2026-09-28,06:00:33.951Z
+
+**v1.5.0** — Funcionalidad inicial del Módulo de Historias Clinicas.
+
+---
+
 ## [1.4.0] - 2026-09-22,21:39:58.612Z
 
 **v1.4.0** — Funcionalidad inicial del Módulo de Pacientes y Tratamientos.

@@ -6,7 +6,7 @@ import { KPICard } from '@/components/reports/KPICard';
 import { UsageLineChart, ChartDataPoint } from '@/components/reports/usage-line-chart';
 import { PeriodOption, SessionRecord } from '../types';
 import { getRecordTimestamp, getRecordDurationMinutes } from '../utils/reports-utils';
-import { createReportsStyles } from '../styles/reports.styles';
+import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
 
 interface UsageReportViewProps {

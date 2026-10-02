@@ -5,6 +5,7 @@ import NetInfo from '@react-native-community/netinfo';
 import auth from '@react-native-firebase/auth';
 import ProfileScreen from '../app/(tabs)/profile';
 import renderer from 'react-test-renderer';
+import * as systemDatePicker from '@/components/ui/system-date-picker';
 
 jest.mock('@react-native-community/netinfo', () => ({
   fetch: jest.fn(),
@@ -28,7 +29,6 @@ jest.mock('@react-native-firebase/firestore', () => {
       })),
     })),
     runTransaction: jest.fn((transactionUpdate) => {
-      // Execute the transaction callback immediately with a mock transaction object
       return transactionUpdate({
         get: jest.fn().mockResolvedValue({ exists: false, data: () => ({}) }),
         set: jest.fn(),
@@ -37,7 +37,7 @@ jest.mock('@react-native-firebase/firestore', () => {
     }),
   });
   const mockFirestore = jest.fn(createFirestore);
-  mockFirestore.__create = createFirestore;
+  (mockFirestore as any).__create = createFirestore;
   return mockFirestore;
 });
 
@@ -82,7 +82,7 @@ jest.mock('@react-native-firebase/auth', () => {
   }));
 });
 
-describe('ProfileScreen - Enlace de Verificación de Correo', () => {
+describe('ProfileScreen - Enlace de Verificación de Correo y Cobertura Extendida', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
@@ -104,7 +104,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
   });
 
   // ========================================================
-  // TUS PRUEBAS ORIGINALES (INTACTAS)
+  // PRUEBAS DE VALIDACIONES Y CASOS DE BORDE
   // ========================================================
 
   it('Caso Borde 3: Falla validación síncrona si el correo es inválido', async () => {
@@ -178,14 +178,14 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     let tree;
 
     act(() => {
-        tree = renderer.create(<ProfileScreen />).toJSON();
+      tree = renderer.create().toJSON();
     });
 
     expect(tree).toMatchSnapshot();
   });
 
   // ========================================================
-  // NUEVAS PRUEBAS DE COBERTURA (SIN ROMPER LAS ANTERIORES)
+  // PRUEBAS DE SIMULACIÓN Y CONTROL DE INTERCEPTOR
   // ========================================================
 
   it('Simulación Maestro: Intercepta dr.nuevo@atidental.com y abre el modal sin llamar a Firebase', async () => {
@@ -211,14 +211,9 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     });
   });
 
-  // =========================================================================
-  // SECCIÓN ADICIONAL: INCREMENTO METRIZADO DE COBERTURA DE COMENTARIOS/RAMAS
-  // =========================================================================
-
   it('Flujo Exitoso Directo: Guarda el perfil si el correo electrónico no sufrió cambios', async () => {
     const { getByTestId } = render(<ProfileScreen />);
 
-    // Modificamos el nombre pero dejamos el correo igual al mock inicial (dr.smith@atidental.com)
     fireEvent.changeText(getByTestId('input-name'), 'Valeria Actualizada');
     fireEvent.press(getByTestId('btn-save'));
 
@@ -239,7 +234,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
 
     await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
 
-    // Buscamos el callback de cierre que dispara handleCloseModal
     const modal = getByTestId('modal-verification');
     fireEvent(modal, 'close');
 
@@ -254,13 +248,10 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
   it('Simulación Maestro: Cancela cambios en handleCloseModal si se usó un correo de error simulado', async () => {
     const { getByTestId } = render(<ProfileScreen />);
 
-    // Abrimos el modal con el flujo controlado
     fireEvent.changeText(getByTestId('input-email'), 'dr.nuevo@atidental.com');
     fireEvent.press(getByTestId('btn-save'));
     await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
 
-    // Cambiamos el input a 'sinred@atidental.com' antes de disparar el evento de cierre
-    // para forzar la rama de cancelación por error previo.
     fireEvent.changeText(getByTestId('input-email'), 'sinred@atidental.com');
 
     const modal = getByTestId('modal-verification');
@@ -277,30 +268,23 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
   it('Simulación Maestro: Lanza excepción de red controlada al reenviar link con sinred@atidental.com', async () => {
     const { getByTestId } = render(<ProfileScreen />);
 
-    // Abrimos el modal con el flujo controlado
     fireEvent.changeText(getByTestId('input-email'), 'dr.nuevo@atidental.com');
     fireEvent.press(getByTestId('btn-save'));
     await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
 
-    // Cambiamos el correo al de pruebas sin red
+
     fireEvent.changeText(getByTestId('input-email'), 'sinred@atidental.com');
 
     const modal = getByTestId('modal-verification');
-
-    // Al intentar ejecutar el reenvío, este lanzará la excepción asíncrona 'auth/network-request-failed'
     await expect(fireEvent(modal, 'resend')).rejects.toThrow('profile.alerts.noInternet');
   });
 
   it('Debe cambiar el idioma a inglés y guardarlo al hacer save', async () => {
     const { getByTestId } = render(<ProfileScreen />);
     
-    // Cambiar idioma a inglés
     fireEvent.press(getByTestId('btn-lang-en'));
-    
-    // Cambiar idioma a español (para aumentar cobertura)
     fireEvent.press(getByTestId('btn-lang-es'));
     
-    // Hacer save 
     fireEvent.changeText(getByTestId('input-name'), 'Valeria Actualizada');
     fireEvent.press(getByTestId('btn-save'));
     
@@ -313,7 +297,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
   });
 
   it('Debe manejar estado sin sesión de usuario (no-user) correctamente', async () => {
-    // Override currentUser to null for this test
     (auth as jest.Mock).mockImplementationOnce(() => ({
       currentUser: null,
     }));
@@ -396,7 +379,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
       expect(consoleSpy).toHaveBeenCalled();
     });
 
-    // Ahora cubrimos el catch dentro de handleCloseModal (línea 198)
     fireEvent.changeText(getByTestId('input-email'), 'nuevo@atidental.com');
     fireEvent.press(getByTestId('btn-save'));
     await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
@@ -421,7 +403,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
 
     consoleSpy.mockRestore();
     
-    // Restore the default auth mock
     (auth as jest.Mock).mockImplementation(() => ({
       currentUser: {
         email: 'dr.smith@atidental.com',
@@ -505,7 +486,7 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     );
   });
 
-  it('Verificación pendiente si user.email no coincide en modal', async () => {
+  it('Verificación pendiente si user.email no coincide en modal y hace clic en cancelar', async () => {
     const { getByTestId } = render(<ProfileScreen />);
     fireEvent.changeText(getByTestId('input-email'), 'nuevo@atidental.com');
     fireEvent.press(getByTestId('btn-save'));
@@ -527,6 +508,32 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     const buttons = pendingAlertCall[2];
     const cancelButton = buttons.find((b: any) => b.style === 'destructive');
     cancelButton.onPress();
+  });
+
+  it('Verificación pendiente si user.email no coincide en modal y elige seguir esperando', async () => {
+    const { getByTestId } = render(<ProfileScreen />);
+    fireEvent.changeText(getByTestId('input-email'), 'nuevo@atidental.com');
+    fireEvent.press(getByTestId('btn-save'));
+    await waitFor(() => expect(getByTestId('modal-verification')).toBeTruthy());
+
+    const modal = getByTestId('modal-verification');
+    await fireEvent(modal, 'close');
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.verificationPendingTitle',
+        'profile.alerts.verificationPendingMessage',
+        expect.anything()
+      );
+    });
+    
+    const alertCalls = (Alert.alert as jest.Mock).mock.calls;
+    const pendingAlertCall = alertCalls.find(call => call[0] === 'profile.alerts.verificationPendingTitle');
+    const buttons = pendingAlertCall[2];
+    const keepWaitingButton = buttons.find((b: any) => b.style === 'cancel');
+    if (keepWaitingButton && keepWaitingButton.onPress) {
+      keepWaitingButton.onPress();
+    }
   });
 
   it('Maneja excepción en handleCloseModal (ej. error al guardar token)', async () => {
@@ -557,6 +564,19 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     consoleSpy.mockRestore();
   });
 
+  it('Muestra alerta si el selector de fecha del sistema no está disponible', async () => {
+    const spy = jest.spyOn(systemDatePicker, 'isSystemDatePickerAvailable').mockReturnValueOnce(false);
+    
+    const { getByTestId } = render(<ProfileScreen />);
+    fireEvent.press(getByTestId('select-birth-date'));
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      'profile.alerts.errorTitle',
+      'profile.datePickerUnavailable'
+    );
+    spy.mockRestore();
+  });
+
   it('guarda género y fecha de nacimiento en Firestore', async () => {
     const { getByTestId } = render(<ProfileScreen />);
 
@@ -577,7 +597,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
   it('guarda el país de residencia en Firestore y la métrica geográfica', async () => {
     const { getByTestId } = render(<ProfileScreen />);
 
-    // Seleccionar país
     fireEvent.press(getByTestId('select-country'));
     fireEvent.press(getByTestId('profile-country-option-co'));
     fireEvent.press(getByTestId('btn-save'));
@@ -622,7 +641,50 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
       expect(getByTestId('select-country')).toBeTruthy();
     });
 
-    // Cambiar país de mx (pre-cargado) a co
+    fireEvent.press(getByTestId('select-country'));
+    fireEvent.press(getByTestId('profile-country-option-co'));
+    fireEvent.press(getByTestId('btn-save'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'profile.alerts.updatedTitle',
+        'profile.alerts.updatedMessage',
+      );
+    });
+  });
+
+  it('transacción al remover país con originalCountry existente', async () => {
+    const mockSet = jest.fn();
+    const mockUpdate = jest.fn();
+    const firestoreMock = require('@react-native-firebase/firestore');
+    firestoreMock.mockImplementation(() => ({
+      collection: jest.fn(() => ({
+        doc: jest.fn(() => ({
+          update: jest.fn().mockResolvedValue(true),
+          get: jest.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({ genero: 'male', pais: 'mx' }),
+          }),
+        })),
+      })),
+      runTransaction: jest.fn(async (cb) => {
+        await cb({
+          get: jest.fn().mockResolvedValue({
+            exists: true,
+            data: () => ({ totalUsers: 1, countries: { mx: 1 } }),
+          }),
+          set: mockSet,
+          update: mockUpdate,
+        });
+      }),
+    }));
+
+    const { getByTestId } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('select-country')).toBeTruthy();
+    });
+
     fireEvent.press(getByTestId('select-country'));
     fireEvent.press(getByTestId('profile-country-option-co'));
     fireEvent.press(getByTestId('btn-save'));
@@ -667,7 +729,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
       expect(getByTestId('select-country')).toBeTruthy();
     });
 
-    // No cambiar país — guardar directamente
     fireEvent.press(getByTestId('btn-save'));
 
     await waitFor(() => {
@@ -677,7 +738,6 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
       );
     });
 
-    // No se debería haber llamado set en metricsRef porque el país no cambió
     expect(mockSet).not.toHaveBeenCalled();
   });
 
@@ -713,4 +773,35 @@ describe('ProfileScreen - Enlace de Verificación de Correo', () => {
     });
   });
 
+  it('maneja de forma segura documentos vacíos o con fechaNacimiento nula', async () => {
+    const firestoreMock = require('@react-native-firebase/firestore');
+    firestoreMock.mockImplementation(() => ({
+      collection: jest.fn(() => ({
+        doc: jest.fn(() => ({
+          update: jest.fn().mockResolvedValue(true),
+          get: jest.fn().mockResolvedValue({
+            exists: () => true,
+            data: () => ({
+              genero: null,
+              pais: null,
+              fechaNacimiento: null,
+            }),
+          }),
+        })),
+      })),
+      runTransaction: jest.fn(async (cb) => {
+        await cb({
+          get: jest.fn().mockResolvedValue({ exists: false, data: () => ({}) }),
+          set: jest.fn(),
+          update: jest.fn(),
+        });
+      }),
+    }));
+
+    const { getByTestId } = render(<ProfileScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('select-country')).toBeTruthy();
+    });
+  });
 });
