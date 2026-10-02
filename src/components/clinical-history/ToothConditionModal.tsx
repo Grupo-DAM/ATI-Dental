@@ -50,6 +50,15 @@ export function ToothConditionModal({
     const [localNotes, setLocalNotes] = useState<string>('');
     const [selectedSurface, setSelectedSurface] = useState<ToothSurface | null>(null);
 
+    React.useEffect(() => {
+      if (visible && tooth) {
+        setLocalGeneralStates(tooth.generalStates || []);
+        setLocalSurfaces(tooth.surfacesStates || {});
+        setLocalNotes(tooth.notes || '');
+        setSelectedSurface(null);
+      }
+    }, [visible, tooth]);
+
     const safeTooth = tooth || DEFAULT_TOOTH;
 
     const toggleGeneralState = (state: ToothState) => {

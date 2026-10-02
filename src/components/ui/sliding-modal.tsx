@@ -5,6 +5,8 @@ import {
   Pressable,
   StyleProp,
   ViewStyle,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 import { createSlidingModalStyles } from '@/constants/styles/global.styles';
@@ -18,7 +20,6 @@ export interface SlidingModalProps {
   innerContainerStyle?: StyleProp<ViewStyle>;
 }
 
-/** Generic confirmation bottom sheet modal */
 export function SlidingModal({
   visible,
   isSubmitting = false,
@@ -29,30 +30,40 @@ export function SlidingModal({
     const theme = useTheme();
     const modalStyles = useMemo(() => createSlidingModalStyles(theme), [theme]);
 
+    const WrapperComponent = Platform.OS === 'ios' ? KeyboardAvoidingView : View;
+    const wrapperProps = Platform.OS === 'ios' ? { behavior: 'padding' as const, style: { flex: 1 } } : { style: { flex: 1 } };
+
   return (
     <Modal
       visible={visible}
       transparent
       animationType="slide"
+      statusBarTranslucent
       onRequestClose={isSubmitting ? undefined : onCancel}
     >
-      <Pressable style={modalStyles.overlay} onPress={isSubmitting ? undefined : onCancel}>
-        <Pressable> 
-            <LinearGradient
-                colors={theme.mainGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={modalStyles.wrapper}
-            >
-            <View style={modalStyles.sheet}>
-            <View style={modalStyles.handle} />
-            <View style={innerContainerStyle}>
-                {children}
-            </View>
-            </View>
-            </LinearGradient>
+      <WrapperComponent {...wrapperProps}>
+        <Pressable 
+          testID="modal-overlay" 
+          style={modalStyles.overlay} 
+          onPress={isSubmitting ? undefined : onCancel}
+        >
+          <Pressable testID="modal-card-content" onPress={() => {}}> 
+              <LinearGradient
+                  colors={theme.mainGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={modalStyles.wrapper}
+              >
+                <View style={modalStyles.sheet}>
+                  <View style={modalStyles.handle} />
+                  <View style={innerContainerStyle}>
+                      {children}
+                  </View>
+                </View>
+              </LinearGradient>
+          </Pressable>
         </Pressable>
-      </Pressable>
+      </WrapperComponent>
     </Modal>
   );
 }

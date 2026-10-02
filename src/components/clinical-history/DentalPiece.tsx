@@ -36,7 +36,8 @@ export function DentalPiece({
   return (
     <View style={[styles.dentalPieceContainer, isBottomRow && styles.bottomDentalPieceContainer, containerStyles]}>
       { showNumber &&
-        <View style={[styles.numberPieceContainer, isSelected && styles.numberPieceSelectedContainer]}>
+        <View testID="tooth-number-container" 
+          style={[styles.numberPieceContainer, isSelected && styles.numberPieceSelectedContainer]}>
           <Text style={[styles.numberPiece, isSelected && styles.numberPieceSelected]}>{tooth.number}</Text>
         </View>
       }
