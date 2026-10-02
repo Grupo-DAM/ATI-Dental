@@ -308,6 +308,33 @@ describe('HomeScreen (US-38)', () => {
     fetchSpy.mockRestore();
   });
 
+  it('Al presionar un acceso rápido navega a la ruta asignada', async () => {
+    const { getByTestId } = render(<HomeScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('quick-access-agenda')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('quick-access-agenda'));
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/agenda');
+  });
+
+  it('Al presionar una notificación ya leída no vuelve a llamar a markNotificationAsRead', async () => {
+    jest.spyOn(DashboardService, 'fetchNotifications').mockResolvedValueOnce([
+      { id: 'notif-read', title: 'Leída', subtitle: 'Ya revisada', read: true, targetRoute: '/(tabs)/agenda' }
+    ]);
+
+    const { getByTestId } = render(<HomeScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('notification-item-notif-read')).toBeTruthy();
+    });
+
+    const markSpy = jest.spyOn(DashboardService, 'markNotificationAsRead');
+    fireEvent.press(getByTestId('notification-item-notif-read'));
+    expect(markSpy).not.toHaveBeenCalled();
+  });
+
   it('Coincide con la instantánea estructural (Snapshot Test)', async () => {
     const { toJSON, getByTestId } = render(<HomeScreen />);
     await waitFor(() => {

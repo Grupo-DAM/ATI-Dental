@@ -62,9 +62,22 @@ describe('dashboard-service', () => {
       expect(summary.pendingAppointments).toBe(10);
       expect(summary.fromCache).toBe(true);
     });
+    it('returns default summary when offline and cache is empty', async () => {
+      (NetInfo.fetch as jest.Mock).mockResolvedValueOnce({ isConnected: false });
+      const summary = await fetchDashboardSummary({ uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(summary.pendingAppointments).toBe(2);
+      expect(summary.fromCache).toBe(true);
+    });
+
+    it('recovers gracefully when NetInfo.fetch throws', async () => {
+      (NetInfo.fetch as jest.Mock).mockRejectedValueOnce(new Error('NetInfo error'));
+      const summary = await fetchDashboardSummary({ uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(summary.pendingAppointments).toBe(2);
+      expect(summary.fromCache).toBe(false);
+    });
   });
 
-  describe('fetchQuickAccessItems & saveQuickAccessPreferences', () => {
+  describe('fetchQuickAccessItems edge cases', () => {
     it('filters quick access items for external user to only contact and profile', async () => {
       const items = await fetchQuickAccessItems({ uid: 'ext', email: 'ext@test.com', rol: USER_ROLES.USUARIO_EXTERNO });
       expect(items.length).toBe(2);
@@ -81,6 +94,12 @@ describe('dashboard-service', () => {
       await saveQuickAccessPreferences(USER_ROLES.ODONTOLOGO, ['treatments', 'registerPatient', 'contact']);
       const items = await fetchQuickAccessItems({ uid: 'dent', email: 'dent@test.com', rol: USER_ROLES.ODONTOLOGO });
       expect(items.map((i) => i.id)).toEqual(['treatments', 'registerPatient', 'contact']);
+    });
+
+    it('falls back to default items when saved items contain no valid matches', async () => {
+      await AsyncStorage.setItem(`ati_quick_access_v1_${USER_ROLES.ODONTOLOGO}`, JSON.stringify(['non-existent-1', 'non-existent-2']));
+      const items = await fetchQuickAccessItems({ uid: 'dent', email: 'dent@test.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(items.length).toBe(3);
     });
   });
 
@@ -102,6 +121,19 @@ describe('dashboard-service', () => {
     it('returns empty array when query is empty', async () => {
       const res = await performGlobalSearch('   ', { uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
       expect(res).toEqual([]);
+    });
+
+    it('finds patients by document number and appointments by reason', async () => {
+      const res = await performGlobalSearch('12345678A', { uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(res.some((r) => r.category === 'patients' && r.id === 'patient-pat-1')).toBe(true);
+
+      const aptRes = await performGlobalSearch('Limpieza', { uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(aptRes.some((r) => r.category === 'appointments')).toBe(true);
+    });
+
+    it('finds treatments matching by category name', async () => {
+      const res = await performGlobalSearch('Radiología', { uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(res.some((r) => r.category === 'treatments' && r.title === 'Examen Panorámico')).toBe(true);
     });
 
     it('finds patients and appointments for clinical roles', async () => {

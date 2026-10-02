@@ -33,6 +33,13 @@ import {
   ALL_QUICK_ACCESS_ITEMS,
 } from '@/services/dashboard-service';
 
+const CATEGORY_ICON_MAP: Record<string, any> = {
+  patients: 'person-outline',
+  appointments: 'calendar-outline',
+  treatments: 'medkit-outline',
+  modules: 'grid-outline',
+};
+
 export default function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -430,15 +437,7 @@ export default function HomeScreen() {
                 onPress={() => handleSearchResultPress(item)}
               >
                 <Ionicons
-                  name={
-                    item.category === 'patients'
-                      ? 'person-outline'
-                      : item.category === 'appointments'
-                      ? 'calendar-outline'
-                      : item.category === 'treatments'
-                      ? 'medkit-outline'
-                      : 'grid-outline'
-                  }
+                  name={CATEGORY_ICON_MAP[item.category] || 'grid-outline'}
                   size={20}
                   color={theme.main}
                   style={styles.searchResultIcon}

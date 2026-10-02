@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { Spacing, FontSize, FontWeight, Border, BottomTabInset } from '@/constants/theme';
 
 export const createStyles = (theme: any) => {
-  const isDark = theme.background === '#000000' || theme.text === '#ffffff';
+  const isDark = theme.background === '#000000';
 
   return StyleSheet.create({
     screen: {
@@ -21,8 +21,8 @@ export const createStyles = (theme: any) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      backgroundColor: theme.offlineBannerBackground || '#FEF3C7',
-      borderColor: theme.offlineBannerBorder || '#FDE68A',
+      backgroundColor: theme.offlineBannerBackground,
+      borderColor: theme.offlineBannerBorder,
       borderWidth: Border.width.regular,
       borderRadius: Border.radius.regular,
       paddingVertical: Spacing.two,
@@ -38,7 +38,7 @@ export const createStyles = (theme: any) => {
       marginRight: Spacing.one,
     },
     offlineText: {
-      color: theme.offlineBannerText || '#B45309',
+      color: theme.offlineBannerText,
       fontSize: FontSize.p,
       fontWeight: FontWeight.medium,
       flex: 1,
@@ -54,7 +54,7 @@ export const createStyles = (theme: any) => {
       opacity: 0.8,
     },
     retryButtonText: {
-      color: theme.overMain || '#ffffff',
+      color: theme.overMain,
       fontSize: FontSize.p,
       fontWeight: FontWeight.semibold,
     },
@@ -352,7 +352,7 @@ export const createStyles = (theme: any) => {
       paddingLeft: Spacing.one,
     },
     unreadBadge: {
-      backgroundColor: theme.alert || '#DC2626',
+      backgroundColor: theme.alert,
       borderRadius: 12,
       paddingHorizontal: Spacing.oneHalf,
       paddingVertical: 2,
