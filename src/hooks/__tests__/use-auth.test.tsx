@@ -678,5 +678,270 @@ describe('useAuth Hook', () => {
       (auth as any)().currentUser = null;
       warnSpy.mockRestore();
     });
+
+    it('checkSessionTimeout con sesión válida actualiza timestamp y retorna false', async () => {
+      (auth as any)().currentUser = { uid: 'u-valid', email: 'v@test.com' };
+      const validTimestamp = Date.now() - 5000;
+      jest.spyOn(secureStorage, 'getLastActiveTimestamp').mockResolvedValue(validTimestamp);
+      const spySave = jest.spyOn(secureStorage, 'saveLastActiveTimestamp');
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      let res = true;
+      await act(async () => {
+        res = await result.current.checkSessionTimeout();
+      });
+
+      expect(res).toBe(false);
+      expect(spySave).toHaveBeenCalled();
+      (auth as any)().currentUser = null;
+    });
+
+    it('onSnapshot detecta estado inactivo y expulsa al usuario', async () => {
+      const spySignOut = jest.spyOn(auth(), 'signOut');
+      const spyRemoveToken = jest.spyOn(secureStorage, 'removeSessionToken');
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      const mockFirebaseUser = {
+        uid: 'user_inact_snap',
+        email: 'inact@example.com',
+        getIdToken: jest.fn().mockResolvedValue('jwt-token'),
+      };
+
+      await act(async () => {
+        globalAny.triggerAuthStateChange(mockFirebaseUser);
+      });
+
+      await act(async () => {
+        globalAny.triggerFirestoreSnapshot({
+          exists: () => true,
+          data: () => ({ estado: 'inactivo' }),
+        });
+      });
+
+      expect(spySignOut).toHaveBeenCalled();
+      expect(spyRemoveToken).toHaveBeenCalled();
+      expect(result.current.user).toBeNull();
+    });
+
+    it('cancela unsubscribeProfile cuando el usuario cambia a null tras haber estado activo', async () => {
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      const mockFirebaseUser = {
+        uid: 'user_active_logout',
+        email: 'active_logout@example.com',
+        getIdToken: jest.fn().mockResolvedValue('jwt-token'),
+      };
+
+      await act(async () => {
+        globalAny.triggerAuthStateChange(mockFirebaseUser);
+      });
+
+      await act(async () => {
+        globalAny.triggerFirestoreSnapshot({
+          exists: () => true,
+          data: () => ({ estado: 'activo', nombre: 'Test' }),
+        });
+      });
+
+      expect(result.current.user).not.toBeNull();
+
+      await act(async () => {
+        globalAny.triggerAuthStateChange(null);
+      });
+
+      expect(result.current.user).toBeNull();
+    });
+
+    it('AppState listener no realiza timeout si el estado no es active o no hay usuario', async () => {
+      let appStateListener: ((state: string) => void) | null = null;
+      jest.spyOn(AppState, 'addEventListener').mockImplementation((event: string, handler: any) => {
+        if (event === 'change') {
+          appStateListener = handler;
+        }
+        return { remove: jest.fn() } as any;
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      // Caso 1: background
+      (auth as any)().currentUser = { uid: 'u-1' };
+      const spyCheck = jest.spyOn(result.current, 'checkSessionTimeout');
+
+      await act(async () => {
+        if (appStateListener) {
+          await appStateListener('background');
+        }
+      });
+
+      expect(spyCheck).not.toHaveBeenCalled();
+      (auth as any)().currentUser = null;
+    });
+
+    it('fetchUserDocument usa el fallback por email cuando docExists es falso', async () => {
+      ((firestore() as any).get as jest.Mock)
+        .mockResolvedValueOnce({ exists: () => false, data: () => ({}) }) // doc por UID
+        .mockResolvedValueOnce({ empty: false, docs: [{ id: 'doc-email', data: () => ({ estado: 'activo', nombre: 'Email User' }) }] }); // fallback
+
+      const res = await fetchUserDocument('missing-uid', 'email_user@example.com');
+      expect(res.docExists).toBe(true);
+      expect(res.userData.nombre).toBe('Email User');
+    });
+
+    it('fetchUserByEmailFallback maneja documento donde data no es función', async () => {
+      ((firestore() as any).get as jest.Mock).mockResolvedValueOnce({
+        empty: false,
+        docs: [{ id: 'doc-raw', estado: 'activo', nombre: 'Raw User' }],
+      });
+
+      const res = await fetchUserByEmailFallback('raw@test.com');
+      expect(res).not.toBeNull();
+      expect(res?.userData.nombre).toBe('Raw User');
+    });
+
+    it('fetchUserDocument soporta userDoc con exists y data como propiedades en vez de funciones', async () => {
+      ((firestore() as any).get as jest.Mock).mockResolvedValueOnce({
+        exists: true,
+        estado: 'activo',
+        nombre: 'Property User',
+        metadata: { fromCache: false },
+      });
+
+      const res = await fetchUserDocument('user-prop', 'prop@test.com');
+      expect(res.docExists).toBe(true);
+      expect(res.userData.nombre).toBe('Property User');
+    });
+
+    it('verifyActiveStatus tolera errores inesperados en fetchUserDocument sin romper login', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      ((firestore() as any).get as jest.Mock).mockRejectedValue(new Error('Random firestore crash'));
+
+      (auth().signInWithEmailAndPassword as jest.Mock).mockResolvedValueOnce({
+        user: { uid: 'user-warn', email: 'warn@test.com' },
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        await result.current.login('warn@test.com', '123456');
+      });
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[useAuth] Error al verificar estado del usuario en Firestore:'),
+        expect.any(Error)
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('recordActivity no hace nada si currentUser es null', async () => {
+      (auth as any)().currentUser = null;
+      const saveSpy = jest.spyOn(secureStorage, 'saveLastActiveTimestamp');
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        await result.current.recordActivity();
+      });
+
+      expect(saveSpy).not.toHaveBeenCalled();
+      saveSpy.mockRestore();
+    });
+
+    it('login completa exitosamente si credential no contiene user con uid', async () => {
+      (auth().signInWithEmailAndPassword as jest.Mock).mockResolvedValueOnce({
+        user: null,
+      });
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      let cred: any;
+      await act(async () => {
+        cred = await result.current.login('empty@test.com', '123456');
+      });
+
+      expect(cred).toEqual({ user: null });
+    });
+
+    it('cancela unsubscribeProfile al detectar sesión expirada en onAuthStateChanged', async () => {
+      const mockUnsubProfile = jest.fn();
+      const origOnSnapshot = (firestore() as any).onSnapshot;
+      (firestore() as any).onSnapshot = jest.fn((onNext, onError) => {
+        globalThis.registeredFirestoreOnNext = onNext;
+        globalThis.registeredFirestoreOnError = onError;
+        return mockUnsubProfile;
+      });
+
+      const spyGet = jest.spyOn(secureStorage, 'getLastActiveTimestamp')
+        .mockResolvedValueOnce(Date.now())
+        .mockResolvedValueOnce(Date.now() - 31 * 24 * 60 * 60 * 1000);
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        await globalAny.triggerAuthStateChange({
+          uid: 'user-active-1',
+          email: 'test@active.com',
+          getIdToken: jest.fn().mockResolvedValue('token'),
+        });
+      });
+
+      await act(async () => {
+        await globalAny.triggerAuthStateChange({
+          uid: 'user-active-1',
+          email: 'test@active.com',
+          getIdToken: jest.fn().mockResolvedValue('token'),
+        });
+      });
+
+      expect(mockUnsubProfile).toHaveBeenCalled();
+      expect(result.current.user).toBeNull();
+      spyGet.mockRestore();
+      (firestore() as any).onSnapshot = origOnSnapshot;
+    });
+
+    it('onSnapshot error callback no registra error si auth().currentUser es null', async () => {
+      const mockFirebaseUser = {
+        uid: 'user_error_cb',
+        email: 'errorcb@example.com',
+        getIdToken: jest.fn().mockResolvedValue('jwt-test'),
+      };
+
+      renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        await globalAny.triggerAuthStateChange(mockFirebaseUser);
+      });
+
+      (auth as any)().currentUser = null;
+
+      await act(async () => {
+        globalAny.triggerFirestoreError(new Error('Permission denied'));
+      });
+    });
+
+    it('onSnapshot maneja perfil con docSnapshot.data() nulo o sin estado definido', async () => {
+      const spyExpired = jest.spyOn(secureStorage, 'isSessionExpired').mockReturnValue(false);
+      const mockFirebaseUser = {
+        uid: 'user_active_null_data',
+        email: 'nulldata@example.com',
+        getIdToken: jest.fn().mockResolvedValue('jwt-test'),
+      };
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        await globalAny.triggerAuthStateChange(mockFirebaseUser);
+      });
+
+      await act(async () => {
+        globalAny.triggerFirestoreSnapshot({
+          exists: () => true,
+          data: () => null,
+          metadata: { fromCache: false },
+        });
+      });
+
+      expect(result.current.user).toMatchObject({ uid: 'user_active_null_data' });
+      spyExpired.mockRestore();
+    });
   });
 });
