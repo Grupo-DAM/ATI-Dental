@@ -42,6 +42,7 @@ export function DentalPiece({
         </View>
       }
       <Pressable
+        testID={`tooth-${tooth.number}`}
         onPress={onPress}
         style={styles.pressable}
       >

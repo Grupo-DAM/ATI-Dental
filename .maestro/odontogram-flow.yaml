@@ -1,0 +1,80 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+- runFlow: common/login-admin.yaml
+
+# =======================================================
+# NAVEGACIÓN A FICHA DE PACIENTE
+# =======================================================
+- tapOn:
+    id: "center-btn"
+
+# Verificamos que la tarjeta del paciente carga y es visible
+- extendedWaitUntil:
+    visible:
+      id: "patient-info-card"
+    timeout: 10000
+
+# =======================================================
+# NAVEGACIÓN A HISTORIA CLÍNICA DENTAL
+# =======================================================
+- tapOn:
+    id: "btn-open-clinical-history"
+
+# Verificamos que carga la pantalla de Historia Clínica
+- extendedWaitUntil:
+    visible:
+      id: "clinical-history-screen"
+    timeout: 10000
+
+# Escenario 1: Verificamos datos personales y antecedentes clínicos
+- assertVisible:
+    id: "patient-summary-card"
+
+# Verificamos pestañas disponibles
+- assertVisible:
+    id: "clinical-history-tabs"
+
+# Escenario 2: Verificamos el contenedor preparado para el odontograma futuro
+- tapOn:
+    id: "tab-odontograma"
+
+- extendedWaitUntil:
+    visible:
+      id: "odontogram-container"
+    timeout: 5000
+
+- assertVisible: 
+    id: 'odontogram-legend'
+- assertVisible: 
+    id: 'odontogram-scroll'
+
+- extendedWaitUntil:
+    visible:
+      id: "tooth-18"
+    timeout: 5000
+
+- tapOn:
+    id: "tooth-18"
+
+- extendedWaitUntil:
+    visible:
+      id: "tooth-condition-modal"
+    timeout: 5000
+
+- assertVisible: ".*(18).*"
+
+- tapOn: ".*(Cancelar|Cancel).*"
+
+- extendedWaitUntil:
+    visible:
+      id: "tooth-18"
+    timeout: 5000
+
+# -----------------------------------
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

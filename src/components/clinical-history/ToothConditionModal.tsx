@@ -98,7 +98,7 @@ export function ToothConditionModal({
         onCancel={onCancel}
         innerContainerStyle={modalStyles.container}
     >
-        <View style={modalStyles.horizontalContainer}>
+        <View testID = "tooth-condition-modal" style={modalStyles.horizontalContainer}>
         <View style={modalStyles.dentalPieceSection}>
             <Text style={modalStyles.pieceNumberText}>
                 {safeTooth.number}

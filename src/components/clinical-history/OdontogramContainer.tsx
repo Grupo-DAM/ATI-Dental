@@ -75,7 +75,9 @@ export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Prop
       </View>
 
       {/* Legend */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}
+      <ScrollView
+        testID='odontogram-legend' 
+        horizontal showsHorizontalScrollIndicator={false}
        contentContainerStyle={styles.legendContainer}>
         {ALL_TOOTH_STATES.map((state, index: number) => (
           <View style={styles.legendItem} key={'state'+index}>
@@ -86,7 +88,9 @@ export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Prop
       </ScrollView>
 
       {/* Scroll odontogram */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}
+      <ScrollView 
+        testID='odontogram-scroll'
+        horizontal showsHorizontalScrollIndicator={false}
         contentContainerStyle = {styles.odontogramScrollContainer}
       >
         <View key={'leftCuadrants'} style={styles.halfOdontogram}>
