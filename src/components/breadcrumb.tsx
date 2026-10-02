@@ -4,7 +4,7 @@ import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export type BreadcrumbProps = {
-  parent: string;
+  parent?: string;
   current: string;
 };
 
@@ -14,8 +14,12 @@ export function Breadcrumb({ parent, current }: Readonly<BreadcrumbProps>) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.parentText}>{parent}</Text>
-      <Text style={styles.chevron}>   ›   </Text>
+      {Boolean(parent) && (
+        <>
+          <Text style={styles.parentText}>{parent}</Text>
+          <Text style={styles.chevron}>   ›   </Text>
+        </>
+      )}
       <Text style={styles.currentText}>{current}</Text>
     </View>
   );

@@ -1,0 +1,1256 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot Test) 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "#F7F6F8",
+      "flex": 1,
+    }
+  }
+>
+  <View
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#52287D",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "paddingBottom": 16,
+          "paddingHorizontal": 24,
+        },
+        {
+          "paddingTop": 12,
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 8,
+        }
+      }
+    >
+      <ViewManagerAdapter_ExpoImage
+        containerViewRef={"[React.ref]"}
+        contentFit="contain"
+        contentPosition={
+          {
+            "left": "50%",
+            "top": "50%",
+          }
+        }
+        height={28}
+        nativeViewRef={"[React.ref]"}
+        onError={[Function]}
+        onLoad={[Function]}
+        onLoadStart={[Function]}
+        onProgress={[Function]}
+        placeholder={[]}
+        sfEffect={null}
+        source={
+          [
+            {
+              "__packager_asset": true,
+              "height": 1,
+              "scale": 1,
+              "uri": undefined,
+              "width": 1,
+            },
+          ]
+        }
+        style={
+          {
+            "height": 28,
+            "width": 28,
+          }
+        }
+        symbolSize={null}
+        symbolWeight={null}
+        tintColor={4294967295}
+        transition={null}
+        width={28}
+      />
+      <Text
+        style={
+          {
+            "color": "white",
+            "fontSize": 20,
+            "fontWeight": "700",
+            "letterSpacing": 0.5,
+          }
+        }
+      >
+        ATI Dental
+      </Text>
+    </View>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "opacity": 1,
+          "padding": 4,
+        }
+      }
+      testID="menu-btn"
+    >
+      <Text
+        allowFontScaling={false}
+        selectable={false}
+        style={
+          [
+            {
+              "color": "white",
+              "fontSize": 36,
+            },
+            undefined,
+            {
+              "fontFamily": "ionicons",
+              "fontStyle": "normal",
+              "fontWeight": "normal",
+            },
+            {},
+          ]
+        }
+      >
+        
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#ffffff",
+        "borderBottomColor": "#EDF2F7",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "paddingHorizontal": 20,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <Text
+      style={
+        {
+          "color": "#52287D",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+    >
+      tabs.home
+    </Text>
+  </View>
+  <RCTScrollView
+    contentContainerStyle={
+      [
+        {
+          "flexGrow": 1,
+          "paddingBottom": 90,
+        },
+        {
+          "gap": 24,
+          "paddingBottom": 114,
+          "paddingHorizontal": 24,
+          "paddingTop": 16,
+        },
+      ]
+    }
+    showsVerticalScrollIndicator={false}
+  >
+    <View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 16,
+            "justifyContent": "space-between",
+          }
+        }
+        testID="welcome-header"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flex": 1,
+              "flexDirection": "row",
+              "gap": 16,
+            }
+          }
+        >
+          <ViewManagerAdapter_ExpoImage
+            backgroundColor={4293455349}
+            borderRadius={29}
+            containerViewRef={"[React.ref]"}
+            contentFit="cover"
+            contentPosition={
+              {
+                "left": "50%",
+                "top": "50%",
+              }
+            }
+            height={58}
+            nativeViewRef={"[React.ref]"}
+            onError={[Function]}
+            onLoad={[Function]}
+            onLoadStart={[Function]}
+            onProgress={[Function]}
+            placeholder={[]}
+            sfEffect={null}
+            source={
+              [
+                {
+                  "__packager_asset": true,
+                  "height": 1,
+                  "scale": 1,
+                  "uri": undefined,
+                  "width": 1,
+                },
+              ]
+            }
+            style={
+              {
+                "backgroundColor": "#E8EDF5",
+                "borderRadius": 29,
+                "height": 58,
+                "width": 58,
+              }
+            }
+            symbolSize={null}
+            symbolWeight={null}
+            transition={null}
+            width={58}
+          />
+          <View
+            style={
+              {
+                "flex": 1,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#1F2937",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 20,
+                  "fontWeight": "700",
+                }
+              }
+              testID="greeting-title"
+            >
+              ¡Hola Dr. Ramirez!
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#6B7280",
+                  "fontSize": 14,
+                  "fontWeight": "400",
+                  "marginTop": 2,
+                }
+              }
+            >
+              Bienvenida de nuevo
+            </Text>
+          </View>
+        </View>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#ffffff",
+                "borderColor": "#DBD4E2",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              false,
+            ]
+          }
+          testID="customize-quick-access-btn"
+        >
+          <Text
+            allowFontScaling={false}
+            selectable={false}
+            style={
+              [
+                {
+                  "color": "#141018",
+                  "fontSize": 20,
+                },
+                undefined,
+                {
+                  "fontFamily": "ionicons",
+                  "fontStyle": "normal",
+                  "fontWeight": "normal",
+                },
+                {},
+              ]
+            }
+          >
+            
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "backgroundColor": "#ffffff",
+              "borderColor": "#DBD4E2",
+              "borderRadius": 8,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "gap": 8,
+              "height": 46,
+              "paddingHorizontal": 16,
+            },
+            false,
+          ]
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          selectable={false}
+          style={
+            [
+              {
+                "color": "#60646C",
+                "fontSize": 20,
+              },
+              {
+                "opacity": 0.7,
+              },
+              {
+                "fontFamily": "ionicons",
+                "fontStyle": "normal",
+                "fontWeight": "normal",
+              },
+              {},
+            ]
+          }
+        >
+          
+        </Text>
+        <TextInput
+          autoCapitalize="none"
+          autoCorrect={false}
+          onBlur={[Function]}
+          onChangeText={[Function]}
+          onFocus={[Function]}
+          placeholder="Buscar pacientes, citas o tratamientos"
+          placeholderTextColor="#9E8BAC"
+          style={
+            {
+              "color": "#141018",
+              "flex": 1,
+              "fontSize": 12,
+              "height": "100%",
+              "paddingVertical": 0,
+            }
+          }
+          testID="home-search-input"
+          value=""
+        />
+      </View>
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#5B2D8B",
+              "borderRadius": 12,
+              "elevation": 4,
+              "flex": 1,
+              "paddingTop": 8,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 4,
+                "width": 0,
+              },
+              "shadowOpacity": 0.1,
+              "shadowRadius": 6,
+            },
+            {
+              "flex": 0,
+              "width": "100%",
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#ffffff",
+                "borderRadius": 12,
+                "padding": 12,
+              },
+              {
+                "gap": 16,
+                "padding": 20,
+              },
+            ]
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#1F2937",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                }
+              }
+            >
+              Resumen de hoy
+            </Text>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "opacity": 1,
+                  "paddingHorizontal": 4,
+                  "paddingVertical": 2,
+                }
+              }
+              testID="view-agenda-link"
+            >
+              <Text
+                style={
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 14,
+                    "fontWeight": "700",
+                  }
+                }
+              >
+                Ver agenda
+              </Text>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "alignItems": "stretch",
+                "flexDirection": "row",
+                "gap": 10,
+              }
+            }
+          >
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "borderRadius": 8,
+                    "borderWidth": 1,
+                    "flex": 1,
+                    "flexDirection": "row",
+                    "gap": 8,
+                    "minHeight": 76,
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 16,
+                  },
+                  {
+                    "backgroundColor": "#EAF7EE",
+                    "borderColor": "#8BD69E",
+                  },
+                ]
+              }
+              testID="metric-citas"
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 32,
+                      "fontWeight": "700",
+                      "lineHeight": 36,
+                    },
+                    {
+                      "color": "#2E7D32",
+                    },
+                  ]
+                }
+              >
+                2
+              </Text>
+              <Text
+                style={
+                  [
+                    {
+                      "flex": 1,
+                      "fontSize": 12,
+                      "fontWeight": "500",
+                      "lineHeight": 15,
+                    },
+                    {
+                      "color": "#2E7D32",
+                    },
+                  ]
+                }
+              >
+                Citas pendientes
+              </Text>
+            </View>
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "borderRadius": 8,
+                    "borderWidth": 1,
+                    "flex": 1,
+                    "flexDirection": "row",
+                    "gap": 8,
+                    "minHeight": 76,
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 16,
+                  },
+                  {
+                    "backgroundColor": "#FEF3E8",
+                    "borderColor": "#F7C293",
+                  },
+                ]
+              }
+              testID="metric-pacientes"
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 32,
+                      "fontWeight": "700",
+                      "lineHeight": 36,
+                    },
+                    {
+                      "color": "#D85A00",
+                    },
+                  ]
+                }
+              >
+                3
+              </Text>
+              <Text
+                style={
+                  [
+                    {
+                      "flex": 1,
+                      "fontSize": 12,
+                      "fontWeight": "500",
+                      "lineHeight": 15,
+                    },
+                    {
+                      "color": "#D85A00",
+                    },
+                  ]
+                }
+              >
+                Pacientes pendientes
+              </Text>
+            </View>
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "borderRadius": 8,
+                    "borderWidth": 1,
+                    "flex": 1,
+                    "flexDirection": "row",
+                    "gap": 8,
+                    "minHeight": 76,
+                    "paddingHorizontal": 10,
+                    "paddingVertical": 16,
+                  },
+                  {
+                    "backgroundColor": "#EBF1FC",
+                    "borderColor": "#AEC5F3",
+                  },
+                ]
+              }
+              testID="metric-examenes"
+            >
+              <Text
+                style={
+                  [
+                    {
+                      "fontSize": 32,
+                      "fontWeight": "700",
+                      "lineHeight": 36,
+                    },
+                    {
+                      "color": "#2F5EA8",
+                    },
+                  ]
+                }
+              >
+                4
+              </Text>
+              <Text
+                style={
+                  [
+                    {
+                      "flex": 1,
+                      "fontSize": 12,
+                      "fontWeight": "500",
+                      "lineHeight": 15,
+                    },
+                    {
+                      "color": "#2F5EA8",
+                    },
+                  ]
+                }
+              >
+                Exámenes pendientes
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#5B2D8B",
+              "borderRadius": 12,
+              "elevation": 4,
+              "flex": 1,
+              "paddingTop": 8,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 4,
+                "width": 0,
+              },
+              "shadowOpacity": 0.1,
+              "shadowRadius": 6,
+            },
+            {
+              "flex": 0,
+              "width": "100%",
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#ffffff",
+                "borderRadius": 12,
+                "padding": 12,
+              },
+              {
+                "gap": 16,
+                "padding": 20,
+              },
+            ]
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#1F2937",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                }
+              }
+            >
+              Accesos rápidos
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "alignItems": "stretch",
+                "flexDirection": "row",
+                "gap": 10,
+              }
+            }
+          >
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#EFE8F9",
+                    "borderColor": "#C7A8E8",
+                    "borderRadius": 8,
+                    "borderWidth": 1,
+                    "flex": 1,
+                    "gap": 6,
+                    "justifyContent": "center",
+                    "minHeight": 76,
+                    "paddingHorizontal": 8,
+                    "paddingVertical": 16,
+                  },
+                  false,
+                ]
+              }
+              testID="quick-access-agenda"
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#5B2D8B",
+                      "fontSize": 24,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "ionicons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Agenda
+              </Text>
+            </View>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#EFE8F9",
+                    "borderColor": "#C7A8E8",
+                    "borderRadius": 8,
+                    "borderWidth": 1,
+                    "flex": 1,
+                    "gap": 6,
+                    "justifyContent": "center",
+                    "minHeight": 76,
+                    "paddingHorizontal": 8,
+                    "paddingVertical": 16,
+                  },
+                  false,
+                ]
+              }
+              testID="quick-access-patients"
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#5B2D8B",
+                      "fontSize": 24,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "ionicons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Pacientes
+              </Text>
+            </View>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#EFE8F9",
+                    "borderColor": "#C7A8E8",
+                    "borderRadius": 8,
+                    "borderWidth": 1,
+                    "flex": 1,
+                    "gap": 6,
+                    "justifyContent": "center",
+                    "minHeight": 76,
+                    "paddingHorizontal": 8,
+                    "paddingVertical": 16,
+                  },
+                  false,
+                ]
+              }
+              testID="quick-access-treatments"
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#5B2D8B",
+                      "fontSize": 24,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "ionicons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+              <Text
+                style={
+                  {
+                    "color": "#5B2D8B",
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                    "textAlign": "center",
+                  }
+                }
+              >
+                Tratamientos
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#5B2D8B",
+              "borderRadius": 12,
+              "elevation": 4,
+              "flex": 1,
+              "paddingTop": 8,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 4,
+                "width": 0,
+              },
+              "shadowOpacity": 0.1,
+              "shadowRadius": 6,
+            },
+            {
+              "flex": 0,
+              "width": "100%",
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#ffffff",
+                "borderRadius": 12,
+                "padding": 12,
+              },
+              {
+                "gap": 16,
+                "padding": 20,
+              },
+            ]
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#1F2937",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                }
+              }
+            >
+              Notificaciones
+            </Text>
+          </View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "gap": 16,
+                  "justifyContent": "space-between",
+                },
+                false,
+              ]
+            }
+            testID="notification-item-notif-1"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "gap": 16,
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#E5DBF3",
+                    "borderRadius": 22,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  selectable={false}
+                  style={
+                    [
+                      {
+                        "color": "#5B2D8B",
+                        "fontSize": 22,
+                      },
+                      undefined,
+                      {
+                        "fontFamily": "ionicons",
+                        "fontStyle": "normal",
+                        "fontWeight": "normal",
+                      },
+                      {},
+                    ]
+                  }
+                >
+                  
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#1F2937",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                    }
+                  }
+                >
+                  Recordatorio de citas
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#6B7280",
+                      "fontSize": 12,
+                      "marginTop": 2,
+                    }
+                  }
+                >
+                  Tienes 3 citas pendientes para hoy
+                </Text>
+              </View>
+            </View>
+            <View
+              style={
+                {
+                  "paddingLeft": 4,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                selectable={false}
+                style={
+                  [
+                    {
+                      "color": "#60646C",
+                      "fontSize": 20,
+                    },
+                    undefined,
+                    {
+                      "fontFamily": "ionicons",
+                      "fontStyle": "normal",
+                      "fontWeight": "normal",
+                    },
+                    {},
+                  ]
+                }
+              >
+                
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;
