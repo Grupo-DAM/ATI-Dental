@@ -52,8 +52,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "ATI Dental necesita acceder a tus fotos para asignar una imagen de perfil al paciente.",
-          "microphonePermission": false
+          "photosPermission": "ATI Dental necesita acceder a tus fotos para asignar una imagen de perfil al paciente."
         }
       ],
       "expo-localization",
