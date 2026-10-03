@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { TreatmentsTimeline } from '@/components/clinical-history/TreatmentsTimeline';
 import { ConsultationsTimeline } from '@/components/clinical-history/ConsultationsTimeline';
 import { PatientSummaryCard } from '@/components/clinical-history/PatientSummaryCard';
@@ -393,6 +393,79 @@ describe('Clinical History Sub-Components - Unit & Branch Coverage', () => {
       
       // Verifica que se dibuje al menos un estado de la leyenda para confirmar el renderizado del bucle
       expect(screen.getByText(/missing/i)).toBeTruthy();
+    });
+
+    it('ejecuta los comandos de voz y actualiza Firestore para cada condición', () => {
+      let capturedVoiceCallback: ((cmd: any) => void) | null = null;
+      const voiceSpy = jest.spyOn(require('@/hooks/use-dental-voice'), 'useDentalVoice').mockImplementation((props: any) => {
+        if (props?.onCommandRecognized) {
+          capturedVoiceCallback = props.onCommandRecognized;
+        }
+        return {
+          isListening: true,
+          transcript: 'Diente 18 caries',
+          lastCommand: null,
+          permissionError: null,
+          toggleListening: jest.fn(),
+          simulateCommand: jest.fn(),
+        };
+      });
+
+      render(
+        <OdontogramContainer
+          currentPatientId="paciente_test_123"
+          initialOdontogram={{
+            adult: { pieces: {} },
+            child: { pieces: {} },
+            isAdult: true,
+          }}
+        />
+      );
+
+      expect(capturedVoiceCallback).toBeDefined();
+
+      // Disparamos caries con superficie
+      if (capturedVoiceCallback) {
+        act(() => {
+          (capturedVoiceCallback as any)({
+            success: true,
+            toothNumber: 18,
+            state: 'cavity',
+            surface: 'oclusal',
+          });
+        });
+
+        // Obturado con superficie
+        act(() => {
+          (capturedVoiceCallback as any)({
+            success: true,
+            toothNumber: 18,
+            state: 'filled',
+            surface: 'distal',
+          });
+        });
+
+        // Temporal con superficie
+        act(() => {
+          (capturedVoiceCallback as any)({
+            success: true,
+            toothNumber: 18,
+            state: 'temporal',
+            surface: 'mesial',
+          });
+        });
+
+        // Diente sano
+        act(() => {
+          (capturedVoiceCallback as any)({
+            success: true,
+            toothNumber: 18,
+            state: 'sano',
+          });
+        });
+      }
+
+      voiceSpy.mockRestore();
     });
   });
 

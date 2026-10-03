@@ -1,14 +1,18 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
-import { ALL_TOOTH_STATES, OdontogramData, ToothCondition } from '@/types/clinical-record';
+import { ALL_TOOTH_STATES, OdontogramData, ToothState, ToothCondition } from '@/types/clinical-record';
 import { useDentalPiecesPerCuadrant } from '@/hooks/use-dental-pieces-per-cuadrant';
 import { createOdontogramStyles } from '@/constants/styles/patients.style';
 import { DentalCuadrant } from '@/components/clinical-history/DentalPiece';
 import { FontSize } from '@/constants/theme';
+import { VoiceDictationBar } from './VoiceDictationBar';
+import { useDentalVoice } from '@/hooks/use-dental-voice';
+import { firestore } from '@/config/firebase';
+import { useLocalSearchParams } from 'expo-router';
 
 interface Props {
   readonly odontogram?: OdontogramData;
@@ -26,6 +30,80 @@ const DEFAULT_ODONTOGRAM: OdontogramData = {
   teeth: {}, 
 };
 
+const REVERSE_STATE_MAP: Record<string, string> = {
+  cavity: 'caries',
+  filled: 'obturado',
+  missing: 'ausente',
+  implant: 'implante',
+  root_canal: 'endodoncia',
+  fixed_dental_prosthesis: 'protesis_fija',
+  retained_root: 'remanente_radicular',
+  in_eruption: 'en_erupcion',
+  temporal: 'temporal',
+};
+
+async function saveOdontogramToFirestore(
+  patientId: string,
+  isAdult: boolean,
+  teethData: Record<number, any>
+) {
+  if (!patientId) return;
+
+  try {
+    const estadoPiezas: Record<string, any> = {};
+
+    Object.entries(teethData).forEach(([num, data]) => {
+      const states = data.generalStates || [];
+      const mainState = states[0] ? (REVERSE_STATE_MAP[states[0]] || states[0]) : null;
+
+      const caras: Record<string, string> = {};
+      if (data.surfacesStates) {
+        Object.entries(data.surfacesStates).forEach(([surface, sState]) => {
+          caras[surface] = REVERSE_STATE_MAP[sState] || sState;
+        });
+      }
+
+      if (mainState || Object.keys(caras).length > 0) {
+        estadoPiezas[num] = {
+          ...(mainState ? { estado_general: mainState } : {}),
+          ...(states.length > 0 ? { estados_generales: states.map((s: string) => REVERSE_STATE_MAP[s] || s) } : {}),
+          ...(Object.keys(caras).length > 0 ? { caras } : {}),
+        };
+      }
+    });
+
+    const query = await firestore()
+      .collection('odontogramas')
+      .where('pacienteId', '==', patientId)
+      .get();
+
+    if (!query.empty) {
+      const docs = [...query.docs];
+      docs.sort((a, b) => {
+        const timeA = new Date(a.data().fechaRegistro || 0).getTime();
+        const timeB = new Date(b.data().fechaRegistro || 0).getTime();
+        return timeB - timeA;
+      });
+      const docId = docs[0].id;
+      await firestore().collection('odontogramas').doc(docId).update({
+        estadoPiezas,
+        fechaRegistro: new Date().toISOString(),
+      });
+    } else {
+      await firestore().collection('odontogramas').add({
+        pacienteId: patientId,
+        tipo: isAdult ? 'adulto' : 'infantil',
+        fechaRegistro: new Date().toISOString(),
+        estadoPiezas,
+        notasGeneral: '',
+      });
+    }
+  } catch (error) {
+    console.error('[OdontogramContainer] Error guardando en Firebase:', error);
+  }
+}
+
+
 export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Props>) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -33,23 +111,105 @@ export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Prop
   const [selectedTooth, setSelectedTooth] = useState<number | null>(null);
 
   const safeOdontogram = odontogram || DEFAULT_ODONTOGRAM;
+  const { patientId: paramPatientId } = useLocalSearchParams<{ patientId?: string }>();
+  const currentPatientId = safeOdontogram.patientId || paramPatientId || '';
+
+  // Estado local reactivo para que los dientes cambien de color con la voz
+    const [teethData, setTeethData] = useState<Record<number, any>>(safeOdontogram.teeth || {});
+
+    useEffect(() => {
+        if (safeOdontogram.teeth && Object.keys(safeOdontogram.teeth).length > 0) {
+          setTeethData(safeOdontogram.teeth);
+        }
+      }, [safeOdontogram.teeth]);
+    // Hook de comandos de voz
+    const {
+      isListening,
+      transcript,
+      lastCommand,
+      permissionError,
+      toggleListening,
+    } = useDentalVoice({
+      isAdult: safeOdontogram.isAdult ?? true,
+      onCommandRecognized: (command) => {
+        if (command.success && command.toothNumber && command.state) {
+          const num = command.toothNumber;
+          const newState = command.state;
+
+          setTeethData((prev) => {
+            const currentPiece = prev[num] || { number: num, generalStates: [] };
+
+            let updatedStates: ToothState[] = [];
+            let updatedSurfaces = { ...(currentPiece.surfacesStates || {}) };
+
+            // 1. Si el comando es SANO
+            if (newState === 'sano') {
+              if (command.surface) {
+                // Si dijeron por ejemplo "13 distal sano", limpia solo esa cara
+                delete updatedSurfaces[command.surface];
+                updatedStates = currentPiece.generalStates || [];
+              } else {
+                // Diente sano completo -> limpia todo
+                updatedStates = [];
+                updatedSurfaces = {};
+              }
+            }
+            // 2. Si el comando es AUSENTE (Diente extraído o inexistente)
+            else if (newState === 'missing') {
+              // Limpia todas las afecciones y caras previas, dejando solo 'missing'
+              updatedStates = ['missing'];
+              updatedSurfaces = {};
+            }
+            // 3. Cualquier otra afección (caries, obturado, implante, prótesis, etc.)
+            else {
+              // Si el diente estaba marcado como 'ausente' previamente, se lo quitamos al agregarle una afección
+              const prevStates = (currentPiece.generalStates || []).filter((s) => s !== 'missing');
+              updatedStates = Array.from(new Set([...prevStates, newState as ToothState]));
+
+              if (command.surface) {
+                const surfaceValue = (newState === 'caries' ? 'cavity' : newState === 'obturado' ? 'filled' : newState);
+                updatedSurfaces[command.surface] = surfaceValue as any;
+              }
+            }
+
+            const updated = {
+              ...prev,
+              [num]: {
+                ...currentPiece,
+                generalStates: updatedStates,
+                surfacesStates: updatedSurfaces,
+              },
+            };
+
+            // Guarda automáticamente en Firebase Firestore
+            void saveOdontogramToFirestore(
+              currentPatientId,
+              safeOdontogram.isAdult ?? true,
+              updated
+            );
+
+            return updated;
+          });
+        }
+      },
+    });
 
   const cuadrantsData = useDentalPiecesPerCuadrant(
-    safeOdontogram.isAdult ?? true, 
-    safeOdontogram.teeth
+    safeOdontogram.isAdult ?? true,
+    teethData
   );
 
   React.useEffect(() => {
     if (selectedTooth !== null && onToothSelect) {
       // Buscamos los datos existentes en la base de datos para ese diente
-      const toothData = safeOdontogram.teeth?.[selectedTooth] || {
+      const toothData = teethData[selectedTooth] || safeOdontogram.teeth?.[selectedTooth] || {
         number: selectedTooth,
         generalStates: [],
       };
       onToothSelect(toothData);
-      
+
       // Reseteamos la selección interna para permitir volver a tocar el mismo diente luego
-      setSelectedTooth(null); 
+      setSelectedTooth(null);
     }
   }, [selectedTooth, safeOdontogram.teeth, onToothSelect]);
 
@@ -129,9 +289,52 @@ export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Prop
           ))}
         </View>
       </ScrollView>
+      {/* Barra de Transcripción y Feedback */}
+        <VoiceDictationBar
+          isListening={isListening}
+          transcript={transcript}
+          lastCommand={lastCommand}
+          permissionError={permissionError}
+        />
 
+        {/* BOTÓN FLOTANTE (FAB) IDÉNTICO AL FIGMA
+          Desaparece automáticamente cuando hay un diente seleccionado (!selectedTooth) */}
+            <TouchableOpacity
+              testID="btn-voice-dictation"
+              activeOpacity={0.85}
+              onPress={toggleListening}
+              style={[
+                fabStyles.fabButton,
+                { backgroundColor: isListening ? theme.alert : theme.main },
+              ]}
+            >
+              <Ionicons
+                name={isListening ? 'stop' : 'mic'}
+                size={28}
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
       {/* hint */}
 
     </View>
   );
 }
+
+const fabStyles = StyleSheet.create({
+  fabButton: {
+    alignSelf: 'flex-end',
+    marginRight: 4,
+    marginTop: 16,
+    marginBottom: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+  },
+});
