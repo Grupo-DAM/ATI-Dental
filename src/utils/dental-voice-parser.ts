@@ -59,6 +59,10 @@ const STATE_SYNONYMS: Record<string, ToothState | 'sano'> = {
   'corona': 'fixed_dental_prosthesis',
   'funda': 'fixed_dental_prosthesis',
   'puente': 'fixed_dental_prosthesis',
+  'protesis': 'fixed_dental_prosthesis',
+  'prótesis': 'fixed_dental_prosthesis',
+  'protesis fija': 'fixed_dental_prosthesis',
+  'prótesis fija': 'fixed_dental_prosthesis',
   // Raíz retenida (retained_root)
   'raiz': 'retained_root',
   'raíz': 'retained_root',
@@ -73,6 +77,7 @@ const STATE_SYNONYMS: Record<string, ToothState | 'sano'> = {
   'provisional': 'temporal',
   // Sano / Sin afección
   'sano': 'sano',
+  'sanos': 'sano',
   'limpio': 'sano',
   'normal': 'sano',
 };

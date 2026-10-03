@@ -23,22 +23,29 @@ function mapFirebaseToOdontogram(docData: any): OdontogramData {
     Object.entries(docData.estadoPiezas).forEach(([toothStr, data]: [string, any]) => {
       const toothNumber = parseInt(toothStr, 10);
       
-      // 1. Convertir el estado_general a tu arreglo de ToothState[]
-      const generalStates: ToothState[] = [];
-      if (data.estado_general && STATE_MAP[data.estado_general]) {
-        generalStates.push(STATE_MAP[data.estado_general]);
-      }
+        // 1. Convertir el estado_general o estados_generales a tu arreglo de ToothState[]
+        const generalStates: ToothState[] = [];
+        if (Array.isArray(data.estados_generales)) {
+          data.estados_generales.forEach((st: string) => {
+            if (STATE_MAP[st] && !generalStates.includes(STATE_MAP[st])) {
+              generalStates.push(STATE_MAP[st]);
+            }
+          });
+        } else if (data.estado_general && STATE_MAP[data.estado_general]) {
+          generalStates.push(STATE_MAP[data.estado_general]);
+        }
 
-      // 2. Convertir las caras/superficies mapeando el string en español al inglés
-      const surfacesStates: ToothCondition['surfacesStates'] = {};
-      if (data.caras) {
-        Object.entries(data.caras).forEach(([surface, stateStr]: [string, any]) => {
-          const mappedState = STATE_MAP[stateStr];
-          if (mappedState === 'cavity' || mappedState === 'filled' || mappedState === 'temporal') {
-            surfacesStates[surface as ToothSurface] = mappedState as 'caries' | 'obturado' | 'temporal';
-          }
-        });
-      }
+        // 2. Convertir las caras/superficies mapeando el string en español al inglés
+        const surfacesStates: ToothCondition['surfacesStates'] = {};
+        if (data.caras) {
+          Object.entries(data.caras).forEach(([surface, stateStr]: [string, any]) => {
+            const mappedState = STATE_MAP[stateStr];
+            // 👇 Permite que cualquier estado mapeado (implante, prótesis, etc.) se conserve en la cara:
+            if (mappedState) {
+              surfacesStates[surface as ToothSurface] = mappedState as any;
+            }
+          });
+        }
 
       teethRecord[toothNumber] = {
         number: toothNumber,

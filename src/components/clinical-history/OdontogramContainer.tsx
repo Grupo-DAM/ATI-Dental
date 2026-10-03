@@ -59,13 +59,14 @@ async function saveOdontogramToFirestore(
       const caras: Record<string, string> = {};
       if (data.surfacesStates) {
         Object.entries(data.surfacesStates).forEach(([surface, sState]) => {
-          caras[surface] = sState === 'caries' ? 'caries' : sState === 'obturado' ? 'obturado' : 'temporal';
+          caras[surface] = REVERSE_STATE_MAP[sState] || sState;
         });
       }
 
       if (mainState || Object.keys(caras).length > 0) {
         estadoPiezas[num] = {
           ...(mainState ? { estado_general: mainState } : {}),
+          ...(states.length > 0 ? { estados_generales: states.map((s: string) => REVERSE_STATE_MAP[s] || s) } : {}),
           ...(Object.keys(caras).length > 0 ? { caras } : {}),
         };
       }
@@ -134,37 +135,44 @@ export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Prop
         if (command.success && command.toothNumber && command.state) {
           const num = command.toothNumber;
           const newState = command.state;
+
           setTeethData((prev) => {
             const currentPiece = prev[num] || { number: num, generalStates: [] };
-            // Si el comando es "sano", vaciamos las afecciones
-            const updatedStates = newState === 'sano'
-              ? []
-              : Array.from(new Set([...(currentPiece.generalStates || []), newState as ToothState]));
-            // Mapeo de superficie si fue dictada por voz (ej. "oclusal")
-            const updatedSurfaces = newState === 'sano'
-              ? {}
-              : {
-                  ...(currentPiece.surfacesStates || {}),
-                  ...(command.surface
-                    ? { [command.surface]: (newState === 'cavity' ? 'caries' : newState === 'filled' ? 'obturado' : 'temporal') }
-                    : {}),
-                };
+
+            let updatedStates: ToothState[] = [];
+            let updatedSurfaces = { ...(currentPiece.surfacesStates || {}) };
+
+            // 1. Si el comando es SANO
+            if (newState === 'sano') {
+              if (command.surface) {
+                // Si dijeron por ejemplo "13 distal sano", limpia solo esa cara
+                delete updatedSurfaces[command.surface];
+                updatedStates = currentPiece.generalStates || [];
+              } else {
+                // Diente sano completo -> limpia todo
+                updatedStates = [];
+                updatedSurfaces = {};
+              }
+            }
+            // 2. Si el comando es AUSENTE (Diente extraído o inexistente)
+            else if (newState === 'missing') {
+              // Limpia todas las afecciones y caras previas, dejando solo 'missing'
+              updatedStates = ['missing'];
+              updatedSurfaces = {};
+            }
+            // 3. Cualquier otra afección (caries, obturado, implante, prótesis, etc.)
+            else {
+              // Si el diente estaba marcado como 'ausente' previamente, se lo quitamos al agregarle una afección
+              const prevStates = (currentPiece.generalStates || []).filter((s) => s !== 'missing');
+              updatedStates = Array.from(new Set([...prevStates, newState as ToothState]));
+
+              if (command.surface) {
+                const surfaceValue = (newState === 'caries' ? 'cavity' : newState === 'obturado' ? 'filled' : newState);
+                updatedSurfaces[command.surface] = surfaceValue as any;
+              }
+            }
 
             const updated = {
-                ...prev,
-                [num]: {
-                  ...currentPiece,
-                  generalStates: updatedStates,
-                  surfacesStates: updatedSurfaces,
-                },
-              };
-              // Guarda automáticamente en Firebase Firestore
-              void saveOdontogramToFirestore(
-                currentPatientId,
-                safeOdontogram.isAdult ?? true,
-                updated
-              );
-            return {
               ...prev,
               [num]: {
                 ...currentPiece,
@@ -172,6 +180,15 @@ export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Prop
                 surfacesStates: updatedSurfaces,
               },
             };
+
+            // Guarda automáticamente en Firebase Firestore
+            void saveOdontogramToFirestore(
+              currentPatientId,
+              safeOdontogram.isAdult ?? true,
+              updated
+            );
+
+            return updated;
           });
         }
       },
@@ -185,7 +202,7 @@ export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Prop
   React.useEffect(() => {
     if (selectedTooth !== null && onToothSelect) {
       // Buscamos los datos existentes en la base de datos para ese diente
-      const toothData = safeOdontogram.teeth?.[selectedTooth] || {
+      const toothData = teethData[selectedTooth] || safeOdontogram.teeth?.[selectedTooth] || {
         number: selectedTooth,
         generalStates: [],
       };
@@ -274,7 +291,6 @@ export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Prop
           transcript={transcript}
           lastCommand={lastCommand}
           permissionError={permissionError}
-          onToggleListening={toggleListening}
         />
 
         {/* BOTÓN FLOTANTE (FAB) IDÉNTICO AL FIGMA
