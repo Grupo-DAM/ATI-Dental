@@ -943,5 +943,71 @@ describe('useAuth Hook', () => {
       expect(result.current.user).toMatchObject({ uid: 'user_active_null_data' });
       spyExpired.mockRestore();
     });
+
+    it('checkSessionTimeout cancela unsubscribeProfileRef si está activo al expirar la sesión', async () => {
+      const mockUnsub = jest.fn();
+      const origOnSnapshot = (firestore() as any).onSnapshot;
+      (firestore() as any).onSnapshot = jest.fn(() => mockUnsub);
+
+      const spyGet = jest.spyOn(secureStorage, 'getLastActiveTimestamp')
+        .mockResolvedValueOnce(Date.now())
+        .mockResolvedValue(Date.now() - 31 * 24 * 60 * 60 * 1000);
+
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        await globalAny.triggerAuthStateChange({
+          uid: 'u-unsub-test',
+          email: 'unsub@test.com',
+          getIdToken: jest.fn().mockResolvedValue('token'),
+        });
+      });
+
+      (auth as any)().currentUser = { uid: 'u-unsub-test' };
+
+      await act(async () => {
+        await result.current.checkSessionTimeout();
+      });
+
+      expect(mockUnsub).toHaveBeenCalled();
+      (auth as any)().currentUser = null;
+      spyGet.mockRestore();
+      (firestore() as any).onSnapshot = origOnSnapshot;
+    });
+
+    it('intervalo en primer plano ejecuta checkSessionTimeout periódicamente', async () => {
+      jest.useFakeTimers();
+      const spyGet = jest.spyOn(secureStorage, 'getLastActiveTimestamp');
+      const mockFirebaseUser = {
+        uid: 'user_timer_active',
+        email: 'timer@example.com',
+        getIdToken: jest.fn().mockResolvedValue('token'),
+      };
+
+      renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        await globalAny.triggerAuthStateChange(mockFirebaseUser);
+      });
+
+      await act(async () => {
+        globalAny.triggerFirestoreSnapshot({
+          exists: () => true,
+          data: () => ({ estado: 'activo' }),
+          metadata: { fromCache: false },
+        });
+      });
+
+      (auth as any)().currentUser = { uid: 'user_timer_active' };
+
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(spyGet).toHaveBeenCalled();
+      (auth as any)().currentUser = null;
+      spyGet.mockRestore();
+      jest.useRealTimers();
+    });
   });
 });

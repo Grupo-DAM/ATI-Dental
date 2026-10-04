@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { AppState } from 'react-native';
 import { auth, firestore } from '../config/firebase';
 import {
@@ -45,7 +45,7 @@ interface AuthContextType {
   /** Registra una interacción del usuario actualizando su marca de tiempo de actividad */
   recordActivity: () => Promise<void>;
   /** Verifica si la sesión actual ha caducado por inactividad y expulsa si es necesario */
-  checkSessionTimeout: () => Promise<boolean>;
+  checkSessionTimeout: (refreshTimestampIfValid?: boolean) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -128,17 +128,16 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const unsubscribeProfileRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    let unsubscribeProfile: (() => void) | null = null;
-
     const unsubscribeAuth = auth().onAuthStateChanged(async (firebaseUser) => {
       setError(null);
 
       if (!firebaseUser) {
-        if (unsubscribeProfile) {
-          unsubscribeProfile();
-          unsubscribeProfile = null; // Evitamos ejecuciones duplicadas
+        if (unsubscribeProfileRef.current) {
+          unsubscribeProfileRef.current();
+          unsubscribeProfileRef.current = null; // Evitamos ejecuciones duplicadas
         }
 
         setUser(null);
@@ -153,9 +152,9 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
         const lastActive = await getLastActiveTimestamp();
         if (lastActive !== null && isSessionExpired(lastActive)) {
           console.log('[useAuth] Sesión caducada por inactividad. Cerrando sesión de forma segura...');
-          if (unsubscribeProfile) {
-            unsubscribeProfile();
-            unsubscribeProfile = null;
+          if (unsubscribeProfileRef.current) {
+            unsubscribeProfileRef.current();
+            unsubscribeProfileRef.current = null;
           }
           await auth().signOut().catch(() => {});
           await removeSessionToken().catch(() => {});
@@ -178,8 +177,8 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
         console.error('Error al guardar token JWT tras cambio de sesión:', err);
       }
 
-      if (unsubscribeProfile) unsubscribeProfile();
-      unsubscribeProfile = firestore()
+      if (unsubscribeProfileRef.current) unsubscribeProfileRef.current();
+      unsubscribeProfileRef.current = firestore()
         .collection('usuarios')
         .doc(firebaseUser.uid)
         .onSnapshot(
@@ -230,8 +229,9 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
 
     return () => {
       unsubscribeAuth();
-      if (unsubscribeProfile) {
-        unsubscribeProfile();
+      if (unsubscribeProfileRef.current) {
+        unsubscribeProfileRef.current();
+        unsubscribeProfileRef.current = null;
       }
     };
   }, []);
@@ -301,7 +301,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     }
   }, []);
 
-  const checkSessionTimeout = useCallback(async (): Promise<boolean> => {
+  const checkSessionTimeout = useCallback(async (refreshTimestampIfValid: boolean = true): Promise<boolean> => {
     const currentUser = auth().currentUser;
     if (!currentUser) return false;
 
@@ -309,13 +309,19 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
       const lastActive = await getLastActiveTimestamp();
       if (lastActive !== null && isSessionExpired(lastActive)) {
         console.log('[useAuth] Sesión expirada detectada por checkSessionTimeout. Cerrando sesión...');
+        if (unsubscribeProfileRef.current) {
+          unsubscribeProfileRef.current();
+          unsubscribeProfileRef.current = null;
+        }
         await auth().signOut().catch(() => {});
         await clearSessionData().catch(() => {});
         setUser(null);
         setLoading(false);
         return true;
       }
-      await saveLastActiveTimestamp(Date.now());
+      if (refreshTimestampIfValid) {
+        await saveLastActiveTimestamp(Date.now());
+      }
       return false;
     } catch (e) {
       console.warn('[useAuth] Error al verificar timeout en checkSessionTimeout:', e);
@@ -326,7 +332,7 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: string) => {
       if (nextAppState === 'active' && auth().currentUser) {
-        await checkSessionTimeout();
+        await checkSessionTimeout(true);
       }
     };
 
@@ -335,6 +341,18 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
       subscription.remove();
     };
   }, [checkSessionTimeout]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(() => {
+      checkSessionTimeout(false);
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [user, checkSessionTimeout]);
 
   const register = useCallback(async (email: string, password: string) => {
     setError(null);
