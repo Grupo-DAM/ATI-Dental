@@ -420,5 +420,66 @@ export const createSlidingModalStyles = (theme: any) => {
           borderRadius: Border.radius.regular,
           marginBottom: Spacing.four,
       },
-  })
-}
+  });
+};
+
+export const createModalOptionListStyles = (theme: any) =>
+  StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: Spacing.four || 24,
+    },
+    modalCard: {
+      width: '100%',
+      maxWidth: 380,
+      maxHeight: '80%',
+      backgroundColor: theme.backgroundElement,
+      borderRadius: Border.radius.wide || 16,
+      padding: Spacing.four || 20,
+      shadowColor: theme.shadowColor || '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 10,
+      elevation: 6,
+    },
+    modalTitle: {
+      fontSize: FontSize.h4 || 18,
+      fontWeight: '700',
+      color: theme.pageTitle,
+      marginBottom: Spacing.three || 16,
+      fontFamily: 'Open Sans',
+    },
+    modalOption: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 12,
+      borderRadius: Border.radius.regular || 8,
+      marginBottom: 4,
+    },
+    modalOptionSelected: {
+      backgroundColor: theme.accentBackground,
+    },
+    modalOptionContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      flex: 1,
+    },
+    modalOptionIcon: {
+      marginRight: 4,
+    },
+    modalOptionText: {
+      fontSize: 15,
+      color: theme.fieldLabel,
+      fontFamily: 'Open Sans',
+    },
+    modalOptionTextSelected: {
+      color: theme.logo || theme.main,
+      fontWeight: '600',
+    },
+  });

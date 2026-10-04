@@ -2,8 +2,36 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchClinicalRecord, deleteConsultation, updateConsultation, updateOdontogram } from '@/services/clinical-record-service';
 import { ClinicalRecord, Consultation } from '@/types/clinical-record';
 import { Treatment } from '@/services/treatment-service';
+import { Patient } from '@/services/patient-service';
 
 export type ClinicalTab = 'consultas' | 'odontograma' | 'tratamientos';
+
+export const DEFAULT_DEMO_PATIENT: Patient = {
+  id: 'demo-patient',
+  patientCode: 'PAC-0000',
+  fullName: 'Paciente de Prueba',
+  documentId: 'V-00.000.000',
+  birthDate: '1995-01-01',
+  gender: 'No especificado',
+  phone: '0000-0000000',
+  status: 'activo',
+  medicalHistory: [],
+  knownAllergies: [],
+};
+
+export const DEFAULT_DEMO_CLINICAL_RECORD: ClinicalRecord = {
+  patient: DEFAULT_DEMO_PATIENT,
+  consultations: [],
+  treatments: [],
+  odontogram: {
+    patientId: 'demo-patient',
+    updatedAt: new Date().toISOString(),
+    isAdult: true,
+    status: 'ready',
+    teeth: {},
+    notes: 'Odontograma en blanco de prueba.',
+  },
+};
 
 export function useClinicalRecord(patientId?: string) {
   const [record, setRecord] = useState<ClinicalRecord | null>(null);
@@ -14,6 +42,13 @@ export function useClinicalRecord(patientId?: string) {
   const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
 
   const loadData = useCallback(async () => {
+    if (patientId === 'demo-patient') {
+      setRecord(DEFAULT_DEMO_CLINICAL_RECORD);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     if (!patientId) {
       setError('No se proporcionó un ID de paciente');
       setLoading(false);

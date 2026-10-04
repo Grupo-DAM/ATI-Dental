@@ -52,7 +52,18 @@
     "home": "Home",
     "explore": "Patients",
     "agenda": "Schedule",
-    "profile": "Profile"
+    "profile": "Profile",
+    "createModal": {
+      "title": "Create new element",
+      "patient": "New Patient",
+      "appointment": "New Appointment",
+      "consultation": "New Consultation",
+      "treatment": "New Treatment",
+      "odontogram": "New Odontogram",
+      "user": "New User",
+      "accessDeniedTitle": "Access Denied",
+      "accessDeniedMessage": "You do not have sufficient permissions to register this type of element."
+    }
   },
   "navigation": {
     "title": "Navigation",

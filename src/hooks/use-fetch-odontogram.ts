@@ -79,7 +79,7 @@ export function useFetchOdontogram({ patientId, selectedDate }: UseFetchOdontogr
   const [odontogramError, setError] = useState<Error | null>(null);
 
       useEffect(() => {
-        if (!patientId) {
+        if (!patientId || patientId === 'demo-patient') {
           setLoading(false);
           return;
         }
