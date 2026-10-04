@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
 import { VerificationLinkModal } from '@/components/OTPModal';
 import { PageTitleLayout } from '@/components/page-title-layout';
+import { PersonalDataSection, SectionCard } from '@/components/form';
 import { BirthDatePicker, formatBirthDate } from '@/components/ui/birth-date-picker';
 import { FormSelectField } from '@/components/ui/form-field';
 import { ModalOptionList } from '@/components/ui/modal-option-list';
@@ -391,174 +392,85 @@ export default function ProfileScreen() {
         </>
       }
     >
-      <View style={styles.cardContainer}>
-        <View style={styles.cardHeader}>
-          <Ionicons name="person" size={24} color={theme.main} style={styles.cardHeaderIcon} />
-          <Text style={styles.cardHeaderTitle}>{t('profile.personalInfo')}</Text>
-        </View>
+      <PersonalDataSection
+        type="profile"
+        name={name}
+        onChangeName={(val) => {
+          setName(val);
+          if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
+        }}
+        nameError={errors.name}
+        lastName={lastName}
+        onChangeLastName={(val) => {
+          setLastName(val);
+          if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: undefined }));
+        }}
+        lastNameError={errors.lastName}
+        birthDate={birthDate}
+        onOpenDatePicker={handleOpenDatePicker}
+        gender={gender}
+        genderLabel={genderLabel}
+        onOpenGenderModal={() => setGenderModalVisible(true)}
+        country={country}
+        countryLabel={countryLabel}
+        onOpenCountryModal={() => setCountryModalVisible(true)}
+        email={email}
+        onChangeEmail={(val) => {
+          setEmail(val);
+          if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+        }}
+        emailError={errors.email}
+        phone={phone}
+        onChangePhone={setPhone}
+        bio={bio}
+        onChangeBio={setBio}
+      />
 
-        <View style={styles.cardBody}>
-          <View style={styles.avatarRow}>
-            <Image
-              source={require('@/assets/expo.icon/Assets/avatar.png')}
-              style={styles.avatar}
-              contentFit="cover"
-            />
-            <View style={styles.avatarActions}>
-              <Text style={styles.avatarLabel}>{t('profile.profilePicture')}</Text>
-              <View style={styles.avatarButtonsRow}>
-                <TouchableOpacity style={styles.btnCambiar}>
-                  <Text style={styles.btnCambiarText}>{t('profile.change')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity>
-                  <Text style={styles.btnEliminarText}>{t('profile.remove')}</Text>
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.avatarHelpText}>{t('profile.avatarHelp')}</Text>
-            </View>
-          </View>
-
-          <Text style={styles.label}>{t('profile.firstName')}</Text>
-          <TextInput
-            testID="input-name"
-            style={[styles.input, errors.name ? styles.inputError : null]}
-            placeholderTextColor={theme.placeholderColor}
-            value={name}
-            onChangeText={setName}
-          />
-          {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
-
-          <Text style={styles.label}>{t('profile.lastName')}</Text>
-          <TextInput
-            testID="input-lastname"
-            style={[styles.input, errors.lastName ? styles.inputError : null]}
-            placeholderTextColor={theme.placeholderColor}
-            value={lastName}
-            onChangeText={setLastName}
-          />
-          {errors.lastName ? <Text style={styles.errorText}>{errors.lastName}</Text> : null}
-
-          <View style={styles.row}>
-            <View style={styles.rowItemWide}>
-              <FormSelectField
-                testID="select-birth-date"
-                label={t('profile.birthDate')}
-                valueLabel={birthDate || t('profile.birthDatePlaceholder')}
-                isPlaceholder={!birthDate}
-                onPress={handleOpenDatePicker}
-                iconName="calendar-outline"
-              />
-            </View>
-            <View style={styles.rowItem}>
-              <FormSelectField
-                testID="select-gender"
-                label={t('profile.gender')}
-                valueLabel={genderLabel}
-                isPlaceholder={!gender}
-                onPress={() => setGenderModalVisible(true)}
-                iconName="chevron-down"
-              />
-            </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={styles.rowItemWide}>
-              <FormSelectField
-                testID="select-country"
-                label={t('profile.country')}
-                valueLabel={countryLabel}
-                isPlaceholder={!country}
-                onPress={() => setCountryModalVisible(true)}
-                iconName="chevron-down"
-              />
-            </View>
-          </View>
-
-          <Text style={styles.label}>{t('profile.email')}</Text>
-          <View style={[styles.inputWithIcon, errors.email ? styles.inputError : null]}>
-            <Image
-              source={require('@/assets/expo.icon/Assets/email.svg')}
-              style={styles.emailIcon}
-              contentFit="contain"
-              tintColor={theme.placeholderColor}
-            />
-            <TextInput
-              testID="input-email"
-              value={email}
-              onChangeText={setEmail}
-              style={styles.emailInput}
-              placeholderTextColor={theme.placeholderColor}
-              autoCapitalize="none"
-            />
-          </View>
-          {errors.email ? (
-            <Text style={styles.errorText}>{errors.email}</Text>
-          ) : null}
-
-          <Text style={styles.label}>{t('profile.phone')}</Text>
-          <TextInput
-            style={styles.input}
-            value={phone}
-            onChangeText={setPhone}
-            placeholderTextColor={theme.placeholderColor}
-          />
-
-          <Text style={styles.label}>{t('profile.bio')}</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={bio}
-            onChangeText={setBio}
-            placeholder={t('profile.bioPlaceholder')}
-            placeholderTextColor={theme.placeholderColor}
-            multiline
-          />
-        </View>
-      </View>
-      <View style={[styles.cardContainer, styles.cardSpacing]}>
-        <View style={styles.cardHeader}>
+      <SectionCard
+        title={t('profile.interfaceLanguage')}
+        icon={
           <Image
             source={require('@/assets/expo.icon/Assets/language.svg')}
             style={styles.languageIcon}
             contentFit="contain"
             tintColor={theme.main}
           />
-          <Text style={styles.cardHeaderTitle}>{t('profile.interfaceLanguage')}</Text>
-        </View>
-        <View style={styles.cardBody}>
-          <Text style={styles.languageDesc}>{t('profile.languageDesc')}</Text>
+        }
+        cardSpacing
+      >
+        <Text style={styles.languageDesc}>{t('profile.languageDesc')}</Text>
 
-          <TouchableOpacity
-            testID="btn-lang-es"
-            style={[styles.languageOption, language === 'es' && styles.languageOptionSelected]}
-            onPress={() => setLanguage('es')}
-          >
-            <View>
-              <Text style={styles.languageTitle}>{t('profile.spanish')}</Text>
-              <Text style={styles.languageSubtitle}>{t('profile.spanishDesc')}</Text>
-            </View>
-            {language === 'es' && (
-              <Image
-                source={require('@/assets/expo.icon/Assets/check_circle.svg')}
-                style={styles.checkIcon}
-                contentFit="contain"
-                tintColor={theme.main}
-              />
-            )}
-          </TouchableOpacity>
+        <TouchableOpacity
+          testID="btn-lang-es"
+          style={[styles.languageOption, language === 'es' && styles.languageOptionSelected]}
+          onPress={() => setLanguage('es')}
+        >
+          <View>
+            <Text style={styles.languageTitle}>{t('profile.spanish')}</Text>
+            <Text style={styles.languageSubtitle}>{t('profile.spanishDesc')}</Text>
+          </View>
+          {language === 'es' && (
+            <Image
+              source={require('@/assets/expo.icon/Assets/check_circle.svg')}
+              style={styles.checkIcon}
+              contentFit="contain"
+              tintColor={theme.main}
+            />
+          )}
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            testID="btn-lang-en"
-            style={[styles.languageOption, language === 'en' && styles.languageOptionSelected]}
-            onPress={() => setLanguage('en')}
-          >
-            <View>
-              <Text style={styles.languageTitle}>{t('profile.english')}</Text>
-              <Text style={styles.languageSubtitle}>{t('profile.englishDesc')}</Text>
-            </View>
-            {language === 'en' && <Ionicons name="checkmark-circle" size={24} color={theme.main} />}
-          </TouchableOpacity>
-        </View>
-      </View>
+        <TouchableOpacity
+          testID="btn-lang-en"
+          style={[styles.languageOption, language === 'en' && styles.languageOptionSelected]}
+          onPress={() => setLanguage('en')}
+        >
+          <View>
+            <Text style={styles.languageTitle}>{t('profile.english')}</Text>
+            <Text style={styles.languageSubtitle}>{t('profile.englishDesc')}</Text>
+          </View>
+          {language === 'en' && <Ionicons name="checkmark-circle" size={24} color={theme.main} />}
+        </TouchableOpacity>
+      </SectionCard>
 
       <View style={styles.actionsRow}>
         <TouchableOpacity style={styles.cancelBtn}>
