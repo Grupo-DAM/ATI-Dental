@@ -438,4 +438,25 @@ describe('RegisterConsultationScreen', () => {
     // Dismiss toast
     fireEvent.press(getByTestId('btn-dismiss-toast'));
   });
+
+  it('permite alternar la visualización del odontograma interactivo', async () => {
+    const { getByTestId, queryByTestId } = render(<RegisterConsultationScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('btn-toggle-interactive-odontogram')).toBeTruthy();
+    });
+
+    expect(queryByTestId('interactive-odontogram-container')).toBeNull();
+
+    // Abrir odontograma interactivo
+    fireEvent.press(getByTestId('btn-toggle-interactive-odontogram'));
+
+    await waitFor(() => {
+      expect(getByTestId('interactive-odontogram-container')).toBeTruthy();
+    });
+
+    // Ocultar odontograma interactivo
+    fireEvent.press(getByTestId('btn-toggle-interactive-odontogram'));
+    expect(queryByTestId('interactive-odontogram-container')).toBeNull();
+  });
 });

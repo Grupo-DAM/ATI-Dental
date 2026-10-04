@@ -13,6 +13,8 @@ import { useTranslation } from 'react-i18next';
 import { PageTitleLayout } from '@/components/page-title-layout';
 import { PatientSummaryCard } from '@/components/clinical-history/PatientSummaryCard';
 import { AppointmentSelector } from '@/components/consultation/AppointmentSelector';
+import { OdontogramContainer } from '@/components/clinical-history/OdontogramContainer';
+import { useFetchOdontogram } from '@/hooks/use-fetch-odontogram';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { NotificationToast } from '@/components/notification-toast';
 import { useTheme } from '@/hooks/use-theme';
@@ -59,6 +61,11 @@ export default function RegisterConsultationScreen() {
   const [odontograma, setOdontograma] = useState<string>(
     'Sin anomalías clínicas registradas. Odontograma base completado.'
   );
+  const [showInteractiveOdontogram, setShowInteractiveOdontogram] = useState<boolean>(false);
+  const { odontogram: fetchedOdontogram, loading: loadingOdontogram } = useFetchOdontogram({
+    patientId,
+    isAdult: true,
+  });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Modales y Notificaciones
@@ -424,24 +431,70 @@ export default function RegisterConsultationScreen() {
             </Text>
           </View>
           <View style={styles.odontogramCard}>
-            <TouchableOpacity
-              style={styles.odontogramButton}
-              activeOpacity={0.7}
-              testID="btn-update-odontogram"
-              onPress={() => {
-                setOdontograma(
-                  'Odontograma inspeccionado y actualizado: sin lesiones cariosas activas, restauraciones intactas.'
-                );
-                if (formErrors.odontograma) {
-                  setFormErrors((prev) => ({ ...prev, odontograma: '' }));
-                }
-              }}
-            >
-              <Ionicons name="sparkles-outline" size={16} color={theme.main} />
-              <Text style={styles.odontogramButtonText}>
-                {t('registerConsultation.updateOdontogram', 'Actualizar Odontograma')}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.odontogramActionsRow}>
+              <TouchableOpacity
+                style={styles.odontogramButton}
+                activeOpacity={0.7}
+                testID="btn-update-odontogram"
+                onPress={() => {
+                  setOdontograma(
+                    'Odontograma inspeccionado y actualizado: sin lesiones cariosas activas, restauraciones intactas.'
+                  );
+                  if (formErrors.odontograma) {
+                    setFormErrors((prev) => ({ ...prev, odontograma: '' }));
+                  }
+                }}
+              >
+                <Ionicons name="sparkles-outline" size={16} color={theme.main} />
+                <Text style={styles.odontogramButtonText}>
+                  {t('registerConsultation.updateOdontogram', 'Actualizar Odontograma')}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.toggleOdontogramButton}
+                activeOpacity={0.7}
+                testID="btn-toggle-interactive-odontogram"
+                onPress={() => setShowInteractiveOdontogram((prev) => !prev)}
+              >
+                <Ionicons
+                  name={showInteractiveOdontogram ? 'eye-off-outline' : 'color-palette-outline'}
+                  size={16}
+                  color={theme.main}
+                />
+                <Text style={styles.toggleOdontogramButtonText}>
+                  {showInteractiveOdontogram
+                    ? t('registerConsultation.hideInteractiveOdontogram', 'Ocultar Odontograma')
+                    : t('registerConsultation.showInteractiveOdontogram', 'Ver Odontograma')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {showInteractiveOdontogram && (
+              <View style={styles.odontogramContainerWrapper} testID="interactive-odontogram-container">
+                {loadingOdontogram ? (
+                  <ActivityIndicator size="small" color={theme.main} style={{ marginVertical: 12 }} />
+                ) : (
+                  <OdontogramContainer
+                    odontogram={fetchedOdontogram}
+                    onToothSelect={(tooth) => {
+                      const statesStr =
+                        tooth.generalStates && tooth.generalStates.length > 0
+                          ? tooth.generalStates.join(', ')
+                          : 'revisada/sana';
+                      const toothDetail = `Pieza ${tooth.number}: ${statesStr}`;
+                      setOdontograma((prev) => {
+                        if (prev.includes(`Pieza ${tooth.number}`)) return prev;
+                        return prev.trim().length > 0 ? `${prev.trim()}\n${toothDetail}` : toothDetail;
+                      });
+                      if (formErrors.odontograma) {
+                        setFormErrors((prev) => ({ ...prev, odontograma: '' }));
+                      }
+                    }}
+                  />
+                )}
+              </View>
+            )}
 
             <TextInput
               testID="input-odontograma"

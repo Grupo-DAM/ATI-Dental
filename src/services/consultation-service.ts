@@ -1,8 +1,9 @@
-import { firestore } from '@/config/firebase';
+import { auth, firestore } from '@/config/firebase';
 import { Config } from '@/constants/config';
 import { getSessionToken } from '@/utils/secure-storage';
 import { Consultation } from '@/types/clinical-record';
 
+export const HISTORIAS_CLINICAS_COLLECTION = 'historias_clinicas';
 export const CONSULTATIONS_COLLECTION = 'consultas';
 export const APPOINTMENTS_COLLECTION = 'citas';
 
@@ -175,14 +176,37 @@ export async function registerConsultationRecord(
 
   // 2. Persistencia en Firestore si WebAPI no completó o para redundancia
   try {
+    let currentUserId: string | null = null;
+    try {
+      if (typeof auth === 'function') {
+        currentUserId = auth()?.currentUser?.uid || null;
+      }
+    } catch {
+      // Ignored in test environment
+    }
+
+    const consultationDoc = {
+      ...consultationPayload,
+      pacienteId: data.patientId,
+      patientId: data.patientId,
+      fechaConsulta: consultationPayload.consultationDate,
+      motivo: data.motivo,
+      diagnostico: data.diagnostico,
+      tratamiento: data.tratamientoRecetado,
+      tratamientoRecetado: data.tratamientoRecetado,
+      tratamientosRealizados: data.tratamientoRecetado,
+      notesEvolucion: data.observaciones,
+      observaciones: data.observaciones,
+      notas: data.observaciones,
+      appointmentId: data.appointmentId || null,
+      odontograma: data.odontograma,
+      odontologoId: currentUserId,
+      createdAt: new Date().toISOString(),
+    };
+
     const docRef = await firestore()
-      .collection(CONSULTATIONS_COLLECTION)
-      .add({
-        ...consultationPayload,
-        appointmentId: data.appointmentId || null,
-        odontograma: data.odontograma,
-        createdAt: new Date().toISOString(),
-      });
+      .collection(HISTORIAS_CLINICAS_COLLECTION)
+      .add(consultationDoc);
     consultationPayload.id = docRef.id;
   } catch (firestoreError: any) {
     // Si no hubo éxito en la API y Firestore falló, retornamos error de red
