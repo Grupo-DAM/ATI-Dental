@@ -195,7 +195,12 @@ jest.mock('@react-native-community/netinfo', () => {
       isInternetReachable: true,
     }
   };
-});jest.mock('@react-native-community/netinfo', () => {
+});
+
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);
+jest.mock('@react-native-community/netinfo', () => {
  const defaultState = {
    type: 'wifi',
    isConnected: true,

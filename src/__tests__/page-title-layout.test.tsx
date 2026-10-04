@@ -32,12 +32,18 @@ jest.mock('@/components/breadcrumb', () => {
   return {
     Breadcrumb: ({ parent, current }: any) => (
       <View testID="mock-breadcrumb">
-        <Text>{parent}</Text>
-        <Text>{current}</Text>
+        {parent ? <Text testID="bc-parent">{parent}</Text> : null}
+        {current ? <Text testID="bc-current">{current}</Text> : null}
       </View>
     ),
   };
 });
+
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
 
 describe('PageTitleLayout', () => {
   it('renders title, subtitle, breadcrumb, header, and children correctly with direct strings', () => {
@@ -55,8 +61,8 @@ describe('PageTitleLayout', () => {
 
     expect(getByTestId('custom-layout')).toBeTruthy();
     expect(getByTestId('mock-app-header')).toBeTruthy();
-    expect(getByText('Inicio')).toBeTruthy();
-    expect(getByText('Módulo')).toBeTruthy();
+    expect(getByTestId('bc-parent')).toBeTruthy();
+    expect(getByTestId('bc-current')).toBeTruthy();
     expect(getByText('Mi Título')).toBeTruthy();
     expect(getByText('Mi Subtítulo')).toBeTruthy();
     expect(getByText('Contenido Hijo')).toBeTruthy();
@@ -65,18 +71,55 @@ describe('PageTitleLayout', () => {
   it('renders title and breadcrumb keys with translation and modals', () => {
     const { getByText } = render(
       <PageTitleLayout
-        titleKey="tabs.home"
-        subtitleKey="tabs.explore"
-        parentBreadcrumbKey="tabs.agenda"
-        currentBreadcrumbKey="tabs.profile"
+        titleKey="common.title"
+        subtitleKey="common.subtitle"
+        parentBreadcrumbKey="common.parent"
+        currentBreadcrumbKey="common.current"
         modals={<View testID="mock-modal"><Text>Modal Activo</Text></View>}
       >
         <Text>Contenido</Text>
       </PageTitleLayout>
     );
 
+    expect(getByText('common.title')).toBeTruthy();
+    expect(getByText('common.subtitle')).toBeTruthy();
     expect(getByText('Modal Activo')).toBeTruthy();
     expect(getByText('Contenido')).toBeTruthy();
+  });
+
+  it('renderiza solo con titleKey sin subtitleKey', () => {
+    const { getByText, queryByText } = render(
+      <PageTitleLayout
+        titleKey="common.onlyTitle"
+        currentBreadcrumbKey="common.current"
+      />
+    );
+
+    expect(getByText('common.onlyTitle')).toBeTruthy();
+    expect(queryByText('common.subtitle')).toBeNull();
+  });
+
+  it('renderiza solo con subtitleKey sin titleKey', () => {
+    const { getByText, queryByText } = render(
+      <PageTitleLayout
+        subtitleKey="common.onlySubtitle"
+        currentBreadcrumbKey="common.current"
+      />
+    );
+
+    expect(getByText('common.onlySubtitle')).toBeTruthy();
+    expect(queryByText('common.title')).toBeNull();
+  });
+
+  it('renderiza sin titleKey ni subtitleKey (como en Home)', () => {
+    const { getByTestId, queryByText } = render(
+      <PageTitleLayout currentBreadcrumbKey="tabs.home">
+        <View testID="home-content" />
+      </PageTitleLayout>
+    );
+
+    expect(getByTestId('home-content')).toBeTruthy();
+    expect(queryByText('common.title')).toBeNull();
   });
 
   it('renders loading state when authLoading is true', () => {

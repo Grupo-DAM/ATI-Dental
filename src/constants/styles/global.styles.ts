@@ -207,6 +207,24 @@ export const createGlobalStyles = (theme: any) => StyleSheet.create({
       lineHeight: 20,
       fontFamily: 'Open Sans',
     },
+    inputShell: {
+      backgroundColor: theme.backgroundElement,
+      borderColor: theme.cardSeparator,
+      borderWidth: Border.width.regular,
+      borderRadius: Border.radius.tiny,
+      paddingHorizontal: Spacing.three,
+      paddingVertical: Spacing.two,
+    },
+    overlay: {
+      flex: Spacing.quarter,
+      backgroundColor: theme.overlayOpacity,
+    },
+    label: {
+      fontSize: FontSize.h5,
+      fontWeight: FontWeight.semibold,
+      color: theme.textNames,
+      marginVertical: Spacing.two,
+    },
 });
 
 export const createInputFieldStyles = (theme: any) => {
@@ -367,7 +385,7 @@ export const createCardContainerStyles = (theme: any) => {
     cardWrapper: {
       flex: 1,
       paddingTop: Spacing.two,
-      borderRadius: 12,
+      borderRadius: Border.radius.wide,
       backgroundColor: theme.main,
       ...global.shadow,
     },
@@ -380,27 +398,22 @@ export const createCardContainerStyles = (theme: any) => {
 };
 
 export const createFormFieldStyles = (theme: any) => {
-
+  const global = createGlobalStyles(theme);
   return StyleSheet.create({
     label: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: theme.textNames,
+      ...global.label,
       marginTop: 15,
-      marginBottom: 8,
+      marginBottom: Spacing.two,
     },
     requiredMark: {
       color: theme.error,
       fontWeight: '700',
     },
     inputShell: {
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      borderRadius: 6,
+      ...global.inputShell,
       paddingHorizontal: 12,
       minHeight: 46,
       justifyContent: 'center',
-      backgroundColor: theme.backgroundElement,
     },
     inputWithIcon: {
       flexDirection: 'row',
@@ -475,4 +488,34 @@ export const createFormFieldStyles = (theme: any) => {
       fontSize: 15,
     },
   });
+}
+
+export const createSlidingModalStyles = (theme: any) => {
+  const global = createGlobalStyles(theme);
+  return StyleSheet.create({
+      overlay: {
+          ...global.overlay,
+          justifyContent: 'flex-end',
+      },
+      wrapper: {
+        paddingTop: Spacing.two,
+        borderRadius: Border.radius.big,
+      },
+      sheet: {
+          backgroundColor: theme.backgroundElement,
+          borderTopLeftRadius: Border.radius.big,
+          borderTopRightRadius: Border.radius.big,
+          paddingHorizontal: Spacing.four,
+          paddingTop: Spacing.three,
+          paddingBottom: BottomTabInset,
+          alignItems: 'center',
+      },
+      handle: {
+          width: 40,
+          height: 4,
+          backgroundColor: theme.cardSeparator,
+          borderRadius: Border.radius.regular,
+          marginBottom: Spacing.four,
+      },
+  })
 }

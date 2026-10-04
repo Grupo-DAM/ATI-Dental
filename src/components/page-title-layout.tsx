@@ -54,7 +54,7 @@ export function PageTitleLayout({
 
   const finalTitle = titleKey ? t(titleKey) : (title ?? '');
   const finalSubtitle = subtitleKey ? t(subtitleKey) : subtitle;
-  const finalParentBreadcrumb = parentBreadcrumbKey ? t(parentBreadcrumbKey) : (parentBreadcrumb ?? '');
+  const finalParentBreadcrumb = parentBreadcrumbKey ? t(parentBreadcrumbKey) : (parentBreadcrumb || undefined);
   const finalCurrentBreadcrumb = currentBreadcrumbKey ? t(currentBreadcrumbKey) : (currentBreadcrumb ?? '');
 
   if (authLoading) {
@@ -79,21 +79,28 @@ export function PageTitleLayout({
     );
   }
 
+  const hasTitleSection = Boolean(titleKey || subtitleKey || title || subtitle);
+
   const renderTitleSection = () => {
+    if (!hasTitleSection) {
+      return null;
+    }
+
     if (headerRight) {
       return (
         <View style={styles.titleSection}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text style={styles.mainTitle}>{finalTitle}</Text>
+            {finalTitle ? <Text style={styles.mainTitle}>{finalTitle}</Text> : null}
             {headerRight}
           </View>
           {finalSubtitle ? <Text style={styles.subtitle}>{finalSubtitle}</Text> : null}
         </View>
       );
     }
+
     return (
       <View style={styles.titleSection}>
-        <Text style={styles.mainTitle}>{finalTitle}</Text>
+        {finalTitle ? <Text style={styles.mainTitle}>{finalTitle}</Text> : null}
         {finalSubtitle ? <Text style={styles.subtitle}>{finalSubtitle}</Text> : null}
       </View>
     );

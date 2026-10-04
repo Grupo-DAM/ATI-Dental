@@ -694,5 +694,70 @@
       "reasonRequired": "Enter the reason for the appointment.",
       "durationRequired": "Select the estimated duration."
     }
+  },
+  "home": {
+    "greeting": "Hello {{name}}!",
+    "defaultName": "Dr. Ramirez",
+    "welcomeBack": "Welcome back",
+    "searchPlaceholder": "Search patients, appointments or treatments",
+    "todaySummary": "Today's summary",
+    "viewAgenda": "View agenda",
+    "pendingAppointments": "Pending\nappointments",
+    "pendingPatients": "Pending\npatients",
+    "pendingExams": "Pending\nexams",
+    "quickAccess": "Quick access",
+    "agenda": "Agenda",
+    "patients": "Patients",
+    "treatments": "Treatments",
+    "reports": "Reports",
+    "users": "Users",
+    "registerPatient": "Register",
+    "contact": "Contact",
+    "profile": "Profile",
+    "notifications": "Notifications",
+    "appointmentReminder": "Appointment reminder",
+    "reminderDesc": "You have {{count}} pending appointments for today",
+    "noNotifications": "No pending notifications",
+    "offlineTitle": "Offline mode",
+    "offlineDesc": "Displaying cached data. Please check your connection.",
+    "retry": "Retry",
+    "errorLoading": "Error loading dashboard summary",
+    "searchResults": "Search results",
+    "noResults": "No results found for \"{{query}}\"",
+    "customizeQuickAccess": "Customize quick access",
+    "save": "Save",
+    "close": "Close",
+    "categories": {
+      "patients": "Patients",
+      "appointments": "Appointments",
+      "treatments": "Treatments",
+      "modules": "Modules"
+    }
+  },
+  "odontogram": {
+    "toothStatus": {
+      "cavity": "Cavity",
+      "filled": "Filled",            
+      "missing": "Missing",   
+      "implant": "Implant",           
+      "root_canal": "Root Canal",         
+      "fixed_dental_prosthesis": "Prosthesis",      
+      "retained_root": "Retained Root",
+      "in_eruption": "In Eruption",         
+      "temporal": "Temporal"
+    },
+    "adult": "Adult",
+    "pediatric": "Pediatric",
+    "toothConditionModal": {
+      "selectedPiece": "Selected Piece",
+      "state": "State",
+      "dentalSurface": "Dental Surface",
+      "optional": "(optional)",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes...",
+      "saveChange": "Save Change",
+      "cancel": "Cancel",
+      "applyToSurface": "State of surface"
+    }
   }
 }

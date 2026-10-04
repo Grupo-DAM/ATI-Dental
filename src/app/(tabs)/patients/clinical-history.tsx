@@ -17,6 +17,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
 import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
 import { useClinicalRecord } from '@/hooks/use-clinical-record';
+import { useFetchOdontogram } from '@/hooks/use-fetch-odontogram';
 import { PatientSummaryCard } from '@/components/clinical-history/PatientSummaryCard';
 import { ClinicalHistoryTabs } from '@/components/clinical-history/ClinicalHistoryTabs';
 import { ConsultationsTimeline } from '@/components/clinical-history/ConsultationsTimeline';
@@ -26,8 +27,9 @@ import { ConsultationDetailModal } from '@/components/clinical-history/Consultat
 import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { deleteTreatment } from '@/services/treatment-service';
-import { Consultation } from '@/types/clinical-record';
+import { Consultation, ToothCondition } from '@/types/clinical-record';
 import { createClinicalHistoryStyles } from '@/constants/styles/patients.style';
+import { ToothConditionModal } from '@/components/clinical-history/ToothConditionModal';
 
 function ageFromBirthDate(birthDate?: string): string {
   if (!birthDate) return '';
@@ -69,6 +71,7 @@ export default function ClinicalHistoryScreen() {
     refetch,
     deleteConsultation,
     updateConsultation,
+    updateOdontogram,
   } = useClinicalRecord(hasAccess ? patientId : undefined);
 
   const skipInitialFocus = useRef(true);
@@ -84,6 +87,8 @@ export default function ClinicalHistoryScreen() {
   );
 
   const [isEditingConsultation, setIsEditingConsultation] = useState(false);
+
+  const [editingTooth, setEditingTooth] = useState<ToothCondition | null>(null);
 
   // Modal de confirmación para eliminar
   const [deleteModalConfig, setDeleteModalConfig] = useState<{
@@ -109,6 +114,14 @@ export default function ClinicalHistoryScreen() {
     type: 'success',
     title: '',
     message: '',
+  });
+
+  // Carga el odontograma 
+  const [selectedConsultationDate, ] = useState<string | null>(null);
+
+  const { odontogram, loading } = useFetchOdontogram({
+    patientId: patientId ?? '',
+    selectedDate: selectedConsultationDate, // Si es null, el hook trae el último odontograma
   });
 
   const handleEditPatient = () => {
@@ -220,6 +233,34 @@ export default function ClinicalHistoryScreen() {
         type: 'error',
         title: 'Error',
         message: err?.message || 'No se pudo actualizar la consulta.',
+      });
+    }
+  };
+
+  const handleSaveToothCondition = async (updatedTooth: ToothCondition) => {
+    try {
+      console.log('Datos del diente listos para Firebase:', updatedTooth);
+      // Aquí invocarás tu servicio de actualización de Firebase en el futuro.
+       const isAdultMode = record?.odontogram?.isAdult ?? true;
+
+      // Invocamos el nuevo callback del hook expuesto
+      const success = await updateOdontogram(updatedTooth, isAdultMode);
+      if (success) {
+        setEditingTooth(null); // Cerramos el modal tras guardar con éxito
+        setToastConfig({
+          visible: true,
+          type: 'success',
+          title: t('odontogram.toast.saveSuccessTitle', 'Pieza actualizada'),
+          message: t('odontogram.toast.saveSuccessMessage', 'El estado del diente ha sido registrado correctamente.'),
+        });
+      }
+    } catch (err) {
+      // We catch this to show the error in the toast modal
+      setToastConfig({
+        visible: true,
+        type: 'error',
+        title: 'Error',
+        message: 'No se pudieron guardar las modificaciones de la pieza dental.',
       });
     }
   };
@@ -347,7 +388,16 @@ export default function ClinicalHistoryScreen() {
 
         {/* Pestaña: Odontograma (Escenario 2 - Contenedor Preparado) */}
         {activeTab === 'odontograma' && (
-          <OdontogramContainer odontogram={record.odontogram} />
+          loading ? (
+            <ActivityIndicator size="large" />
+          ) : (
+            // Se renderiza el odontograma real de la base de datos.
+            // Si viene undefined, el contenedor usará de forma segura su DEFAULT_ODONTOGRAM.
+            <OdontogramContainer 
+              odontogram={odontogram}
+              onToothSelect={(tooth) => setEditingTooth(tooth)}
+            />
+          )
         )}
 
         {/* Pestaña: Tratamientos */}
@@ -427,6 +477,15 @@ export default function ClinicalHistoryScreen() {
         title={toastConfig.title}
         message={toastConfig.message}
         onDismiss={() => setToastConfig((prev) => ({ ...prev, visible: false }))}
+      />
+
+      {/* Tooth Condition Modal */}
+      <ToothConditionModal
+        visible={Boolean(editingTooth)}
+        tooth={editingTooth ?? undefined}
+        isSubmitting={false}
+        onConfirm={handleSaveToothCondition}
+        onCancel={() => setEditingTooth(null)}
       />
     </View>
   );
