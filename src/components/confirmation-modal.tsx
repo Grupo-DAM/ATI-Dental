@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,10 @@ import {
   Pressable,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface ConfirmationModalProps {
   visible: boolean;
@@ -25,7 +25,89 @@ export interface ConfirmationModalProps {
   onCancel: () => void;
 }
 
-/** Generic confirmation bottom sheet modal */
+export const createConfirmationModalStyles = (theme: any, insets?: { bottom?: number }) => {
+  const bottomInset = insets?.bottom ?? 0;
+  const paddingBottom = Math.max(bottomInset, 24);
+
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: theme.backgroundElement,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingHorizontal: 24,
+      paddingTop: 12,
+      paddingBottom,
+      alignItems: 'center',
+    },
+    handle: {
+      width: 40,
+      height: 4,
+      backgroundColor: theme.cardSeparator,
+      borderRadius: 2,
+      marginBottom: 20,
+    },
+    iconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: theme.pageTitle,
+      fontFamily: 'Open Sans',
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    message: {
+      fontSize: 14,
+      color: theme.pageSubtitle,
+      fontFamily: 'Open Sans',
+      textAlign: 'center',
+      marginBottom: 32,
+      lineHeight: 20,
+      paddingHorizontal: 12,
+    },
+    confirmBtn: {
+      width: '100%',
+      height: 48,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    confirmText: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: '#FFFFFF',
+      fontFamily: 'Open Sans',
+    },
+    cancelBtn: {
+      width: '100%',
+      height: 48,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.backgroundSecondary || theme.cardSeparator,
+    },
+    cancelText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.fieldLabel,
+      fontFamily: 'Open Sans',
+    },
+  });
+};
+
+/** Generic confirmation bottom sheet modal supporting dark mode and safe area insets */
 export function ConfirmationModal({
   visible,
   title,
@@ -38,9 +120,15 @@ export function ConfirmationModal({
   onConfirm,
   onCancel,
 }: Readonly<ConfirmationModalProps>) {
-  const iconColor = isDestructive ? Colors.light.error : Colors.light.main;
-  const iconBgColor = isDestructive ? '#FEE2E2' : '#F3E8FF';
-  const confirmBgColor = isDestructive ? Colors.light.error : Colors.light.main;
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const modalStyles = useMemo(() => createConfirmationModalStyles(theme, insets), [theme, insets]);
+
+  const iconColor = isDestructive ? theme.error : theme.main;
+  const iconBgColor = isDestructive
+    ? `${theme.error}20`
+    : (theme.accentBackground || `${theme.main}20`);
+  const confirmBgColor = isDestructive ? theme.error : theme.main;
 
   return (
     <Modal
@@ -92,80 +180,3 @@ export function ConfirmationModal({
     </Modal>
   );
 }
-
-const modalStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 28,
-    alignItems: 'center',
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#D1D5DB',
-    borderRadius: 2,
-    marginBottom: 20,
-  },
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1F2937',
-    fontFamily: 'Open Sans',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  message: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontFamily: 'Open Sans',
-    textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 20,
-    paddingHorizontal: 12,
-  },
-  confirmBtn: {
-    width: '100%',
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  confirmText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    fontFamily: 'Open Sans',
-  },
-  cancelBtn: {
-    width: '100%',
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-  },
-  cancelText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#4B5563',
-    fontFamily: 'Open Sans',
-  },
-});

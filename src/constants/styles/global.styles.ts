@@ -393,8 +393,10 @@ export const createFormFieldStyles = (theme: any) => {
   });
 }
 
-export const createSlidingModalStyles = (theme: any) => {
+export const createSlidingModalStyles = (theme: any, insets?: { bottom?: number }) => {
   const global = createGlobalStyles(theme);
+  const bottomInset = insets?.bottom ?? 0;
+  const paddingBottom = Math.max(bottomInset, Spacing.four || 16);
   return StyleSheet.create({
       overlay: {
           ...global.overlay,
@@ -410,7 +412,7 @@ export const createSlidingModalStyles = (theme: any) => {
           borderTopRightRadius: Border.radius.big,
           paddingHorizontal: Spacing.four,
           paddingTop: Spacing.three,
-          paddingBottom: BottomTabInset,
+          paddingBottom,
           alignItems: 'center',
       },
       handle: {
@@ -420,5 +422,5 @@ export const createSlidingModalStyles = (theme: any) => {
           borderRadius: Border.radius.regular,
           marginBottom: Spacing.four,
       },
-  })
-}
+  });
+};
