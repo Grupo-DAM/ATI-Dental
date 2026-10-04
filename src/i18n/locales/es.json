@@ -654,5 +654,70 @@
       "reasonRequired": "Indica el motivo de la cita.",
       "durationRequired": "Selecciona la duración estimada."
     }
+  },
+  "home": {
+    "greeting": "¡Hola {{name}}!",
+    "defaultName": "Dr. Ramirez",
+    "welcomeBack": "Bienvenida de nuevo",
+    "searchPlaceholder": "Buscar pacientes, citas o tratamientos",
+    "todaySummary": "Resumen de hoy",
+    "viewAgenda": "Ver agenda",
+    "pendingAppointments": "Citas\npendientes",
+    "pendingPatients": "Pacientes\npendientes",
+    "pendingExams": "Examenes\npendientes",
+    "quickAccess": "Accesos rapidos",
+    "agenda": "Agenda",
+    "patients": "Pacientes",
+    "treatments": "Tratamientos",
+    "reports": "Reportes",
+    "users": "Usuarios",
+    "registerPatient": "Registrar",
+    "contact": "Contacto",
+    "profile": "Perfil",
+    "notifications": "Notificaciones",
+    "appointmentReminder": "Recordatorio de citas",
+    "reminderDesc": "Tienes {{count}} citas pendientes para hoy",
+    "noNotifications": "No tienes notificaciones pendientes",
+    "offlineTitle": "Modo sin conexión",
+    "offlineDesc": "Mostrando datos en caché. Verifica tu conexión.",
+    "retry": "Reintentar",
+    "errorLoading": "Error al cargar el resumen del dashboard",
+    "searchResults": "Resultados de búsqueda",
+    "noResults": "No se encontraron resultados para \"{{query}}\"",
+    "customizeQuickAccess": "Personalizar accesos rápidos",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "categories": {
+      "patients": "Pacientes",
+      "appointments": "Citas",
+      "treatments": "Tratamientos",
+      "modules": "Módulos"
+    }
+  },
+  "odontogram": {
+    "toothStatus": {
+      "cavity": "Caries",
+      "filled": "Obturado",            
+      "missing": "Ausente",   
+      "implant": "Implante",           
+      "root_canal": "Endodoncia",         
+      "fixed_dental_prosthesis": "Protesis",      
+      "retained_root": "Remanente Radicular",
+      "in_eruption": "En Erupción",         
+      "temporal": "Temporal"
+    },
+    "adult": "Adulto",
+    "pediatric": "Infantil",
+    "toothConditionModal": {
+      "selectedPiece": "Pieza Seleccionada",
+      "state": "Estado",
+      "dentalSurface": "Pieza Dental",
+      "optional": "(optional)",
+      "notes": "Notas",
+      "notesPlaceholder": "Notas adicionales...",
+      "saveChange": "Guardar Cambios",
+      "cancel": "Cancel",
+      "applyToSurface": "Estado de la superficie"
+    }
   }
 }

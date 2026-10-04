@@ -12,6 +12,9 @@
       "bundleIdentifier": "com.proyect1.ATIDental"
     },
     "android": {
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/ATI-dental-android-icon-foreground.png",
@@ -49,15 +52,21 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "ATI Dental necesita acceder a tus fotos para asignar una imagen de perfil al paciente.",
-          "microphonePermission": false
+          "photosPermission": "ATI Dental necesita acceder a tus fotos para asignar una imagen de perfil al paciente."
         }
       ],
       "expo-localization",
       "./scripts/withAndroidQueries.js",
       "expo-asset",
       "@react-native-firebase/crashlytics",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "@jamsch/expo-speech-recognition",
+        {
+          "microphonePermission": "Permitir a ATI-Dental usar el micrófono para el reconocimiento de voz en el odontograma.",
+          "speechRecognitionPermission": "Permitir el reconocimiento de comandos de voz en ATI-Dental."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

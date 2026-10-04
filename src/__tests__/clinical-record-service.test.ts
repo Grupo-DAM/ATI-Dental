@@ -4,14 +4,18 @@ import {
   updateConsultation,
   getConsultationsByPatientId,
   CONSULTATIONS_COLLECTION,
+  ODONTOGRAMAS_COLLECTION,
   recordScheduledAppointment,
   resolvePatientVisitDates,
   getVisitDatesByPatient,
+  getStoredPatientVisitDates,
+  updateOdontogram,
 } from '@/services/clinical-record-service';
 import { firestore } from '@/config/firebase';
 import { getSessionToken } from '@/utils/secure-storage';
 import { getPatientById } from '@/services/patient-service';
 import { getTreatmentsByPatientId } from '@/services/treatment-service';
+import { OdontogramData } from '@/types/clinical-record';
 
 jest.mock('@/utils/secure-storage', () => ({
   getSessionToken: jest.fn(),
@@ -513,6 +517,184 @@ describe('Clinical Record Service', () => {
       expect(res.success).toBe(true);
       expect(warn).toHaveBeenCalled();
       warn.mockRestore();
+    });
+  });
+
+  describe('getStoredPatientVisitDates', () => {
+    it('obtiene fechas almacenadas de un paciente específico', async () => {
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          { id: '1', data: () => ({ patientId: 'p-100', date: '2026-01-15', status: 'COMPLETADO' }) },
+        ],
+      });
+
+      const dates = await getStoredPatientVisitDates('p-100');
+      expect(dates.lastVisit).toBe('2026-01-15');
+    });
+  });
+
+  describe('updateOdontogram', () => {
+    const mockOdontogramData: OdontogramData = {
+      patientId: 'p-100',
+      updatedAt: '2026-10-02T00:00:00Z',
+      isAdult: true,
+      status: 'active',
+      notes: 'Nota general del odontograma',
+      teeth: {
+        16: {
+          number: 16,
+          generalStates: ['filled'],
+          surfacesStates: {
+            mesial: 'cavity',
+            oclusal: 'filled',
+            distal: 'unknown_state',
+          },
+          notes: 'Sensibilidad',
+        },
+        21: {
+          number: 21,
+          generalStates: ['missing'],
+        },
+      },
+    };
+
+    it('lanza un error si el objeto odontogram no tiene patientId', async () => {
+      await expect(
+        updateOdontogram({ patientId: '' } as any, true)
+      ).rejects.toThrow('[clinical-record-service] Imposible actualizar: pacienteId faltante.');
+    });
+
+    it('actualiza el odontograma exitosamente via Proxy Serverless', async () => {
+      (getSessionToken as jest.Mock).mockResolvedValueOnce('valid-token');
+      mockFetch.mockResolvedValueOnce({ ok: true });
+
+      const result = await updateOdontogram(mockOdontogramData, true);
+      expect(result).toBe(true);
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/odontogramas/p-100'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer valid-token',
+            'Content-Type': 'application/json',
+          }),
+        })
+      );
+    });
+
+    it('hace fallback a Firestore si el serverless falla y actualiza el documento existente si es de hoy', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Proxy error'));
+      const todayIso = new Date().toISOString();
+
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'odontogram-doc-1',
+            data: () => ({
+              fechaRegistro: todayIso,
+            }),
+          },
+        ],
+      });
+      (mockFirestoreInstance.set as jest.Mock).mockResolvedValueOnce(undefined);
+
+      const result = await updateOdontogram(mockOdontogramData, true);
+
+      expect(result).toBe(true);
+      expect(mockFirestoreInstance.collection).toHaveBeenCalledWith(ODONTOGRAMAS_COLLECTION);
+      expect(mockFirestoreInstance.doc).toHaveBeenCalledWith('odontogram-doc-1');
+      expect(mockFirestoreInstance.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pacienteId: 'p-100',
+          tipo: 'adulto',
+          notasGeneral: 'Nota general del odontograma',
+          estadoPiezas: expect.objectContaining({
+            '16': {
+              estado_general: 'obturado',
+              caras: { mesial: 'caries', oclusal: 'obturado' },
+              notas: 'Sensibilidad',
+            },
+            '21': {
+              estado_general: 'ausente',
+              caras: null,
+              notas: null,
+            },
+          }),
+        }),
+        { merge: true }
+      );
+    });
+
+    it('crea un nuevo documento en Firestore si no existe registro previo del mismo día', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Proxy offline'));
+
+      // Devuelve un registro previo de una fecha pasada
+      (mockFirestoreInstance.get as jest.Mock).mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'odontogram-doc-old',
+            data: () => ({
+              fechaRegistro: '2023-01-01T10:00:00.000Z',
+            }),
+          },
+        ],
+      });
+      (mockFirestoreInstance.add as jest.Mock).mockResolvedValueOnce({ id: 'new-odontogram-doc' });
+
+      const result = await updateOdontogram(mockOdontogramData, false);
+
+      expect(result).toBe(true);
+      expect(mockFirestoreInstance.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pacienteId: 'p-100',
+          tipo: 'pediatrico',
+        })
+      );
+    });
+
+    it('lanza un error explicativo si Firestore falla durante el guardado del odontograma', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      (mockFirestoreInstance.get as jest.Mock).mockRejectedValueOnce(new Error('Error de permisos en Firestore'));
+
+      await expect(updateOdontogram(mockOdontogramData, true)).rejects.toThrow('Error de permisos en Firestore');
+    });
+
+    it('lanza el mensaje fallback si el error de Firestore no contiene message', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      (mockFirestoreInstance.get as jest.Mock).mockRejectedValueOnce({});
+
+      await expect(updateOdontogram(mockOdontogramData, true)).rejects.toThrow('Error de red al guardar el odontograma clínico.');
+    });
+  });
+
+  describe('Casos de borde en utilidades de fechas', () => {
+    it('maneja instancias de Date inválidas (NaN) en resolvePatientVisitDates', () => {
+      const invalidDate = new Date('fecha-invalida');
+      const dates = resolvePatientVisitDates('invalid-date', undefined, {}, invalidDate);
+      expect(dates).toEqual({ lastVisit: undefined, nextAppointment: undefined });
+    });
+
+    it('resuelve correctamente la última visita si la fecha previa es más antigua', () => {
+      const dates = resolvePatientVisitDates(
+        '2026-05-10',
+        undefined,
+        { lastVisit: '2026-01-01' },
+        new Date(2026, 9, 1)
+      );
+      expect(dates.lastVisit).toBe('2026-05-10');
+    });
+
+    it('mantiene la última visita existente si es más reciente que la fecha procesada', () => {
+      const dates = resolvePatientVisitDates(
+        '2026-01-01',
+        undefined,
+        { lastVisit: '2026-05-10' },
+        new Date(2026, 9, 1)
+      );
+      expect(dates.lastVisit).toBe('2026-05-10');
     });
   });
 });

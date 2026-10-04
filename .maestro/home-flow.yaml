@@ -1,0 +1,85 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+- runFlow: common/login-admin.yaml
+
+# Navegar a la pestaña de Home
+- tapOn:
+    id: "home-tab"
+
+# Esperar que carguen las métricas del dashboard
+- extendedWaitUntil:
+    visible:
+      id: "metric-citas"
+    timeout: 15000
+
+# Validar widgets y métricas de "Resumen de hoy"
+- assertVisible:
+    id: "greeting-title"
+- assertVisible:
+    id: "metric-citas"
+- assertVisible:
+    id: "metric-pacientes"
+- assertVisible:
+    id: "metric-examenes"
+
+# Probar barra de búsqueda general
+- tapOn:
+    id: "home-search-input"
+- inputText: "Ana"
+- hideKeyboard
+
+- extendedWaitUntil:
+    visible:
+      id: "search-results-container"
+    timeout: 5000
+
+- tapOn:
+    id: "home-search-input"
+- eraseText
+- hideKeyboard
+
+# Probar interacción con notificación
+- scrollUntilVisible:
+    element:
+      id: "notification-item-notif-1"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "notification-item-notif-1"
+
+- extendedWaitUntil:
+    visible:
+      id: "close-notification-modal"
+    timeout: 5000
+
+- tapOn:
+    id: "close-notification-modal"
+
+# Probar navegación a la agenda desde acceso rápido
+- scrollUntilVisible:
+    element:
+      id: "quick-access-agenda"
+    direction: UP
+    timeout: 10000
+
+- tapOn:
+    id: "quick-access-agenda"
+
+- extendedWaitUntil:
+    visible:
+      id: "prev-week-btn"
+    timeout: 15000
+
+# Regresar a Home
+- tapOn:
+    id: "home-tab"
+
+# Cierre de sesión limpio
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

@@ -1,190 +1,340 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import Svg, { Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { OdontogramData } from '@/types/clinical-record';
+import { ALL_TOOTH_STATES, OdontogramData, ToothState, ToothCondition } from '@/types/clinical-record';
+import { useDentalPiecesPerCuadrant } from '@/hooks/use-dental-pieces-per-cuadrant';
+import { createOdontogramStyles } from '@/constants/styles/patients.style';
+import { DentalCuadrant } from '@/components/clinical-history/DentalPiece';
+import { FontSize } from '@/constants/theme';
+import { VoiceDictationBar } from './VoiceDictationBar';
+import { useDentalVoice } from '@/hooks/use-dental-voice';
+import { firestore } from '@/config/firebase';
+import { useLocalSearchParams } from 'expo-router';
 
 interface Props {
   readonly odontogram?: OdontogramData;
+  readonly onToothSelect?: (tooth: ToothCondition) => void;
 }
 
-export function OdontogramContainer({ odontogram }: Readonly<Props>) {
+function getToothStateColor(theme: any, state: string) {
+  return theme[state] || theme.backgroundElement;
+}
+
+const DEFAULT_ODONTOGRAM: OdontogramData = {
+  patientId: '',
+  status: 'placeholder',
+  isAdult: true,
+  teeth: {}, 
+};
+
+const REVERSE_STATE_MAP: Record<string, string> = {
+  cavity: 'caries',
+  filled: 'obturado',
+  missing: 'ausente',
+  implant: 'implante',
+  root_canal: 'endodoncia',
+  fixed_dental_prosthesis: 'protesis_fija',
+  retained_root: 'remanente_radicular',
+  in_eruption: 'en_erupcion',
+  temporal: 'temporal',
+};
+
+async function saveOdontogramToFirestore(
+  patientId: string,
+  isAdult: boolean,
+  teethData: Record<number, any>
+) {
+  if (!patientId) return;
+
+  try {
+    const estadoPiezas: Record<string, any> = {};
+
+    Object.entries(teethData).forEach(([num, data]) => {
+      const states = data.generalStates || [];
+      const mainState = states[0] ? (REVERSE_STATE_MAP[states[0]] || states[0]) : null;
+
+      const caras: Record<string, string> = {};
+      if (data.surfacesStates) {
+        Object.entries(data.surfacesStates).forEach(([surface, sState]) => {
+          caras[surface] = REVERSE_STATE_MAP[sState] || sState;
+        });
+      }
+
+      if (mainState || Object.keys(caras).length > 0) {
+        estadoPiezas[num] = {
+          ...(mainState ? { estado_general: mainState } : {}),
+          ...(states.length > 0 ? { estados_generales: states.map((s: string) => REVERSE_STATE_MAP[s] || s) } : {}),
+          ...(Object.keys(caras).length > 0 ? { caras } : {}),
+        };
+      }
+    });
+
+    const query = await firestore()
+      .collection('odontogramas')
+      .where('pacienteId', '==', patientId)
+      .get();
+
+    if (!query.empty) {
+      const docs = [...query.docs];
+      docs.sort((a, b) => {
+        const timeA = new Date(a.data().fechaRegistro || 0).getTime();
+        const timeB = new Date(b.data().fechaRegistro || 0).getTime();
+        return timeB - timeA;
+      });
+      const docId = docs[0].id;
+      await firestore().collection('odontogramas').doc(docId).update({
+        estadoPiezas,
+        fechaRegistro: new Date().toISOString(),
+      });
+    } else {
+      await firestore().collection('odontogramas').add({
+        pacienteId: patientId,
+        tipo: isAdult ? 'adulto' : 'infantil',
+        fechaRegistro: new Date().toISOString(),
+        estadoPiezas,
+        notasGeneral: '',
+      });
+    }
+  } catch (error) {
+    console.error('[OdontogramContainer] Error guardando en Firebase:', error);
+  }
+}
+
+
+export function OdontogramContainer({ odontogram, onToothSelect }: Readonly<Props>) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const styles = createStyles(theme);
-  const isDark = theme.background === '#000000';
-  const badgeTextColor = isDark ? '#FFFFFF' : theme.main;
+  const styles = useMemo(() => createOdontogramStyles(theme), [theme]);
+  const [selectedTooth, setSelectedTooth] = useState<number | null>(null);
+
+  const safeOdontogram = odontogram || DEFAULT_ODONTOGRAM;
+  const { patientId: paramPatientId } = useLocalSearchParams<{ patientId?: string }>();
+  const currentPatientId = safeOdontogram.patientId || paramPatientId || '';
+
+  // Estado local reactivo para que los dientes cambien de color con la voz
+    const [teethData, setTeethData] = useState<Record<number, any>>(safeOdontogram.teeth || {});
+
+    useEffect(() => {
+        if (safeOdontogram.teeth && Object.keys(safeOdontogram.teeth).length > 0) {
+          setTeethData(safeOdontogram.teeth);
+        }
+      }, [safeOdontogram.teeth]);
+    // Hook de comandos de voz
+    const {
+      isListening,
+      transcript,
+      lastCommand,
+      permissionError,
+      toggleListening,
+    } = useDentalVoice({
+      isAdult: safeOdontogram.isAdult ?? true,
+      onCommandRecognized: (command) => {
+        if (command.success && command.toothNumber && command.state) {
+          const num = command.toothNumber;
+          const newState = command.state;
+
+          setTeethData((prev) => {
+            const currentPiece = prev[num] || { number: num, generalStates: [] };
+
+            let updatedStates: ToothState[] = [];
+            let updatedSurfaces = { ...(currentPiece.surfacesStates || {}) };
+
+            // 1. Si el comando es SANO
+            if (newState === 'sano') {
+              if (command.surface) {
+                // Si dijeron por ejemplo "13 distal sano", limpia solo esa cara
+                delete updatedSurfaces[command.surface];
+                updatedStates = currentPiece.generalStates || [];
+              } else {
+                // Diente sano completo -> limpia todo
+                updatedStates = [];
+                updatedSurfaces = {};
+              }
+            }
+            // 2. Si el comando es AUSENTE (Diente extraído o inexistente)
+            else if (newState === 'missing') {
+              // Limpia todas las afecciones y caras previas, dejando solo 'missing'
+              updatedStates = ['missing'];
+              updatedSurfaces = {};
+            }
+            // 3. Cualquier otra afección (caries, obturado, implante, prótesis, etc.)
+            else {
+              // Si el diente estaba marcado como 'ausente' previamente, se lo quitamos al agregarle una afección
+              const prevStates = (currentPiece.generalStates || []).filter((s) => s !== 'missing');
+              updatedStates = Array.from(new Set([...prevStates, newState as ToothState]));
+
+              if (command.surface) {
+                const surfaceValue = (newState === 'caries' ? 'cavity' : newState === 'obturado' ? 'filled' : newState);
+                updatedSurfaces[command.surface] = surfaceValue as any;
+              }
+            }
+
+            const updated = {
+              ...prev,
+              [num]: {
+                ...currentPiece,
+                generalStates: updatedStates,
+                surfacesStates: updatedSurfaces,
+              },
+            };
+
+            // Guarda automáticamente en Firebase Firestore
+            void saveOdontogramToFirestore(
+              currentPatientId,
+              safeOdontogram.isAdult ?? true,
+              updated
+            );
+
+            return updated;
+          });
+        }
+      },
+    });
+
+  const cuadrantsData = useDentalPiecesPerCuadrant(
+    safeOdontogram.isAdult ?? true,
+    teethData
+  );
+
+  React.useEffect(() => {
+    if (selectedTooth !== null && onToothSelect) {
+      // Buscamos los datos existentes en la base de datos para ese diente
+      const toothData = teethData[selectedTooth] || safeOdontogram.teeth?.[selectedTooth] || {
+        number: selectedTooth,
+        generalStates: [],
+      };
+      onToothSelect(toothData);
+
+      // Reseteamos la selección interna para permitir volver a tocar el mismo diente luego
+      setSelectedTooth(null);
+    }
+  }, [selectedTooth, safeOdontogram.teeth, onToothSelect]);
+
+  const leftCuadrants = safeOdontogram.isAdult ? [ 1, 4 ] : [ 5, 8 ];
+  const rightCuadrants = safeOdontogram.isAdult ? [ 2, 3 ] : [ 6, 7 ];
 
   return (
-    <View style={styles.card} testID="odontogram-container">
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <Ionicons name="medkit" size={20} color={theme.main} />
-          <Text style={styles.title}>
-            {t('clinicalHistory.odontogramTitle', 'Odontograma Dental')}
+    <View style={styles.container} testID="odontogram-container">
+      {/* New odontogram action buttons */}
+      <View style={styles.actionBtnsContainer}>
+        <TouchableOpacity style={[styles.actionBtnShell, safeOdontogram.isAdult && styles.actionBtnShellActive]}>
+          <Ionicons name="add" size={FontSize.h5} color={safeOdontogram.isAdult? theme.overMain : theme.pageSubtitle} />
+          <Text style={[styles.actionBtnText, safeOdontogram.isAdult && styles.actionBtnTextActive]}>
+            {t('odontogram.adult')}
           </Text>
-        </View>
-        <View style={styles.badge}>
-          <Text style={[styles.badgeText, { color: badgeTextColor }]}>
-            {t('clinicalHistory.comingSoon', 'Próximamente')}
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionBtnShell, !safeOdontogram.isAdult && styles.actionBtnShellActive]}>
+          <Ionicons name="add" size={FontSize.h5} color={safeOdontogram.isAdult? theme.pageSubtitle : theme.overMain} />
+          <Text style={[styles.actionBtnText, !safeOdontogram.isAdult && styles.actionBtnTextActive]}>
+            {t('odontogram.pediatric')}
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
-      {/* Placeholder visual */}
-      <View style={styles.placeholderBox}>
-        <View style={styles.iconCircle}>
-          <Ionicons name="fitness-outline" size={40} color={isDark ? '#FFFFFF' : theme.main} />
-        </View>
-        <Text style={styles.placeholderTitle}>
-          {t('clinicalHistory.odontogramPlaceholderTitle', 'Módulo de Odontograma Digital')}
-        </Text>
-        <Text style={styles.placeholderMessage}>
-          {t(
-            'clinicalHistory.odontogramPlaceholderDesc',
-            'Este contenedor modular está preparado con la estructura de datos para la inyección del componente gráfico interactivo en el siguiente sprint.'
-          )}
-        </Text>
+      {/* Legend */}
+      <ScrollView
+        testID='odontogram-legend' 
+        horizontal showsHorizontalScrollIndicator={false}
+       contentContainerStyle={styles.legendContainer}>
+        {ALL_TOOTH_STATES.map((state, index: number) => (
+          <View style={styles.legendItem} key={'state'+index}>
+            <View style={[styles.legendDot, {backgroundColor: getToothStateColor(theme, state)}]}></View>
+            <Text style={styles.legendText}>{t(`odontogram.toothStatus.${state}`)}</Text>
+          </View>
+        ))}
+      </ScrollView>
 
-        {/* Feature Pills */}
-        <View style={styles.pillsRow}>
-          <View style={styles.pill}>
-            <Ionicons name="checkmark-circle-outline" size={14} color={theme.main} />
-            <Text style={styles.pillText}>32 Piezas Dentales (FDI)</Text>
-          </View>
-          <View style={styles.pill}>
-            <Ionicons name="layers-outline" size={14} color={theme.main} />
-            <Text style={styles.pillText}>5 Superficies por Diente</Text>
-          </View>
-          <View style={styles.pill}>
-            <Ionicons name="sync-outline" size={14} color={theme.main} />
-            <Text style={styles.pillText}>Estado Sincronizado</Text>
-          </View>
+      {/* Scroll odontogram */}
+      <ScrollView 
+        testID='odontogram-scroll'
+        horizontal showsHorizontalScrollIndicator={false}
+        contentContainerStyle = {styles.odontogramScrollContainer}
+      >
+        <View key={'leftCuadrants'} style={styles.halfOdontogram}>
+          {leftCuadrants.map((cuadrant, index: number) => (
+            <DentalCuadrant 
+              key={`cuadrant-${cuadrant}`}
+              teeth={cuadrantsData[cuadrant] ?? []} 
+              isLeftCuadrant = {true}
+              isBottomCuadrant = {index === 1}
+              selectedTooth={selectedTooth} 
+              setSelectedTooth={setSelectedTooth}/>
+          ))}
         </View>
-      </View>
 
-      {/* Metadata status footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>
-          Estado del módulo: <Text style={{ fontWeight: '700', color: isDark ? '#FFFFFF' : theme.main }}>Estructura lista ({odontogram?.status || 'placeholder'})</Text>
-        </Text>
-      </View>
+        <Svg height="100%" width="2">
+          <Line
+            x1="0"
+            y1="1"
+            x2="0"
+            y2="100%"
+            stroke={theme.breadcrumbSeparator} // Color de la línea
+            strokeWidth="4"  // Grosor de la línea
+            strokeDasharray="4, 4" // [Longitud del punto, Espacio entre puntos] 
+          />
+        </Svg>
+
+        <View key={'rightCuadrants'} style={styles.halfOdontogram}>
+          {rightCuadrants.map((cuadrant, index: number) => (
+            <DentalCuadrant 
+              key={`cuadrant-${cuadrant}`}
+              teeth={cuadrantsData[cuadrant] ?? []} 
+              isLeftCuadrant = {false}
+              isBottomCuadrant = {index === 1}
+              selectedTooth={selectedTooth} 
+              setSelectedTooth={setSelectedTooth}/>
+          ))}
+        </View>
+      </ScrollView>
+      {/* Barra de Transcripción y Feedback */}
+        <VoiceDictationBar
+          isListening={isListening}
+          transcript={transcript}
+          lastCommand={lastCommand}
+          permissionError={permissionError}
+        />
+
+        {/* BOTÓN FLOTANTE (FAB) IDÉNTICO AL FIGMA
+          Desaparece automáticamente cuando hay un diente seleccionado (!selectedTooth) */}
+            <TouchableOpacity
+              testID="btn-voice-dictation"
+              activeOpacity={0.85}
+              onPress={toggleListening}
+              style={[
+                fabStyles.fabButton,
+                { backgroundColor: isListening ? theme.alert : theme.main },
+              ]}
+            >
+              <Ionicons
+                name={isListening ? 'stop' : 'mic'}
+                size={28}
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+      {/* hint */}
+
     </View>
   );
 }
 
-const createStyles = (theme: ReturnType<typeof useTheme>) =>
-  StyleSheet.create({
-    card: {
-      backgroundColor: theme.backgroundElement,
-      borderRadius: 16,
-      marginHorizontal: 16,
-      marginBottom: 20,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      padding: 16,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    titleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    title: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: theme.pageTitle,
-      fontFamily: 'Open Sans',
-    },
-    badge: {
-      backgroundColor: theme.accentBackground,
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 12,
-    },
-    badgeText: {
-      fontSize: 11,
-      fontWeight: '700',
-      color: theme.main,
-      fontFamily: 'Open Sans',
-    },
-    placeholderBox: {
-      backgroundColor: theme.backgroundSecondary,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      borderStyle: 'dashed',
-      alignItems: 'center',
-      paddingVertical: 28,
-      paddingHorizontal: 16,
-    },
-    iconCircle: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: theme.accentBackground,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    placeholderTitle: {
-      fontSize: 15,
-      fontWeight: '700',
-      color: theme.pageTitle,
-      fontFamily: 'Open Sans',
-      marginBottom: 6,
-      textAlign: 'center',
-    },
-    placeholderMessage: {
-      fontSize: 12,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-      textAlign: 'center',
-      lineHeight: 18,
-      maxWidth: 320,
-      marginBottom: 16,
-    },
-    pillsRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      gap: 8,
-    },
-    pill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.backgroundElement,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: theme.cardSeparator,
-      gap: 5,
-    },
-    pillText: {
-      fontSize: 11,
-      fontWeight: '600',
-      color: theme.fieldLabel,
-      fontFamily: 'Open Sans',
-    },
-    footer: {
-      marginTop: 14,
-      paddingTop: 10,
-      borderTopWidth: 1,
-      borderTopColor: theme.pageSeparator,
-      alignItems: 'center',
-    },
-    footerText: {
-      fontSize: 11,
-      color: theme.pageSubtitle,
-      fontFamily: 'Open Sans',
-    },
-  });
+const fabStyles = StyleSheet.create({
+  fabButton: {
+    alignSelf: 'flex-end',
+    marginRight: 4,
+    marginTop: 16,
+    marginBottom: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+  },
+});
