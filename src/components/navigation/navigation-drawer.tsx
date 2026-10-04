@@ -195,7 +195,8 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
     <Modal
       visible={isMounted}
       animationType="none"
-      presentationStyle="fullScreen"
+      transparent={true}
+      statusBarTranslucent={true}
       onRequestClose={onClose}>
       <Animated.View style={[styles.container, { paddingBottom: insets.bottom }, panelStyle]}>
         <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
