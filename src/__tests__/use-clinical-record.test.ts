@@ -4,13 +4,15 @@ import {
   fetchClinicalRecord,
   deleteConsultation,
   updateConsultation,
+  updateOdontogram,
 } from '@/services/clinical-record-service';
-import { Consultation, ClinicalRecord } from '@/types/clinical-record';
+import { Consultation, ClinicalRecord, ToothCondition } from '@/types/clinical-record';
 
 jest.mock('@/services/clinical-record-service', () => ({
   fetchClinicalRecord: jest.fn(),
   deleteConsultation: jest.fn(),
   updateConsultation: jest.fn(),
+  updateOdontogram: jest.fn(),
 }));
 
 describe('useClinicalRecord Hook', () => {
@@ -74,7 +76,18 @@ describe('useClinicalRecord Hook', () => {
     patient: mockPatient,
     consultations: mockConsultations,
     treatments: mockTreatments,
-    odontogram: { status: 'placeholder' },
+    odontogram: {
+      patientId: 'p-1',
+      updatedAt: '2023-01-01T00:00:00Z',
+      status: 'active',
+      isAdult: true,
+      teeth: {
+        16: {
+          number: 16,
+          generalStates: ['filled'],
+        },
+      },
+    },
   };
 
   beforeEach(() => {
@@ -119,6 +132,19 @@ describe('useClinicalRecord Hook', () => {
     });
   });
 
+  it('maneja mensaje de error fallback si no viene especificado en la respuesta', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: false,
+    });
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe('No se pudo cargar la historia clínica');
+    });
+  });
+
   it('maneja error si no se pasa patientId', async () => {
     const { result } = renderHook(() => useClinicalRecord());
 
@@ -126,6 +152,24 @@ describe('useClinicalRecord Hook', () => {
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe('No se proporcionó un ID de paciente');
     });
+  });
+
+  it('permite cambiar la pestaña activa (activeTab)', async () => {
+    (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+      success: true,
+      data: mockRecord,
+    });
+
+    const { result } = renderHook(() => useClinicalRecord('p-1'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.activeTab).toBe('consultas');
+
+    act(() => {
+      result.current.setActiveTab('odontograma');
+    });
+
+    expect(result.current.activeTab).toBe('odontograma');
   });
 
   it('filtra consultas reactivamente por título, motivo, diagnóstico, fecha y doctor', async () => {
@@ -322,5 +366,110 @@ describe('useClinicalRecord Hook', () => {
       ok = await result.current.updateConsultation('c-1', { title: 'No cambiara' });
     });
     expect(ok).toBe(false);
+  });
+
+  describe('updateOdontogram en useClinicalRecord', () => {
+    const updatedTooth: ToothCondition = {
+      number: 11,
+      generalStates: ['cavity'],
+      surfacesStates: {
+        mesial: 'cavity',
+      },
+    };
+
+    it('actualiza el diente y el odontograma en el estado local cuando la persistencia es exitosa', async () => {
+      (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+        success: true,
+        data: mockRecord,
+      });
+      (updateOdontogram as jest.Mock).mockResolvedValue(true);
+
+      const { result } = renderHook(() => useClinicalRecord('p-1'));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      let ok = false;
+      await act(async () => {
+        ok = await result.current.updateOdontogram(updatedTooth, true);
+      });
+
+      expect(ok).toBe(true);
+      expect(updateOdontogram).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patientId: 'p-1',
+          teeth: expect.objectContaining({
+            16: { number: 16, generalStates: ['filled'] },
+            11: updatedTooth,
+          }),
+        }),
+        true
+      );
+      expect(result.current.record?.odontogram?.teeth?.[11]).toEqual(updatedTooth);
+    });
+
+    it('inicializa correctamente teeth si record.odontogram.teeth es undefined', async () => {
+      (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+        success: true,
+        data: {
+          ...mockRecord,
+          odontogram: {
+            patientId: 'p-1',
+            status: 'active',
+            teeth: undefined,
+          },
+        },
+      });
+      (updateOdontogram as jest.Mock).mockResolvedValue(true);
+
+      const { result } = renderHook(() => useClinicalRecord('p-1'));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      let ok = false;
+      await act(async () => {
+        ok = await result.current.updateOdontogram(updatedTooth, false);
+      });
+
+      expect(ok).toBe(true);
+      expect(result.current.record?.odontogram?.teeth?.[11]).toEqual(updatedTooth);
+    });
+
+    it('retorna false si no hay un registro u odontograma cargado', async () => {
+      (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+        success: true,
+        data: {
+          ...mockRecord,
+          odontogram: null,
+        },
+      });
+
+      const { result } = renderHook(() => useClinicalRecord('p-1'));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      let ok = true;
+      await act(async () => {
+        ok = await result.current.updateOdontogram(updatedTooth, true);
+      });
+
+      expect(ok).toBe(false);
+      expect(updateOdontogram).not.toHaveBeenCalled();
+    });
+
+    it('no actualiza el estado local si la llamada a updateOdontogram falla (retorna false)', async () => {
+      (fetchClinicalRecord as jest.Mock).mockResolvedValue({
+        success: true,
+        data: mockRecord,
+      });
+      (updateOdontogram as jest.Mock).mockResolvedValue(false);
+
+      const { result } = renderHook(() => useClinicalRecord('p-1'));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      let ok = true;
+      await act(async () => {
+        ok = await result.current.updateOdontogram(updatedTooth, true);
+      });
+
+      expect(ok).toBe(false);
+      expect(result.current.record?.odontogram?.teeth?.[11]).toBeUndefined();
+    });
   });
 });

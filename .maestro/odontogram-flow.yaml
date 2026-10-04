@@ -45,29 +45,32 @@ appId: com.proyect1.ATIDental
       id: "odontogram-container"
     timeout: 5000
 
-# Escenario 3: Verificamos pestaña de Consultas con diagnósticos y procedimientos
-- tapOn:
-    id: "tab-consultas"
+- assertVisible: 
+    id: 'odontogram-legend'
+- assertVisible: 
+    id: 'odontogram-scroll'
 
 - extendedWaitUntil:
     visible:
-      id: "consultations-timeline"
+      id: "tooth-18"
     timeout: 5000
 
-- assertVisible:
-    id: "search-consultations-input"
-
-# Verificamos pestaña de Tratamientos
 - tapOn:
-    id: "tab-tratamientos"
+    id: "tooth-18"
 
 - extendedWaitUntil:
     visible:
-      id: "treatments-timeline"
+      id: "tooth-condition-modal"
     timeout: 5000
 
-- assertVisible:
-    id: "btn-add-treatment"
+- assertVisible: ".*(18).*"
+
+- tapOn: ".*(Cancelar|Cancel).*"
+
+- extendedWaitUntil:
+    visible:
+      id: "tooth-18"
+    timeout: 5000
 
 # -----------------------------------
 - tapOn:

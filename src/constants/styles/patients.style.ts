@@ -1,4 +1,4 @@
-import { Spacing, Colors, FontFamily} from "@/constants/theme";
+import { Spacing, Colors, FontFamily, FontSize, FontWeight, LineHeight, Border } from "@/constants/theme";
 import { StyleSheet, Platform } from "react-native";
 import { createGlobalStyles } from "./global.styles";
 
@@ -20,14 +20,14 @@ export const createClinicalHistoryStyles = (theme: any) => {
         fontSize: 18,
         fontWeight: '700',
         color: theme.pageTitle,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
         marginTop: 16,
         textAlign: 'center',
         },
         stateMessage: {
         fontSize: 14,
         color: theme.pageSubtitle,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
         marginTop: 8,
         textAlign: 'center',
         lineHeight: 20,
@@ -46,10 +46,240 @@ export const createClinicalHistoryStyles = (theme: any) => {
         color: theme.overMain,
         fontSize: 14,
         fontWeight: '600',
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
         },
   });
 };
+
+export const createDentalPieceStyles = (theme: any) => {
+    return StyleSheet.create({
+        dentalPieceContainer: {
+            alignItems: 'center',
+            height: '100%', 
+            gap: Spacing.one,
+            maxHeight: 140,
+            width: 38,
+        },
+        bottomDentalPieceContainer: {
+            flexDirection: 'column-reverse'
+        },
+        numberPieceContainer: {
+            height: '15%',
+            paddingHorizontal: Spacing.two,
+        },
+        numberPieceSelectedContainer: {
+            backgroundColor: theme.main,
+            borderRadius: Spacing.six,
+        },
+        numberPiece: {
+            color: theme.text,
+            fontFamily: FontFamily.regular,
+            fontWeight: FontWeight.medium
+        },
+        numberPieceSelected: {
+            fontWeight: FontWeight.bold,
+            color: theme.overMain,
+        },
+        stateDot: {
+            height: '15%',                  
+            aspectRatio: Spacing.quarter,      // Garantiza que se mantenga como un círculo perfecto (ancho = alto)
+            borderRadius: Border.radius.wide,
+            borderWidth: Spacing.none
+        },
+        stateDotHealthy: {
+            borderWidth: Border.width.regular,
+            borderColor: theme.cardSeparator
+        },
+        pressable: {
+            height: '65%', justifyContent: 'center', alignItems: 'center'
+        },
+        toothAsset: {
+            height: '100%',                   
+            aspectRatio: 0.4,
+            resizeMode: 'contain',
+        },
+        flipToothAsset: {
+            transform: [{ scaleX: -1 }]
+        }
+    })
+}
+export const createDentalCuadrantStyles = () => {
+    return StyleSheet.create({
+        cuadrantRow: {
+            flexDirection: 'row',
+            gap: Spacing.three
+        },
+        leftCuadrantRow: {
+            flexDirection: 'row-reverse',
+        }
+    })
+}
+
+export const createOdontogramStyles = (theme: any) => {
+    const global = createGlobalStyles(theme);
+    return StyleSheet.create({
+        container: {
+            marginHorizontal: Spacing.three,
+            gap: Spacing.three
+        },
+        actionBtnsContainer: {
+            flexDirection: 'row',
+            gap: Spacing.two,
+        },
+        actionBtnShell: {
+            backgroundColor: theme.backgroundElement,
+            borderColor: theme.breadcrumbSeparator,
+            borderWidth: Border.width.regular,
+            borderRadius: Border.radius.narrow,
+            flexDirection: 'row',
+            paddingHorizontal: Spacing.two,
+            paddingVertical: Spacing.one,
+            gap: Spacing.one,
+        },
+        actionBtnShellActive: {
+            backgroundColor: theme.main,
+            borderColor: theme.main,
+        },
+        actionBtnText: {
+            fontFamily: FontFamily.regular,
+            fontSize: FontSize.small,
+            fontWeight: FontWeight.regular,
+            color: theme.pageSubtitle,
+        },
+        actionBtnTextActive: {
+            color: theme.overMain
+        },
+        legendContainer: {
+            ...global.inputShell,
+            flexDirection: 'row',
+            gap: Spacing.two,
+            justifyContent: 'space-around',
+            overflow: 'hidden'
+        },
+        legendItem: {
+            flexDirection: 'row',
+            gap: Spacing.one,
+            alignItems: 'center'
+        },
+        legendDot: {
+            width: Spacing.two,
+            height: Spacing.two,
+            borderRadius: Border.radius.wide,
+        },
+        legendText: {
+            ...global.text,
+            fontSize: FontSize.small,
+            fontWeight: FontWeight.regular,
+            lineHeight: LineHeight.pageSubtitle,
+            textAlign: 'center'
+        },
+        odontogramScrollContainer: {
+            gap: Spacing.three
+        },
+        halfOdontogram: {
+            gap: Spacing.two
+        }
+    });
+}
+
+export const createToothConditionModalStyles = (theme: any) => {
+    const global = createGlobalStyles(theme);
+    const odontogram = createOdontogramStyles(theme);
+    return StyleSheet.create({
+        container:{
+            gap: Spacing.three,
+        },
+        horizontalContainer: {
+            width: '100%',
+            flexDirection: 'row',
+            gap: Spacing.three,
+            alignItems: 'flex-start', 
+            // Añadimos una posición relativa para que la sección absoluta del diente se ancle aquí
+            position: 'relative', 
+        },
+        dentalPieceSection: {
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: 80, // Asignamos un ancho fijo para que actúe como columna estable
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+        },
+        pieceNumberText: {
+            color: theme.text,
+            fontSize: FontSize.h3,
+            fontFamily: FontFamily.regular,
+            fontWeight: FontWeight.extrabold,
+            lineHeight: LineHeight.loginSubtitle,
+        },
+        textMultilineWrapper: {
+            flex: Spacing.quarter,
+
+        },
+        dentalPieceSectionText: {
+            color: theme.textNames,
+            fontSize: FontSize.p,
+            fontFamily: FontFamily.regular,
+            fontWeight: FontWeight.regular,
+            lineHeight: LineHeight.note,
+        },
+        dentalPieceContainer: {
+            marginTop: Spacing.two,
+            borderWidth: Border.width.regular,
+            borderRadius: Border.radius.regular,
+            
+            // Toma de forma restrictiva todo el espacio vertical restante 
+            // debajo del texto del número del diente, sin empujar jamás al padre.
+            flex: 1, 
+            width: '100%', // Se adapta al ancho de 80px de su sección padre
+            alignSelf: 'center', 
+            
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: Spacing.two,
+        },
+        stateSection: {
+            flex: 1,
+            // ✨ IMPORTANTE: Agregamos un margen izquierdo equivalente al ancho de la columna 
+            // absoluta (80px) + el gap (Spacing.three), para que los botones no se encimen sobre el diente.
+            marginLeft: 80 + Spacing.four,
+        },
+        label: {
+            ...global.label,
+        },
+        buttonGroupRow:{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: Spacing.one,
+        },
+        stateButton: { 
+            ...odontogram.legendItem, 
+            borderWidth: Border.width.regular,
+            borderRadius: Border.radius.regular,
+            borderColor: theme.cardSeparator,
+            paddingHorizontal: Spacing.three,
+            paddingVertical: Spacing.one,
+            marginHorizontal: Spacing.one,
+        },
+        legendDot: { ...odontogram.legendDot },
+        stateButtonText: {...odontogram.legendText,},
+        surfaceContainerRow: {},
+        surfaceButton: {},
+        surfaceButtonText: {},
+        surfaceStateSelectorBox: {
+            paddingHorizontal: Spacing.two,
+        },
+        tinyLabel: {
+            ...global.label,
+            fontSize: FontSize.p,
+        },
+        actionBtns: {
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+        }
+    });
+}
 
 export const createRegisterPatientStyles = (theme: any) => {
     const global = createGlobalStyles(theme);
@@ -128,7 +358,7 @@ export const createRegisterTreatmentStyles = (theme: any) => {
       titleSection: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12 },
       mainTitle: {
         fontSize: 22, fontWeight: '700', color: theme.pageTitle,
-        fontFamily: 'Open Sans', marginBottom: 4,
+        fontFamily: FontFamily.regular, marginBottom: 4,
       },
       subtitle: { fontSize: 13, color: theme.pageSubtitle, lineHeight: 18, fontFamily: FontFamily.regular },
     
@@ -150,7 +380,7 @@ export const createRegisterTreatmentStyles = (theme: any) => {
       },
       examName: {
         fontSize: 13, fontWeight: '600', color: Colors.light.main,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
       },
       examDate: {
         fontSize: 11, color: theme.pageSubtitle, fontFamily: FontFamily.regular, marginTop: 2,
@@ -166,7 +396,7 @@ export const createRegisterTreatmentStyles = (theme: any) => {
         gap: 4,
       },
       addBtnText: {
-        color: theme.overMain, fontSize: 13, fontWeight: '600', fontFamily: 'Open Sans',
+        color: theme.overMain, fontSize: 13, fontWeight: '600', fontFamily: FontFamily.regular,
       },
     
       buttonRow: {
@@ -181,9 +411,9 @@ export const createRegisterTreatmentStyles = (theme: any) => {
       btnCancel: {
         backgroundColor: theme.backgroundElement, borderWidth: 1, borderColor: theme.cardSeparator, minWidth: 110,
       },
-      btnCancelText: { color: theme.fieldLabel, fontSize: 14, fontWeight: '600', fontFamily: 'Open Sans' },
+      btnCancelText: { color: theme.fieldLabel, fontSize: 14, fontWeight: '600', fontFamily: FontFamily.regular },
       btnSave: { backgroundColor: Colors.light.main, minWidth: 180 },
-      btnSaveText: { color: theme.overMain, fontSize: 14, fontWeight: '600', fontFamily: 'Open Sans' },
+      btnSaveText: { color: theme.overMain, fontSize: 14, fontWeight: '600', fontFamily: FontFamily.regular },
       btnSaveSubmitting: { opacity: 0.7 },
       btnSaveIcon: { marginRight: 8 }
     });
@@ -227,7 +457,7 @@ export const createInputStyles = (theme: any) => {
         fontSize: 13,
         fontWeight: '600',
         color: theme.fieldLabel,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
         marginBottom: 6,
       },
       inputContainer: {
@@ -243,13 +473,13 @@ export const createInputStyles = (theme: any) => {
       input: {
         flex: 1,
         fontSize: 14,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
         color: theme.pageTitle,
         height: '100%',
       },
       prefix: {
         fontSize: 14,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
         color: theme.pageSubtitle,
         marginRight: 4,
       },
@@ -270,7 +500,7 @@ export const createInputStyles = (theme: any) => {
       },
       selectText: {
         fontSize: 14,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
         color: theme.pageTitle,
         flex: 1,
       },
@@ -300,7 +530,7 @@ export const createInputStyles = (theme: any) => {
       },
       optionText: {
         fontSize: 14,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
         color: theme.fieldLabel,
       },
       optionTextSelected: {
@@ -313,7 +543,7 @@ export const createInputStyles = (theme: any) => {
       errorText: {
         fontSize: 12,
         color: theme.error,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
         marginTop: 4,
       },
       scrollView: {
@@ -357,20 +587,20 @@ export const createPatientCardStyles = (theme: any) => {
             fontSize: 17,
             fontWeight: '700',
             color: theme.overMain,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             marginBottom: 2,
         },
         details: {
             fontSize: 12,
             color: theme.overMain,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             marginBottom: 6,
         },
         phoneRow: { flexDirection: 'row', alignItems: 'center' },
         phone: {
             fontSize: 13,
             color: theme.overMain,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
         phoneIcon: {
             marginRight: 6 
@@ -390,7 +620,7 @@ export const createSectionStyles = (theme: any) => {
             fontSize: 16,
             fontWeight: '600',
             color: theme.logo,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
     });     
 };
@@ -411,7 +641,7 @@ export const createBreadCrumbStyle = (theme: any) => {
         parentText: {
             color: theme.pageSubtitle,
             fontSize: 14,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
         chevron: {
             color: theme.breadcrumbSeparator,
@@ -421,7 +651,7 @@ export const createBreadCrumbStyle = (theme: any) => {
             color: theme.main,
             fontSize: 14,
             fontWeight: '600',
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
     });
 };
@@ -452,7 +682,7 @@ export const createActionBarStyles = (theme: any) => {
             fontSize: 13,
             fontWeight: '600',
             color: Colors.light.main,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
         iconButton: {
             width: 40,
@@ -487,13 +717,13 @@ export const createBadgeStyles = (theme: any) => {
         badgeLabel: {
             fontSize: 11,
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             fontWeight: '500',
         },
         badgeValue: {
             fontSize: 13,
             color: theme.pageTitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             fontWeight: '600',
         },
     });
@@ -525,7 +755,7 @@ export const createPatientFileSectionStyles = (theme: any) => {
         fontSize: 15,
         fontWeight: '600',
         color: theme.pageTitle,
-        fontFamily: 'Open Sans',
+        fontFamily: FontFamily.regular,
       },
       content: {
         paddingHorizontal: 16,
@@ -546,13 +776,13 @@ export const createDetailStyles = (theme: any) => {
         label: {
             fontSize: 13,
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             fontWeight: '500',
         },
         value: {
             fontSize: 13,
             color: theme.pageTitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             fontWeight: '600',
             maxWidth: '55%',
             textAlign: 'right',
@@ -606,7 +836,7 @@ export const createTreatmentStyles = (theme: any) => {
         date: {
             fontSize: 12,
             color: Colors.light.main,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             fontWeight: '600',
         },
         statusBadge: {
@@ -617,19 +847,19 @@ export const createTreatmentStyles = (theme: any) => {
         statusText: {
             fontSize: 10,
             fontWeight: '600',
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
         name: {
             fontSize: 15,
             fontWeight: '700',
             color: theme.pageTitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             marginBottom: 4,
         },
         notes: {
             fontSize: 12,
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             lineHeight: 17,
             marginBottom: 8,
         },
@@ -642,7 +872,7 @@ export const createTreatmentStyles = (theme: any) => {
         metaText: {
             fontSize: 12,
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
         metaDot: {
             fontSize: 12,
@@ -664,7 +894,7 @@ export const createTreatmentStyles = (theme: any) => {
         actionText: {
             fontSize: 12,
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
     });
 };
@@ -690,7 +920,7 @@ export const createTreatmentSectionStyles = (theme: any) =>  {
             fontSize: 15,
             fontWeight: '600',
             color: theme.pageTitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
         addButton: {
             flexDirection: 'row',
@@ -705,7 +935,7 @@ export const createTreatmentSectionStyles = (theme: any) =>  {
             fontSize: 13,
             color: Colors.light.main,
             fontWeight: '600',
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
         emptyState: {
             alignItems: 'center',
@@ -715,13 +945,13 @@ export const createTreatmentSectionStyles = (theme: any) =>  {
             fontSize: 14,
             fontWeight: '600',
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             marginTop: 12,
         },
         emptyMessage: {
             fontSize: 12,
             color: theme.placeholderColor,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             textAlign: 'center',
             marginTop: 4,
             paddingHorizontal: 32,
@@ -754,19 +984,19 @@ export const createMedicalRowStyles = (theme:any) => {
         label: {
             fontSize: 13,
             color: theme.pageTitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             fontWeight: '600',
             marginBottom: 2,
         },
         value: {
             fontSize: 13,
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
         noteText: {
             fontSize: 12,
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             lineHeight: 18,
             marginTop: 2,
         },
@@ -786,14 +1016,14 @@ export const createExamStyles = (theme: any) => {
         name: {
             fontSize: 13,
             color: theme.pageTitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             fontWeight: '500',
             flex: 1,
         },
         date: {
             fontSize: 12,
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             marginLeft: 12,
         },
         emptyState: {
@@ -803,7 +1033,7 @@ export const createExamStyles = (theme: any) => {
         emptyText: {
             fontSize: 13,
             color: theme.placeholderColor,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
     });
 };
@@ -827,14 +1057,14 @@ export const createPatientFileStyles = (theme: any) => {
             fontSize: 18,
             fontWeight: '700',
             color: theme.pageTitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             marginTop: 16,
             textAlign: 'center',
         },
         stateMessage: {
             fontSize: 14,
             color: theme.pageSubtitle,
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
             marginTop: 8,
             textAlign: 'center',
             lineHeight: 20,
@@ -853,7 +1083,7 @@ export const createPatientFileStyles = (theme: any) => {
             fontSize: 14,
             color: theme.overMain,
             fontWeight: '600',
-            fontFamily: 'Open Sans',
+            fontFamily: FontFamily.regular,
         },
     });
 };

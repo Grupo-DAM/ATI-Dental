@@ -223,7 +223,9 @@ export async function fetchClinicalRecord(patientId: string): Promise<ClinicalRe
     const odontogram: OdontogramData = {
       patientId: patient.id,
       updatedAt: new Date().toISOString(),
+      isAdult: true,
       status: 'placeholder',
+      teeth: {},
       notes: 'Contenedor preparado para inyección del componente de odontograma interactivo.',
     };
 
@@ -567,3 +569,135 @@ async function withStoredVisitDates(patientId: string, patient: Patient): Promis
   }
 }
 
+const INVERSE_STATE_MAP: Record<string, string> = {
+  'cavity': 'caries',
+  'filled': 'obturado',
+  'missing': 'ausente',
+  'implant': 'implante',
+  'root_canal': 'endodoncia',
+  'fixed_dental_prosthesis': 'protesis_fija',
+  'retained_root': 'remanente_radicular',
+  'in_eruption': 'en_erupcion',
+  'temporal': 'temporal'
+};
+
+function mapOdontogramToFirebase(odontogram: OdontogramData, isAdult: boolean): any {
+  const estadoPiezas: Record<string, any> = {};
+
+  if (odontogram.teeth) {
+    Object.entries(odontogram.teeth).forEach(([toothStr, condition]) => {
+      const generalState = condition.generalStates?.[0] || '';
+      const caras: Record<string, string> = {};
+
+      if (condition.surfacesStates) {
+        Object.entries(condition.surfacesStates).forEach(([surface, state]) => {
+          if (state && INVERSE_STATE_MAP[state]) {
+            caras[surface] = INVERSE_STATE_MAP[state];
+          }
+        });
+      }
+
+      estadoPiezas[toothStr] = {
+        estado_general: INVERSE_STATE_MAP[generalState] || 'sano',
+        caras: Object.keys(caras).length > 0 ? caras : null,
+        notas: condition.notes || null,
+      };
+    });
+  }
+
+  return {
+    pacienteId: odontogram.patientId,
+    fechaRegistro: new Date().toISOString(),
+    tipo: isAdult ? 'adulto' : 'pediatrico',
+    notasGeneral: odontogram.notes || '',
+    estadoPiezas,
+  };
+}
+
+export const ODONTOGRAMAS_COLLECTION = 'odontogramas';
+
+/**
+ * Guarda o actualiza el odontograma de un paciente en el sistema.
+ * 1. Intenta enviar el registro mediante la capa intermedia Serverless con Bearer Token.
+ * 2. Si falla o está en modo fuera de línea, realiza un merge directo en la colección Firestore.
+ */
+export async function updateOdontogram(
+  odontogram: OdontogramData, 
+  isAdult: boolean
+): Promise<boolean> {
+  if (!odontogram?.patientId) {
+    throw new Error('[clinical-record-service] Imposible actualizar: pacienteId faltante.');
+  }
+
+  // 1. Intento a través del Proxy Serverless Orquestado
+  try {
+    const token = await getSessionToken();
+    const endpoint = `${Config.serverless.proxyUrl}/odontogramas/${odontogram.patientId}`;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ odontogram, isAdult }),
+        signal: controller.signal,
+      });
+
+      if (response.ok) {
+        return true;
+      }
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (proxyError) {
+    console.log('[clinical-record-service] Serverless proxy unreachable for update, fallback to Firestore:', proxyError);
+  }
+
+  // 2. Fallback de persistencia robusta directa a Firestore
+  try {
+    const firebasePayload = mapOdontogramToFirebase(odontogram, isAdult);
+    
+    // Buscamos si el paciente ya tiene un registro previo hoy para actualizarlo, o creamos uno nuevo
+    const snapshot = await firestore()
+      .collection(ODONTOGRAMAS_COLLECTION)
+      .where('pacienteId', '==', odontogram.patientId)
+      .orderBy('fechaRegistro', 'desc')
+      .limit(1)
+      .get();
+
+    if (!snapshot.empty) {
+      // Si el último odontograma fue registrado el mismo día, hacemos merge sobre ese documento
+      const lastDoc = snapshot.docs[0];
+      const lastDocDate = lastDoc.data().fechaRegistro?.split('T')[0];
+      const todayDate = new Date().toISOString().split('T')[0];
+
+      if (lastDocDate === todayDate) {
+        await firestore()
+          .collection(ODONTOGRAMAS_COLLECTION)
+          .doc(lastDoc.id)
+          .set(firebasePayload, { merge: true });
+        return true;
+      }
+    }
+
+    // De lo contrario, se añade un documento histórico completamente nuevo de la consulta actual
+    await firestore()
+      .collection(ODONTOGRAMAS_COLLECTION)
+      .add(firebasePayload);
+
+    return true;
+  } catch (firestoreError: any) {
+    console.error('[clinical-record-service] Error writing odontogram to Firestore:', firestoreError);
+    throw new Error(firestoreError?.message || 'Error de red al guardar el odontograma clínico.');
+  }
+}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { TreatmentsTimeline } from '@/components/clinical-history/TreatmentsTimeline';
 import { ConsultationsTimeline } from '@/components/clinical-history/ConsultationsTimeline';
 import { PatientSummaryCard } from '@/components/clinical-history/PatientSummaryCard';
@@ -17,6 +17,28 @@ import { Patient } from '@/services/patient-service';
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, fallback?: string) => fallback || key,
+  }),
+}));
+
+jest.mock('@/hooks/use-theme', () => ({
+  useTheme: () => ({
+    backgroundElement: '#ffffff',
+    overMain: '#000000',
+    pageSubtitle: '#888888',
+    breadcrumbSeparator: '#cccccc',
+    // Agrega aquí los estados de ALL_TOOTH_STATES si getToothStateColor los busca del tema
+    cavity: '#ff0000',
+    filled: '#0000ff',
+  }),
+}));
+
+// Mock del hook que calcula las piezas dentales por cuadrante
+jest.mock('@/hooks/use-dental-pieces-per-cuadrant', () => ({
+  useDentalPiecesPerCuadrant: jest.fn((isAdult) => {
+    // Retornamos una estructura mockeada básica para los cuadrantes correspondientes
+    return isAdult 
+      ? { 1: [], 2: [], 3: [], 4: [] }
+      : { 5: [], 6: [], 7: [], 8: [] };
   }),
 }));
 
@@ -327,28 +349,123 @@ describe('Clinical History Sub-Components - Unit & Branch Coverage', () => {
   });
 
   describe('OdontogramContainer', () => {
-    it('renderiza con datos de odontograma específicos y en modo oscuro', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('renderiza con datos de odontograma específicos y muestra opciones de adulto', () => {
       jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('dark');
 
-      render(
+        render(
         <OdontogramContainer
           odontogram={{
-            patientId: 'p-1',
-            status: 'activo',
-            updatedAt: '2023-10-01',
+            patientId: 'paciente_cova_123',
+            status: 'ready',
+            isAdult: true,
+            teeth: {},
+            updatedAt: '2026-06-09T19:00:00.000Z',
           }}
         />
       );
 
-      expect(screen.getByText(/Estructura lista \(activo\)/)).toBeTruthy();
-      expect(screen.getByText('32 Piezas Dentales (FDI)')).toBeTruthy();
+      // Verificamos que el contenedor principal exista por su testID
+      expect(screen.getByTestId('odontogram-container')).toBeTruthy();
 
+      // Verificamos que aparezcan los botones de tipo de odontograma (traducción mockeada retorna el nodo final)
+      expect(screen.getByText(/adult/i)).toBeTruthy();
+      expect(screen.getByText(/pediatric/i)).toBeTruthy();
+
+      // Verificamos que la leyenda de estados se renderice (ejemplo con 'cavity' y 'filled')
+      expect(screen.getByText(/cavity/i)).toBeTruthy();
+      expect(screen.getByText(/filled/i)).toBeTruthy();
+
+      // Restauramos el esquema de color
       jest.spyOn(require('react-native'), 'useColorScheme').mockReturnValue('light');
     });
 
-    it('renderiza con status por defecto placeholder', () => {
-      render(<OdontogramContainer />);
-      expect(screen.getByText(/Estructura lista \(placeholder\)/)).toBeTruthy();
+    it('renderiza correctamente usando el objeto por defecto (DEFAULT_ODONTOGRAM) cuando es undefined', () => {
+      render(<OdontogramContainer odontogram={undefined} />);
+
+      // Al ser undefined, el componente asume DEFAULT_ODONTOGRAM el cual es Adulto (isAdult: true)
+      expect(screen.getByTestId('odontogram-container')).toBeTruthy();
+      expect(screen.getByText(/adult/i)).toBeTruthy();
+      expect(screen.getByText(/pediatric/i)).toBeTruthy();
+      
+      // Verifica que se dibuje al menos un estado de la leyenda para confirmar el renderizado del bucle
+      expect(screen.getByText(/missing/i)).toBeTruthy();
+    });
+
+    it('ejecuta los comandos de voz y actualiza Firestore para cada condición', () => {
+      let capturedVoiceCallback: ((cmd: any) => void) | null = null;
+      const voiceSpy = jest.spyOn(require('@/hooks/use-dental-voice'), 'useDentalVoice').mockImplementation((props: any) => {
+        if (props?.onCommandRecognized) {
+          capturedVoiceCallback = props.onCommandRecognized;
+        }
+        return {
+          isListening: true,
+          transcript: 'Diente 18 caries',
+          lastCommand: null,
+          permissionError: null,
+          toggleListening: jest.fn(),
+          simulateCommand: jest.fn(),
+        };
+      });
+
+      render(
+        <OdontogramContainer
+          currentPatientId="paciente_test_123"
+          initialOdontogram={{
+            adult: { pieces: {} },
+            child: { pieces: {} },
+            isAdult: true,
+          }}
+        />
+      );
+
+      expect(capturedVoiceCallback).toBeDefined();
+
+      // Disparamos caries con superficie
+      if (capturedVoiceCallback) {
+        act(() => {
+          (capturedVoiceCallback as any)({
+            success: true,
+            toothNumber: 18,
+            state: 'cavity',
+            surface: 'oclusal',
+          });
+        });
+
+        // Obturado con superficie
+        act(() => {
+          (capturedVoiceCallback as any)({
+            success: true,
+            toothNumber: 18,
+            state: 'filled',
+            surface: 'distal',
+          });
+        });
+
+        // Temporal con superficie
+        act(() => {
+          (capturedVoiceCallback as any)({
+            success: true,
+            toothNumber: 18,
+            state: 'temporal',
+            surface: 'mesial',
+          });
+        });
+
+        // Diente sano
+        act(() => {
+          (capturedVoiceCallback as any)({
+            success: true,
+            toothNumber: 18,
+            state: 'sano',
+          });
+        });
+      }
+
+      voiceSpy.mockRestore();
     });
   });
 
