@@ -16,6 +16,7 @@ type RegisterPatientI18n = { language: string };
 const mockBack = jest.fn();
 const mockReplace = jest.fn();
 const mockCanGoBack = jest.fn(() => true);
+const mockUseAuth = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({
@@ -105,6 +106,23 @@ jest.mock('@/services/patient-service', () => ({
   ),
 }));
 
+jest.mock('@/hooks/use-auth', () => ({
+  useAuth: () => mockUseAuth(),
+}));
+
+jest.mock('@/constants/user-roles', () => ({
+  isOdontologoUser: (user: any) => user?.role === 'odontologo',
+  isAdminUser: (user: any) => user?.role === 'admin',
+  isAsistenteUser: (user: any) => user?.role === 'asistente',
+  USER_ROLES: {
+    ADMIN: 'admin',
+    ODONTOLOGO: 'odontologo',
+    ASISTENTE: 'asistente',
+    PATIENT: 'patient',
+  },
+  getRoleLabelKey: (role?: string) => (role ? `roles.${role}` : 'roles.user'),
+}));
+
 describe('RegisterPatientScreen', () => {
   const originalOs = Platform.OS;
   const i18nState = { language: 'es' };
@@ -118,6 +136,11 @@ describe('RegisterPatientScreen', () => {
     (isSystemDatePickerAvailable as jest.Mock).mockReturnValue(true);
     mockRequestPermission.mockResolvedValue({ granted: true });
     mockLaunchLibrary.mockResolvedValue({ canceled: true, assets: null });
+
+    mockUseAuth.mockReturnValue({
+      user: { role: 'odontologo' },
+      loading: false,
+    });
   });
 
   afterEach(() => {
