@@ -28,7 +28,7 @@ import {
   type NavigationMenuIconKey,
 } from '@/components/navigation/navigation-menu-icon-slot';
 import { getNavigationDisplayName } from '@/constants/navigation-user';
-import { getRoleLabelKey, isAdminUser } from '@/constants/user-roles';
+import { getRoleLabelKey, isAdminUser, isOdontologoUser, isAsistenteUser } from '@/constants/user-roles';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -57,7 +57,7 @@ const APP_VERSION = Constants.expoConfig?.version ?? '1.0.1';
 const SLIDE_IN_MS = 280;
 const SLIDE_OUT_MS = 220;
 
-const MAIN_MENU_ITEMS: MenuItem[] = [
+const ODONTOLOGO_MENU_ITEMS: MenuItem[] = [
   {
     testID: 'nav-item-patients',
     route: '/(tabs)/patients/patients-list',
@@ -74,6 +74,9 @@ const MAIN_MENU_ITEMS: MenuItem[] = [
     icon: require('@/assets/expo.icon/Assets/register-patient.svg'),
     labelKey: 'navigation.registerPatient',
   },
+]
+
+const MAIN_MENU_ITEMS: MenuItem[] = [
   {
     testID: 'nav-item-profile',
     route: '/(tabs)/profile',
@@ -172,6 +175,7 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
 
   const activeSegment = segments[segments.length - 1];
   const isAdminRouteActive = ADMIN_SUBMENU_ITEMS.some((item) => item.segment === activeSegment);
+  const showOdontologoSection = isAdminUser(user) || isOdontologoUser(user) || isAsistenteUser(user);
   const showAdminSection = isAdminUser(user);
   const displayName = getNavigationDisplayName(user, t('navigation.defaultUser'));
   const roleLabel = t(getRoleLabelKey(user?.rol));
@@ -210,6 +214,22 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
         </View>
 
         <ScrollView style={styles.menuScroll} contentContainerStyle={styles.menuContent}>
+          {showOdontologoSection && ODONTOLOGO_MENU_ITEMS.map((item) => (
+            <Pressable
+              key={item.testID}
+              testID={item.testID}
+              accessibilityRole="button"
+              onPress={() => navigateTo(item.route)}
+              style={({ pressed }) => [
+                styles.menuItem,
+                activeSegment === item.segment && styles.menuItemActive,
+                pressed && styles.pressed,
+              ]}>
+              <NavigationMenuIconSlot iconKey={item.iconKey} source={item.icon} />
+              <Text style={styles.menuItemText}>{t(item.labelKey)}</Text>
+            </Pressable>
+          ))}
+
           {MAIN_MENU_ITEMS.map((item) => (
             <Pressable
               key={item.testID}

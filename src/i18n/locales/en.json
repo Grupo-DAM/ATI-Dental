@@ -338,7 +338,9 @@
       "successTitle": "Patient registered",
       "successMessage": "Patient data has been captured. Saving to the system will be connected later.",
       "saveError": "An error occurred while saving the patient. Please check your connection and try again."
-    }
+    },
+    "accessDeniedTitle": "Access Denied",
+    "accessDeniedMessage": "This section is restricted to dentists and asistants only."
   },
   "patients-list": {
     "title": "List of Patients",

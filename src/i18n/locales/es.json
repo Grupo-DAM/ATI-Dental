@@ -338,7 +338,9 @@
       "successTitle": "Paciente registrado",
       "successMessage": "Los datos del paciente se han capturado. El guardado en el sistema se conectará más adelante.",
       "saveError": "Ocurrió un error al guardar el paciente. Por favor verifique su conexión e intente nuevamente."
-    }
+    },
+    "accessDeniedTitle": "Acceso Denegado",
+    "accessDeniedMessage": "Esta sección está restringida únicamente a odontólogos y asistentes."
   },
   "patients-list": {
     "title": "Listado de Pacientes",
