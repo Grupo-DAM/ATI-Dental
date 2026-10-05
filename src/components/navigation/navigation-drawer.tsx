@@ -195,6 +195,24 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
     }
   };
 
+  const renderMenuItems = (list: MenuItem[]) => {
+    return list.map((item) => (
+      <Pressable
+        key={item.testID}
+        testID={item.testID}
+        accessibilityRole="button"
+        onPress={() => navigateTo(item.route)}
+        style={({ pressed }) => [
+          styles.menuItem,
+          activeSegment === item.segment && styles.menuItemActive,
+          pressed && styles.pressed,
+        ]}>
+        <NavigationMenuIconSlot iconKey={item.iconKey} source={item.icon} />
+        <Text style={styles.menuItemText}>{t(item.labelKey)}</Text>
+      </Pressable>
+    ))
+  }
+
   return (
     <Modal
       visible={isMounted}
@@ -214,37 +232,9 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
         </View>
 
         <ScrollView style={styles.menuScroll} contentContainerStyle={styles.menuContent}>
-          {showOdontologoSection && ODONTOLOGO_MENU_ITEMS.map((item) => (
-            <Pressable
-              key={item.testID}
-              testID={item.testID}
-              accessibilityRole="button"
-              onPress={() => navigateTo(item.route)}
-              style={({ pressed }) => [
-                styles.menuItem,
-                activeSegment === item.segment && styles.menuItemActive,
-                pressed && styles.pressed,
-              ]}>
-              <NavigationMenuIconSlot iconKey={item.iconKey} source={item.icon} />
-              <Text style={styles.menuItemText}>{t(item.labelKey)}</Text>
-            </Pressable>
-          ))}
+          {showOdontologoSection && renderMenuItems(ODONTOLOGO_MENU_ITEMS)}
 
-          {MAIN_MENU_ITEMS.map((item) => (
-            <Pressable
-              key={item.testID}
-              testID={item.testID}
-              accessibilityRole="button"
-              onPress={() => navigateTo(item.route)}
-              style={({ pressed }) => [
-                styles.menuItem,
-                activeSegment === item.segment && styles.menuItemActive,
-                pressed && styles.pressed,
-              ]}>
-              <NavigationMenuIconSlot iconKey={item.iconKey} source={item.icon} />
-              <Text style={styles.menuItemText}>{t(item.labelKey)}</Text>
-            </Pressable>
-          ))}
+          {renderMenuItems(MAIN_MENU_ITEMS)}
 
           {showAdminSection ? (
             <View style={styles.adminSection} testID="nav-admin-section">
