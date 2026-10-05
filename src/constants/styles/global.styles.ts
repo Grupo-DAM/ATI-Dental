@@ -110,6 +110,103 @@ export const createGlobalStyles = (theme: any) => StyleSheet.create({
       alignItems: 'center',
       marginBottom: Spacing.two,
     },
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    safeContainer: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    card: {
+      backgroundColor: theme.backgroundElement,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.border,
+      padding: 16,
+      marginBottom: 16,
+    },
+    cardTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: theme.text,
+      fontFamily: 'Open Sans',
+    },
+    separator: {
+      height: 1,
+      backgroundColor: theme.cardSeparator,
+      marginVertical: 12,
+    },
+    requiredAsterisk: {
+      color: theme.error,
+      fontWeight: '700',
+    },
+    inputMultiline: {
+      minHeight: 84,
+      textAlignVertical: 'top',
+    },
+    inputError: {
+      borderColor: theme.error,
+    },
+    buttonPrimary: {
+      backgroundColor: theme.main,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      gap: 8,
+    },
+    buttonPrimaryText: {
+      color: theme.overMain,
+      fontSize: 15,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
+    },
+    buttonSecondary: {
+      backgroundColor: theme.backgroundElement,
+      borderWidth: 1,
+      borderColor: theme.border,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      gap: 8,
+    },
+    buttonSecondaryText: {
+      color: theme.text,
+      fontSize: 15,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    centerContent: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 24,
+    },
+    accessDeniedTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: theme.text,
+      marginTop: 16,
+      marginBottom: 8,
+      textAlign: 'center',
+      fontFamily: 'Open Sans',
+    },
+    accessDeniedDesc: {
+      fontSize: 14,
+      color: theme.textSecondary,
+      textAlign: 'center',
+      lineHeight: 20,
+      fontFamily: 'Open Sans',
+    },
     inputShell: {
       backgroundColor: theme.backgroundElement,
       borderColor: theme.cardSeparator,
@@ -393,8 +490,10 @@ export const createFormFieldStyles = (theme: any) => {
   });
 }
 
-export const createSlidingModalStyles = (theme: any) => {
+export const createSlidingModalStyles = (theme: any, insets?: { bottom?: number }) => {
   const global = createGlobalStyles(theme);
+  const bottomInset = insets?.bottom ?? 0;
+  const paddingBottom = Math.max(bottomInset, Spacing.four || 16);
   return StyleSheet.create({
       overlay: {
           ...global.overlay,
@@ -410,7 +509,7 @@ export const createSlidingModalStyles = (theme: any) => {
           borderTopRightRadius: Border.radius.big,
           paddingHorizontal: Spacing.four,
           paddingTop: Spacing.three,
-          paddingBottom: BottomTabInset,
+          paddingBottom,
           alignItems: 'center',
       },
       handle: {
@@ -422,7 +521,6 @@ export const createSlidingModalStyles = (theme: any) => {
       },
   });
 };
-
 export const createModalOptionListStyles = (theme: any) =>
   StyleSheet.create({
     modalOverlay: {
@@ -482,4 +580,4 @@ export const createModalOptionListStyles = (theme: any) =>
       color: theme.logo || theme.main,
       fontWeight: '600',
     },
-  });
+  });

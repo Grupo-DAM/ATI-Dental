@@ -93,7 +93,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     let isMounted = true;
-    (async () => {
+    void (async () => {
       setLoading(true);
       setError(null);
       try {

@@ -1,9 +1,31 @@
 import React from 'react';
-import { render, fireEvent, Platform } from '@testing-library/react-native';
-import { ConfirmationModal } from '../confirmation-modal';
+import { render, fireEvent } from '@testing-library/react-native';
+import { ConfirmationModal, createConfirmationModalStyles } from '../confirmation-modal';
+import { Colors } from '@/constants/theme';
 
-describe('ConfirmationModal', () => {
-  it('renders correctly', () => {
+let mockBottomInset = 0;
+let mockTheme = Colors.light;
+
+jest.mock('react-native-safe-area-context', () => {
+  const actual = jest.requireActual('react-native-safe-area-context');
+  return {
+    ...actual,
+    useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: mockBottomInset, left: 0 }),
+  };
+});
+
+jest.mock('@/hooks/use-theme', () => ({
+  useTheme: () => mockTheme,
+}));
+
+describe('ConfirmationModal Component Suite', () => {
+  beforeEach(() => {
+    mockBottomInset = 0;
+    mockTheme = Colors.light;
+    jest.clearAllMocks();
+  });
+
+  it('renders correctly with default props in light mode', () => {
     const { getByText } = render(
       <ConfirmationModal
         visible={true}
@@ -17,6 +39,8 @@ describe('ConfirmationModal', () => {
     );
     expect(getByText('Confirm')).toBeTruthy();
     expect(getByText('Are you sure?')).toBeTruthy();
+    expect(getByText('Yes')).toBeTruthy();
+    expect(getByText('No')).toBeTruthy();
   });
 
   it('calls onConfirm when confirm button is pressed', () => {
@@ -33,7 +57,7 @@ describe('ConfirmationModal', () => {
       />
     );
     fireEvent.press(getByTestId('modal-confirm-btn'));
-    expect(onConfirmMock).toHaveBeenCalled();
+    expect(onConfirmMock).toHaveBeenCalledTimes(1);
   });
 
   it('calls onCancel when cancel button is pressed', () => {
@@ -50,10 +74,11 @@ describe('ConfirmationModal', () => {
       />
     );
     fireEvent.press(getByTestId('modal-cancel-btn'));
-    expect(onCancelMock).toHaveBeenCalled();
+    expect(onCancelMock).toHaveBeenCalledTimes(1);
   });
 
-  it('renders ActivityIndicator when isSubmitting is true', () => {
+  it('renders ActivityIndicator and disables confirm button when isSubmitting is true', () => {
+    const onConfirmMock = jest.fn();
     const { getByTestId, queryByText } = render(
       <ConfirmationModal
         visible={true}
@@ -62,28 +87,71 @@ describe('ConfirmationModal', () => {
         confirmText="Yes"
         cancelText="No"
         isSubmitting={true}
-        onConfirm={() => {}}
+        onConfirm={onConfirmMock}
         onCancel={() => {}}
       />
     );
-    // Button is disabled, should not trigger onPress
     fireEvent.press(getByTestId('modal-confirm-btn'));
-    expect(queryByText('Yes')).toBeNull(); // Text replaced by ActivityIndicator
+    expect(queryByText('Yes')).toBeNull();
+    expect(onConfirmMock).not.toHaveBeenCalled();
   });
 
-  it('tests Platform.OS padding condition', () => {
-    // Just render to cover the default branch, the OS mock is complex and styling is hard to test in RN
+  it('renders correctly with isDestructive=true', () => {
     const { getByText } = render(
       <ConfirmationModal
         visible={true}
-        title="Confirm padding"
-        message="Testing padding"
-        confirmText="Yes"
-        cancelText="No"
+        title="Delete Item"
+        message="This action cannot be undone"
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDestructive={true}
         onConfirm={() => {}}
         onCancel={() => {}}
       />
     );
-    expect(getByText('Confirm padding')).toBeTruthy();
+    expect(getByText('Delete Item')).toBeTruthy();
+  });
+
+  it('renders properly in dark mode without falling back to white background', () => {
+    mockTheme = Colors.dark;
+    const { getByText } = render(
+      <ConfirmationModal
+        visible={true}
+        title="Dark Modal"
+        message="Dark mode confirmation"
+        confirmText="Confirm"
+        cancelText="Cancel"
+        onConfirm={() => {}}
+        onCancel={() => {}}
+      />
+    );
+    expect(getByText('Dark Modal')).toBeTruthy();
+  });
+
+  describe('createConfirmationModalStyles unit tests', () => {
+    it('applies fallback minimum padding when insets.bottom is 0 or undefined', () => {
+      const stylesZero = createConfirmationModalStyles(Colors.light, { bottom: 0 });
+      expect(stylesZero.sheet.paddingBottom).toBe(24);
+
+      const stylesUndefined = createConfirmationModalStyles(Colors.light, undefined);
+      expect(stylesUndefined.sheet.paddingBottom).toBe(24);
+    });
+
+    it('dynamically adapts paddingBottom for Android 3-button navigation bar (e.g. 48px)', () => {
+      const stylesAndroidBar = createConfirmationModalStyles(Colors.light, { bottom: 48 });
+      expect(stylesAndroidBar.sheet.paddingBottom).toBe(48);
+    });
+
+    it('dynamically adapts paddingBottom for iOS Home Indicator (e.g. 34px)', () => {
+      const stylesIOS = createConfirmationModalStyles(Colors.light, { bottom: 34 });
+      expect(stylesIOS.sheet.paddingBottom).toBe(34);
+    });
+
+    it('applies dark theme background and colors correctly in createConfirmationModalStyles', () => {
+      const stylesDark = createConfirmationModalStyles(Colors.dark, { bottom: 20 });
+      expect(stylesDark.sheet.backgroundColor).toBe(Colors.dark.backgroundElement);
+      expect(stylesDark.title.color).toBe(Colors.dark.pageTitle);
+      expect(stylesDark.handle.backgroundColor).toBe(Colors.dark.cardSeparator);
+    });
   });
 });

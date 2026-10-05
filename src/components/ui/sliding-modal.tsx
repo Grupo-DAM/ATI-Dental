@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/hooks/use-theme';
 import { createSlidingModalStyles } from '@/constants/styles/global.styles';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,7 +29,8 @@ export function SlidingModal({
   innerContainerStyle
 }: Readonly<SlidingModalProps>) {
     const theme = useTheme();
-    const modalStyles = useMemo(() => createSlidingModalStyles(theme), [theme]);
+    const insets = useSafeAreaInsets();
+    const modalStyles = useMemo(() => createSlidingModalStyles(theme, insets), [theme, insets]);
 
     const WrapperComponent = Platform.OS === 'ios' ? KeyboardAvoidingView : View;
     const wrapperProps = Platform.OS === 'ios' ? { behavior: 'padding' as const, style: { flex: 1 } } : { style: { flex: 1 } };

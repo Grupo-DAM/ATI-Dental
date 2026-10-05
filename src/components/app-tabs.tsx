@@ -10,11 +10,13 @@ import { CreateElementModal } from '@/components/create-element-modal';
 import { CreatableElementOption } from '@/constants/create-element-options';
 
 export default function AppTabs() {
+  const colors = useTheme();
   const renderTabBar = useCallback((props: any) => <CustomTabBar {...props} />, []);
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        sceneContainerStyle: { backgroundColor: colors.background },
       }}
       tabBar={renderTabBar}
     >
@@ -31,6 +33,7 @@ export default function AppTabs() {
       <Tabs.Screen name="patients/schedule-appointment" options={{ href: null, title: 'Crear cita' }} />
       <Tabs.Screen name="patient-file" options={{ href: null, title: 'Ficha de Paciente' }} />
       <Tabs.Screen name="patients/clinical-history" options={{ href: null, title: 'Historia Clínica' }} />
+      <Tabs.Screen name="patients/register-consultation" options={{ href: null, title: 'Registrar Consulta' }} />
     </Tabs>
   );
 }
@@ -56,7 +59,8 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
     activeRouteName === 'patients/patients-list' ||
     activeRouteName === 'patients/register-patient' ||
     activeRouteName === 'patient-file' ||
-    activeRouteName === 'patients/clinical-history';
+    activeRouteName === 'patients/clinical-history' ||
+    activeRouteName === 'patients/register-consultation';
 
   const handleNavigate = (routeName: string) => {
     navigation.navigate(routeName);

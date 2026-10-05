@@ -260,12 +260,12 @@ export async function markNotificationAsRead(id: string): Promise<NotificationIt
 /**
  * Performs a debounced global search filtered strictly by role permissions.
  */
-export async function performGlobalSearch(
+export function performGlobalSearch(
   query: string,
   user?: UserProfile | null
 ): Promise<SearchResultItem[]> {
   const trimmed = query.trim().toLowerCase();
-  if (!trimmed) return [];
+  if (!trimmed) return Promise.resolve([]);
 
   const role = user?.rol || USER_ROLES.ODONTOLOGO;
   const results: SearchResultItem[] = [];
@@ -355,5 +355,5 @@ export async function performGlobalSearch(
     });
   }
 
-  return results;
+  return Promise.resolve(results);
 }

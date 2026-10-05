@@ -228,6 +228,7 @@ export const createToothConditionModalStyles = (theme: any) => {
             marginTop: Spacing.two,
             borderWidth: Border.width.regular,
             borderRadius: Border.radius.regular,
+            borderColor: theme.cardSeparator,
             
             // Toma de forma restrictiva todo el espacio vertical restante 
             // debajo del texto del número del diente, sin empujar jamás al padre.

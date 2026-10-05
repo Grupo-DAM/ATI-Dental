@@ -110,5 +110,12 @@ service cloud.firestore {
       // Cualquier usuario autenticado puede leer y escribir (requerido para la transacción en el perfil)
       allow read, write: if isAuthenticated();
     }
+
+    // 15. Colección de Consultas Médicas (US-13)
+    match /consultas/{consultaId} {
+      allow read: if isAuthenticated();
+      // Solo odontólogos o administradores pueden registrar o actualizar consultas
+      allow write: if isAuthenticated() && (getUserRole() == 'odontologo' || isAdminUser());
+    }
   }
 }
