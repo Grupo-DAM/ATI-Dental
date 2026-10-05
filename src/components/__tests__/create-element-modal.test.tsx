@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { CreateElementModal } from '../create-element-modal';
+import { ModalOptionList } from '@/components/ui/modal-option-list';
 import {
   ALL_CREATABLE_ELEMENTS,
   getCreatableOptionsForRole,
@@ -109,71 +110,61 @@ describe('CreateElementModal Suite (US-39 / Issue #184)', () => {
   });
 
   describe('Escenario 2: Selección y redirección al formulario correspondiente', () => {
-    it('cierra el modal y redirige a register-patient al seleccionar Paciente', () => {
-      mockUser = { rol: 'odontologo' };
-      render(<CreateElementModal visible={true} onClose={mockOnClose} />);
+    it.each([
+      {
+        desc: 'Paciente',
+        role: 'odontologo',
+        testId: 'create-opt-patient',
+        expectedRoute: 'patients/register-patient',
+      },
+      {
+        desc: 'Cita',
+        role: 'asistente',
+        testId: 'create-opt-appointment',
+        expectedRoute: 'patients/schedule-appointment',
+      },
+      {
+        desc: 'Consulta',
+        role: 'odontologo',
+        testId: 'create-opt-consultation',
+        expectedRoute: {
+          pathname: 'patients/clinical-history',
+          params: { tab: 'consultas', patientId: 'demo-patient' },
+        },
+      },
+      {
+        desc: 'Tratamiento',
+        role: 'odontologo',
+        testId: 'create-opt-treatment',
+        expectedRoute: 'patients/register-treatment',
+      },
+      {
+        desc: 'Odontograma',
+        role: 'odontologo',
+        testId: 'create-opt-odontogram',
+        expectedRoute: {
+          pathname: 'patients/clinical-history',
+          params: { tab: 'odontograma', patientId: 'demo-patient' },
+        },
+      },
+      {
+        desc: 'Usuario siendo Administrador',
+        role: 'admin',
+        testId: 'create-opt-user',
+        expectedRoute: 'admin/users',
+      },
+    ])(
+      'cierra el modal y redirige correctamente al seleccionar $desc',
+      ({ role, testId, expectedRoute }) => {
+        mockUser = { rol: role };
+        render(<CreateElementModal visible={true} onClose={mockOnClose} />);
 
-      fireEvent.press(screen.getByTestId('create-opt-patient'));
+        fireEvent.press(screen.getByTestId(testId));
 
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith('patients/register-patient');
-    });
-
-    it('cierra el modal y redirige a schedule-appointment al seleccionar Cita', () => {
-      mockUser = { rol: 'asistente' };
-      render(<CreateElementModal visible={true} onClose={mockOnClose} />);
-
-      fireEvent.press(screen.getByTestId('create-opt-appointment'));
-
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith('patients/schedule-appointment');
-    });
-
-    it('cierra el modal y redirige a clinical-history con tab consultas al seleccionar Consulta', () => {
-      mockUser = { rol: 'odontologo' };
-      render(<CreateElementModal visible={true} onClose={mockOnClose} />);
-
-      fireEvent.press(screen.getByTestId('create-opt-consultation'));
-
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: 'patients/clinical-history',
-        params: { tab: 'consultas', patientId: 'demo-patient' },
-      });
-    });
-
-    it('cierra el modal y redirige a register-treatment al seleccionar Tratamiento', () => {
-      mockUser = { rol: 'odontologo' };
-      render(<CreateElementModal visible={true} onClose={mockOnClose} />);
-
-      fireEvent.press(screen.getByTestId('create-opt-treatment'));
-
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith('patients/register-treatment');
-    });
-
-    it('cierra el modal y redirige a clinical-history con tab odontograma al seleccionar Odontograma', () => {
-      mockUser = { rol: 'odontologo' };
-      render(<CreateElementModal visible={true} onClose={mockOnClose} />);
-
-      fireEvent.press(screen.getByTestId('create-opt-odontogram'));
-
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: 'patients/clinical-history',
-        params: { tab: 'odontograma', patientId: 'demo-patient' },
-      });
-    });
-
-    it('cierra el modal y redirige a admin/users al seleccionar Usuario siendo Administrador', () => {
-      mockUser = { rol: 'admin' };
-      render(<CreateElementModal visible={true} onClose={mockOnClose} />);
-
-      fireEvent.press(screen.getByTestId('create-opt-user'));
-
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith('admin/users');
-    });
+        expect(mockOnClose).toHaveBeenCalledTimes(1);
+        expect(mockPush).toHaveBeenCalledWith(expectedRoute);
+      }
+    );
 
     it('ejecuta onSelectOption personalizado si es provisto como prop', () => {
       mockUser = { rol: 'admin' };
@@ -234,6 +225,33 @@ describe('CreateElementModal Suite (US-39 / Issue #184)', () => {
       expect(isRoleAllowedToCreate('odontologo', 'odontogram')).toBe(true);
       expect(isRoleAllowedToCreate('admin', 'user')).toBe(true);
       expect(isRoleAllowedToCreate(undefined, 'patient')).toBe(false);
+    });
+
+    it('muestra Alert de acceso denegado si se intenta seleccionar una opción restringida', () => {
+      mockUser = { rol: 'asistente' };
+      const { UNSAFE_getByType } = render(
+        <CreateElementModal visible={true} onClose={mockOnClose} />
+      );
+      const modalList = UNSAFE_getByType(ModalOptionList);
+      modalList.props.onSelectOption('user');
+
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Acceso Restringido',
+        'No posees permisos suficientes para registrar este tipo de elemento.'
+      );
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('ignora la selección si el optionId no existe', () => {
+      mockUser = { rol: 'admin' };
+      const { UNSAFE_getByType } = render(
+        <CreateElementModal visible={true} onClose={mockOnClose} />
+      );
+      const modalList = UNSAFE_getByType(ModalOptionList);
+      modalList.props.onSelectOption('unknown-id');
+
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(Alert.alert).not.toHaveBeenCalled();
     });
   });
 
