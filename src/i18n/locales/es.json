@@ -52,7 +52,18 @@
     "home": "Inicio",
     "explore": "Pacientes",
     "agenda": "Agenda",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "createModal": {
+      "title": "Crear nuevo elemento",
+      "patient": "Nuevo Paciente",
+      "appointment": "Nueva Cita",
+      "consultation": "Nueva Consulta",
+      "treatment": "Nuevo Tratamiento",
+      "odontogram": "Nuevo Odontograma",
+      "user": "Nuevo Usuario",
+      "accessDeniedTitle": "Acceso Restringido",
+      "accessDeniedMessage": "No posees permisos suficientes para registrar este tipo de elemento."
+    }
   },
   "navigation": {
     "title": "Navegación",

@@ -1,11 +1,13 @@
 import { Tabs } from 'expo-router';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { useTheme } from '@/hooks/use-theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { createTabBarStyles } from '@/constants/styles/global.styles';
+import { CreateElementModal } from '@/components/create-element-modal';
+import { CreatableElementOption } from '@/constants/create-element-options';
 
 export default function AppTabs() {
   const colors = useTheme();
@@ -39,7 +41,7 @@ export default function AppTabs() {
 interface CustomTabBarProps {
   state: {
     index: number;
-    routes: Array<{ name: string; key: string }>;
+    routes: { name: string; key: string }[];
   };
   descriptors?: Record<string, any>;
   navigation: {
@@ -62,6 +64,17 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
 
   const handleNavigate = (routeName: string) => {
     navigation.navigate(routeName);
+  };
+
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+
+  const handleSelectCreateOption = (option: CreatableElementOption) => {
+    setIsCreateModalVisible(false);
+    if (option.params) {
+      navigation.navigate(option.route, option.params);
+    } else {
+      navigation.navigate(option.route);
+    }
   };
 
   // Dynamic padding compensation for iOS gestures and Android navigation bars
@@ -124,10 +137,10 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
 
       <View style={styles.floatingButtonContainer}>
         <TouchableOpacity
-          testID = 'center-btn'
+          testID="center-btn"
           activeOpacity={0.8}
           style={[styles.floatingButton, { backgroundColor: colors.main }]}
-          onPress={() => navigation.navigate('patient-file', { patientId: 'paciente_cova_123' })}
+          onPress={() => setIsCreateModalVisible(true)}
         >
           <Image
             source={require('@/assets/expo.icon/Assets/plus-solid.svg')}
@@ -175,6 +188,12 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
           {t('tabs.profile')}
         </Text>
       </TouchableOpacity>
+
+      <CreateElementModal
+        visible={isCreateModalVisible}
+        onClose={() => setIsCreateModalVisible(false)}
+        onSelectOption={handleSelectCreateOption}
+      />
     </View>
   );
 }

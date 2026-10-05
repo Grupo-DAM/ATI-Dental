@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -49,7 +49,11 @@ export default function ClinicalHistoryScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createClinicalHistoryStyles(theme), [theme]);
   const { user, loading: authLoading } = useAuth();
-  const { patientId } = useLocalSearchParams<{ patientId?: string }>();
+  const { patientId, tab, initialTab } = useLocalSearchParams<{
+    patientId?: string;
+    tab?: 'consultas' | 'odontograma' | 'tratamientos';
+    initialTab?: 'consultas' | 'odontograma' | 'tratamientos';
+  }>();
 
   // ── Access Control (Escenario 4: Odontólogo y Admin autorizados) ──
   const isOdontologo = isOdontologoUser(user);
@@ -73,6 +77,13 @@ export default function ClinicalHistoryScreen() {
     updateConsultation,
     updateOdontogram,
   } = useClinicalRecord(hasAccess ? patientId : undefined);
+
+  useEffect(() => {
+    const targetTab = tab || initialTab;
+    if (targetTab && ['consultas', 'odontograma', 'tratamientos'].includes(targetTab)) {
+      setActiveTab(targetTab);
+    }
+  }, [tab, initialTab, setActiveTab]);
 
   const skipInitialFocus = useRef(true);
   useFocusEffect(
@@ -120,7 +131,7 @@ export default function ClinicalHistoryScreen() {
   const [selectedConsultationDate, ] = useState<string | null>(null);
 
   const { odontogram, loading } = useFetchOdontogram({
-    patientId: patientId ?? '',
+    patientId: (patientId && patientId !== 'demo-patient') ? patientId : '',
     selectedDate: selectedConsultationDate, // Si es null, el hook trae el último odontograma
   });
 
@@ -254,7 +265,7 @@ export default function ClinicalHistoryScreen() {
           message: t('odontogram.toast.saveSuccessMessage', 'El estado del diente ha sido registrado correctamente.'),
         });
       }
-    } catch (err) {
+    } catch {
       // We catch this to show the error in the toast modal
       setToastConfig({
         visible: true,

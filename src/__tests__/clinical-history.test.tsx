@@ -471,5 +471,15 @@ describe('useClinicalRecord Hook', () => {
       expect(ok).toBe(false);
       expect(result.current.record?.odontogram?.teeth?.[11]).toBeUndefined();
     });
+
+    it('retorna el registro de prueba por defecto cuando el patientId es demo-patient', async () => {
+      const { result } = renderHook(() => useClinicalRecord('demo-patient'));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.record?.patient.id).toBe('demo-patient');
+      expect(result.current.record?.patient.fullName).toBe('Paciente de Prueba');
+      expect(result.current.error).toBeNull();
+      expect(fetchClinicalRecord).not.toHaveBeenCalled();
+    });
   });
 });

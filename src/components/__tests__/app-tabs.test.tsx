@@ -22,6 +22,8 @@ jest.mock('expo-router', () => ({
   Tabs: Object.assign((props: any) => mockTabs(props), {
     Screen: () => null,
   }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
 }));
 
 // 2. Mock del hook personalizado de temas
@@ -38,6 +40,13 @@ jest.mock('@/hooks/use-theme', () => ({
 const mockUseSafeAreaInsets = jest.fn();
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => mockUseSafeAreaInsets(),
+}));
+
+jest.mock('@/hooks/use-auth', () => ({
+  useAuth: () => ({
+    user: { rol: 'administrador', nombre: 'Admin' },
+    loading: false,
+  }),
 }));
 
 // 4. Mock de expo-image
@@ -183,7 +192,7 @@ describe('AppTabs Component & CustomTabBar', () => {
     expect(mockNavigate).toHaveBeenCalledWith('patients/patients-list');
   });
 
-  it('should navigate to register-treatment when pressing the central button', () => {
+  it('should open create element modal when pressing the central button and navigate on selection', () => {
     const mockNavigate = jest.fn();
 
     mockTabs.mockImplementationOnce(({ tabBar }: any) =>
@@ -197,6 +206,9 @@ describe('AppTabs Component & CustomTabBar', () => {
     const { getByTestId } = render(<AppTabs />);
     fireEvent.press(getByTestId('center-btn'));
 
-    expect(mockNavigate).toHaveBeenCalledWith('patient-file', { patientId: 'paciente_cova_123' });
+    expect(getByTestId('create-opt-patient')).toBeTruthy();
+
+    fireEvent.press(getByTestId('create-opt-patient'));
+    expect(mockNavigate).toHaveBeenCalledWith('patients/register-patient');
   });
 });
