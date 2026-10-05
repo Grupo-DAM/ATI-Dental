@@ -157,6 +157,13 @@ export function PersonalDataSection({
     };
   }, [photoLabels, type, t]);
 
+  const resolvedUserStatusLabel = useMemo(() => {
+    if (userStatusLabel) return userStatusLabel;
+    if (typeof userStatus === 'string') return userStatus;
+    if (userStatus) return t('admin-users.activeStatus') || 'Activo';
+    return t('admin-users.inactiveStatus') || 'Inactivo';
+  }, [userStatusLabel, userStatus, t]);
+
   const sectionIcon = icon ?? <Ionicons name="person" size={24} color={theme.main} />;
 
   return (
@@ -365,14 +372,7 @@ export function PersonalDataSection({
             <FormSelectField
               testID="select-user-status"
               label={t('admin-users.statusLabel') || 'Estado del usuario'}
-              valueLabel={
-                userStatusLabel ||
-                (typeof userStatus === 'string'
-                  ? userStatus
-                  : userStatus
-                    ? t('admin-users.activeStatus') || 'Activo'
-                    : t('admin-users.inactiveStatus') || 'Inactivo')
-              }
+              valueLabel={resolvedUserStatusLabel}
               isPlaceholder={userStatus === undefined || userStatus === ''}
               onPress={onOpenStatusModal ?? (() => {})}
               iconName="chevron-down"

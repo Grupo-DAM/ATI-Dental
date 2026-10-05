@@ -3,7 +3,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { auth, firestore } from '@/config/firebase';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Image } from 'expo-image';
@@ -11,7 +11,6 @@ import { VerificationLinkModal } from '@/components/OTPModal';
 import { PageTitleLayout } from '@/components/page-title-layout';
 import { PersonalDataSection, SectionCard } from '@/components/form';
 import { BirthDatePicker, formatBirthDate } from '@/components/ui/birth-date-picker';
-import { FormSelectField } from '@/components/ui/form-field';
 import { ModalOptionList } from '@/components/ui/modal-option-list';
 import { isSystemDatePickerAvailable } from '@/components/ui/system-date-picker';
 import { getPatientGenderLabelKey, isPatientGender, PATIENT_GENDER_VALUES } from '@/constants/patient';

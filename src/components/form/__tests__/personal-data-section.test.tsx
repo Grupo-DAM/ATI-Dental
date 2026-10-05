@@ -272,7 +272,7 @@ describe('PersonalDataSection', () => {
         />
       );
 
-      fireEvent.press(getByTestId('select-country'));
+      expect(() => fireEvent.press(getByTestId('select-country'))).not.toThrow();
     });
   });
 });

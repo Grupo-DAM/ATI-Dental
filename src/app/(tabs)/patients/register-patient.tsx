@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useAuth } from '@/hooks/use-auth';
 import { isOdontologoUser, isAdminUser, isAsistenteUser } from '@/constants/user-roles';
 

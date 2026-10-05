@@ -293,53 +293,6 @@ export const createRegisterPatientStyles = (theme: any) => {
         scroll: {
             flex: 1,
         },
-        btnChange: {
-            borderWidth: 1,
-            borderColor: theme.cardSeparator,
-            paddingHorizontal: 16,
-            paddingVertical: 6,
-            borderRadius: 6,
-            marginRight: 15,
-            backgroundColor: theme.backgroundElement,
-        },
-        btnChangeText: {
-            color: theme.textNames,
-            fontSize: 14,
-        },
-        btnRemoveText: {
-            color: theme.alert,
-            fontSize: 14,
-        },
-        btnRemoveDisabled: {
-            opacity: 0.4,
-        },
-        avatarHelpText: {
-            fontSize: 12,
-            color: theme.placeholderColor,
-        },
-        emailIcon: {
-            width: 18,
-            height: 18,
-            marginRight: 10,
-        },
-        leadingIcon: {
-            marginRight: 10,
-        },
-        row: {
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: 12,
-        },
-        rowItem: {
-            flexGrow: 1,
-            flexBasis: 140,
-            minWidth: 140,
-        },
-        rowItemWide: {
-            flexGrow: 1.35,
-            flexBasis: 160,
-            minWidth: 160,
-        },
         actions: {
             flexDirection: 'row',
             flexWrap: 'wrap',
