@@ -16,6 +16,7 @@ type RegisterPatientI18n = { language: string };
 const mockBack = jest.fn();
 const mockReplace = jest.fn();
 const mockCanGoBack = jest.fn(() => true);
+const mockUseAuth = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({
@@ -105,6 +106,23 @@ jest.mock('@/services/patient-service', () => ({
   ),
 }));
 
+jest.mock('@/hooks/use-auth', () => ({
+  useAuth: () => mockUseAuth(),
+}));
+
+jest.mock('@/constants/user-roles', () => ({
+  isOdontologoUser: (user: any) => user?.role === 'odontologo',
+  isAdminUser: (user: any) => user?.role === 'admin',
+  isAsistenteUser: (user: any) => user?.role === 'asistente',
+  USER_ROLES: {
+    ADMIN: 'admin',
+    ODONTOLOGO: 'odontologo',
+    ASISTENTE: 'asistente',
+    PATIENT: 'patient',
+  },
+  getRoleLabelKey: (role?: string) => (role ? `roles.${role}` : 'roles.user'),
+}));
+
 describe('RegisterPatientScreen', () => {
   const originalOs = Platform.OS;
   const i18nState = { language: 'es' };
@@ -118,6 +136,11 @@ describe('RegisterPatientScreen', () => {
     (isSystemDatePickerAvailable as jest.Mock).mockReturnValue(true);
     mockRequestPermission.mockResolvedValue({ granted: true });
     mockLaunchLibrary.mockResolvedValue({ canceled: true, assets: null });
+
+    mockUseAuth.mockReturnValue({
+      user: { role: 'odontologo' },
+      loading: false,
+    });
   });
 
   afterEach(() => {
@@ -544,5 +567,110 @@ describe('RegisterPatientScreen', () => {
       expect(mockReplace).toHaveBeenCalledWith('/(tabs)/explore');
     });
     alertSpy.mockRestore();
+  });
+
+   it('muestra la vista de acceso denegado si el usuario no tiene los roles requeridos', () => {
+    // Forzamos a que el usuario autenticado sea un paciente normal sin permisos de registro
+    mockUseAuth.mockReturnValueOnce({
+      user: { role: 'patient' },
+      loading: false,
+    });
+
+    render(<RegisterPatientScreen />);
+
+    // Debería renderizar la vista de acceso denegado en lugar del formulario
+    expect(screen.queryByTestId('register-patient-screen')).toBeNull();
+    expect(screen.getByText('registerPatient.accessDeniedTitle')).toBeTruthy();
+    expect(screen.getByText('registerPatient.accessDeniedMessage')).toBeTruthy();
+  });
+
+  it('rellena el formulario usando campos alternativos en español desde patientData', () => {
+    // Simulamos que la base de datos nos devuelve las propiedades mapeadas con nombres en español
+    const mockLegacyData = JSON.stringify({
+      nombre: 'María Delgado',
+      cedula: 'V-11111',
+      fechaNacimiento: '20/10/1995',
+      genero: 'female',
+      telefono: '04140000000',
+      direccion: 'Av. Principal',
+      tipoSangre: 'AB+',
+      alergias: 'Ninguna',
+      condiciones: 'Ninguna',
+      notas: 'Paciente recurrente'
+    });
+
+    jest.spyOn(require('expo-router'), 'useLocalSearchParams').mockReturnValueOnce({
+      patientData: mockLegacyData,
+    });
+
+    render(<RegisterPatientScreen />);
+
+    // Verificamos que las alternativas en español de populateFormWithPatient funcionaron
+    expect(screen.getByTestId('input-full-name').props.value).toBe('María Delgado');
+    expect(screen.getByTestId('input-document').props.value).toBe('V-11111');
+    expect(screen.getByTestId('input-phone').props.value).toBe('04140000000');
+    expect(screen.getByTestId('input-address').props.value).toBe('Av. Principal');
+    expect(screen.getByTestId('input-allergies').props.value).toBe('Ninguna');
+    expect(screen.getByTestId('input-conditions').props.value).toBe('Ninguna');
+    expect(screen.getByTestId('input-notes').props.value).toBe('Paciente recurrente');
+  });
+
+  it('registra correctamente cuando la foto de perfil no tiene la propiedad fileSize', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    
+    // Simulamos la selección de una foto que carece del campo fileSize (algunas plataformas/motores no lo traen)
+    mockLaunchLibrary.mockResolvedValueOnce({
+      canceled: false,
+      assets: [{ uri: 'file://valid-image.jpg' }], // Sin fileSize
+    });
+
+    render(<RegisterPatientScreen />);
+    
+    // Cambiamos la foto
+    fireEvent.press(screen.getByTestId('btn-change-photo'));
+    await waitFor(() => expect(mockLaunchLibrary).toHaveBeenCalled());
+
+    // Completamos el formulario para guardarlo con la foto asignada
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Pedro Pérez');
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+
+    await waitFor(() => {
+      expect(createPatient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fullName: 'Pedro Pérez',
+          photoUri: 'file://valid-image.jpg',
+        })
+      );
+      expect(alertSpy).toHaveBeenCalledWith(
+        'registerPatient.alerts.successTitle',
+        'registerPatient.alerts.successMessage',
+        expect.any(Array),
+      );
+    });
+    alertSpy.mockRestore();
+  });
+
+  it('captura y maneja los errores silenciosamente si getPatientById falla al buscar por ID', async () => {
+    const { getPatientById } = require('@/services/patient-service');
+    // Forzamos a que la promesa falle simulando una desconexión o error de Firebase
+    (getPatientById as jest.Mock).mockRejectedValueOnce(new Error('Firebase connection timeout'));
+    
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    jest.spyOn(require('expo-router'), 'useLocalSearchParams').mockReturnValueOnce({
+      patientId: 'failed-id-123',
+    });
+
+    render(<RegisterPatientScreen />);
+
+    // Esperamos a que la promesa se rechace y verifique el catch interno del useEffect
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        '[RegisterPatient] Error consultando paciente:',
+        expect.any(Error)
+      );
+    });
+
+    consoleErrorSpy.mockRestore();
   });
 });

@@ -8,7 +8,8 @@ import { parseAppointmentDateKey } from '@/utils/appointment-schedule';
 import { parseDateRobustly } from '@/utils/date-utils';
 import { summarizePatientVisits, VisitStamp } from '@/utils/patient-visits';
 
-export const CONSULTATIONS_COLLECTION = 'consultas';
+export const HISTORIAS_CLINICAS_COLLECTION = 'historias_clinicas';
+export const CONSULTATIONS_COLLECTION = 'historias_clinicas';
 const APPOINTMENTS_COLLECTION = 'citas';
 
 const DEFAULT_SEEDS = [
@@ -107,22 +108,22 @@ export async function getConsultationsByPatientId(patientId: string): Promise<Co
       .where('patientId', '==', patientId)
       .get();
 
-    if (!snapshot.empty) {
+    if (snapshot && !snapshot.empty) {
       return snapshot.docs.map((doc) => {
         const d = doc.data();
         return {
           id: doc.id,
-          patientId: d.patientId,
-          consultationDate: d.consultationDate || d.date,
-          title: d.title || d.treatmentName || 'Consulta Odontológica',
+          patientId: d.patientId || d.pacienteId || patientId,
+          consultationDate: d.consultationDate || d.fechaConsulta || d.date,
+          title: d.title || d.treatmentName || d.motivo || d.tratamiento || 'Consulta Odontológica',
           motivo: d.motivo || d.category || 'Control general',
           diagnostico: d.diagnostico || d.notes || 'Sin diagnóstico registrado',
-          diagnosticoDetallado: d.diagnosticoDetallado || [],
+          diagnosticoDetallado: d.diagnosticoDetallado || (d.diagnostico ? [d.diagnostico] : []),
           proximaCita: d.proximaCita,
           doctor: d.doctor || d.responsibleDentist || 'Dr. Smith',
           duration: d.duration || '45 minutos',
-          tratamientosRealizados: d.tratamientosRealizados || '',
-          notas: d.notas || d.notes || '',
+          tratamientosRealizados: d.tratamientosRealizados || d.tratamiento || '',
+          notas: d.notas || d.notes || d.notesEvolucion || '',
           appointmentId: d.appointmentId,
         };
       });
@@ -261,6 +262,25 @@ async function mutateConsultationDoc(
     } else if (updatedData) {
       await docRef.set(updatedData, { merge: true });
     }
+
+    try {
+      const docRefHistorias = firestore().collection(HISTORIAS_CLINICAS_COLLECTION).doc(consultationId);
+      if (action === 'delete') {
+        await docRefHistorias.delete();
+      } else if (updatedData) {
+        const mappedData: Record<string, any> = {
+          ...updatedData,
+          ...(updatedData.consultationDate ? { fechaConsulta: updatedData.consultationDate } : {}),
+          ...(updatedData.diagnostico ? { diagnostico: updatedData.diagnostico } : {}),
+          ...(updatedData.tratamientosRealizados ? { tratamiento: updatedData.tratamientosRealizados } : {}),
+          ...(updatedData.notas ? { notesEvolucion: updatedData.notas } : {}),
+        };
+        await docRefHistorias.set(mappedData, { merge: true });
+      }
+    } catch {
+      // Ignorar fallback secundario
+    }
+
     return true;
   } catch (error) {
     console.warn(`[clinical-record-service] ${action}Consultation error in Firestore:`, error);

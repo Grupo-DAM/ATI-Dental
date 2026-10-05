@@ -6,6 +6,7 @@ import firestoreModule from '@react-native-firebase/firestore';
 import { firestore } from '@/config/firebase';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { AuthProvider } from '@/hooks/use-auth';
+import { Colors } from '@/constants/theme';
 import '@/i18n';
 
 LogBox.ignoreLogs([
@@ -42,14 +43,29 @@ ErrorUtils.setGlobalHandler((error, isFatal) => {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? 'light'];
+  const baseTheme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
+
+  const navigationTheme = {
+    ...baseTheme,
+    colors: {
+      ...(baseTheme.colors ?? {}),
+      background: theme.background,
+    },
+  };
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={navigationTheme}>
         {/* Asegúrate de que este componente no se quede como un velo bloqueando toques */}
         <AnimatedSplashOverlay />
 
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: theme.background },
+          }}
+        >
           <Stack.Screen name="index" />
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />

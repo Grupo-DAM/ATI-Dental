@@ -8,7 +8,7 @@ import { usePatients } from '@/hooks/user-list/use-patients-list';
 import { usePatientFiltering } from '@/hooks/user-list/use-list-filtering';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
-import { isOdontologoUser, isAdminUser } from '@/constants/user-roles';
+import { isOdontologoUser, isAdminUser, isAsistenteUser } from '@/constants/user-roles';
 import { createAccessDeniedStyles } from '@/constants/styles/access-denied.styles';
 import { useRouter } from 'expo-router';
 import { AdminListLayout } from '@/components/users-list/admin-list-layout';
@@ -23,7 +23,8 @@ export default function AdminUserList() {
 
   const isOdontologo = authUser ? isOdontologoUser(authUser) : false;
   const isAdmin = authUser ? isAdminUser(authUser) : false;
-  const hasPermission = isOdontologo || isAdmin;
+  const isAsistente = authUser ? isAsistenteUser(authUser) : false;
+  const hasPermission = isOdontologo || isAdmin || isAsistente;
 
   const { patients, isRetrying, handleRetryConnection } = usePatients();
   const filter = usePatientFiltering(patients);

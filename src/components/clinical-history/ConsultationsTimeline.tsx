@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -38,6 +39,7 @@ interface Props {
   readonly searchQuery: string;
   readonly onSearchChange: (q: string) => void;
   readonly onScheduleAppointment: () => void;
+  readonly onRegisterConsultation?: () => void;
   readonly onSelectConsultation: (consultation: Consultation) => void;
   readonly onModifyConsultation?: (consultation: Consultation) => void;
   readonly onDeleteConsultation?: (consultationId: string) => void;
@@ -48,6 +50,7 @@ export function ConsultationsTimeline({
   searchQuery,
   onSearchChange,
   onScheduleAppointment,
+  onRegisterConsultation,
   onSelectConsultation,
   onModifyConsultation,
   onDeleteConsultation,
@@ -63,7 +66,22 @@ export function ConsultationsTimeline({
         <Text style={styles.sectionTitle}>
           {t('clinicalHistory.tabs.consultations', 'Consultas')}
         </Text>
-        <ScheduleAppointmentButton onPress={onScheduleAppointment} />
+        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+          {onRegisterConsultation && (
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: theme.main }]}
+              onPress={onRegisterConsultation}
+              activeOpacity={0.7}
+              testID="btn-register-consultation"
+            >
+              <Ionicons name="add" size={16} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>
+                {t('clinicalHistory.newConsultation', 'Nueva Consulta')}
+              </Text>
+            </TouchableOpacity>
+          )}
+          <ScheduleAppointmentButton onPress={onScheduleAppointment} />
+        </View>
       </View>
 
       {/* Reusable Search Input */}
@@ -239,5 +257,20 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       color: theme.text,
       fontFamily: 'Open Sans',
       flex: 1,
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 8,
+      height: 44,
+      gap: 6,
+    },
+    actionButtonText: {
+      color: '#FFFFFF',
+      fontSize: 12,
+      fontWeight: '600',
+      fontFamily: 'Open Sans',
     },
   });

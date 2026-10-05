@@ -4,9 +4,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '@/hooks/use-auth';
+import { isOdontologoUser, isAdminUser, isAsistenteUser } from '@/constants/user-roles';
 
 import { PageTitleLayout } from '@/components/page-title-layout';
 import { PersonalDataSection, SectionCard } from '@/components/form';
+import { ThemedView } from '@/components/themed-view';
+import { AccessDeniedView } from '@/components/access-denied-view';
+import { AppHeader } from '@/components/app-header';
 import { BirthDatePicker, formatBirthDate } from '@/components/ui/birth-date-picker';
 import { FormActionButton, FormSelectField, FormTextField } from '@/components/ui/form-field';
 import { ModalOptionList } from '@/components/ui/modal-option-list';
@@ -55,6 +60,12 @@ export default function RegisterPatientScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createRegisterPatientStyles(theme), [theme]);
   const router = useRouter();
+  const { user: authUser, loading: authLoading } = useAuth();
+  
+  const isOdontologo = authUser ? isOdontologoUser(authUser) : false;
+  const isAdmin = authUser ? isAdminUser(authUser) : false;
+  const isAsistente = authUser ? isAsistenteUser(authUser) : false;
+  const hasPermission = isOdontologo || isAdmin || isAsistente;
 
   const [fullName, setFullName] = useState('');
   const [documentId, setDocumentId] = useState('');
@@ -208,18 +219,49 @@ export default function RegisterPatientScreen() {
     router.replace('/(tabs)/explore');
   };
 
-    const handleSubmit = async () => {
-      if (isSubmitting) {
-        return;
-      }
+  const handleSubmit = async () => {
+    if (isSubmitting) {
+      return;
+    }
 
-      const validation = validatePatientForm({
+    const validation = validatePatientForm({
+      fullName,
+      email,
+      phone,
+      documentId,
+      birthDate,
+      gender,
+      address,
+      bloodType,
+      allergies,
+      conditions,
+      notes,
+      photoUri,
+    });
+
+    if (!validation.isValid) {
+      const translatedErrors: { fullName?: string; email?: string } = {};
+      if (validation.errors.fullName) {
+        translatedErrors.fullName = t(validation.errors.fullName);
+      }
+      if (validation.errors.email) {
+        translatedErrors.email = t(validation.errors.email);
+      }
+      setErrors(translatedErrors);
+      return;
+    }
+
+    setErrors({});
+    setIsSubmitting(true);
+
+    try {
+      await createPatient({
         fullName,
-        email,
-        phone,
         documentId,
         birthDate,
         gender,
+        phone,
+        email,
         address,
         bloodType,
         allergies,
@@ -228,64 +270,45 @@ export default function RegisterPatientScreen() {
         photoUri,
       });
 
-      if (!validation.isValid) {
-        const translatedErrors: { fullName?: string; email?: string } = {};
-        if (validation.errors.fullName) {
-          translatedErrors.fullName = t(validation.errors.fullName);
-        }
-        if (validation.errors.email) {
-          translatedErrors.email = t(validation.errors.email);
-        }
-        setErrors(translatedErrors);
-        return;
-      }
-
-      setErrors({});
-      setIsSubmitting(true);
-
-      try {
-        await createPatient({
-          fullName,
-          documentId,
-          birthDate,
-          gender,
-          phone,
-          email,
-          address,
-          bloodType,
-          allergies,
-          conditions,
-          notes,
-          photoUri,
-        });
-
-        Alert.alert(
-          t('registerPatient.alerts.successTitle'),
-          t('registerPatient.alerts.successMessage'),
-          [
-            {
-              text: t('registerPatient.confirmDate'),
-              onPress: () => {
-                if (router.canGoBack()) {
-                  router.back();
-                } else {
-                  router.replace('/(tabs)/explore');
-                }
-              },
+      Alert.alert(
+        t('registerPatient.alerts.successTitle'),
+        t('registerPatient.alerts.successMessage'),
+        [
+          {
+            text: t('registerPatient.confirmDate'),
+            onPress: () => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace('/(tabs)/explore');
+              }
             },
-          ]
-        );
-      } catch (error: any) {
-        console.error('[RegisterPatientScreen] Error registering patient:', error);
-        const detail = error?.message ? `\n${error.message}` : '';
-        Alert.alert(
-          t('registerPatient.alerts.errorTitle'),
-          `${t('registerPatient.alerts.saveError')}${detail}`
-        );
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
+          },
+        ]
+      );
+    } catch (error: any) {
+      console.error('[RegisterPatientScreen] Error registering patient:', error);
+      const detail = error?.message ? `\n${error.message}` : '';
+      Alert.alert(
+        t('registerPatient.alerts.errorTitle'),
+        `${t('registerPatient.alerts.saveError')}${detail}`
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!hasPermission) {
+    return (
+      <ThemedView style={styles.container}>
+        <AppHeader />
+        <AccessDeniedView
+          title={t('registerPatient.accessDeniedTitle')}
+          message={t('registerPatient.accessDeniedMessage')}
+        />
+      </ThemedView>
+    );
+  }
 
   return (
     <PageTitleLayout
