@@ -152,6 +152,14 @@ export default function ClinicalHistoryScreen() {
     });
   };
 
+  const handleRegisterConsultation = () => {
+    const targetPatientId = record?.patient?.id || patientId;
+    router.push({
+      pathname: '/(tabs)/patients/register-consultation' as any,
+      params: { patientId: targetPatientId },
+    });
+  };
+
   const handleAddTreatment = () => {
     if (!record?.patient) return;
     router.push({
@@ -358,6 +366,7 @@ export default function ClinicalHistoryScreen() {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onScheduleAppointment={handleScheduleAppointment}
+            onRegisterConsultation={handleRegisterConsultation}
             onSelectConsultation={(c: Consultation) => {
               setSelectedConsultation(c);
               setIsEditingConsultation(false);
