@@ -2,17 +2,19 @@ import React from 'react';
 import { LogBox } from 'react-native';
 import { render, waitFor } from '@testing-library/react-native';
 
-jest.mock('expo-router', () => {
-  const React = require('react');
-  const Stack = ({ children }: { children?: React.ReactNode }) => <>{children}</>;
-  Stack.Screen = () => null;
-  return { Stack };
-});
+const mockStack: any = jest.fn(({ children }: { children?: React.ReactNode }) => <>{children}</>);
+mockStack.Screen = () => null;
+
+jest.mock('expo-router', () => ({
+  Stack: mockStack,
+}));
+
+const mockThemeProvider = jest.fn(({ children }: { children?: React.ReactNode }) => <>{children}</>);
 
 jest.mock('@react-navigation/native', () => ({
-  DarkTheme: { dark: true },
-  DefaultTheme: { dark: false },
-  ThemeProvider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  DarkTheme: { dark: true, colors: { primary: 'blue' } },
+  DefaultTheme: { dark: false, colors: { primary: 'blue' } },
+  ThemeProvider: (props: any) => mockThemeProvider(props),
 }));
 
 jest.mock('@/hooks/use-auth', () => ({
@@ -97,5 +99,65 @@ describe('RootLayout', () => {
     getSpy.mockRestore();
     setSpy.mockRestore();
     consoleSpy.mockRestore();
+  });
+
+  it('configures Stack contentStyle and ThemeProvider with light background by default', () => {
+    const React = require('react');
+    const RootLayout = require('@/app/_layout').default;
+    const { Colors } = require('@/constants/theme');
+
+    render(<RootLayout />);
+
+    expect(mockStack.mock.lastCall[0]).toEqual(
+      expect.objectContaining({
+        screenOptions: expect.objectContaining({
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.light.background },
+        }),
+      })
+    );
+
+    expect(mockThemeProvider.mock.lastCall[0]).toEqual(
+      expect.objectContaining({
+        value: expect.objectContaining({
+          dark: false,
+          colors: expect.objectContaining({
+            background: Colors.light.background,
+          }),
+        }),
+      })
+    );
+  });
+
+  it('configures Stack contentStyle and ThemeProvider with dark background when dark mode active', () => {
+    const React = require('react');
+    const ReactNative = require('react-native');
+    const colorSchemeSpy = jest.spyOn(ReactNative, 'useColorScheme').mockReturnValue('dark');
+    const RootLayout = require('@/app/_layout').default;
+    const { Colors } = require('@/constants/theme');
+
+    render(<RootLayout />);
+
+    expect(mockStack.mock.lastCall[0]).toEqual(
+      expect.objectContaining({
+        screenOptions: expect.objectContaining({
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.dark.background },
+        }),
+      })
+    );
+
+    expect(mockThemeProvider.mock.lastCall[0]).toEqual(
+      expect.objectContaining({
+        value: expect.objectContaining({
+          dark: true,
+          colors: expect.objectContaining({
+            background: Colors.dark.background,
+          }),
+        }),
+      })
+    );
+
+    colorSchemeSpy.mockRestore();
   });
 });

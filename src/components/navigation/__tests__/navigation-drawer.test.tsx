@@ -1,4 +1,5 @@
 import React from 'react';
+import { Modal } from 'react-native';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import { NavigationDrawer } from '@/components/navigation/navigation-drawer';
@@ -145,5 +146,17 @@ describe('NavigationDrawer', () => {
       expect(logout).toHaveBeenCalled();
     });
     expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('configura el modal como transparente para evitar el destello blanco en transiciones', () => {
+    useAuth.mockReturnValue({
+      user: { uid: '1', email: 'doc@test.com', rol: 'odontologo' },
+      logout: jest.fn(),
+    });
+
+    const { UNSAFE_getByType } = render(<NavigationDrawer visible onClose={jest.fn()} />);
+    const modal = UNSAFE_getByType(Modal);
+    expect(modal.props.transparent).toBe(true);
+    expect(modal.props.presentationStyle).toBeUndefined();
   });
 });

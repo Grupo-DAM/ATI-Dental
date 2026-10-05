@@ -8,11 +8,13 @@ import { useTranslation } from 'react-i18next';
 import { createTabBarStyles } from '@/constants/styles/global.styles';
 
 export default function AppTabs() {
+  const colors = useTheme();
   const renderTabBar = useCallback((props: any) => <CustomTabBar {...props} />, []);
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        sceneContainerStyle: { backgroundColor: colors.background },
       }}
       tabBar={renderTabBar}
     >
