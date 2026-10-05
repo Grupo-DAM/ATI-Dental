@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import AdminUserList from '@/app/(tabs)/patients/patients-list';
+import { isAsistenteUser } from '@/constants/user-roles';
 
 // Mocks de Hooks
 const mockUsePatients = jest.fn();
@@ -31,9 +32,11 @@ jest.mock('@react-native-community/netinfo', () => ({
 jest.mock('@/constants/user-roles', () => ({
   isOdontologoUser: (user: any) => user?.role === 'odontologo',
   isAdminUser: (user: any) => user?.role === 'admin',
+  isAsistenteUser: (user: any) => user?.role === 'asistente',
   USER_ROLES: {
     ADMIN: 'admin',
     ODONTOLOGO: 'odontologo',
+    ASISTENTE: 'asistente',
     PATIENT: 'patient',
   },
   getRoleLabelKey: (role?: string) => (role ? `roles.${role}` : 'roles.user'),
