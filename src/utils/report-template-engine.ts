@@ -1,6 +1,7 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
+import i18n from '@/i18n';
 
 /**
  * Paleta corporativa oficial de ATI Dental
@@ -79,6 +80,107 @@ export function escapeHtml(value: unknown): string {
 
 export type ReportBadgeVariant = 'primary' | 'success' | 'warning' | 'info' | 'neutral';
 
+export type ReportLanguage = 'es' | 'en';
+
+export interface ReportStrings {
+  clinicTagline: string;
+  page: string;
+  taxIdLabel: string;
+  phoneLabel: string;
+  emailLabel: string;
+  webLabel: string;
+  emissionDate: string;
+  emissionAuthor: string;
+  automatedSystem: string;
+  observationsTitle: string;
+  signatureTitleDefault: string;
+  signatureSubtitleDefault: string;
+  licensePrefix: string;
+  sealText: string;
+  sealSubtitle: string;
+  confidentialityNotice: string;
+  emptyTableMessage: string;
+  shareDialogTitle: string;
+  shareWebError: string;
+  shareUnavailableError: string;
+  shareCanceledOrFailed: string;
+}
+
+export const REPORT_STRINGS: Record<ReportLanguage, ReportStrings> = {
+  es: {
+    clinicTagline: 'Clínica Odontológica Especializada',
+    page: 'Página',
+    taxIdLabel: 'RIF',
+    phoneLabel: 'Tel',
+    emailLabel: 'Email',
+    webLabel: 'Web',
+    emissionDate: 'Emisión',
+    emissionAuthor: 'Emisor',
+    automatedSystem: 'Sistema Automatizado',
+    observationsTitle: 'Observaciones y Notas de Control:',
+    signatureTitleDefault: 'Dr. Odontólogo Responsable',
+    signatureSubtitleDefault: 'Especialista Tratante',
+    licensePrefix: 'Colegio Odontológico / Lic:',
+    sealText: 'Sello Institucional ATI Dental',
+    sealSubtitle: 'Validación Clínica Autorizada',
+    confidentialityNotice:
+      'Documento oficial emitido por ATI Dental Management Suite. Contiene información clínica o administrativa confidencial amparada por normativas de secreto profesional y protección de datos médicos.',
+    emptyTableMessage: 'No hay registros disponibles para mostrar.',
+    shareDialogTitle: 'Compartir Reporte - ATI Dental',
+    shareWebError: 'En entorno Web, compartir archivos locales por URI no está soportado de forma nativa.',
+    shareUnavailableError: 'La función de compartir no está disponible en este dispositivo.',
+    shareCanceledOrFailed: 'Compartición cancelada o no completada',
+  },
+  en: {
+    clinicTagline: 'Specialized Dental Clinic',
+    page: 'Page',
+    taxIdLabel: 'Tax ID',
+    phoneLabel: 'Phone',
+    emailLabel: 'Email',
+    webLabel: 'Web',
+    emissionDate: 'Issued',
+    emissionAuthor: 'Issuer',
+    automatedSystem: 'Automated System',
+    observationsTitle: 'Observations and Control Notes:',
+    signatureTitleDefault: 'Attending Dentist',
+    signatureSubtitleDefault: 'Treating Specialist',
+    licensePrefix: 'Dental Board / License:',
+    sealText: 'ATI Dental Institutional Seal',
+    sealSubtitle: 'Authorized Clinical Validation',
+    confidentialityNotice:
+      'Official document issued by ATI Dental Management Suite. Contains confidential clinical or administrative information protected by professional secrecy and medical data privacy regulations.',
+    emptyTableMessage: 'No records available to display.',
+    shareDialogTitle: 'Share Report - ATI Dental',
+    shareWebError: 'On Web environment, sharing local files by URI is not supported natively.',
+    shareUnavailableError: 'The share function is not available on this device.',
+    shareCanceledOrFailed: 'Sharing cancelled or incomplete',
+  },
+};
+
+/**
+ * Resuelve el idioma aplicable al reporte ('es' o 'en')
+ * Da prioridad a la selección explícita del desarrollador y recurre a i18n activo o 'es' por defecto.
+ */
+export function resolveReportLanguage(requested?: string): ReportLanguage {
+  if (requested === 'en' || requested === 'es') {
+    return requested;
+  }
+  if (typeof requested === 'string') {
+    const lower = requested.toLowerCase();
+    if (lower.startsWith('en')) return 'en';
+    if (lower.startsWith('es')) return 'es';
+  }
+  try {
+    const active = i18n?.language;
+    if (typeof active === 'string' && active.toLowerCase().startsWith('en')) {
+      return 'en';
+    }
+  } catch {
+    // Si i18n no está disponible en el entorno
+  }
+  return 'es';
+}
+
 export interface ReportBadge {
   label: string;
   variant?: ReportBadgeVariant;
@@ -98,6 +200,7 @@ export interface ReportMetadata {
   signatureSubtitle?: string;
   licenseNumber?: string;
   notes?: string[];
+  language?: ReportLanguage;
 }
 
 export interface TableColumn {
@@ -111,6 +214,7 @@ export interface TableConfig {
   rows: (string | number | boolean | null | undefined)[][];
   emptyMessage?: string;
   striped?: boolean;
+  language?: ReportLanguage;
 }
 
 export interface MetricCardItem {
@@ -132,6 +236,7 @@ export interface RenderReportOptions {
   customStyles?: string;
   orientation?: 'portrait' | 'landscape';
   pageSize?: 'A4' | 'letter';
+  language?: ReportLanguage;
 }
 
 export interface ReportFileResult {
@@ -144,6 +249,7 @@ export interface ShareReportOptions {
   dialogTitle?: string;
   mimeType?: string;
   UTI?: string;
+  language?: ReportLanguage;
 }
 
 export interface ShareReportResult {
@@ -175,11 +281,15 @@ export function getCorporateLogoSvg(): string {
 }
 
 /**
- * Formatea una fecha u objeto Date al formato corporativo estándar de ATI Dental
+ * Formatea una fecha u objeto Date al formato corporativo estándar de ATI Dental.
+ * Soporta formateo según el idioma ('es': DD/MM/YYYY HH:mm, 'en': MM/DD/YYYY HH:mm).
  */
-export function formatReportDateTime(date?: string | Date): string {
+export function formatReportDateTime(date?: string | Date, language?: string): string {
+  const lang = resolveReportLanguage(language);
   const d = date ? (typeof date === 'string' ? new Date(date) : date) : new Date();
-  if (Number.isNaN(d.getTime())) return new Date().toLocaleString('es-ES');
+  if (Number.isNaN(d.getTime())) {
+    return lang === 'en' ? new Date().toLocaleString('en-US') : new Date().toLocaleString('es-ES');
+  }
   
   const pad = (n: number) => String(n).padStart(2, '0');
   const day = pad(d.getDate());
@@ -188,6 +298,9 @@ export function formatReportDateTime(date?: string | Date): string {
   const hours = pad(d.getHours());
   const minutes = pad(d.getMinutes());
 
+  if (lang === 'en') {
+    return `${month}/${day}/${year} ${hours}:${minutes}`;
+  }
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
@@ -205,7 +318,9 @@ export function generateReportCode(prefix = 'REP'): string {
  * Helper para renderizar tablas estilizadas con reglas anti-corte de página
  */
 export function buildTableHtml(config: TableConfig): string {
-  const { columns, rows, emptyMessage = 'No hay registros disponibles para mostrar.', striped = true } = config;
+  const lang = resolveReportLanguage(config.language);
+  const defaultEmpty = REPORT_STRINGS[lang].emptyTableMessage;
+  const { columns, rows, emptyMessage = defaultEmpty, striped = true } = config;
 
   if (!rows || rows.length === 0) {
     return `
@@ -327,14 +442,18 @@ export function renderReportHtml(options: RenderReportOptions): string {
     pageSize = 'A4',
   } = options;
 
+  const lang = resolveReportLanguage(options.language || metadata.language);
+  const strings = REPORT_STRINGS[lang];
+
   const clinic = {
     ...DEFAULT_CLINIC_INFO,
+    tagline: metadata.clinicInfo?.tagline || strings.clinicTagline,
     ...(metadata.clinicInfo || {}),
   };
 
   const reportCode = metadata.reportCode || generateReportCode();
-  const formattedDate = formatReportDateTime(metadata.generatedAt);
-  const userIssuer = metadata.generatedBy || 'Sistema Automatizado';
+  const formattedDate = formatReportDateTime(metadata.generatedAt, lang);
+  const userIssuer = metadata.generatedBy || strings.automatedSystem;
 
   const badgeHtml = metadata.badge
     ? `<span class="report-badge badge-${metadata.badge.variant || 'primary'}">${escapeHtml(metadata.badge.label)}</span>`
@@ -343,7 +462,7 @@ export function renderReportHtml(options: RenderReportOptions): string {
   const notesHtml = metadata.notes && metadata.notes.length > 0
     ? `
       <div class="report-notes-card keep-together">
-        <h4 class="notes-title">Observaciones y Notas de Control:</h4>
+        <h4 class="notes-title">${escapeHtml(strings.observationsTitle)}</h4>
         <ul class="notes-list">
           ${metadata.notes.map((note) => `<li>${escapeHtml(note)}</li>`).join('')}
         </ul>
@@ -357,22 +476,22 @@ export function renderReportHtml(options: RenderReportOptions): string {
       <div class="signature-section keep-together">
         <div class="signature-column">
           <div class="signature-line"></div>
-          <p class="signature-name">${escapeHtml(metadata.signatureTitle || 'Dr. Odontólogo Responsable')}</p>
-          <p class="signature-meta">${escapeHtml(metadata.signatureSubtitle || 'Especialista Tratante')}</p>
-          ${metadata.licenseNumber ? `<p class="signature-license">Colegio Odontológico / Lic: ${escapeHtml(metadata.licenseNumber)}</p>` : ''}
+          <p class="signature-name">${escapeHtml(metadata.signatureTitle || strings.signatureTitleDefault)}</p>
+          <p class="signature-meta">${escapeHtml(metadata.signatureSubtitle || strings.signatureSubtitleDefault)}</p>
+          ${metadata.licenseNumber ? `<p class="signature-license">${escapeHtml(strings.licensePrefix)} ${escapeHtml(metadata.licenseNumber)}</p>` : ''}
         </div>
         <div class="signature-column seal-column">
           <div class="seal-box">
-            <span class="seal-text">Sello Institucional ATI Dental</span>
+            <span class="seal-text">${escapeHtml(strings.sealText)}</span>
           </div>
-          <p class="signature-meta">Validación Clínica Autorizada</p>
+          <p class="signature-meta">${escapeHtml(strings.sealSubtitle)}</p>
         </div>
       </div>
     `
     : '';
 
   return `<!DOCTYPE html>
-<html lang="es">
+<html lang="${lang}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
@@ -386,7 +505,7 @@ export function renderReportHtml(options: RenderReportOptions): string {
       size: ${pageSize} ${orientation};
       margin: 12mm 14mm 16mm 14mm;
       @bottom-right {
-        content: "Página " counter(page);
+        content: "${strings.page} " counter(page);
         font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         font-size: 8pt;
         color: #6B7280;
@@ -828,13 +947,13 @@ export function renderReportHtml(options: RenderReportOptions): string {
         <div class="brand-titles">
           <h1>${escapeHtml(clinic.name)}</h1>
           <p class="tagline">${escapeHtml(clinic.tagline)}</p>
-          <p class="tax-id">RIF: ${escapeHtml(clinic.taxId)}</p>
+          <p class="tax-id">${escapeHtml(strings.taxIdLabel)}: ${escapeHtml(clinic.taxId)}</p>
         </div>
       </div>
       <div class="header-clinic-meta">
         <p>${escapeHtml(clinic.address)}</p>
-        <p>Tel: ${escapeHtml(clinic.phone)} · Email: ${escapeHtml(clinic.email)}</p>
-        <p>Web: ${escapeHtml(clinic.website)}</p>
+        <p>${escapeHtml(strings.phoneLabel)}: ${escapeHtml(clinic.phone)} · ${escapeHtml(strings.emailLabel)}: ${escapeHtml(clinic.email)}</p>
+        <p>${escapeHtml(strings.webLabel)}: ${escapeHtml(clinic.website)}</p>
       </div>
     </header>
 
@@ -847,8 +966,8 @@ export function renderReportHtml(options: RenderReportOptions): string {
       </div>
       <div class="meta-box">
         <span class="code-badge">${escapeHtml(reportCode)}</span>
-        <span class="emission-date">Emisión: ${escapeHtml(formattedDate)}</span>
-        <span class="emission-author">Emisor: ${escapeHtml(userIssuer)}</span>
+        <span class="emission-date">${escapeHtml(strings.emissionDate)}: ${escapeHtml(formattedDate)}</span>
+        <span class="emission-author">${escapeHtml(strings.emissionAuthor)}: ${escapeHtml(userIssuer)}</span>
       </div>
     </section>
 
@@ -866,7 +985,7 @@ export function renderReportHtml(options: RenderReportOptions): string {
     <!-- Pie Institucional de Confidencialidad -->
     <footer class="report-footer">
       <div class="footer-left">
-        Documento oficial emitido por ATI Dental Management Suite. Contiene información clínica o administrativa confidencial amparada por normativas de secreto profesional y protección de datos médicos.
+        ${escapeHtml(strings.confidentialityNotice)}
       </div>
       <div class="footer-right">
         ${escapeHtml(reportCode)} · ${escapeHtml(formattedDate)}
@@ -908,10 +1027,13 @@ export async function shareReportPdf(
   uri: string,
   options: ShareReportOptions = {},
 ): Promise<ShareReportResult> {
+  const lang = resolveReportLanguage(options.language);
+  const strings = REPORT_STRINGS[lang];
+
   if (Platform.OS === 'web') {
     return {
       shared: false,
-      message: 'En entorno Web, compartir archivos locales por URI no está soportado de forma nativa.',
+      message: strings.shareWebError,
     };
   }
 
@@ -919,7 +1041,7 @@ export async function shareReportPdf(
   if (!isAvailable) {
     return {
       shared: false,
-      message: 'La función de compartir no está disponible en este dispositivo.',
+      message: strings.shareUnavailableError,
     };
   }
 
@@ -927,7 +1049,7 @@ export async function shareReportPdf(
     await Sharing.shareAsync(uri, {
       mimeType: options.mimeType || 'application/pdf',
       UTI: options.UTI || 'com.adobe.pdf',
-      dialogTitle: options.dialogTitle || 'Compartir Reporte - ATI Dental',
+      dialogTitle: options.dialogTitle || strings.shareDialogTitle,
     });
 
     return { shared: true };
@@ -936,7 +1058,7 @@ export async function shareReportPdf(
     // El usuario puede cancelar el diálogo de compartir sin que deba considerarse falla de la app
     return {
       shared: false,
-      message: `Compartición cancelada o no completada: ${errorMsg}`,
+      message: `${strings.shareCanceledOrFailed}: ${errorMsg}`,
     };
   }
 }
@@ -957,7 +1079,11 @@ export async function generateAndShareReport(
   shareOptions?: ShareReportOptions,
 ): Promise<GenerateAndShareReportResult> {
   const file = await generatePdfReport(options);
-  const share = await shareReportPdf(file.uri, shareOptions);
+  const effectiveShareOptions: ShareReportOptions = {
+    language: options.language || options.metadata.language,
+    ...shareOptions,
+  };
+  const share = await shareReportPdf(file.uri, effectiveShareOptions);
 
   return {
     file,

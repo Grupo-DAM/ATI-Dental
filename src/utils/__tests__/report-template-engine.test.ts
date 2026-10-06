@@ -15,13 +15,17 @@ import {
   generateReportCode,
   printReport,
   renderReportHtml,
+  REPORT_STRINGS,
   REPORT_THEME,
+  resolveReportLanguage,
   shareReportPdf,
 } from '../report-template-engine';
+import i18n from '@/i18n';
 
 describe('report-template-engine', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
+    await i18n.changeLanguage('es');
   });
 
   describe('escapeHtml', () => {
@@ -354,4 +358,108 @@ describe('report-template-engine', () => {
       expect(result.uri).toBeDefined();
     });
   });
+
+  describe('Internacionalización (i18n: Español e Inglés)', () => {
+    it('resolveReportLanguage resuelve idiomas explícitos y locales', () => {
+      expect(resolveReportLanguage('es')).toBe('es');
+      expect(resolveReportLanguage('en')).toBe('en');
+      expect(resolveReportLanguage('en-US')).toBe('en');
+      expect(resolveReportLanguage('en-GB')).toBe('en');
+      expect(resolveReportLanguage('es-ES')).toBe('es');
+      expect(resolveReportLanguage('es-VE')).toBe('es');
+      expect(resolveReportLanguage('fr')).toBe('es'); // fallback a español
+      expect(resolveReportLanguage(undefined)).toBe('es');
+    });
+
+    it('formatReportDateTime formatea según el idioma solicitado', () => {
+      const fixedDate = new Date(2026, 4, 15, 14, 30);
+      expect(formatReportDateTime(fixedDate, 'es')).toBe('15/05/2026 14:30');
+      expect(formatReportDateTime(fixedDate, 'en')).toBe('05/15/2026 14:30');
+    });
+
+    it('buildTableHtml utiliza el mensaje de tabla vacía según el idioma', () => {
+      const htmlEs = buildTableHtml({
+        columns: [{ header: 'Procedimiento' }],
+        rows: [],
+        language: 'es',
+      });
+      expect(htmlEs).toContain(REPORT_STRINGS.es.emptyTableMessage);
+
+      const htmlEn = buildTableHtml({
+        columns: [{ header: 'Procedure' }],
+        rows: [],
+        language: 'en',
+      });
+      expect(htmlEn).toContain(REPORT_STRINGS.en.emptyTableMessage);
+      expect(htmlEn).toContain('No records available to display.');
+    });
+
+    it('renderReportHtml compila completamente en inglés cuando language es "en"', () => {
+      const html = renderReportHtml({
+        metadata: {
+          title: 'Periodontal Assessment Report',
+          subtitle: 'Comprehensive Diagnostic Summary',
+          badge: { label: 'CONFIDENTIAL', variant: 'warning' },
+          notes: ['Patient requires scaling every 3 months'],
+          language: 'en',
+        },
+        contentHtml: '<p>Probing depths recorded</p>',
+      });
+
+      expect(html).toContain('<html lang="en">');
+      expect(html).toContain('Specialized Dental Clinic');
+      expect(html).toContain('Tax ID:');
+      expect(html).toContain('Phone:');
+      expect(html).toContain('Email:');
+      expect(html).toContain('Web:');
+      expect(html).toContain('Issued:');
+      expect(html).toContain('Issuer: Automated System');
+      expect(html).toContain('Page ');
+      expect(html).toContain('Observations and Control Notes:');
+      expect(html).toContain('Attending Dentist');
+      expect(html).toContain('Treating Specialist');
+      expect(html).toContain('ATI Dental Institutional Seal');
+      expect(html).toContain('Authorized Clinical Validation');
+      expect(html).toContain('Official document issued by ATI Dental Management Suite');
+    });
+
+    it('renderReportHtml respeta metadata.language o options.language', () => {
+      const htmlFromOption = renderReportHtml({
+        metadata: { title: 'Treatment Plan' },
+        contentHtml: '<p>Plan details</p>',
+        language: 'en',
+      });
+      expect(htmlFromOption).toContain('Specialized Dental Clinic');
+      expect(htmlFromOption).toContain('Issued:');
+
+      const htmlFromMeta = renderReportHtml({
+        metadata: { title: 'Treatment Plan', language: 'en' },
+        contentHtml: '<p>Plan details</p>',
+      });
+      expect(htmlFromMeta).toContain('Specialized Dental Clinic');
+      expect(htmlFromMeta).toContain('Issued:');
+    });
+
+    it('renderReportHtml detecta automáticamente el idioma de i18n cuando no se especifica', async () => {
+      await i18n.changeLanguage('en');
+      const htmlAuto = renderReportHtml({
+        metadata: { title: 'Auto Detected Report' },
+        contentHtml: '<p>Auto content</p>',
+      });
+      expect(htmlAuto).toContain('Specialized Dental Clinic');
+      expect(htmlAuto).toContain('Issued:');
+    });
+
+    it('shareReportPdf adapta mensajes de error y títulos según el idioma', async () => {
+      (Sharing.isAvailableAsync as jest.Mock).mockResolvedValueOnce(false);
+      const resEs = await shareReportPdf('file:///test.pdf', { language: 'es' });
+      expect(resEs.message).toBe(REPORT_STRINGS.es.shareUnavailableError);
+
+      (Sharing.isAvailableAsync as jest.Mock).mockResolvedValueOnce(false);
+      const resEn = await shareReportPdf('file:///test.pdf', { language: 'en' });
+      expect(resEn.message).toBe(REPORT_STRINGS.en.shareUnavailableError);
+      expect(resEn.message).toContain('The share function is not available on this device.');
+    });
+  });
 });
+

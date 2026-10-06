@@ -16,7 +16,9 @@ import {
   generateReportCode,
   printReport,
   renderReportHtml,
+  REPORT_STRINGS,
   REPORT_THEME,
+  resolveReportLanguage,
   shareReportPdf,
 } from '@/utils/report-template-engine';
 import type {
@@ -25,6 +27,8 @@ import type {
   MetricCardItem,
   RenderReportOptions,
   ReportFileResult,
+  ReportLanguage,
+  ReportStrings,
   ShareReportOptions,
   ShareReportResult,
   TableConfig,
@@ -96,14 +100,25 @@ export class ReportService {
   static buildAlert(message: string, variant: 'info' | 'warning' | 'success' = 'info'): string {
     return buildAlertBoxHtml(message, variant);
   }
+
+  /**
+   * Resuelve el idioma del reporte ('es' o 'en')
+   */
+  static resolveLanguage(requested?: string): ReportLanguage {
+    return resolveReportLanguage(requested);
+  }
+
+  static readonly STRINGS = REPORT_STRINGS;
 }
 
 export {
   escapeHtml,
   formatReportDateTime,
   generateReportCode,
+  resolveReportLanguage,
   DEFAULT_CLINIC_INFO,
   REPORT_THEME,
+  REPORT_STRINGS,
 };
 export type {
   GenerateAndShareReportResult,
@@ -111,6 +126,8 @@ export type {
   MetricCardItem,
   RenderReportOptions,
   ReportFileResult,
+  ReportLanguage,
+  ReportStrings,
   ShareReportOptions,
   ShareReportResult,
   TableConfig,

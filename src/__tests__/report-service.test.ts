@@ -84,4 +84,28 @@ describe('ReportService', () => {
     const alertHtml = ReportService.buildAlert('Mensaje importante', 'warning');
     expect(alertHtml).toContain('alert-warning');
   });
+
+  it('soporta internacionalización (i18n) en español e inglés', () => {
+    expect(ReportService.resolveLanguage('en')).toBe('en');
+    expect(ReportService.resolveLanguage('es')).toBe('es');
+    expect(ReportService.STRINGS.es.clinicTagline).toBe('Clínica Odontológica Especializada');
+    expect(ReportService.STRINGS.en.clinicTagline).toBe('Specialized Dental Clinic');
+
+    const htmlEn = ReportService.renderHtml({
+      metadata: { title: 'Clinical Summary', language: 'en' },
+      contentHtml: '<p>Details</p>',
+    });
+
+    expect(htmlEn).toContain('<html lang="en">');
+    expect(htmlEn).toContain('Specialized Dental Clinic');
+    expect(htmlEn).toContain('Issued:');
+    expect(htmlEn).toContain('ATI Dental Institutional Seal');
+
+    const tableEn = ReportService.buildTable({
+      columns: [{ header: 'Items' }],
+      rows: [],
+      language: 'en',
+    });
+    expect(tableEn).toContain('No records available to display.');
+  });
 });
