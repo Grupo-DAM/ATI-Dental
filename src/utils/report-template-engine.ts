@@ -4,23 +4,50 @@ import { Platform } from 'react-native';
 
 /**
  * Paleta corporativa oficial de ATI Dental
+ * Sincronizada fielmente con src/constants/theme.ts (Colors.light, BRAND_COLORS y TOOTH_STATES)
  */
 export const REPORT_THEME = {
-  primary: '#5B2D8B',
-  primaryDark: '#52287D',
-  primaryLight: '#DBB4FF',
-  primarySoft: '#F4EEFB',
-  textDark: '#141018',
-  textMuted: '#6B7280',
-  textLight: '#9CA3AF',
-  border: '#E5E7EB',
-  borderStrong: '#CBD5E1',
-  backgroundAlt: '#F9FAFB',
+  // Colores principales de marca (BRAND_COLORS / Colors.light.main / header)
+  primary: '#5B2D8B',       // Colors.light.main y logo
+  primaryDark: '#52287D',   // Colors.light.header
+  primaryLight: '#DBB4FF',  // Colors.light.mainGradient[1]
+  boldAccent: '#3E1F5C',    // Colors.light.boldAccent
+  primarySoft: '#F3E8FF',   // Colors.light.accentBackground
+  textDark: '#141018',      // Colors.light.text
+  pageTitle: '#1F2937',     // Colors.light.pageTitle
+  textMuted: '#6B7280',     // Colors.light.pageSubtitle
+  textLight: '#9CA3AF',     // Colors.light.breadcrumbSeparator
+  border: '#DBD4E2',        // Colors.light.border
+  borderStrong: '#D1D5DB',  // Colors.light.cardSeparator
+  background: '#F7F6F8',    // Colors.light.background
+  backgroundAlt: '#F9FAFB', // Colors.light.backgroundSecondary
   white: '#FFFFFF',
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
+
+  // Estados y alertas
+  success: '#10B981',       // BRAND_COLORS.positive
+  warning: '#D97706',       // BRAND_COLORS.warning
+  error: '#DC2626',         // BRAND_COLORS.alert / error
+  info: '#2E7CEE',          // BRAND_COLORS.filled / azul clínico
+
+  // Badges de tratamientos (Treatment badges en theme.ts)
+  completeBg: '#E8F5E9', completeText: '#2E7D32',
+  inProgressBg: '#FFF3E0', inProgressText: '#E65100',
+  pendingBg: '#FFF8E1', pendingText: '#F57F17',
+  canceledBg: '#FFEBEE', canceledText: '#C62828',
+  preventitiveBg: '#E8EAF6', preventitiveText: '#283593',
+
+  // Colores del Odontograma (Tooth states en theme.ts)
+  toothStates: {
+    cavity: '#F05C5E',
+    filled: '#2E7CEE',
+    missing: '#A5A8B1',
+    implant: '#de8bd0',
+    root_canal: '#FCA04B',
+    fixed_dental_prosthesis: '#B18DF4',
+    retained_root: '#e37c44',
+    in_eruption: '#4d814f',
+    temporal: '#deed5c',
+  },
 } as const;
 
 /**
@@ -351,13 +378,16 @@ export function renderReportHtml(options: RenderReportOptions): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
   <title>${escapeHtml(metadata.title)} - ${escapeHtml(clinic.name)}</title>
   <style>
+    /* Tipografía Institucional Oficial ATI Dental: Open Sans */
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap');
+
     /* Configuración de Hoja y Márgenes de Impresión A4 / Carta */
     @page {
       size: ${pageSize} ${orientation};
       margin: 12mm 14mm 16mm 14mm;
       @bottom-right {
         content: "Página " counter(page);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         font-size: 8pt;
         color: #6B7280;
       }
@@ -372,7 +402,7 @@ export function renderReportHtml(options: RenderReportOptions): string {
     body {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 10pt;
       line-height: 1.45;
       color: ${REPORT_THEME.textDark};
