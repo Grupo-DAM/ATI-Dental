@@ -66,7 +66,8 @@
           "microphonePermission": "Permitir a ATI-Dental usar el micrófono para el reconocimiento de voz en el odontograma.",
           "speechRecognitionPermission": "Permitir el reconocimiento de comandos de voz en ATI-Dental."
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,

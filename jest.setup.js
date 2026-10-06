@@ -197,6 +197,31 @@ jest.mock('@react-native-community/netinfo', () => {
   };
 });
 
+// Mocks de expo-print
+jest.mock('expo-print', () => ({
+  printAsync: jest.fn(() => Promise.resolve()),
+  printToFileAsync: jest.fn(() => Promise.resolve({
+    uri: 'file:///data/user/0/com.atidental/cache/Print/report.pdf',
+    numberOfPages: 1,
+    base64: 'bW9jay1wZGYtY29udGVudA==',
+  })),
+  selectPrinterAsync: jest.fn(() => Promise.resolve({ name: 'Mock Printer', url: 'ipp://mock' })),
+  Orientation: {
+    portrait: 'portrait',
+    landscape: 'landscape',
+  },
+}));
+
+// Mocks de expo-sharing
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  shareAsync: jest.fn(() => Promise.resolve()),
+  getSharedPayloads: jest.fn(() => []),
+  getResolvedSharedPayloadsAsync: jest.fn(() => Promise.resolve([])),
+  clearSharedPayloads: jest.fn(),
+  useIncomingShare: jest.fn(() => ({ resolvedSharedPayloads: [], isResolving: false })),
+}));
+
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
