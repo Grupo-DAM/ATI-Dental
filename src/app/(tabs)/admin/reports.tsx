@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -48,6 +48,7 @@ export default function AdminReportsScreen() {
   const [selectedReportType, setSelectedReportType] = useState<ReportType>('usage');
   const [showPeriodModal, setShowPeriodModal] = useState(false);
   const [showReportTypeModal, setShowReportTypeModal] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Validación de seguridad (No autenticado vs No administrador)
   useEffect(() => {
@@ -130,7 +131,13 @@ export default function AdminReportsScreen() {
   }, [t]);
 
   const handleExportPdf = useCallback(() => {
+    setShowExportMenu(false);
     Alert.alert(t('reports.pdfExportSuccess'), t('reports.pdfExportMessage'));
+  }, [t]);
+
+  const handleExportCsv = useCallback(() => {
+    setShowExportMenu(false);
+    Alert.alert(t('reports.csvExportSuccess'), t('reports.csvExportMessage'));
   }, [t]);
 
   return (
@@ -240,7 +247,7 @@ export default function AdminReportsScreen() {
           />
         )}
 
-        {/* Acciones de pie: Imprimir y PDF */}
+        {/* Acciones de pie: Imprimir y Descargar con Popover (PDF / CSV) */}
         <View style={styles.actionsRow}>
           <TouchableOpacity
             style={styles.printBtn}
@@ -251,16 +258,51 @@ export default function AdminReportsScreen() {
           >
             <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.pdfBtn}
-            onPress={handleExportPdf}
-            activeOpacity={0.7}
-            testID="export-pdf-btn"
-            accessibilityLabel={t('reports.exportPdf')}
-          >
-            <Ionicons name="document-text" size={16} color={theme.overMain} style={styles.pdfBtnIcon} />
-            <Text style={styles.pdfBtnText}>PDF</Text>
-          </TouchableOpacity>
+
+          <View style={styles.downloadContainer}>
+            {showExportMenu && (
+              <>
+                <Pressable
+                  style={styles.menuBackdrop}
+                  onPress={() => setShowExportMenu(false)}
+                  testID="export-menu-backdrop"
+                />
+                <View style={styles.exportMenuPopover} testID="export-menu-popover">
+                  <TouchableOpacity
+                    style={[styles.exportMenuItem, styles.exportMenuItemActive]}
+                    onPress={handleExportCsv}
+                    activeOpacity={0.7}
+                    testID="export-csv-btn"
+                    accessibilityLabel={t('reports.exportCsv')}
+                  >
+                    <Ionicons name="document-text" size={18} color={theme.main} />
+                    <Text style={[styles.exportMenuText, styles.exportMenuTextActive]}>CSV</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.exportMenuItem}
+                    onPress={handleExportPdf}
+                    activeOpacity={0.7}
+                    testID="export-pdf-btn"
+                    accessibilityLabel={t('reports.exportPdf')}
+                  >
+                    <Ionicons name="documents-outline" size={18} color={theme.fieldLabel} />
+                    <Text style={styles.exportMenuText}>PDF</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+
+            <TouchableOpacity
+              style={styles.downloadBtn}
+              onPress={() => setShowExportMenu((prev) => !prev)}
+              activeOpacity={0.7}
+              testID="download-menu-btn"
+              accessibilityLabel={t('reports.download')}
+            >
+              <Ionicons name="download-outline" size={20} color={theme.overMain} />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </PageTitleLayout>

@@ -561,6 +561,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               "gap": 12,
               "justifyContent": "flex-end",
               "marginBottom": 20,
+              "zIndex": 10,
             }
           }
         >
@@ -625,80 +626,71 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
             </Text>
           </View>
           <View
-            accessibilityLabel="Exportar PDF"
-            accessibilityState={
-              {
-                "busy": undefined,
-                "checked": undefined,
-                "disabled": undefined,
-                "expanded": undefined,
-                "selected": undefined,
-              }
-            }
-            accessibilityValue={
-              {
-                "max": undefined,
-                "min": undefined,
-                "now": undefined,
-                "text": undefined,
-              }
-            }
-            accessible={true}
-            collapsable={false}
-            focusable={true}
-            onClick={[Function]}
-            onResponderGrant={[Function]}
-            onResponderMove={[Function]}
-            onResponderRelease={[Function]}
-            onResponderTerminate={[Function]}
-            onResponderTerminationRequest={[Function]}
-            onStartShouldSetResponder={[Function]}
             style={
               {
-                "alignItems": "center",
-                "backgroundColor": "#5B2D8B",
-                "borderRadius": 8,
-                "elevation": 2,
-                "flexDirection": "row",
-                "height": 38,
-                "justifyContent": "center",
-                "opacity": 1,
-                "paddingHorizontal": 16,
-                "shadowColor": "#5B2D8B",
-                "shadowOffset": {
-                  "height": 2,
-                  "width": 0,
-                },
-                "shadowOpacity": 0.2,
-                "shadowRadius": 3,
+                "position": "relative",
+                "zIndex": 20,
               }
             }
-            testID="export-pdf-btn"
           >
-            <Text
-              color="#ffffff"
-              name="document-text"
-              size={16}
-              style={
+            <View
+              accessibilityLabel="Descargar"
+              accessibilityState={
                 {
-                  "marginRight": 4,
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
                 }
               }
-            >
-              document-text
-            </Text>
-            <Text
-              style={
+              accessibilityValue={
                 {
-                  "color": "#ffffff",
-                  "fontSize": 13,
-                  "fontWeight": "700",
-                  "letterSpacing": 0.5,
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
                 }
               }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#5B2D8B",
+                  "borderRadius": 8,
+                  "elevation": 2,
+                  "height": 38,
+                  "justifyContent": "center",
+                  "opacity": 1,
+                  "shadowColor": "#5B2D8B",
+                  "shadowOffset": {
+                    "height": 2,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.2,
+                  "shadowRadius": 3,
+                  "width": 44,
+                }
+              }
+              testID="download-menu-btn"
             >
-              PDF
-            </Text>
+              <Text
+                color="#ffffff"
+                name="download-outline"
+                size={20}
+              >
+                download-outline
+              </Text>
+            </View>
           </View>
         </View>
       </View>
