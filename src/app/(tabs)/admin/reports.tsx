@@ -269,14 +269,14 @@ export default function AdminReportsScreen() {
                 />
                 <View style={styles.exportMenuPopover} testID="export-menu-popover">
                   <TouchableOpacity
-                    style={[styles.exportMenuItem, styles.exportMenuItemActive]}
+                    style={styles.exportMenuItem}
                     onPress={handleExportCsv}
                     activeOpacity={0.7}
                     testID="export-csv-btn"
                     accessibilityLabel={t('reports.exportCsv')}
                   >
-                    <Ionicons name="document-text" size={18} color={theme.main} />
-                    <Text style={[styles.exportMenuText, styles.exportMenuTextActive]}>CSV</Text>
+                    <Ionicons name="document-text-outline" size={18} color={theme.fieldLabel} />
+                    <Text style={styles.exportMenuText}>CSV</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
