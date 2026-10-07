@@ -39,7 +39,7 @@ export interface LinkedAppointment {
  */
 export function isAppointmentStatusCompatible(status?: string): boolean {
   if (!status) return false;
-  const normalized = status.trim().toLowerCase().replace(/_/g, ' ');
+  const normalized = status.trim().toLowerCase().replaceAll('_', ' ');
   return normalized === 'en progreso' || normalized === 'completada';
 }
 

@@ -71,11 +71,11 @@ export function escapeHtml(value: unknown): string {
   if (value === null || value === undefined) return '';
   const str = String(value);
   return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 export type ReportBadgeVariant = 'primary' | 'success' | 'warning' | 'info' | 'neutral';
@@ -304,13 +304,26 @@ export function formatReportDateTime(date?: string | Date, language?: string): s
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
+let sequenceCounter = 0;
+
 /**
  * Genera el identificador único o código estándar para reportes si no fue provisto
  */
 export function generateReportCode(prefix = 'REP'): string {
   const now = new Date();
   const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-  const randomPart = Math.floor(1000 + Math.random() * 9000);
+  sequenceCounter = (sequenceCounter + 1) % 9000;
+
+  let randomOffset = 0;
+  if (typeof globalThis.crypto?.getRandomValues === 'function') {
+    const array = new Uint16Array(1);
+    globalThis.crypto.getRandomValues(array);
+    randomOffset = array[0] % 9000;
+  } else {
+    randomOffset = sequenceCounter;
+  }
+
+  const randomPart = 1000 + ((randomOffset + sequenceCounter) % 9000);
   return `${prefix}-${datePart}-${randomPart}`;
 }
 
