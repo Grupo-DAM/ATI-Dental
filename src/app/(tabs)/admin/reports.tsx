@@ -219,7 +219,8 @@ export default function AdminReportsScreen() {
       const options = buildAdminReportPdfOptions(currentSnapshot, t);
       await ReportService.print(options);
       Alert.alert(t('reports.print'), t('reports.printTriggered'));
-    } catch {
+    } catch (error) {
+      console.error('Error al imprimir reporte:', error);
       Alert.alert(t('reports.title'), t('reports.printError'));
     } finally {
       setIsExporting(false);
@@ -240,7 +241,8 @@ export default function AdminReportsScreen() {
       const options = buildAdminReportPdfOptions(currentSnapshot, t);
       await ReportService.generateAndShare(options);
       Alert.alert(t('reports.pdfExportSuccess'), t('reports.pdfExportMessage'));
-    } catch {
+    } catch (error) {
+      console.error('Error al exportar reporte PDF:', error);
       Alert.alert(t('reports.title'), t('reports.exportError'));
     } finally {
       setIsExporting(false);

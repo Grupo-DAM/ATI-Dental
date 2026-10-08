@@ -8,9 +8,10 @@ import { PeriodOption } from '../types';
 import { useCrashRateMetrics } from '../hooks/useCrashRateMetrics';
 import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
+import type { UserProfile } from '@/hooks/use-auth';
 
 interface CrashRateReportViewProps {
-  user: any;
+  user: UserProfile | null;
   authLoading: boolean;
   selectedPeriod: PeriodOption;
   totalSessionsCount: number;

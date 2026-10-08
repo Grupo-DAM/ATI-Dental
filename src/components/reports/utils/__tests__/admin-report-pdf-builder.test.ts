@@ -2,10 +2,12 @@ import {
   hasReportData,
   buildAdminReportPdfOptions,
   AdminReportDataSnapshot,
+  TranslateFunction,
 } from '../admin-report-pdf-builder';
 
 describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte Gráfico)', () => {
-  const mockT = (key: string, fallback?: string) => fallback || key;
+  const mockT: TranslateFunction = (key: string, fallbackOrOptions?: unknown) =>
+    typeof fallbackOrOptions === 'string' ? fallbackOrOptions : key;
 
   describe('hasReportData', () => {
     it('valida datos para usage y access basándose en sessions', () => {
@@ -259,6 +261,166 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       const options = buildAdminReportPdfOptions(snapshot, mockT);
       expect(options.metadata.showSignatureBlock).toBe(false);
       expect(options.contentHtml).toContain('No hay registros disponibles');
+    });
+
+    describe('Ramas y casos borde para cobertura exhaustiva', () => {
+      it('hasReportData cubre todas las combinaciones y variantes falsy', () => {
+        expect(hasReportData({ reportType: 'usage', selectedPeriod: 30, periodLabel: '30 días' })).toBe(false);
+        expect(hasReportData({ reportType: 'access', selectedPeriod: 30, periodLabel: '30 días' })).toBe(false);
+        expect(hasReportData({ reportType: 'crash_rate', selectedPeriod: 30, periodLabel: '30 días' })).toBe(false);
+        expect(hasReportData({ reportType: 'retention_rate', selectedPeriod: 30, periodLabel: '30 días' })).toBe(false);
+        expect(hasReportData({ reportType: 'dau_mau', selectedPeriod: 30, periodLabel: '30 días', mauValue: 10 })).toBe(true);
+        expect(hasReportData({
+          reportType: 'dau_mau',
+          selectedPeriod: 30,
+          periodLabel: '30 días',
+          dauMauData: [{ label: '1', mau: 0, dau: 5 }],
+        })).toBe(true);
+        expect(hasReportData({
+          reportType: 'dau_mau',
+          selectedPeriod: 30,
+          periodLabel: '30 días',
+          dauMauData: [{ label: '1', mau: 0, dau: 0 }],
+        })).toBe(false);
+      });
+
+      it('buildUsageReportPdf maneja sesiones sin timestamp, fuera de rango y sin sesiones', () => {
+        const oldTimestamp = Date.now() - 100 * 24 * 3600 * 1000;
+        const snapshot: AdminReportDataSnapshot = {
+          reportType: 'usage',
+          selectedPeriod: 7,
+          periodLabel: '7 días',
+          sessions: [
+            { id: 'no-ts' },
+            { id: 'old', fecha: oldTimestamp },
+          ],
+        };
+        const options = buildAdminReportPdfOptions(snapshot, mockT);
+        expect(options.contentHtml).toContain('Tiempo Promedio de Uso');
+
+        const emptySnapshot: AdminReportDataSnapshot = {
+          reportType: 'usage',
+          selectedPeriod: 7,
+          periodLabel: '7 días',
+        };
+        const emptyOptions = buildAdminReportPdfOptions(emptySnapshot, mockT);
+        expect(emptyOptions.contentHtml).toContain('Tiempo Promedio de Uso');
+      });
+
+      it('buildAccessReportPdf maneja sesiones sin timestamp, fuera de rango y sin sesiones', () => {
+        const oldTimestamp = Date.now() - 100 * 24 * 3600 * 1000;
+        const snapshot: AdminReportDataSnapshot = {
+          reportType: 'access',
+          selectedPeriod: 7,
+          periodLabel: '7 días',
+          sessions: [
+            { id: 'no-ts' },
+            { id: 'old', fecha: oldTimestamp },
+          ],
+        };
+        const options = buildAdminReportPdfOptions(snapshot, mockT);
+        expect(options.contentHtml).toContain('Número de Accesos');
+
+        const emptySnapshot: AdminReportDataSnapshot = {
+          reportType: 'access',
+          selectedPeriod: 7,
+          periodLabel: '7 días',
+        };
+        const emptyOptions = buildAdminReportPdfOptions(emptySnapshot, mockT);
+        expect(emptyOptions.contentHtml).toContain('Número de Accesos');
+      });
+
+      it('buildDemographicsReportPdf maneja métricas nulas y totalUsers = 0', () => {
+        const snapshotNull: AdminReportDataSnapshot = {
+          reportType: 'demographics',
+          selectedPeriod: 30,
+          periodLabel: '30 días',
+          demographicsMetrics: null,
+        };
+        const optionsNull = buildAdminReportPdfOptions(snapshotNull, mockT);
+        expect(optionsNull.contentHtml).toContain('—');
+
+        const snapshotZero: AdminReportDataSnapshot = {
+          reportType: 'demographics',
+          selectedPeriod: 30,
+          periodLabel: '30 días',
+          demographicsMetrics: {
+            totalUsers: 0,
+            averageAge: null,
+            ageBuckets: [{ key: '18_25', count: 0 }],
+            genderSlices: [{ key: 'unspecified', count: 0, percent: 0 }],
+          },
+        };
+        const optionsZero = buildAdminReportPdfOptions(snapshotZero, mockT);
+        expect(optionsZero.contentHtml).toContain('0%');
+      });
+
+      it('buildGeographicsReportPdf maneja métricas nulas y totalUsers = 0', () => {
+        const snapshotNull: AdminReportDataSnapshot = {
+          reportType: 'geographics',
+          selectedPeriod: 30,
+          periodLabel: '30 días',
+          geographicsMetrics: null,
+        };
+        const optionsNull = buildAdminReportPdfOptions(snapshotNull, mockT);
+        expect(optionsNull.contentHtml).toContain('N/A');
+
+        const snapshotZero: AdminReportDataSnapshot = {
+          reportType: 'geographics',
+          selectedPeriod: 30,
+          periodLabel: '30 días',
+          geographicsMetrics: {
+            totalCities: 0,
+            mainCountry: 'Chile',
+            mainCountryPercent: 0,
+            totalUsers: 0,
+            countryBuckets: [{ key: 'CL', label: 'Chile', count: 0 }],
+            regionSlices: [{ key: 'otros', label: 'Otros', count: 0, percent: 0 }],
+          },
+        };
+        const optionsZero = buildAdminReportPdfOptions(snapshotZero, mockT);
+        expect(optionsZero.contentHtml).toContain('0%');
+      });
+
+      it('buildDauMauReportPdf calcula ratio si no viene provisto y maneja mau = 0', () => {
+        const snapshot: AdminReportDataSnapshot = {
+          reportType: 'dau_mau',
+          selectedPeriod: 30,
+          periodLabel: '30 días',
+          dauValue: 20,
+          mauValue: 100,
+          dauMauData: [{ label: 'Oct', mau: 0, dau: 5 }],
+        };
+        const options = buildAdminReportPdfOptions(snapshot, mockT);
+        expect(options.contentHtml).toContain('20%');
+        expect(options.contentHtml).toContain('0%');
+
+        const emptySnapshot: AdminReportDataSnapshot = {
+          reportType: 'dau_mau',
+          selectedPeriod: 30,
+          periodLabel: '30 días',
+        };
+        const emptyOptions = buildAdminReportPdfOptions(emptySnapshot, mockT);
+        expect(emptyOptions.contentHtml).toContain('RATIO DAU/MAU');
+      });
+
+      it('buildCrashRateReportPdf y buildRetentionReportPdf manejan valores nulos por defecto', () => {
+        const crashSnapshot: AdminReportDataSnapshot = {
+          reportType: 'crash_rate',
+          selectedPeriod: 15,
+          periodLabel: '15 días',
+        };
+        const crashOptions = buildAdminReportPdfOptions(crashSnapshot, mockT);
+        expect(crashOptions.contentHtml).toContain('0.00%');
+
+        const retentionSnapshot: AdminReportDataSnapshot = {
+          reportType: 'retention_rate',
+          selectedPeriod: 30,
+          periodLabel: '30 días',
+        };
+        const retentionOptions = buildAdminReportPdfOptions(retentionSnapshot, mockT);
+        expect(retentionOptions.contentHtml).toContain('0%');
+      });
     });
   });
 });

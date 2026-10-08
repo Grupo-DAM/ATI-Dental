@@ -8,9 +8,10 @@ import { useDauMauMetrics } from '../hooks/useDauMauMetrics';
 import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { useTheme } from '@/hooks/use-theme';
 import { ReportChartCard } from '../components/ReportChartCard';
+import type { UserProfile } from '@/hooks/use-auth';
 
 interface DauMauReportViewProps {
-  user: any;
+  user: UserProfile | null;
   authLoading: boolean;
   systemActiveUsersCount: number | null;
   activeUsersCount: number;

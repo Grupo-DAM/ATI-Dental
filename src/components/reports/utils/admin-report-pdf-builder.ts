@@ -78,12 +78,14 @@ export function hasReportData(snapshot: AdminReportDataSnapshot): boolean {
   }
 }
 
+export type TranslateFunction = (key: string, ...args: any[]) => string;
+
 /**
  * Construye la configuración completa de RenderReportOptions para ReportService
  */
 export function buildAdminReportPdfOptions(
   snapshot: AdminReportDataSnapshot,
-  t: (key: string, options?: any) => string,
+  t: TranslateFunction,
 ): RenderReportOptions {
   const { reportType, periodLabel, language } = snapshot;
 
@@ -125,7 +127,7 @@ export function buildAdminReportPdfOptions(
 // -------------------------------------------------------------
 function buildUsageReportPdf(
   snapshot: AdminReportDataSnapshot,
-  t: (key: string, options?: any) => string,
+  t: TranslateFunction,
 ): RenderReportOptions {
   const sessions = snapshot.sessions ?? [];
   const days = snapshot.selectedPeriod;
@@ -207,7 +209,7 @@ function buildUsageReportPdf(
 // -------------------------------------------------------------
 function buildAccessReportPdf(
   snapshot: AdminReportDataSnapshot,
-  t: (key: string, options?: any) => string,
+  t: TranslateFunction,
 ): RenderReportOptions {
   const sessions = snapshot.sessions ?? [];
   const days = snapshot.selectedPeriod;
@@ -285,7 +287,7 @@ function buildAccessReportPdf(
 // -------------------------------------------------------------
 function buildDemographicsReportPdf(
   snapshot: AdminReportDataSnapshot,
-  t: (key: string, options?: any) => string,
+  t: TranslateFunction,
 ): RenderReportOptions {
   const m = snapshot.demographicsMetrics;
   const totalUsers = m?.totalUsers ?? 0;
@@ -357,7 +359,7 @@ function buildDemographicsReportPdf(
 // -------------------------------------------------------------
 function buildGeographicsReportPdf(
   snapshot: AdminReportDataSnapshot,
-  t: (key: string, options?: any) => string,
+  t: TranslateFunction,
 ): RenderReportOptions {
   const g = snapshot.geographicsMetrics;
   const totalCities = g?.totalCities ?? 0;
@@ -431,7 +433,7 @@ function buildGeographicsReportPdf(
 // -------------------------------------------------------------
 function buildDauMauReportPdf(
   snapshot: AdminReportDataSnapshot,
-  t: (key: string, options?: any) => string,
+  t: TranslateFunction,
 ): RenderReportOptions {
   const dauValue = snapshot.dauValue ?? 0;
   const mauValue = snapshot.mauValue ?? 0;
@@ -498,7 +500,7 @@ function buildDauMauReportPdf(
 // -------------------------------------------------------------
 function buildCrashRateReportPdf(
   snapshot: AdminReportDataSnapshot,
-  t: (key: string, options?: any) => string,
+  t: TranslateFunction,
 ): RenderReportOptions {
   const crashRateStr = snapshot.calculatedCrashRateString ?? '0.00%';
   const totalCrashes = snapshot.totalCrashesValue ?? 0;
@@ -555,7 +557,7 @@ function buildCrashRateReportPdf(
 // -------------------------------------------------------------
 function buildRetentionReportPdf(
   snapshot: AdminReportDataSnapshot,
-  t: (key: string, options?: any) => string,
+  t: TranslateFunction,
 ): RenderReportOptions {
   const day1 = snapshot.day1String ?? '0%';
   const day7 = snapshot.day7String ?? '0%';

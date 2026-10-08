@@ -8,9 +8,10 @@ import { useRetentionMetrics } from '../hooks/useRetentionMetrics';
 import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
 import type { RetentionDataPoint } from '../types';
+import type { UserProfile } from '@/hooks/use-auth';
 
 interface RetentionReportViewProps {
-  user: any;
+  user: UserProfile | null;
   authLoading: boolean;
   onDataReady?: (data: {
     retentionData: RetentionDataPoint[];
