@@ -1,0 +1,37 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+- runFlow: common/login-admin.yaml
+
+# 1. Navegar a la pestaña de Agenda
+- extendedWaitUntil:
+    visible:
+      id: "agenda-tab"
+    timeout: 10000
+
+- tapOn:
+    id: "agenda-tab"
+
+# 2. Esperar que la cabecera y el botón de imprimir agenda estén visibles (US-33)
+- extendedWaitUntil:
+    visible:
+      id: "print-agenda-btn"
+    timeout: 15000
+
+- assertVisible:
+    id: "print-agenda-btn"
+
+# 3. Validar visibilidad del título de agenda y botón de agendar
+- assertVisible: ".*(Weekly Agenda|Agenda Semanal).*"
+
+# 4. Probar acción de imprimir agenda en la cabecera
+- tapOn:
+    id: "print-agenda-btn"
+
+# 5. Cierre de sesión limpio
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

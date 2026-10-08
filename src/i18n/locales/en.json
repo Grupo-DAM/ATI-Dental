@@ -571,6 +571,21 @@
     "optionsMessage": "Options for {{name}}'s appointment",
     "viewDetails": "View details",
     "close": "Close",
+    "printAgenda": "Print Schedule",
+    "printAgendaTitle": "Weekly Schedule Report",
+    "printAgendaSubtitle": "Chronological list of scheduled appointments",
+    "printNoAppointments": "No appointments scheduled for the current week.",
+    "printError": "An error occurred while processing schedule printing.",
+    "printSuccess": "Print job submitted successfully",
+    "printWeekRange": "Week of {{start}} to {{end}}",
+    "printTableHeaders": {
+      "time": "Time",
+      "patient": "Patient",
+      "treatment": "Treatment / Reason",
+      "status": "Status",
+      "chair": "Chair",
+      "dentist": "Dentist"
+    },
     "months": {
       "0": "JANUARY",
       "1": "FEBRUARY",

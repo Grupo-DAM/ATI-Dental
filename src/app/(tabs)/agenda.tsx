@@ -30,6 +30,7 @@ import { getAllowedStatusTransitions } from '@/utils/appointment-schedule';
 import { NotificationToast } from '@/components/notification-toast';
 import { ScheduleAppointmentButton } from '@/components/schedule-appointment-button';
 import { createAgendaStyles } from '@/constants/styles/agenda.styles';
+import { printWeeklyAgenda } from '@/services/weekly-agenda-report';
 
 interface WeekHeaderProps {
   readonly monthYear: string;
@@ -37,6 +38,8 @@ interface WeekHeaderProps {
   readonly onPrevWeek: () => void;
   readonly onNextWeek: () => void;
   readonly onScheduleAppointment: () => void;
+  readonly onPrintAgenda?: () => void;
+  readonly isPrinting?: boolean;
 }
 
 function WeekHeader({
@@ -45,9 +48,12 @@ function WeekHeader({
   onPrevWeek,
   onNextWeek,
   onScheduleAppointment,
+  onPrintAgenda,
+  isPrinting = false,
 }: Readonly<WeekHeaderProps>) {
   const colors = useTheme();
   const styles = useMemo(() => createAgendaStyles(colors), [colors]);
+  const { t } = useTranslation();
 
   return (
     <View style={styles.headerContainer}>
@@ -77,8 +83,28 @@ function WeekHeader({
           </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.scheduleButtonSlot}>
+      <View style={styles.headerActionsRow}>
         <ScheduleAppointmentButton onPress={onScheduleAppointment} />
+        {onPrintAgenda ? (
+          <TouchableOpacity
+            testID="print-agenda-btn"
+            style={[styles.printButton, isPrinting && styles.printButtonDisabled]}
+            onPress={onPrintAgenda}
+            disabled={isPrinting}
+            activeOpacity={0.7}
+            accessibilityLabel={t('agenda.printAgenda', 'Imprimir Agenda')}
+            accessibilityRole="button"
+          >
+            {isPrinting ? (
+              <ActivityIndicator size="small" color={colors.text} />
+            ) : (
+              <Ionicons name="print-outline" size={16} color={colors.text} />
+            )}
+            <Text style={styles.printButtonText}>
+              {t('agenda.printAgenda', 'Imprimir Agenda')}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
     </View>
   );
@@ -351,7 +377,7 @@ function ErrorAgendaView({ onRetry }: Readonly<ErrorAgendaViewProps>) {
 }
 
 export default function AgendaScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const colors = useTheme();
   const styles = useMemo(() => createAgendaStyles(colors), [colors]);
   const { user: authUser, loading: authLoading } = useAuth();
@@ -362,6 +388,7 @@ export default function AgendaScreen() {
   const [agenda, setAgenda] = useState<WeeklyAgenda | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
+  const [isPrinting, setIsPrinting] = useState<boolean>(false);
   const [toastConfig, setToastConfig] = useState({
     visible: false,
     type: 'success' as 'success' | 'error',
@@ -373,6 +400,30 @@ export default function AgendaScreen() {
   const isAdmin = authUser ? isAdminUser(authUser) : false;
   const isAsistente = authUser ? isAsistenteUser(authUser) : false;
   const hasPermission = isOdontologo || isAdmin || isAsistente;
+
+  const handlePrintAgenda = useCallback(async () => {
+    if (!agenda || isPrinting) return;
+
+    try {
+      setIsPrinting(true);
+      const dentistName = isOdontologo
+        ? authUser?.displayName || (authUser as any)?.nombre || authUser?.email
+        : undefined;
+
+      await printWeeklyAgenda(agenda, {
+        language: i18n?.language?.startsWith('en') ? 'en' : 'es',
+        dentistName,
+      });
+    } catch (error) {
+      console.error('Error al imprimir agenda semanal:', error);
+      Alert.alert(
+        t('agenda.title', 'Agenda Semanal'),
+        t('agenda.printError', 'Ocurrió un error al procesar la impresión de la agenda.')
+      );
+    } finally {
+      setIsPrinting(false);
+    }
+  }, [agenda, isPrinting, isOdontologo, authUser, i18n?.language, t]);
 
   const loadAgenda = useCallback(async (date: Date) => {
     try {
@@ -507,6 +558,8 @@ export default function AgendaScreen() {
         onPrevWeek={handlePrevWeek}
         onNextWeek={handleNextWeek}
         onScheduleAppointment={() => router.push('/(tabs)/patients/schedule-appointment' as any)}
+        onPrintAgenda={agenda && !loading ? handlePrintAgenda : undefined}
+        isPrinting={isPrinting}
       />
 
       {/* Week Days Strip */}

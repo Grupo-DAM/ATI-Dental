@@ -222,6 +222,13 @@ jest.mock('expo-sharing', () => ({
   useIncomingShare: jest.fn(() => ({ resolvedSharedPayloads: [], isResolving: false })),
 }));
 
+// Mocks de expo-print
+jest.mock('expo-print', () => ({
+  printAsync: jest.fn(() => Promise.resolve()),
+  printToFileAsync: jest.fn(() => Promise.resolve({ uri: 'file:///data/user/0/com.atidental/cache/test.pdf', numberOfPages: 1 })),
+  Orientation: { portrait: 'portrait', landscape: 'landscape' },
+}));
+
 // Mocks de expo-file-system
 const mockFileSystem = {
   cacheDirectory: 'file:///data/user/0/com.atidental/cache/',
