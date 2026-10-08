@@ -233,7 +233,7 @@ export default function HomeScreen() {
               <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
                   <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>{t('home.customizeQuickAccess')}</Text>
+                    <Text style={styles.modalTitle} numberOfLines={2} ellipsizeMode="tail">{t('home.customizeQuickAccess')}</Text>
                     <TouchableOpacity
                       testID="close-customize-modal"
                       onPress={() => setCustomizeModalVisible(false)}
@@ -257,7 +257,7 @@ export default function HomeScreen() {
                         >
                           <View style={styles.modalItemLeft}>
                             <Ionicons name={item.icon as any} size={20} color={theme.main} />
-                            <Text style={styles.modalItemText}>{t(item.labelKey)}</Text>
+                            <Text style={styles.modalItemText} numberOfLines={2} ellipsizeMode="tail">{t(item.labelKey)}</Text>
                           </View>
                           <View style={[styles.modalCheckbox, isSelected && styles.modalCheckboxActive]}>
                             {isSelected && <Ionicons name="checkmark" size={16} color={theme.overMain} />}
@@ -298,7 +298,7 @@ export default function HomeScreen() {
               <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
                   <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>{selectedNotification?.title}</Text>
+                    <Text style={styles.modalTitle} numberOfLines={3} ellipsizeMode="tail">{selectedNotification?.title}</Text>
                     <TouchableOpacity
                       testID="close-notification-modal"
                       onPress={() => setNotificationModalVisible(false)}
@@ -347,7 +347,7 @@ export default function HomeScreen() {
               color={theme.offlineBannerText || '#B45309'}
               style={styles.offlineBannerIcon}
             />
-            <Text style={styles.offlineText}>{t('home.offlineDesc')}</Text>
+            <Text style={styles.offlineText} numberOfLines={3} ellipsizeMode="tail">{t('home.offlineDesc')}</Text>
           </View>
           <TouchableOpacity
             testID="retry-load-button"
@@ -364,7 +364,7 @@ export default function HomeScreen() {
         <View testID="error-banner" style={styles.offlineBanner}>
           <View style={styles.offlineBannerLeft}>
             <Ionicons name="alert-circle-outline" size={18} color={theme.error} style={styles.offlineBannerIcon} />
-            <Text style={styles.offlineText}>{error}</Text>
+            <Text style={styles.offlineText} numberOfLines={3} ellipsizeMode="tail">{error}</Text>
           </View>
           <TouchableOpacity
             testID="retry-error-button"
@@ -385,10 +385,10 @@ export default function HomeScreen() {
             contentFit="cover"
           />
           <View style={styles.greetingTextContainer}>
-            <Text testID="greeting-title" style={styles.greetingTitle}>
+            <Text testID="greeting-title" style={styles.greetingTitle} numberOfLines={2} ellipsizeMode="tail">
               {t('home.greeting', { name: greetingName })}
             </Text>
-            <Text style={styles.greetingSubtitle}>{t('home.welcomeBack')}</Text>
+            <Text style={styles.greetingSubtitle} numberOfLines={2} ellipsizeMode="tail">{t('home.welcomeBack')}</Text>
           </View>
         </View>
         <Pressable
@@ -443,8 +443,8 @@ export default function HomeScreen() {
                   style={styles.searchResultIcon}
                 />
                 <View style={styles.searchResultTextCol}>
-                  <Text style={styles.searchResultTitle}>{item.title}</Text>
-                  <Text style={styles.searchResultSubtitle}>{item.subtitle}</Text>
+                  <Text style={styles.searchResultTitle} numberOfLines={2} ellipsizeMode="tail">{item.title}</Text>
+                  <Text style={styles.searchResultSubtitle} numberOfLines={2} ellipsizeMode="tail">{item.subtitle}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={16} color={theme.textSecondary} />
               </Pressable>
@@ -460,46 +460,47 @@ export default function HomeScreen() {
       {/* ── Section 1: Resumen de hoy (Escenario 1) ── */}
       <CardContainer wrapperStyle={styles.sectionCardWrapper} cardStyle={styles.sectionCardInner}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>{t('home.todaySummary')}</Text>
+          <Text style={styles.sectionTitle} numberOfLines={2} ellipsizeMode="tail">{t('home.todaySummary')}</Text>
           <TouchableOpacity
             testID="view-agenda-link"
             style={styles.agendaLink}
             onPress={() => router.push('/(tabs)/agenda')}
           >
-            <Text style={styles.agendaLinkText}>{t('home.viewAgenda')}</Text>
+            <Text style={styles.agendaLinkText} numberOfLines={1} ellipsizeMode="tail">{t('home.viewAgenda')}</Text>
           </TouchableOpacity>
         </View>
 
         {loading && !summary ? (
-          <View testID="summary-skeleton" style={styles.skeletonRow}>
-            <View style={styles.skeletonBox} />
-            <View style={styles.skeletonBox} />
-            <View style={styles.skeletonBox} />
+          <View testID="summary-skeleton" style={styles.metricsGrid}>
+            <View style={styles.metricsTopRow}>
+              <View style={styles.skeletonBox} />
+              <View style={styles.skeletonBox} />
+            </View>
+            <View style={[styles.skeletonBox, styles.metricCardWide]} />
           </View>
         ) : (
-          <View style={styles.metricsRow}>
-            {/* Citas pendientes */}
-            <View testID="metric-citas" style={[styles.metricCard, styles.metricCardGreen]}>
-              <Text style={[styles.metricNumber, styles.metricNumberGreen]}>
-                {summary?.pendingAppointments ?? 0}
-              </Text>
-              <Text style={[styles.metricLabel, styles.metricLabelGreen]}>
-                {t('home.pendingAppointments')}
-              </Text>
+          <View style={styles.metricsGrid}>
+            <View style={styles.metricsTopRow}>
+              <View testID="metric-citas" style={[styles.metricCard, styles.metricCardGreen]}>
+                <Text style={[styles.metricNumber, styles.metricNumberGreen]}>
+                  {summary?.pendingAppointments ?? 0}
+                </Text>
+                <Text style={[styles.metricLabel, styles.metricLabelGreen]}>
+                  {t('home.pendingAppointments')}
+                </Text>
+              </View>
+
+              <View testID="metric-pacientes" style={[styles.metricCard, styles.metricCardOrange]}>
+                <Text style={[styles.metricNumber, styles.metricNumberOrange]}>
+                  {summary?.pendingPatients ?? 0}
+                </Text>
+                <Text style={[styles.metricLabel, styles.metricLabelOrange]}>
+                  {t('home.pendingPatients')}
+                </Text>
+              </View>
             </View>
 
-            {/* Pacientes pendientes */}
-            <View testID="metric-pacientes" style={[styles.metricCard, styles.metricCardOrange]}>
-              <Text style={[styles.metricNumber, styles.metricNumberOrange]}>
-                {summary?.pendingPatients ?? 0}
-              </Text>
-              <Text style={[styles.metricLabel, styles.metricLabelOrange]}>
-                {t('home.pendingPatients')}
-              </Text>
-            </View>
-
-            {/* Examenes pendientes */}
-            <View testID="metric-examenes" style={[styles.metricCard, styles.metricCardBlue]}>
+            <View testID="metric-examenes" style={[styles.metricCard, styles.metricCardBlue, styles.metricCardWide]}>
               <Text style={[styles.metricNumber, styles.metricNumberBlue]}>
                 {summary?.pendingExams ?? 0}
               </Text>
@@ -514,7 +515,7 @@ export default function HomeScreen() {
       {/* ── Section 2: Accesos rápidos (Escenario 1 & 3) ── */}
       <CardContainer wrapperStyle={styles.sectionCardWrapper} cardStyle={styles.sectionCardInner}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>{t('home.quickAccess')}</Text>
+          <Text style={styles.sectionTitle} numberOfLines={2} ellipsizeMode="tail">{t('home.quickAccess')}</Text>
         </View>
 
         {loading && quickAccessList.length === 0 ? (
@@ -533,7 +534,7 @@ export default function HomeScreen() {
                 onPress={() => router.push(item.route as any)}
               >
                 <Ionicons name={item.icon as any} size={24} color={theme.main} />
-                <Text style={styles.quickAccessLabel}>{t(item.labelKey)}</Text>
+                <Text style={styles.quickAccessLabel} numberOfLines={2} ellipsizeMode="tail">{t(item.labelKey)}</Text>
               </Pressable>
             ))}
           </View>
@@ -543,7 +544,7 @@ export default function HomeScreen() {
       {/* ── Section 3: Notificaciones (Escenario 1 & 4) ── */}
       <CardContainer wrapperStyle={styles.sectionCardWrapper} cardStyle={styles.sectionCardInner}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>{t('home.notifications')}</Text>
+          <Text style={styles.sectionTitle} numberOfLines={2} ellipsizeMode="tail">{t('home.notifications')}</Text>
           {unreadCount > 0 && (
             <View testID="unread-badge" style={styles.unreadBadge}>
               <Text style={styles.unreadBadgeText}>{unreadCount}</Text>
@@ -566,8 +567,8 @@ export default function HomeScreen() {
                   <Ionicons name="notifications-outline" size={22} color={theme.main} />
                 </View>
                 <View style={styles.notificationTextCol}>
-                  <Text style={styles.notificationTitle}>{notif.title}</Text>
-                  <Text style={styles.notificationSubtitle}>{notif.subtitle}</Text>
+                  <Text style={styles.notificationTitle} numberOfLines={2} ellipsizeMode="tail">{notif.title}</Text>
+                  <Text style={styles.notificationSubtitle} numberOfLines={3} ellipsizeMode="tail">{notif.subtitle}</Text>
                 </View>
               </View>
               <View style={styles.notificationRight}>

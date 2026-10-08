@@ -32,6 +32,8 @@ export const createStyles = (theme: any) => {
       flexDirection: 'row',
       alignItems: 'center',
       flex: 1,
+      flexShrink: 1,
+      minWidth: 0,
       gap: Spacing.two,
     },
     offlineBannerIcon: {
@@ -42,6 +44,7 @@ export const createStyles = (theme: any) => {
       fontSize: FontSize.p,
       fontWeight: FontWeight.medium,
       flex: 1,
+      flexShrink: 1,
     },
     retryButton: {
       backgroundColor: theme.main,
@@ -80,6 +83,9 @@ export const createStyles = (theme: any) => {
     },
     greetingTextContainer: {
       flex: 1,
+      flexShrink: 1,
+      flexWrap: 'wrap',
+      minWidth: 0,
       justifyContent: 'center',
     },
     greetingTitle: {
@@ -87,12 +93,14 @@ export const createStyles = (theme: any) => {
       fontWeight: FontWeight.bold,
       color: theme.pageTitle,
       fontFamily: 'Open Sans',
+      flexShrink: 1,
     },
     greetingSubtitle: {
       fontSize: FontSize.h5,
       fontWeight: FontWeight.regular,
       color: theme.pageSubtitle,
       marginTop: 2,
+      flexShrink: 1,
     },
     editButton: {
       width: 44,
@@ -161,6 +169,7 @@ export const createStyles = (theme: any) => {
       borderBottomWidth: 0.5,
       borderBottomColor: theme.pageSeparator,
       gap: Spacing.two,
+      minWidth: 0,
     },
     searchResultItemPressed: {
       backgroundColor: theme.backgroundSelected,
@@ -170,16 +179,21 @@ export const createStyles = (theme: any) => {
     },
     searchResultTextCol: {
       flex: 1,
+      flexShrink: 1,
+      flexWrap: 'wrap',
+      minWidth: 0,
     },
     searchResultTitle: {
       fontSize: FontSize.h5,
       fontWeight: FontWeight.semibold,
       color: theme.pageTitle,
+      flexShrink: 1,
     },
     searchResultSubtitle: {
       fontSize: FontSize.p,
       color: theme.pageSubtitle,
       marginTop: 2,
+      flexShrink: 1,
     },
     noResultsText: {
       fontSize: FontSize.p,
@@ -203,11 +217,14 @@ export const createStyles = (theme: any) => {
       justifyContent: 'space-between',
     },
     sectionTitle: {
+      flex: 1,
+      flexShrink: 1,
       fontSize: FontSize.h4,
       fontWeight: FontWeight.bold,
       color: theme.pageTitle,
     },
     agendaLink: {
+      flexShrink: 0,
       paddingVertical: Spacing.half,
       paddingHorizontal: Spacing.one,
     },
@@ -217,14 +234,19 @@ export const createStyles = (theme: any) => {
       color: theme.main,
     },
 
-    // ─── Resumen de Hoy Metrics ───
-    metricsRow: {
+    // ─── Resumen de Hoy Metrics (2 arriba, 1 abajo) ───
+    metricsGrid: {
+      gap: 10,
+    },
+    metricsTopRow: {
       flexDirection: 'row',
       alignItems: 'stretch',
       gap: 10,
     },
     metricCard: {
       flex: 1,
+      flexShrink: 1,
+      minWidth: 0,
       flexDirection: 'row',
       alignItems: 'center',
       paddingVertical: Spacing.three,
@@ -234,16 +256,24 @@ export const createStyles = (theme: any) => {
       gap: Spacing.two,
       minHeight: 76,
     },
+    metricCardWide: {
+      width: '100%',
+      flexGrow: 0,
+      flexBasis: '100%',
+    },
     metricNumber: {
+      flexShrink: 0,
       fontSize: 32,
       fontWeight: FontWeight.bold,
       lineHeight: 36,
     },
     metricLabel: {
       flex: 1,
+      flexShrink: 1,
+      minWidth: 0,
       fontSize: FontSize.p,
       fontWeight: FontWeight.medium,
-      lineHeight: 15,
+      lineHeight: 16,
     },
 
     // Card 1: Green (Citas pendientes)
@@ -290,6 +320,8 @@ export const createStyles = (theme: any) => {
     },
     quickAccessButton: {
       flex: 1,
+      flexShrink: 1,
+      minWidth: 0,
       alignItems: 'center',
       justifyContent: 'center',
       paddingVertical: Spacing.three,
@@ -305,6 +337,8 @@ export const createStyles = (theme: any) => {
       opacity: 0.75,
     },
     quickAccessLabel: {
+      width: '100%',
+      flexShrink: 1,
       fontSize: FontSize.p,
       fontWeight: FontWeight.semibold,
       color: isDark ? '#E9D5FF' : theme.main,
@@ -325,6 +359,8 @@ export const createStyles = (theme: any) => {
       flexDirection: 'row',
       alignItems: 'center',
       flex: 1,
+      flexShrink: 1,
+      minWidth: 0,
       gap: Spacing.three,
     },
     notificationIconWrapper: {
@@ -337,18 +373,24 @@ export const createStyles = (theme: any) => {
     },
     notificationTextCol: {
       flex: 1,
+      flexShrink: 1,
+      flexWrap: 'wrap',
+      minWidth: 0,
     },
     notificationTitle: {
       fontSize: FontSize.h5,
       fontWeight: FontWeight.bold,
       color: theme.pageTitle,
+      flexShrink: 1,
     },
     notificationSubtitle: {
       fontSize: FontSize.p,
       color: theme.pageSubtitle,
       marginTop: 2,
+      flexShrink: 1,
     },
     notificationRight: {
+      flexShrink: 0,
       paddingLeft: Spacing.one,
     },
     unreadBadge: {
@@ -413,6 +455,9 @@ export const createStyles = (theme: any) => {
       paddingBottom: Spacing.two,
     },
     modalTitle: {
+      flex: 1,
+      flexShrink: 1,
+      minWidth: 0,
       fontSize: FontSize.h4,
       fontWeight: FontWeight.bold,
       color: theme.pageTitle,
@@ -429,11 +474,18 @@ export const createStyles = (theme: any) => {
       borderBottomColor: theme.pageSeparator,
     },
     modalItemLeft: {
+      flex: 1,
+      flexShrink: 1,
+      flexWrap: 'wrap',
+      minWidth: 0,
       flexDirection: 'row',
       alignItems: 'center',
       gap: Spacing.two,
     },
     modalItemText: {
+      flex: 1,
+      flexShrink: 1,
+      minWidth: 0,
       fontSize: FontSize.p,
       color: theme.pageTitle,
       fontWeight: FontWeight.medium,
