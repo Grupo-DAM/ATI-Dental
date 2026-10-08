@@ -508,7 +508,7 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
             mainCountryPercent: 70,
             totalUsers: 50,
             countryBuckets: [{ key: 'US', label: 'United States', count: 35 }],
-            regionSlices: [{ key: 'florida', label: 'Florida', count: 20, percent: 40 }],
+            regionSlices: [{ key: 'otros', label: 'Florida', count: 20, percent: 40 }],
           },
         }, mockT);
         expect(geoOpts.metadata.fileName).toBe('Report_Geographic_Distribution');

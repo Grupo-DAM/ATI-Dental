@@ -279,8 +279,8 @@ interface CategoryDistributionItem {
 function buildCategoryDistributionTableHtml(
   firstColumnHeader: string,
   items: CategoryDistributionItem[],
-  percentHeader: string,
-  usersHeader: string,
+  percentHeader = 'Porcentaje',
+  usersHeader = 'Usuarios',
   language?: 'es' | 'en',
 ): string {
   return ReportService.buildTable({
