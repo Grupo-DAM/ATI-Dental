@@ -123,17 +123,21 @@ export function buildAdminReportPdfOptions(
 }
 
 // -------------------------------------------------------------
-// 1. REPORTE DE TIEMPO DE USO
+// HELPERS COMPARTIDOS DE EXTRACCIÓN Y TABLAS (Anti-duplicación Sonar)
 // -------------------------------------------------------------
-function buildUsageReportPdf(
-  snapshot: AdminReportDataSnapshot,
-  t: TranslateFunction,
-): RenderReportOptions {
-  const sessions = snapshot.sessions ?? [];
-  const days = snapshot.selectedPeriod;
-  const now = new Date();
+interface DailySessionBucket {
+  accesses: number;
+  totalMinutes: number;
+  dayNum: number;
+  dateStr: string;
+}
 
-  const buckets: Record<string, { accesses: number; totalMinutes: number; dayNum: number; dateStr: string }> = {};
+function buildDailySessionBuckets(
+  sessions: SessionRecord[],
+  days: number,
+): Record<string, DailySessionBucket> {
+  const now = new Date();
+  const buckets: Record<string, DailySessionBucket> = {};
 
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date();
@@ -152,6 +156,62 @@ function buildUsageReportPdf(
       buckets[key].totalMinutes += getRecordDurationMinutes(record);
     }
   });
+
+  return buckets;
+}
+
+function buildSessionActivityMetricsHtml(
+  snapshot: AdminReportDataSnapshot,
+  t: TranslateFunction,
+): string {
+  return ReportService.buildMetrics([
+    {
+      label: t('reports.totalAccessToday', 'TOTAL ACCESOS (HOY)'),
+      value: snapshot.totalAccessToday ?? 0,
+      variant: 'primary',
+    },
+    {
+      label: t('reports.activeUsers', 'USUARIOS ACTIVOS'),
+      value: snapshot.displayedActiveUsers ?? 0,
+      variant: 'info',
+    },
+    {
+      label: t('reports.reportTypeLabel', 'PERÍODO'),
+      value: snapshot.periodLabel,
+      variant: 'neutral',
+    },
+  ]);
+}
+
+interface CategoryDistributionItem {
+  label: string;
+  count: number;
+  percent: number | string;
+}
+
+function buildCategoryDistributionTableHtml(
+  firstColumnHeader: string,
+  items: CategoryDistributionItem[],
+  percentHeader = 'Porcentaje',
+): string {
+  return ReportService.buildTable({
+    columns: [
+      { header: firstColumnHeader, align: 'left', width: '50%' },
+      { header: 'Usuarios', align: 'center', width: '25%' },
+      { header: percentHeader, align: 'right', width: '25%' },
+    ],
+    rows: items.map((it) => [it.label, it.count, typeof it.percent === 'number' ? `${it.percent}%` : it.percent]),
+  });
+}
+
+// -------------------------------------------------------------
+// 1. REPORTE DE TIEMPO DE USO
+// -------------------------------------------------------------
+function buildUsageReportPdf(
+  snapshot: AdminReportDataSnapshot,
+  t: TranslateFunction,
+): RenderReportOptions {
+  const buckets = buildDailySessionBuckets(snapshot.sessions ?? [], snapshot.selectedPeriod);
 
   const tableRows = Object.keys(buckets).map((key) => {
     const b = buckets[key];
@@ -179,23 +239,7 @@ function buildUsageReportPdf(
     valueSuffix: ' min',
   });
 
-  const metricsHtml = ReportService.buildMetrics([
-    {
-      label: t('reports.totalAccessToday', 'TOTAL ACCESOS (HOY)'),
-      value: snapshot.totalAccessToday ?? 0,
-      variant: 'primary',
-    },
-    {
-      label: t('reports.activeUsers', 'USUARIOS ACTIVOS'),
-      value: snapshot.displayedActiveUsers ?? 0,
-      variant: 'info',
-    },
-    {
-      label: t('reports.reportTypeLabel', 'PERÍODO'),
-      value: snapshot.periodLabel,
-      variant: 'neutral',
-    },
-  ]);
+  const metricsHtml = buildSessionActivityMetricsHtml(snapshot, t);
 
   const tableHtml = ReportService.buildTable({
     columns: [
@@ -232,38 +276,14 @@ function buildAccessReportPdf(
   snapshot: AdminReportDataSnapshot,
   t: TranslateFunction,
 ): RenderReportOptions {
-  const sessions = snapshot.sessions ?? [];
-  const days = snapshot.selectedPeriod;
-  const now = new Date();
+  const buckets = buildDailySessionBuckets(snapshot.sessions ?? [], snapshot.selectedPeriod);
 
-  const buckets: Record<string, { accesses: number; dateStr: string }> = {};
+  const tableRows = Object.keys(buckets).map((key) => [buckets[key].dateStr, buckets[key].accesses]);
 
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(now.getDate() - i);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    buckets[key] = { accesses: 0, dateStr: key };
-  }
-
-  sessions.forEach((record) => {
-    const ts = getRecordTimestamp(record);
-    if (ts === null) return;
-    const d = new Date(ts);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    if (buckets[key]) {
-      buckets[key].accesses += 1;
-    }
-  });
-
-  const tableRows = Object.keys(buckets).map((key) => {
-    const b = buckets[key];
-    return [b.dateStr, b.accesses];
-  });
-
-  const chartPoints = Object.keys(buckets).map((key) => {
-    const b = buckets[key];
-    return { label: b.dateStr.slice(5), value: b.accesses };
-  });
+  const chartPoints = Object.keys(buckets).map((key) => ({
+    label: buckets[key].dateStr.slice(5),
+    value: buckets[key].accesses,
+  }));
 
   const chartHtml = ReportService.buildSvgLineChart({
     title: t('reports.chartTitle', 'Accesos Diarios al Sistema'),
@@ -277,23 +297,7 @@ function buildAccessReportPdf(
     ],
   });
 
-  const metricsHtml = ReportService.buildMetrics([
-    {
-      label: t('reports.totalAccessToday', 'TOTAL ACCESOS (HOY)'),
-      value: snapshot.totalAccessToday ?? 0,
-      variant: 'primary',
-    },
-    {
-      label: t('reports.activeUsers', 'USUARIOS ACTIVOS'),
-      value: snapshot.displayedActiveUsers ?? 0,
-      variant: 'info',
-    },
-    {
-      label: t('reports.reportTypeLabel', 'PERÍODO'),
-      value: snapshot.periodLabel,
-      variant: 'neutral',
-    },
-  ]);
+  const metricsHtml = buildSessionActivityMetricsHtml(snapshot, t);
 
   const tableHtml = ReportService.buildTable({
     columns: [
@@ -372,16 +376,10 @@ function buildDemographicsReportPdf(
     orientation: 'horizontal',
   });
 
-  const ageRows = ageItems.map((item) => [item.label, item.value, `${item.percentage}%`]);
-
-  const ageTableHtml = ReportService.buildTable({
-    columns: [
-      { header: t('reports.ageChartTitle', 'Rango de Edad'), align: 'left', width: '50%' },
-      { header: 'Usuarios', align: 'center', width: '25%' },
-      { header: 'Porcentaje', align: 'right', width: '25%' },
-    ],
-    rows: ageRows,
-  });
+  const ageTableHtml = buildCategoryDistributionTableHtml(
+    t('reports.ageChartTitle', 'Rango de Edad'),
+    ageItems.map((item) => ({ label: item.label, count: item.value, percent: item.percentage })),
+  );
 
   const genderColors: Record<string, string> = {
     female: '#5B2D8B',
@@ -407,16 +405,10 @@ function buildDemographicsReportPdf(
     centerLabel: t('reports.totalUsers', 'Total'),
   });
 
-  const genderRows = genderSlices.map((g) => [g.label, g.value, `${g.percent}%`]);
-
-  const genderTableHtml = ReportService.buildTable({
-    columns: [
-      { header: t('reports.genderChartTitle', 'Distribución por Género'), align: 'left', width: '50%' },
-      { header: 'Usuarios', align: 'center', width: '25%' },
-      { header: 'Porcentaje', align: 'right', width: '25%' },
-    ],
-    rows: genderRows,
-  });
+  const genderTableHtml = buildCategoryDistributionTableHtml(
+    t('reports.genderChartTitle', 'Distribución por Género'),
+    genderSlices.map((g) => ({ label: g.label, count: g.value, percent: g.percent })),
+  );
 
   return {
     metadata: {
@@ -485,16 +477,11 @@ function buildGeographicsReportPdf(
     orientation: 'horizontal',
   });
 
-  const countryRows = countryItems.map((c) => [c.label, c.value, `${c.percentage}%`]);
-
-  const countryTableHtml = ReportService.buildTable({
-    columns: [
-      { header: t('reports.chartTopCountries', 'País de Residencia'), align: 'left', width: '50%' },
-      { header: 'Usuarios', align: 'center', width: '25%' },
-      { header: 'Participación', align: 'right', width: '25%' },
-    ],
-    rows: countryRows,
-  });
+  const countryTableHtml = buildCategoryDistributionTableHtml(
+    t('reports.chartTopCountries', 'País de Residencia'),
+    countryItems.map((c) => ({ label: c.label, count: c.value, percent: c.percentage })),
+    'Participación',
+  );
 
   const regionPalette = ['#5B2D8B', '#8E59CF', '#B39DDB', '#D4C4E8', '#EDE4F5'];
   const regionSlices = (g?.regionSlices ?? []).map((r, i) => ({
@@ -511,16 +498,10 @@ function buildGeographicsReportPdf(
     centerLabel: t('reports.totalUsers', 'Total'),
   });
 
-  const regionRows = regionSlices.map((r) => [r.label, r.value, `${r.percent}%`]);
-
-  const regionTableHtml = ReportService.buildTable({
-    columns: [
-      { header: t('reports.chartRegions', 'Distribución por Región'), align: 'left', width: '50%' },
-      { header: 'Usuarios', align: 'center', width: '25%' },
-      { header: 'Porcentaje', align: 'right', width: '25%' },
-    ],
-    rows: regionRows,
-  });
+  const regionTableHtml = buildCategoryDistributionTableHtml(
+    t('reports.chartRegions', 'Distribución por Región'),
+    regionSlices.map((r) => ({ label: r.label, count: r.value, percent: r.percent })),
+  );
 
   return {
     metadata: {
