@@ -1,0 +1,121 @@
+appId: com.proyect1.ATIDental
+---
+# stopApp: false evita matar Expo (pantalla en blanco sin Metro).
+- launchApp
+
+- runFlow: common/login-admin.yaml
+
+# 1. Esperamos y tocamos la pestaña de Perfil
+- extendedWaitUntil:
+    visible:
+      id: "profile-tab"
+    timeout: 10000
+
+- tapOn:
+    id: "profile-tab"
+
+# 2. Abrir el menú lateral
+- extendedWaitUntil:
+    visible:
+      id: "menu-btn"
+    timeout: 10000
+
+- tapOn:
+    id: "menu-btn"
+
+# 3. Desplegar Administración
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-toggle"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-toggle"
+
+# 4. Entrar a Reportes
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-reports"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-reports"
+
+# 5. Esperar que cargue la pantalla principal de Reportes Administrativos
+- extendedWaitUntil:
+    visible:
+      id: "report-type-select"
+    timeout: 15000
+
+- assertVisible:
+    id: "admin-reports-screen"
+
+- extendedWaitUntil:
+    visible:
+      id: "kpi-cards-container"
+    timeout: 10000
+
+# 6. Desplazar hacia los controles de exportación e impresión (US-02)
+- scrollUntilVisible:
+    element:
+      id: "print-btn"
+    direction: DOWN
+    timeout: 15000
+    speed: 40
+
+# 7. Validar presencia de botón de impresión y menú de exportación
+- assertVisible:
+    id: "print-btn"
+
+- assertVisible:
+    id: "download-menu-btn"
+
+# 8. Cambiar a otro reporte gráfico (Crash Rate) y validar disponibilidad de exportación
+- scrollUntilVisible:
+    element:
+      id: "report-type-select"
+    direction: UP
+    timeout: 15000
+    speed: 40
+
+- tapOn:
+    id: "report-type-select"
+
+- extendedWaitUntil:
+    visible:
+      id: "type-option-crash-rate"
+    timeout: 10000
+
+- tapOn:
+    id: "type-option-crash-rate"
+
+- extendedWaitUntil:
+    visible:
+      id: "kpi-cards-container"
+    timeout: 10000
+
+# 9. Desplazar y validar controles en el nuevo reporte gráfico
+- scrollUntilVisible:
+    element:
+      id: "print-btn"
+    direction: DOWN
+    timeout: 15000
+    speed: 40
+
+- assertVisible:
+    id: "print-btn"
+
+- assertVisible:
+    id: "download-menu-btn"
+
+# 10. Cerrar sesión limpiamente
+- tapOn:
+    id: "menu-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-logout"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-logout"
