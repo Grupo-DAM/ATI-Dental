@@ -160,11 +160,26 @@ function hourRangeLabel(date: Date): string {
   return `${start}:00 - ${end}:00`;
 }
 
+const FIXED_NOW = new Date(2026, 9, 8, 15, 30, 0);
+
 describe('HourlyDistributionScreen', () => {
   let alertSpy: jest.SpyInstance;
   let pdfSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    jest.useFakeTimers({
+      now: FIXED_NOW,
+      doNotFake: [
+        'nextTick',
+        'queueMicrotask',
+        'setImmediate',
+        'clearImmediate',
+        'setInterval',
+        'clearInterval',
+        'setTimeout',
+        'clearTimeout',
+      ],
+    });
     jest.clearAllMocks();
     mockUser = { uid: 'admin-1', email: 'admin@atidental.com', rol: 'admin' };
     mockAuthLoading = false;
@@ -181,6 +196,7 @@ describe('HourlyDistributionScreen', () => {
   afterEach(() => {
     alertSpy.mockRestore();
     pdfSpy.mockRestore();
+    jest.useRealTimers();
   });
 
   it('muestra la hora pico y el gráfico de 24 columnas', async () => {
