@@ -44,6 +44,7 @@ import { UserGeographicsReportView } from '@/components/reports/views/UserGeogra
 import { HourlyDistributionReportView, HourlyDistributionSnapshot } from '@/components/reports/views/HourlyDistributionReportView';
 import {
   buildHourlyDistributionCsv,
+  buildHourlyDistributionNotes,
   buildHourlyDistributionReportHtml,
   buildHourlyExportBaseName,
   shareHourlyDistributionCsv,
@@ -275,7 +276,10 @@ export default function AdminReportsScreen() {
         count: t('reports.hourlyCsvCount'),
         percent: t('reports.hourlyCsvPercent'),
         peak: hourlyDistribution.isBimodal ? t('reports.hourlyPeaksTitle') : t('reports.hourlyPeakTitle'),
+        chartTitle: t('reports.hourlyChartTitle', 'Accesos por hora'),
+        chartSubtitle: `${hourlySnapshot?.windowLabel ?? ''} · ${hourlySnapshot?.dayLabel ?? ''}`,
       };
+      const notes = buildHourlyDistributionNotes(hourlyDistribution, language);
       const contentHtml = buildHourlyDistributionReportHtml(hourlyDistribution, headers, language);
       const fileBaseName = buildHourlyExportBaseName(
         hourlySnapshot?.windowHours ?? 24,
@@ -286,6 +290,8 @@ export default function AdminReportsScreen() {
           title: t('reports.hourlyPdfTitle'),
           subtitle: `${hourlySnapshot?.windowLabel ?? ''} · ${hourlySnapshot?.dayLabel ?? ''}`,
           category: t('reports.hourlyPdfCategory'),
+          badge: { label: hourlySnapshot?.windowLabel ?? '24h', variant: 'primary' },
+          notes,
           showSignatureBlock: false,
           language,
         },

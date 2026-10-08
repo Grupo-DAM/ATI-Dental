@@ -12,6 +12,12 @@ export interface HourlyCsvHeaders {
   percent: string;
 }
 
+export interface HourlyReportLabels extends HourlyCsvHeaders {
+  peak: string;
+  chartTitle?: string;
+  chartSubtitle?: string;
+}
+
 function csvCell(value: string | number): string {
   const text = String(value);
   if (/[",\n\r]/.test(text)) {
@@ -33,28 +39,76 @@ export function buildHourlyDistributionCsv(
   return `\uFEFF${lines.join('\r\n')}`;
 }
 
+export function buildHourlyDistributionNotes(
+  distribution: PeakHoursDistribution,
+  language: ReportLanguage,
+): string[] {
+  if (language === 'en') {
+    const peakText = distribution.peaks.length > 0
+      ? `Peak activity detected: ${distribution.peaks.map((p) => `${p.label} (${p.count} accesses, ${p.percentage}%)`).join(', ')}.`
+      : 'No peak activity detected during the selected period.';
+    return [
+      peakText,
+      'Hourly distribution identifies peak concurrency intervals to optimize staff scheduling and maintenance windows.',
+      'Data consolidated from user sessions recorded in Cloud Firestore.',
+    ];
+  }
+  const peakText = distribution.peaks.length > 0
+    ? `Franja(s) de mayor actividad detectada(s): ${distribution.peaks.map((p) => `${p.label} (${p.count} accesos, ${p.percentage}%)`).join(', ')}.`
+    : 'No se detectaron franjas pico en el período seleccionado.';
+  return [
+    peakText,
+    'La distribución horaria permite identificar los intervalos de mayor concurrencia para planificar turnos clínicos y ventanas de mantenimiento.',
+    'Datos consolidados a partir de las sesiones de usuario registradas en Cloud Firestore.',
+  ];
+}
+
 export function buildHourlyDistributionReportHtml(
   distribution: PeakHoursDistribution,
-  labels: HourlyCsvHeaders & { peak: string },
+  labels: HourlyReportLabels,
   language: ReportLanguage,
 ): string {
   const metrics = ReportService.buildMetrics(
     distribution.peaks.map((peak) => ({
       label: labels.peak,
       value: `${peak.label} (${peak.count})`,
+      variant: 'primary',
     })),
   );
+
+  const chartPoints = distribution.slots.map((slot) => ({
+    label: `${String(slot.hour).padStart(2, '0')}:00`,
+    value: slot.count,
+  }));
+
+  const chartTitle = labels.chartTitle || (language === 'en' ? 'Hourly Access Distribution' : 'Distribución de Accesos por Hora');
+  const chartSubtitle = labels.chartSubtitle || (language === 'en' ? 'Access frequency across hourly slots' : 'Frecuencia de accesos por intervalo horario');
+
+  const chart = ReportService.buildSvgLineChart({
+    title: chartTitle,
+    subtitle: chartSubtitle,
+    series: [
+      {
+        name: labels.count,
+        color: '#5B2D8B',
+        points: chartPoints,
+        unit: 'acc',
+      },
+    ],
+  });
+
   const table = ReportService.buildTable({
     columns: [
       { header: labels.slot },
       { header: labels.count, align: 'right' },
       { header: labels.percent, align: 'right' },
     ],
-    rows: distribution.slots.map((slot) => [slot.label, slot.count, slot.percentage]),
+    rows: distribution.slots.map((slot) => [slot.label, slot.count, `${slot.percentage}%`]),
     striped: true,
     language,
   });
-  return `${metrics}${table}`;
+
+  return `${metrics}${chart}${table}`;
 }
 
 export function buildHourlyExportBaseName(

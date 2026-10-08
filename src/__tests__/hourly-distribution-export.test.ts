@@ -4,6 +4,7 @@ import * as Sharing from 'expo-sharing';
 import { calculatePeakHoursDistribution } from '@/components/reports/utils/reports-utils';
 import {
   buildHourlyDistributionCsv,
+  buildHourlyDistributionNotes,
   buildHourlyDistributionReportHtml,
   buildHourlyExportBaseName,
   shareHourlyDistributionCsv,
@@ -34,15 +35,35 @@ describe('exportación de distribución horaria', () => {
     expect(csv).toContain('00:00 - 01:00,0,0');
   });
 
-  it('arma el HTML institucional con la tabla de franjas', () => {
+  it('arma el HTML institucional con la tabla de franjas y gráfico SVG', () => {
     const html = buildHourlyDistributionReportHtml(
       distribution,
-      { ...headers, peak: 'Hora pico' },
+      { ...headers, peak: 'Hora pico', chartTitle: 'Accesos por hora' },
       'es',
     );
     expect(html).toContain('10:00 - 11:00');
     expect(html).toContain('Franja Horaria');
     expect(html).toContain('Hora pico');
+    expect(html).toContain('<svg');
+    expect(html).toContain('Accesos por hora');
+  });
+
+  it('genera notas y observaciones institucionales bilingües', () => {
+    const notesEs = buildHourlyDistributionNotes(distribution, 'es');
+    expect(notesEs.length).toBeGreaterThan(0);
+    expect(notesEs[0]).toContain('10:00 - 11:00');
+    expect(notesEs[1]).toContain('distribución horaria');
+
+    const notesEn = buildHourlyDistributionNotes(distribution, 'en');
+    expect(notesEn.length).toBeGreaterThan(0);
+    expect(notesEn[0]).toContain('10:00 - 11:00');
+    expect(notesEn[1]).toContain('Hourly distribution');
+
+    const emptyNotes = buildHourlyDistributionNotes(
+      { slots: [], total: 0, peaks: [], isBimodal: false, isEmpty: true },
+      'es',
+    );
+    expect(emptyNotes[0]).toContain('No se detectaron');
   });
 
   it('escribe el archivo y abre la hoja de compartir', async () => {
