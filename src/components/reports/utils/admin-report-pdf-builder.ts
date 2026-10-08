@@ -78,7 +78,7 @@ export function hasReportData(snapshot: AdminReportDataSnapshot): boolean {
   }
 }
 
-export type TranslateFunction = (key: string, ...args: any[]) => string;
+export type TranslateFunction = (key: string, fallback?: any) => string;
 
 /**
  * Construye la configuración completa de RenderReportOptions para ReportService
