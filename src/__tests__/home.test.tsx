@@ -342,4 +342,48 @@ describe('HomeScreen (US-38)', () => {
     });
     expect(toJSON()).toMatchSnapshot();
   });
+
+  it('limita los textos largos de las tarjetas al ancho del contenedor', async () => {
+    const longName = 'María Fernanda de los Ángeles Contreras Villanueva';
+    mockUser = { ...mockUser, nombre: longName };
+    jest.spyOn(DashboardService, 'fetchNotifications').mockResolvedValueOnce([
+      {
+        id: 'notif-long',
+        title: 'Cita confirmada con el paciente de nombre extremadamente largo',
+        subtitle: 'Estado: reprogramada por el consultorio principal de la sede norte durante la mañana',
+        read: false,
+      },
+    ]);
+    jest.spyOn(DashboardService, 'performGlobalSearch').mockResolvedValueOnce([
+      {
+        id: 'patient-long',
+        category: 'patients',
+        title: longName,
+        subtitle: 'Historia clínica pendiente de actualización por el odontólogo tratante',
+        route: '/(tabs)/patient-file?patientId=patient-long',
+      },
+    ]);
+
+    const { getByTestId, getByText } = render(<HomeScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('greeting-title').props.numberOfLines).toBe(2);
+      expect(getByTestId('greeting-title').props.ellipsizeMode).toBe('tail');
+      expect(getByText('Citas pendientes').props.numberOfLines).toBeUndefined();
+      expect(getByTestId('metric-examenes').props.style).toEqual(
+        expect.arrayContaining([expect.objectContaining({ width: '100%' })]),
+      );
+      expect(getByTestId('notification-item-notif-long')).toBeTruthy();
+    });
+
+    expect(getByText('Cita confirmada con el paciente de nombre extremadamente largo').props.numberOfLines).toBe(2);
+    expect(getByText('Estado: reprogramada por el consultorio principal de la sede norte durante la mañana').props.numberOfLines).toBe(3);
+
+    fireEvent.changeText(getByTestId('home-search-input'), longName);
+
+    await waitFor(() => {
+      expect(getByText(longName).props.numberOfLines).toBe(2);
+      expect(getByText(longName).props.ellipsizeMode).toBe('tail');
+    });
+  });
 });

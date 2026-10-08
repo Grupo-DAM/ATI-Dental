@@ -261,14 +261,20 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
             style={
               {
                 "flex": 1,
+                "flexShrink": 1,
+                "flexWrap": "wrap",
                 "justifyContent": "center",
+                "minWidth": 0,
               }
             }
           >
             <Text
+              ellipsizeMode="tail"
+              numberOfLines={2}
               style={
                 {
                   "color": "#1F2937",
+                  "flexShrink": 1,
                   "fontFamily": "Open Sans",
                   "fontSize": 20,
                   "fontWeight": "700",
@@ -279,9 +285,12 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
               ¡Hola Dr. Ramirez!
             </Text>
             <Text
+              ellipsizeMode="tail"
+              numberOfLines={2}
               style={
                 {
                   "color": "#6B7280",
+                  "flexShrink": 1,
                   "fontSize": 14,
                   "fontWeight": "400",
                   "marginTop": 2,
@@ -474,9 +483,13 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
             }
           >
             <Text
+              ellipsizeMode="tail"
+              numberOfLines={2}
               style={
                 {
                   "color": "#1F2937",
+                  "flex": 1,
+                  "flexShrink": 1,
                   "fontSize": 16,
                   "fontWeight": "700",
                 }
@@ -514,6 +527,7 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
               onStartShouldSetResponder={[Function]}
               style={
                 {
+                  "flexShrink": 0,
                   "opacity": 1,
                   "paddingHorizontal": 4,
                   "paddingVertical": 2,
@@ -522,6 +536,8 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
               testID="view-agenda-link"
             >
               <Text
+                ellipsizeMode="tail"
+                numberOfLines={1}
                 style={
                   {
                     "color": "#5B2D8B",
@@ -537,67 +553,141 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
           <View
             style={
               {
-                "alignItems": "stretch",
-                "flexDirection": "row",
                 "gap": 10,
               }
             }
           >
             <View
               style={
-                [
-                  {
-                    "alignItems": "center",
-                    "borderRadius": 8,
-                    "borderWidth": 1,
-                    "flex": 1,
-                    "flexDirection": "row",
-                    "gap": 8,
-                    "minHeight": 76,
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 16,
-                  },
-                  {
-                    "backgroundColor": "#EAF7EE",
-                    "borderColor": "#8BD69E",
-                  },
-                ]
+                {
+                  "alignItems": "stretch",
+                  "flexDirection": "row",
+                  "gap": 10,
+                }
               }
-              testID="metric-citas"
             >
-              <Text
+              <View
                 style={
                   [
                     {
-                      "fontSize": 32,
-                      "fontWeight": "700",
-                      "lineHeight": 36,
-                    },
-                    {
-                      "color": "#2E7D32",
-                    },
-                  ]
-                }
-              >
-                2
-              </Text>
-              <Text
-                style={
-                  [
-                    {
+                      "alignItems": "center",
+                      "borderRadius": 8,
+                      "borderWidth": 1,
                       "flex": 1,
-                      "fontSize": 12,
-                      "fontWeight": "500",
-                      "lineHeight": 15,
+                      "flexDirection": "row",
+                      "flexShrink": 1,
+                      "gap": 8,
+                      "minHeight": 76,
+                      "minWidth": 0,
+                      "paddingHorizontal": 10,
+                      "paddingVertical": 16,
                     },
                     {
-                      "color": "#2E7D32",
+                      "backgroundColor": "#EAF7EE",
+                      "borderColor": "#8BD69E",
                     },
                   ]
                 }
+                testID="metric-citas"
               >
-                Citas pendientes
-              </Text>
+                <Text
+                  style={
+                    [
+                      {
+                        "flexShrink": 0,
+                        "fontSize": 32,
+                        "fontWeight": "700",
+                        "lineHeight": 36,
+                      },
+                      {
+                        "color": "#2E7D32",
+                      },
+                    ]
+                  }
+                >
+                  2
+                </Text>
+                <Text
+                  style={
+                    [
+                      {
+                        "flex": 1,
+                        "flexShrink": 1,
+                        "fontSize": 12,
+                        "fontWeight": "500",
+                        "lineHeight": 16,
+                        "minWidth": 0,
+                      },
+                      {
+                        "color": "#2E7D32",
+                      },
+                    ]
+                  }
+                >
+                  Citas pendientes
+                </Text>
+              </View>
+              <View
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "borderRadius": 8,
+                      "borderWidth": 1,
+                      "flex": 1,
+                      "flexDirection": "row",
+                      "flexShrink": 1,
+                      "gap": 8,
+                      "minHeight": 76,
+                      "minWidth": 0,
+                      "paddingHorizontal": 10,
+                      "paddingVertical": 16,
+                    },
+                    {
+                      "backgroundColor": "#FEF3E8",
+                      "borderColor": "#F7C293",
+                    },
+                  ]
+                }
+                testID="metric-pacientes"
+              >
+                <Text
+                  style={
+                    [
+                      {
+                        "flexShrink": 0,
+                        "fontSize": 32,
+                        "fontWeight": "700",
+                        "lineHeight": 36,
+                      },
+                      {
+                        "color": "#D85A00",
+                      },
+                    ]
+                  }
+                >
+                  3
+                </Text>
+                <Text
+                  style={
+                    [
+                      {
+                        "flex": 1,
+                        "flexShrink": 1,
+                        "fontSize": 12,
+                        "fontWeight": "500",
+                        "lineHeight": 16,
+                        "minWidth": 0,
+                      },
+                      {
+                        "color": "#D85A00",
+                      },
+                    ]
+                  }
+                >
+                  Pacientes pendientes
+                </Text>
+              </View>
             </View>
             <View
               style={
@@ -608,70 +698,21 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                     "borderWidth": 1,
                     "flex": 1,
                     "flexDirection": "row",
+                    "flexShrink": 1,
                     "gap": 8,
                     "minHeight": 76,
-                    "paddingHorizontal": 10,
-                    "paddingVertical": 16,
-                  },
-                  {
-                    "backgroundColor": "#FEF3E8",
-                    "borderColor": "#F7C293",
-                  },
-                ]
-              }
-              testID="metric-pacientes"
-            >
-              <Text
-                style={
-                  [
-                    {
-                      "fontSize": 32,
-                      "fontWeight": "700",
-                      "lineHeight": 36,
-                    },
-                    {
-                      "color": "#D85A00",
-                    },
-                  ]
-                }
-              >
-                3
-              </Text>
-              <Text
-                style={
-                  [
-                    {
-                      "flex": 1,
-                      "fontSize": 12,
-                      "fontWeight": "500",
-                      "lineHeight": 15,
-                    },
-                    {
-                      "color": "#D85A00",
-                    },
-                  ]
-                }
-              >
-                Pacientes pendientes
-              </Text>
-            </View>
-            <View
-              style={
-                [
-                  {
-                    "alignItems": "center",
-                    "borderRadius": 8,
-                    "borderWidth": 1,
-                    "flex": 1,
-                    "flexDirection": "row",
-                    "gap": 8,
-                    "minHeight": 76,
+                    "minWidth": 0,
                     "paddingHorizontal": 10,
                     "paddingVertical": 16,
                   },
                   {
                     "backgroundColor": "#EBF1FC",
                     "borderColor": "#AEC5F3",
+                  },
+                  {
+                    "flexBasis": "100%",
+                    "flexGrow": 0,
+                    "width": "100%",
                   },
                 ]
               }
@@ -681,6 +722,7 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                 style={
                   [
                     {
+                      "flexShrink": 0,
                       "fontSize": 32,
                       "fontWeight": "700",
                       "lineHeight": 36,
@@ -698,9 +740,11 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                   [
                     {
                       "flex": 1,
+                      "flexShrink": 1,
                       "fontSize": 12,
                       "fontWeight": "500",
-                      "lineHeight": 15,
+                      "lineHeight": 16,
+                      "minWidth": 0,
                     },
                     {
                       "color": "#2F5EA8",
@@ -764,9 +808,13 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
             }
           >
             <Text
+              ellipsizeMode="tail"
+              numberOfLines={2}
               style={
                 {
                   "color": "#1F2937",
+                  "flex": 1,
+                  "flexShrink": 1,
                   "fontSize": 16,
                   "fontWeight": "700",
                 }
@@ -823,9 +871,11 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                     "borderRadius": 8,
                     "borderWidth": 1,
                     "flex": 1,
+                    "flexShrink": 1,
                     "gap": 6,
                     "justifyContent": "center",
                     "minHeight": 76,
+                    "minWidth": 0,
                     "paddingHorizontal": 8,
                     "paddingVertical": 16,
                   },
@@ -856,12 +906,16 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                 
               </Text>
               <Text
+                ellipsizeMode="tail"
+                numberOfLines={2}
                 style={
                   {
                     "color": "#5B2D8B",
+                    "flexShrink": 1,
                     "fontSize": 12,
                     "fontWeight": "600",
                     "textAlign": "center",
+                    "width": "100%",
                   }
                 }
               >
@@ -907,9 +961,11 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                     "borderRadius": 8,
                     "borderWidth": 1,
                     "flex": 1,
+                    "flexShrink": 1,
                     "gap": 6,
                     "justifyContent": "center",
                     "minHeight": 76,
+                    "minWidth": 0,
                     "paddingHorizontal": 8,
                     "paddingVertical": 16,
                   },
@@ -940,12 +996,16 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                 
               </Text>
               <Text
+                ellipsizeMode="tail"
+                numberOfLines={2}
                 style={
                   {
                     "color": "#5B2D8B",
+                    "flexShrink": 1,
                     "fontSize": 12,
                     "fontWeight": "600",
                     "textAlign": "center",
+                    "width": "100%",
                   }
                 }
               >
@@ -991,9 +1051,11 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                     "borderRadius": 8,
                     "borderWidth": 1,
                     "flex": 1,
+                    "flexShrink": 1,
                     "gap": 6,
                     "justifyContent": "center",
                     "minHeight": 76,
+                    "minWidth": 0,
                     "paddingHorizontal": 8,
                     "paddingVertical": 16,
                   },
@@ -1024,12 +1086,16 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                 
               </Text>
               <Text
+                ellipsizeMode="tail"
+                numberOfLines={2}
                 style={
                   {
                     "color": "#5B2D8B",
+                    "flexShrink": 1,
                     "fontSize": 12,
                     "fontWeight": "600",
                     "textAlign": "center",
+                    "width": "100%",
                   }
                 }
               >
@@ -1089,9 +1155,13 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
             }
           >
             <Text
+              ellipsizeMode="tail"
+              numberOfLines={2}
               style={
                 {
                   "color": "#1F2937",
+                  "flex": 1,
+                  "flexShrink": 1,
                   "fontSize": 16,
                   "fontWeight": "700",
                 }
@@ -1149,7 +1219,9 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                   "alignItems": "center",
                   "flex": 1,
                   "flexDirection": "row",
+                  "flexShrink": 1,
                   "gap": 16,
+                  "minWidth": 0,
                 }
               }
             >
@@ -1191,13 +1263,19 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                 style={
                   {
                     "flex": 1,
+                    "flexShrink": 1,
+                    "flexWrap": "wrap",
+                    "minWidth": 0,
                   }
                 }
               >
                 <Text
+                  ellipsizeMode="tail"
+                  numberOfLines={2}
                   style={
                     {
                       "color": "#1F2937",
+                      "flexShrink": 1,
                       "fontSize": 14,
                       "fontWeight": "700",
                     }
@@ -1206,9 +1284,12 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                   Recordatorio de citas
                 </Text>
                 <Text
+                  ellipsizeMode="tail"
+                  numberOfLines={3}
                   style={
                     {
                       "color": "#6B7280",
+                      "flexShrink": 1,
                       "fontSize": 12,
                       "marginTop": 2,
                     }
@@ -1221,6 +1302,7 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
             <View
               style={
                 {
+                  "flexShrink": 0,
                   "paddingLeft": 4,
                 }
               }

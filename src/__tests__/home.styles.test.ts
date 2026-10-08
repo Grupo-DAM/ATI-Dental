@@ -19,4 +19,20 @@ describe('home.styles', () => {
     expect(styles.metricCardOrange).toBeDefined();
     expect(styles.metricCardBlue).toBeDefined();
   });
+
+  it('encoge el texto de las tarjetas para que no desborde la fila', () => {
+    const styles = createStyles(Colors.light);
+    expect(styles.metricCard.minWidth).toBe(0);
+    expect(styles.metricsTopRow.flexDirection).toBe('row');
+    expect(styles.metricCardWide.width).toBe('100%');
+    expect(styles.metricLabel.flexShrink).toBe(1);
+    expect(styles.notificationTextCol).toEqual(expect.objectContaining({
+      flexShrink: 1,
+      flexWrap: 'wrap',
+      minWidth: 0,
+    }));
+    expect(styles.greetingTextContainer.flexShrink).toBe(1);
+    expect(styles.searchResultTextCol.flexShrink).toBe(1);
+    expect(styles.quickAccessLabel.flexShrink).toBe(1);
+  });
 });
