@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
 import { KPICard } from '@/components/reports/KPICard';
-import { UsageLineChart } from '@/components/reports/usage-line-chart';
+import { UsageLineChart, ChartDataPoint } from '@/components/reports/usage-line-chart';
 import { PeriodOption } from '../types';
 import { useCrashRateMetrics } from '../hooks/useCrashRateMetrics';
 import { createReportsStyles } from '../../../constants/styles/reports.styles';
@@ -16,6 +16,12 @@ interface CrashRateReportViewProps {
   totalSessionsCount: number;
   periodLabel: string;
   onOpenPeriodModal: () => void;
+  onDataReady?: (data: {
+    totalCrashesValue: number;
+    affectedUsersValue: number;
+    calculatedCrashRateString: string;
+    crashRateData: ChartDataPoint[];
+  }) => void;
 }
 
 export function CrashRateReportView({
@@ -25,6 +31,7 @@ export function CrashRateReportView({
   totalSessionsCount,
   periodLabel,
   onOpenPeriodModal,
+  onDataReady,
 }: CrashRateReportViewProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -45,6 +52,15 @@ export function CrashRateReportView({
     totalSessionsCount,
     t,
   });
+
+  useEffect(() => {
+    onDataReady?.({
+      totalCrashesValue,
+      affectedUsersValue,
+      calculatedCrashRateString,
+      crashRateData,
+    });
+  }, [totalCrashesValue, affectedUsersValue, calculatedCrashRateString, crashRateData, onDataReady]);
 
   return (
     <>

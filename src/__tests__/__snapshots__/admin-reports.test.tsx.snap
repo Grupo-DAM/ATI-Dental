@@ -571,7 +571,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
               {
                 "busy": undefined,
                 "checked": undefined,
-                "disabled": undefined,
+                "disabled": false,
                 "expanded": undefined,
                 "selected": undefined,
               }
@@ -639,7 +639,7 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
                 {
                   "busy": undefined,
                   "checked": undefined,
-                  "disabled": undefined,
+                  "disabled": false,
                   "expanded": undefined,
                   "selected": undefined,
                 }

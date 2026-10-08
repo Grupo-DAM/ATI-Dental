@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Alert, Platform, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform, Pressable, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -12,13 +12,29 @@ import { isAdminUser } from '@/constants/user-roles';
 
 // 1. Estilos, Tipos y Utilidades
 import { createReportsStyles } from '@/constants/styles/reports.styles';
-import { PeriodOption, ReportType } from '@/components/reports/types';
+import {
+  PeriodOption,
+  ReportType,
+  UserDemographicsMetrics,
+  UserGeographicsMetrics,
+  RetentionDataPoint,
+} from '@/components/reports/types';
 import { generatePeriodOptions } from '@/components/reports/utils/reports-utils';
+import { DauMauDataPoint } from '@/components/reports/dau-mau-line-chart';
+import { ChartDataPoint } from '@/components/reports/usage-line-chart';
 
 // 2. Hook de datos (Sesiones y Usuarios)
 import { useAdminSessions } from '@/components/reports/hooks/useAdminSessions';
 
-// 3. Vistas Modulares
+// 3. Servicio de Reportes y Generador PDF (US-02)
+import { ReportService } from '@/services/report-service';
+import {
+  buildAdminReportPdfOptions,
+  hasReportData,
+  AdminReportDataSnapshot,
+} from '@/components/reports/utils/admin-report-pdf-builder';
+
+// 4. Vistas Modulares
 import { UsageReportView } from '@/components/reports/views/UsageReportView';
 import { DauMauReportView } from '@/components/reports/views/DauMauReportView';
 import { CrashRateReportView } from '@/components/reports/views/CrashRateReportView';
@@ -39,7 +55,7 @@ export {
 export type { SessionRecord, RetentionDataPoint, RetentionMetricsDoc } from '@/components/reports/types';
 
 export default function AdminReportsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createReportsStyles(theme), [theme]);
   const { user, loading: authLoading } = useAuth();
@@ -49,6 +65,7 @@ export default function AdminReportsScreen() {
   const [showPeriodModal, setShowPeriodModal] = useState(false);
   const [showReportTypeModal, setShowReportTypeModal] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Validación de seguridad (No autenticado vs No administrador)
   useEffect(() => {
@@ -76,6 +93,28 @@ export default function AdminReportsScreen() {
     activeUsersCount,
     displayedActiveUsers,
   } = useAdminSessions(user, authLoading, selectedPeriod, t);
+
+  // Estados para datos analíticos de las vistas secundarias reportados mediante onDataReady
+  const [demographicsData, setDemographicsData] = useState<UserDemographicsMetrics | null>(null);
+  const [geographicsData, setGeographicsData] = useState<UserGeographicsMetrics | null>(null);
+  const [dauMauMetrics, setDauMauMetrics] = useState<{
+    dauValue: number;
+    mauValue: number;
+    dauMauRatio: number;
+    dauMauData: DauMauDataPoint[];
+  } | null>(null);
+  const [crashRateMetrics, setCrashRateMetrics] = useState<{
+    totalCrashesValue: number;
+    affectedUsersValue: number;
+    calculatedCrashRateString: string;
+    crashRateData: ChartDataPoint[];
+  } | null>(null);
+  const [retentionMetrics, setRetentionMetrics] = useState<{
+    retentionData: RetentionDataPoint[];
+    day1String: string;
+    day7String: string;
+    day30String: string;
+  } | null>(null);
 
   // Etiqueta del período
   const periodLabel = useMemo(() => {
@@ -122,18 +161,91 @@ export default function AdminReportsScreen() {
     { name: 'retention_rate', testID: 'type-option-retention-rate', label: t('reports.reportTypeRetentionRate') },
   ];
 
-  const handlePrint = useCallback(() => {
+  // Snapshot consolidado de los datos actuales del reporte activo
+  const currentSnapshot = useMemo<AdminReportDataSnapshot>(() => ({
+    reportType: selectedReportType,
+    selectedPeriod,
+    periodLabel,
+    language: (i18n?.language?.startsWith('en') ? 'en' : 'es'),
+    sessions,
+    totalAccessToday,
+    displayedActiveUsers,
+    demographicsMetrics: demographicsData,
+    geographicsMetrics: geographicsData,
+    dauValue: dauMauMetrics?.dauValue,
+    mauValue: dauMauMetrics?.mauValue,
+    dauMauRatio: dauMauMetrics?.dauMauRatio,
+    dauMauData: dauMauMetrics?.dauMauData,
+    totalCrashesValue: crashRateMetrics?.totalCrashesValue,
+    affectedUsersValue: crashRateMetrics?.affectedUsersValue,
+    calculatedCrashRateString: crashRateMetrics?.calculatedCrashRateString,
+    crashRateData: crashRateMetrics?.crashRateData,
+    retentionData: retentionMetrics?.retentionData,
+    day1String: retentionMetrics?.day1String,
+    day7String: retentionMetrics?.day7String,
+    day30String: retentionMetrics?.day30String,
+  }), [
+    selectedReportType,
+    selectedPeriod,
+    periodLabel,
+    i18n?.language,
+    sessions,
+    totalAccessToday,
+    displayedActiveUsers,
+    demographicsData,
+    geographicsData,
+    dauMauMetrics,
+    crashRateMetrics,
+    retentionMetrics,
+  ]);
+
+  const hasData = useMemo(() => hasReportData(currentSnapshot), [currentSnapshot]);
+
+  const handlePrint = useCallback(async () => {
+    if (isExporting) return;
+
+    if (!hasData) {
+      Alert.alert(t('reports.title'), t('reports.exportNoData'));
+      return;
+    }
+
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       window.print();
       return;
     }
-    Alert.alert(t('reports.print'), t('reports.printTriggered'));
-  }, [t]);
 
-  const handleExportPdf = useCallback(() => {
+    try {
+      setIsExporting(true);
+      const options = buildAdminReportPdfOptions(currentSnapshot, t);
+      await ReportService.print(options);
+      Alert.alert(t('reports.print'), t('reports.printTriggered'));
+    } catch {
+      Alert.alert(t('reports.title'), t('reports.printError'));
+    } finally {
+      setIsExporting(false);
+    }
+  }, [hasData, isExporting, currentSnapshot, t]);
+
+  const handleExportPdf = useCallback(async () => {
     setShowExportMenu(false);
-    Alert.alert(t('reports.pdfExportSuccess'), t('reports.pdfExportMessage'));
-  }, [t]);
+    if (isExporting) return;
+
+    if (!hasData) {
+      Alert.alert(t('reports.title'), t('reports.exportNoData'));
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      const options = buildAdminReportPdfOptions(currentSnapshot, t);
+      await ReportService.generateAndShare(options);
+      Alert.alert(t('reports.pdfExportSuccess'), t('reports.pdfExportMessage'));
+    } catch {
+      Alert.alert(t('reports.title'), t('reports.exportError'));
+    } finally {
+      setIsExporting(false);
+    }
+  }, [hasData, isExporting, currentSnapshot, t]);
 
   const handleExportCsv = useCallback(() => {
     setShowExportMenu(false);
@@ -206,6 +318,7 @@ export default function AdminReportsScreen() {
             authLoading={authLoading}
             periodLabel={periodLabel}
             onOpenPeriodModal={() => setShowPeriodModal(true)}
+            onDataReady={setDemographicsData}
           />
         )}
 
@@ -215,6 +328,7 @@ export default function AdminReportsScreen() {
             authLoading={authLoading}
             periodLabel={periodLabel}
             onOpenPeriodModal={() => setShowPeriodModal(true)}
+            onDataReady={setGeographicsData}
           />
         )}
 
@@ -226,6 +340,7 @@ export default function AdminReportsScreen() {
             activeUsersCount={activeUsersCount}
             periodLabel={periodLabel}
             onOpenPeriodModal={() => setShowPeriodModal(true)}
+            onDataReady={setDauMauMetrics}
           />
         )}
 
@@ -237,6 +352,7 @@ export default function AdminReportsScreen() {
             totalSessionsCount={sessions.length}
             periodLabel={periodLabel}
             onOpenPeriodModal={() => setShowPeriodModal(true)}
+            onDataReady={setCrashRateMetrics}
           />
         )}
 
@@ -244,19 +360,25 @@ export default function AdminReportsScreen() {
           <RetentionReportView
             user={user}
             authLoading={authLoading}
+            onDataReady={setRetentionMetrics}
           />
         )}
 
         {/* Acciones de pie: Imprimir y Descargar con Popover (PDF / CSV) */}
         <View style={styles.actionsRow}>
           <TouchableOpacity
-            style={styles.printBtn}
+            style={[styles.printBtn, isExporting && { opacity: 0.6 }]}
             onPress={handlePrint}
             activeOpacity={0.7}
+            disabled={isExporting}
             testID="print-btn"
             accessibilityLabel={t('reports.print')}
           >
-            <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
+            {isExporting ? (
+              <ActivityIndicator size="small" color={theme.fieldLabel} testID="print-spinner" />
+            ) : (
+              <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
+            )}
           </TouchableOpacity>
 
           <View style={styles.downloadContainer}>
@@ -283,6 +405,7 @@ export default function AdminReportsScreen() {
                     style={styles.exportMenuItem}
                     onPress={handleExportPdf}
                     activeOpacity={0.7}
+                    disabled={isExporting}
                     testID="export-pdf-btn"
                     accessibilityLabel={t('reports.exportPdf')}
                   >
@@ -294,13 +417,18 @@ export default function AdminReportsScreen() {
             )}
 
             <TouchableOpacity
-              style={styles.downloadBtn}
+              style={[styles.downloadBtn, isExporting && { opacity: 0.6 }]}
               onPress={() => setShowExportMenu((prev) => !prev)}
               activeOpacity={0.7}
+              disabled={isExporting}
               testID="download-menu-btn"
               accessibilityLabel={t('reports.download')}
             >
-              <Ionicons name="download-outline" size={20} color={theme.overMain} />
+              {isExporting ? (
+                <ActivityIndicator size="small" color={theme.overMain} testID="download-spinner" />
+              ) : (
+                <Ionicons name="download-outline" size={20} color={theme.overMain} />
+              )}
             </TouchableOpacity>
           </View>
         </View>

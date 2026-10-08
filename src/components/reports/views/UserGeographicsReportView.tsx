@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { KPICard } from '@/components/reports/KPICard';
@@ -9,13 +9,14 @@ import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
 import { useUserGeographics } from '../hooks/useUserGeographics';
 import type { UserProfile } from '@/hooks/use-auth';
-// import type { UserGeographicsMetrics } from '../types';
+import type { UserGeographicsMetrics } from '../types';
 
 interface UserGeographicsReportViewProps {
   user: UserProfile | null;
   authLoading: boolean;
   periodLabel: string;
   onOpenPeriodModal: () => void;
+  onDataReady?: (data: UserGeographicsMetrics | null) => void;
 }
 
 export function UserGeographicsReportView({
@@ -23,6 +24,7 @@ export function UserGeographicsReportView({
   authLoading,
   periodLabel,
   onOpenPeriodModal,
+  onDataReady,
 }: Readonly<UserGeographicsReportViewProps>) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -34,6 +36,10 @@ export function UserGeographicsReportView({
     enabled: true,
     t,
   });
+
+  useEffect(() => {
+    onDataReady?.(data);
+  }, [data, onDataReady]);
 
   const hasData = data && data.totalUsers > 0;
 

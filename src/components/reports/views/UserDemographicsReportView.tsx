@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { KPICard } from '@/components/reports/KPICard';
@@ -9,12 +9,14 @@ import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
 import { useUserDemographics } from '../hooks/useUserDemographics';
 import type { UserProfile } from '@/hooks/use-auth';
+import type { UserDemographicsMetrics } from '../types';
 
 interface UserDemographicsReportViewProps {
   user: UserProfile | null;
   authLoading: boolean;
   periodLabel: string;
   onOpenPeriodModal: () => void;
+  onDataReady?: (data: UserDemographicsMetrics) => void;
 }
 
 export function UserDemographicsReportView({
@@ -22,6 +24,7 @@ export function UserDemographicsReportView({
   authLoading,
   periodLabel,
   onOpenPeriodModal,
+  onDataReady,
 }: Readonly<UserDemographicsReportViewProps>) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -40,6 +43,10 @@ export function UserDemographicsReportView({
     enabled: true,
     t,
   });
+
+  useEffect(() => {
+    onDataReady?.({ totalUsers, averageAge, ageBuckets, genderSlices });
+  }, [totalUsers, averageAge, ageBuckets, genderSlices, onDataReady]);
 
   const hasData = totalUsers > 0;
 

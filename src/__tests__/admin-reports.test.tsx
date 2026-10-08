@@ -115,6 +115,9 @@ const mockT = (key: string) => {
     'reports.csvExportSuccess': 'Archivo CSV generado',
     'reports.csvExportMessage': 'Los datos tabulares han sido preparados para su descarga.',
     'reports.printTriggered': 'Enviando reporte a la impresora...',
+    'reports.exportNoData': 'No hay datos disponibles para exportar o imprimir en este reporte.',
+    'reports.exportError': 'Ocurrió un error al generar o compartir el reporte.',
+    'reports.printError': 'Ocurrió un error al enviar el reporte a imprimir.',
     'reports.accessDenied': 'Esta pantalla es exclusiva para administradores.',
     'reports.sessionRequired': 'Debes iniciar sesión para continuar.',
     'reports.loading': 'Cargando reportes...',
@@ -135,7 +138,29 @@ const mockT = (key: string) => {
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: mockT,
+    i18n: { language: 'es' },
   }),
+  initReactI18next: {
+    type: '3rdParty',
+    init: jest.fn(),
+  },
+}));
+
+jest.mock('@/services/report-service', () => ({
+  ReportService: {
+    generateAndShare: jest.fn(() => Promise.resolve({
+      file: { uri: 'mock-uri', numberOfPages: 1 },
+      share: { shared: true },
+    })),
+    print: jest.fn(() => Promise.resolve()),
+    renderHtml: jest.fn(() => '<html>mock</html>'),
+    generatePdf: jest.fn(() => Promise.resolve({ uri: 'mock-uri', numberOfPages: 1 })),
+    sharePdf: jest.fn(() => Promise.resolve({ shared: true })),
+    buildTable: jest.fn(() => '<table>mock</table>'),
+    buildMetrics: jest.fn(() => '<div>metrics</div>'),
+    buildInfoGrid: jest.fn(() => '<div>grid</div>'),
+    buildAlert: jest.fn(() => '<div>alert</div>'),
+  },
 }));
 
 describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () => {
@@ -349,11 +374,32 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
     expect(getByTestId('chart-title').props.children).toBe('Accesos Diarios al Sistema');
   });
 
-  it('Ejecuta acciones de Imprimir y Exportar con menú de selección (PDF y CSV)', () => {
+  it('Ejecuta acciones de Imprimir y Exportar con menú de selección (PDF y CSV)', async () => {
+    const now = Date.now();
+    const mockSessions = [
+      {
+        id: 's1',
+        data: () => ({
+          userId: 'user-1',
+          fecha: now,
+          tiempoInicio: now - 30 * 60000,
+          tiempoFin: now,
+          duracion: 30,
+        }),
+      },
+    ];
+
+    mockOnSnapshot = jest.fn((onNext) => {
+      onNext({ docs: mockSessions, empty: false });
+      return jest.fn();
+    });
+
     const { getByTestId, queryByTestId } = render(<AdminReportsScreen />);
 
     // Imprimir
-    fireEvent.press(getByTestId('print-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('print-btn'));
+    });
     expect(alertSpy).toHaveBeenCalledWith('Imprimir', 'Enviando reporte a la impresora...');
 
     // Popover inicialmente cerrado
@@ -364,7 +410,9 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
     expect(getByTestId('export-menu-popover')).toBeTruthy();
 
     // Exportar a PDF
-    fireEvent.press(getByTestId('export-pdf-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-pdf-btn'));
+    });
     expect(alertSpy).toHaveBeenCalledWith(
       'Reporte generado con éxito',
       'El archivo PDF ha sido preparado para su descarga.'
@@ -386,6 +434,70 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
     expect(getByTestId('export-menu-popover')).toBeTruthy();
     fireEvent.press(getByTestId('export-menu-backdrop'));
     expect(queryByTestId('export-menu-popover')).toBeNull();
+  });
+
+  it('Muestra alerta de sin datos al intentar Imprimir o Exportar PDF cuando no hay registros', async () => {
+    mockOnSnapshot = jest.fn((onNext) => {
+      onNext({ docs: [], empty: true });
+      return jest.fn();
+    });
+
+    const { getByTestId } = render(<AdminReportsScreen />);
+
+    // Intentar imprimir sin datos
+    await act(async () => {
+      fireEvent.press(getByTestId('print-btn'));
+    });
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+
+    // Intentar exportar PDF sin datos
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-pdf-btn'));
+    });
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+  });
+
+  it('US-02: Exporta reporte PDF para DAU/MAU cuando se activa esa vista', async () => {
+    const { ReportService } = require('@/services/report-service');
+    mockDocSnapshot.mockImplementation((onNext) => {
+      onNext({
+        exists: () => true,
+        data: () => ({
+          dau: 45,
+          mau: 142,
+          historico: [
+            { label: 'Abr', mau: 125, dau: 35 },
+            { label: 'Sep', mau: 142, dau: 45 },
+          ],
+        }),
+      });
+      return jest.fn();
+    });
+
+    const { getByTestId } = render(<AdminReportsScreen />);
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(getByTestId('type-option-dau-mau'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-pdf-btn'));
+    });
+
+    expect(ReportService.generateAndShare).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          category: 'Módulo Administrativo · Métricas de Producto',
+          showSignatureBlock: false,
+        }),
+      })
+    );
   });
 
   it('Snapshot: verifica la estructura visual sin regresiones', () => {
