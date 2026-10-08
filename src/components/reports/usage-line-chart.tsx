@@ -9,6 +9,7 @@ export interface ChartDataPoint {
   readonly value: number;
   readonly date?: string;
   readonly fullDate?: string;
+  readonly caption?: string;
 }
 
 export interface UsageLineChartProps {
@@ -150,7 +151,8 @@ export function UsageLineChart({
           testID="chart-tooltip"
         >
           <Text style={styles.tooltipDate}>
-            {selectedPoint.data.date ? `Día ${selectedPoint.data.date}` : selectedPoint.data.label}
+            {selectedPoint.data.caption
+              ?? (selectedPoint.data.date ? `Día ${selectedPoint.data.date}` : selectedPoint.data.label)}
           </Text>
           <Text style={styles.tooltipVal}>
             {selectedPoint.data.value} {unit}

@@ -1,0 +1,97 @@
+appId: com.proyect1.ATIDental
+---
+- launchApp
+
+- runFlow: common/login-admin.yaml
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-tab"
+    timeout: 10000
+
+- tapOn:
+    id: "profile-tab"
+
+- extendedWaitUntil:
+    visible:
+      id: "menu-btn"
+    timeout: 10000
+
+- tapOn:
+    id: "menu-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-toggle"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-toggle"
+
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-reports"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-reports"
+
+- extendedWaitUntil:
+    visible:
+      id: "report-type-select"
+    timeout: 15000
+
+- tapOn:
+    id: "report-type-select"
+
+- extendedWaitUntil:
+    visible:
+      id: "type-option-hourly"
+    timeout: 10000
+
+- tapOn:
+    id: "type-option-hourly"
+
+- extendedWaitUntil:
+    visible:
+      id: "admin-reports-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "download-menu-btn"
+
+- runFlow:
+    when:
+      visible:
+        id: "hourly-peak-insight"
+    commands:
+      - assertVisible:
+          id: "hourly-distribution-chart"
+
+- runFlow:
+    when:
+      visible:
+        id: "hourly-empty-state"
+    commands:
+      - assertVisible: "Sin concurrencia registrada en el período"
+
+- tapOn:
+    id: "download-menu-btn"
+
+- runFlow:
+    when:
+      visible:
+        id: "export-menu-popover"
+    commands:
+      - assertVisible:
+          id: "export-pdf-btn"
+      - assertVisible:
+          id: "export-csv-btn"
+      - tapOn:
+          id: "export-menu-backdrop"
+
+- tapOn:
+    id: "menu-btn"
+
+- tapOn:
+    id: "nav-item-logout"

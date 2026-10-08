@@ -1,0 +1,4717 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HourlyDistributionScreen exporta PDF y CSV desde el menú de descarga 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "#F7F6F8",
+      "flex": 1,
+    }
+  }
+  testID="hourly-distribution-screen"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#ffffff",
+        "borderBottomColor": "#EDF2F7",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "paddingHorizontal": 20,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <Text
+      style={
+        {
+          "color": "#6B7280",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+        }
+      }
+    >
+      Reportes
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#9CA3AF",
+          "fontSize": 14,
+        }
+      }
+    >
+         ›   
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#52287D",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+    >
+      Distribución horaria
+    </Text>
+  </View>
+  <RCTScrollView
+    contentContainerStyle={
+      [
+        {
+          "flexGrow": 1,
+          "paddingBottom": 90,
+        },
+        undefined,
+      ]
+    }
+    showsVerticalScrollIndicator={false}
+  >
+    <View>
+      <View
+        style={
+          {
+            "gap": 6,
+            "marginBottom": 20,
+            "padding": 20,
+            "paddingBottom": 0,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#1F2937",
+              "fontFamily": "Open Sans",
+              "fontSize": 24,
+              "fontWeight": "700",
+              "lineHeight": 32,
+            }
+          }
+        >
+          Distribución horaria
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#6B7280",
+              "fontFamily": "Open Sans",
+              "fontSize": 14,
+              "fontWeight": "400",
+              "lineHeight": 20,
+            }
+          }
+        >
+          Identifique las franjas de mayor concurrencia.
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignSelf": "center",
+            "maxWidth": 800,
+            "paddingHorizontal": 20,
+            "width": "100%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 12,
+              "marginBottom": 20,
+            }
+          }
+          testID="kpi-cards-container"
+        >
+          <View
+            style={
+              {
+                "backgroundColor": "#5B2D8B",
+                "borderRadius": 12,
+                "elevation": 2,
+                "flex": 1,
+                "paddingTop": 8,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#ffffff",
+                  "borderRadius": 12,
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "gap": 10,
+                  "padding": 12,
+                }
+              }
+              testID="kpi-total-access"
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#F3E8FF",
+                    "borderRadius": 22,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
+                  }
+                }
+              >
+                <Text
+                  color="#5B2D8B"
+                  name="log-in-outline"
+                  size={24}
+                >
+                  log-in-outline
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#9CA3AF",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 10,
+                      "fontWeight": "400",
+                      "letterSpacing": 0.4,
+                      "marginBottom": 2,
+                    }
+                  }
+                >
+                  TOTAL ACCESOS (HOY)
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#111827",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                    }
+                  }
+                  testID="kpi-total-access-val"
+                >
+                  1
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "backgroundColor": "#5B2D8B",
+                "borderRadius": 12,
+                "elevation": 2,
+                "flex": 1,
+                "paddingTop": 8,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#ffffff",
+                  "borderRadius": 12,
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "gap": 10,
+                  "padding": 12,
+                }
+              }
+              testID="kpi-active-users"
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#F3E8FF",
+                    "borderRadius": 22,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
+                  }
+                }
+              >
+                <Text
+                  color="#5B2D8B"
+                  name="people"
+                  size={24}
+                >
+                  people
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#9CA3AF",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 10,
+                      "fontWeight": "400",
+                      "letterSpacing": 0.4,
+                      "marginBottom": 2,
+                    }
+                  }
+                >
+                  USUARIOS ACTIVOS
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#111827",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                    }
+                  }
+                  testID="kpi-active-users-val"
+                >
+                  1
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "gap": 8,
+              "marginBottom": 16,
+              "padding": 16,
+            }
+          }
+          testID="hourly-peak-insight"
+        >
+          <Text
+            style={
+              {
+                "color": "#6B7280",
+                "fontFamily": "Open Sans",
+                "fontSize": 12,
+                "fontWeight": "700",
+                "letterSpacing": 0.4,
+              }
+            }
+          >
+            Hora pico
+          </Text>
+          <Text
+            style={
+              {
+                "color": "#1F2937",
+                "fontFamily": "Open Sans",
+                "fontSize": 16,
+                "fontWeight": "700",
+              }
+            }
+            testID="hourly-peak-13"
+          >
+            13:00 - 14:00 (1 accesos)
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "marginBottom": 20,
+              },
+              {
+                "marginBottom": 16,
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#374151",
+                "fontFamily": "Open Sans",
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginBottom": 6,
+              }
+            }
+          >
+            Día
+          </Text>
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "paddingHorizontal": 14,
+                "paddingVertical": 12,
+              }
+            }
+          >
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "flex": 1,
+                  "opacity": 1,
+                }
+              }
+              testID="hourly-day-select"
+            >
+              <Text
+                numberOfLines={1}
+                style={
+                  {
+                    "color": "#4A4A4A",
+                    "flex": 1,
+                    "fontFamily": "Open Sans",
+                    "fontSize": 14,
+                  }
+                }
+              >
+                Todo el período
+              </Text>
+            </View>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "opacity": 1,
+                }
+              }
+            >
+              <Text
+                color="#6B7280"
+                name="calendar-outline"
+                size={18}
+              >
+                calendar-outline
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "elevation": 2,
+              "marginBottom": 20,
+              "padding": 16,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 2,
+                "width": 0,
+              },
+              "shadowOpacity": 0.04,
+              "shadowRadius": 4,
+            }
+          }
+          testID="chart-card"
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "marginBottom": 12,
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#5B2D8B",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                }
+              }
+              testID="chart-title"
+            >
+              Accesos por hora
+            </Text>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#F9FAFB",
+                  "borderColor": "#D1D5DB",
+                  "borderRadius": 6,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "opacity": 1,
+                  "paddingHorizontal": 8,
+                  "paddingVertical": 4,
+                }
+              }
+              testID="period-filter-btn"
+            >
+              <Text
+                style={
+                  {
+                    "color": "#6B7280",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 12,
+                    "fontWeight": "500",
+                  }
+                }
+              >
+                Últimas 24 horas
+              </Text>
+              <Text
+                color="#6B7280"
+                name="filter"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 4,
+                  }
+                }
+              >
+                filter
+              </Text>
+            </View>
+          </View>
+          <View
+            testID="chart-active-container"
+          >
+            <View
+              onLayout={[Function]}
+              style={
+                {
+                  "marginVertical": 8,
+                  "position": "relative",
+                  "width": "100%",
+                }
+              }
+              testID="hourly-distribution-chart"
+            >
+              <Svg
+                height={230}
+                width={340}
+              >
+                <Defs>
+                  <LinearGradient
+                    id="chartGradient"
+                    x1="0"
+                    x2="0"
+                    y1="0"
+                    y2="1"
+                  >
+                    <Stop
+                      offset="0%"
+                      stopColor="#5B2D8B"
+                      stopOpacity={0.22}
+                    />
+                    <Stop
+                      offset="60%"
+                      stopColor="#5B2D8B"
+                      stopOpacity={0.08}
+                    />
+                    <Stop
+                      offset="100%"
+                      stopColor="#5B2D8B"
+                      stopOpacity={0.01}
+                    />
+                  </LinearGradient>
+                </Defs>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={202}
+                  y2={202}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={205.5}
+                >
+                  0
+                </Text>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={156}
+                  y2={156}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={159.5}
+                >
+                  5
+                </Text>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={110}
+                  y2={110}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={113.5}
+                >
+                  10
+                </Text>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={64}
+                  y2={64}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={67.5}
+                >
+                  15
+                </Text>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={18}
+                  y2={18}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={21.5}
+                >
+                  20
+                </Text>
+                <Line
+                  stroke="#CBD5E0"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={202}
+                  y2={202}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={36}
+                  y={220}
+                >
+                  15
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={86.08695652173913}
+                  y={220}
+                >
+                  19
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={136.17391304347825}
+                  y={220}
+                >
+                  23
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={186.26086956521738}
+                  y={220}
+                >
+                  03
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={236.3478260869565}
+                  y={220}
+                >
+                  07
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={286.4347826086956}
+                  y={220}
+                >
+                  11
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={324}
+                  y={220}
+                >
+                  14
+                </Text>
+                <Path
+                  d="M 36.0,202.0 C 38.1,202.0 44.3,202.0 48.5,202.0 C 52.7,202.0 56.9,202.0 61.0,202.0 C 65.2,202.0 69.4,202.0 73.6,202.0 C 77.7,202.0 81.9,202.0 86.1,202.0 C 90.3,202.0 94.4,202.0 98.6,202.0 C 102.8,202.0 107.0,202.0 111.1,202.0 C 115.3,202.0 119.5,202.0 123.7,202.0 C 127.8,202.0 132.0,202.0 136.2,202.0 C 140.3,202.0 144.5,202.0 148.7,202.0 C 152.9,202.0 157.0,202.0 161.2,202.0 C 165.4,202.0 169.6,202.0 173.7,202.0 C 177.9,202.0 182.1,202.0 186.3,202.0 C 190.4,202.0 194.6,202.0 198.8,202.0 C 203.0,202.0 207.1,202.0 211.3,202.0 C 215.5,202.0 219.7,202.0 223.8,202.0 C 228.0,202.0 232.2,202.0 236.3,202.0 C 240.5,202.0 244.7,202.0 248.9,202.0 C 253.0,202.0 257.2,202.0 261.4,202.0 C 265.6,202.0 269.7,202.0 273.9,202.0 C 278.1,202.0 282.3,202.0 286.4,202.0 C 290.6,202.0 294.8,203.5 299.0,202.0 C 303.1,200.5 307.3,192.8 311.5,192.8 C 315.7,192.8 321.9,200.5 324.0,202.0 L 324.0,202.0 L 36.0,202.0 Z"
+                  fill="url(#chartGradient)"
+                />
+                <Path
+                  d="M 36.0,202.0 C 38.1,202.0 44.3,202.0 48.5,202.0 C 52.7,202.0 56.9,202.0 61.0,202.0 C 65.2,202.0 69.4,202.0 73.6,202.0 C 77.7,202.0 81.9,202.0 86.1,202.0 C 90.3,202.0 94.4,202.0 98.6,202.0 C 102.8,202.0 107.0,202.0 111.1,202.0 C 115.3,202.0 119.5,202.0 123.7,202.0 C 127.8,202.0 132.0,202.0 136.2,202.0 C 140.3,202.0 144.5,202.0 148.7,202.0 C 152.9,202.0 157.0,202.0 161.2,202.0 C 165.4,202.0 169.6,202.0 173.7,202.0 C 177.9,202.0 182.1,202.0 186.3,202.0 C 190.4,202.0 194.6,202.0 198.8,202.0 C 203.0,202.0 207.1,202.0 211.3,202.0 C 215.5,202.0 219.7,202.0 223.8,202.0 C 228.0,202.0 232.2,202.0 236.3,202.0 C 240.5,202.0 244.7,202.0 248.9,202.0 C 253.0,202.0 257.2,202.0 261.4,202.0 C 265.6,202.0 269.7,202.0 273.9,202.0 C 278.1,202.0 282.3,202.0 286.4,202.0 C 290.6,202.0 294.8,203.5 299.0,202.0 C 303.1,200.5 307.3,192.8 311.5,192.8 C 315.7,192.8 321.9,200.5 324.0,202.0"
+                  fill="none"
+                  stroke="#5B2D8B"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.2}
+                />
+                <Circle
+                  cx={36}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={36}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={48.52173913043478}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={48.52173913043478}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={61.04347826086956}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={61.04347826086956}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={73.56521739130434}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={73.56521739130434}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={86.08695652173913}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={86.08695652173913}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={98.6086956521739}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={98.6086956521739}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={111.13043478260869}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={111.13043478260869}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={123.65217391304348}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={123.65217391304348}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={136.17391304347825}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={136.17391304347825}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={148.69565217391306}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={148.69565217391306}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={161.2173913043478}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={161.2173913043478}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={173.73913043478262}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={173.73913043478262}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={186.26086956521738}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={186.26086956521738}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={198.78260869565216}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={198.78260869565216}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={211.30434782608697}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={211.30434782608697}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={223.82608695652175}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={223.82608695652175}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={236.3478260869565}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={236.3478260869565}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={248.86956521739128}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={248.86956521739128}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={261.3913043478261}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={261.3913043478261}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={273.9130434782609}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={273.9130434782609}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={286.4347826086956}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={286.4347826086956}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={298.95652173913044}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={298.95652173913044}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={311.47826086956525}
+                  cy={192.8}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={311.47826086956525}
+                  cy={192.8}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={324}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={324}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+              </Svg>
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 20,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-0"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 32.52173913043478,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-1"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 45.04347826086956,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-2"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 57.565217391304344,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-3"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 70.08695652173913,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-4"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 82.6086956521739,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-5"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 95.13043478260869,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-6"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 107.65217391304348,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-7"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 120.17391304347825,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-8"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 132.69565217391306,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-9"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 145.2173913043478,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-10"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 157.73913043478262,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-11"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 170.26086956521738,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-12"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 182.78260869565216,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-13"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 195.30434782608697,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-14"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 207.82608695652175,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-15"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 220.3478260869565,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-16"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 232.86956521739128,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-17"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 245.39130434782612,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-18"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 257.9130434782609,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-19"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 270.4347826086956,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-20"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 282.95652173913044,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-21"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 295.47826086956525,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 176.8,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-22"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 308,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-23"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 12,
+              "justifyContent": "flex-end",
+              "marginBottom": 20,
+              "zIndex": 10,
+            }
+          }
+        >
+          <View
+            accessibilityLabel="Imprimir"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "elevation": 1,
+                "height": 38,
+                "justifyContent": "center",
+                "opacity": 1,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+                "width": 44,
+              }
+            }
+            testID="print-btn"
+          >
+            <Text
+              color="#374151"
+              name="print-outline"
+              size={20}
+            >
+              print-outline
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "position": "relative",
+                "zIndex": 20,
+              }
+            }
+          >
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "bottom": -1000,
+                  "left": -1000,
+                  "position": "absolute",
+                  "right": -1000,
+                  "top": -1000,
+                  "zIndex": 99,
+                }
+              }
+              testID="export-menu-backdrop"
+            />
+            <View
+              style={
+                {
+                  "backgroundColor": "#ffffff",
+                  "borderColor": "#D1D5DB",
+                  "borderRadius": 12,
+                  "borderWidth": 1,
+                  "bottom": 46,
+                  "elevation": 6,
+                  "padding": 6,
+                  "position": "absolute",
+                  "right": 0,
+                  "shadowColor": "#000",
+                  "shadowOffset": {
+                    "height": 4,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.15,
+                  "shadowRadius": 8,
+                  "width": 145,
+                  "zIndex": 100,
+                }
+              }
+              testID="export-menu-popover"
+            >
+              <View
+                accessibilityLabel="Exportar CSV"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "alignItems": "center",
+                    "borderRadius": 8,
+                    "flexDirection": "row",
+                    "gap": 10,
+                    "opacity": 1,
+                    "paddingHorizontal": 12,
+                    "paddingVertical": 9,
+                  }
+                }
+                testID="export-csv-btn"
+              >
+                <Text
+                  color="#374151"
+                  name="document-text-outline"
+                  size={18}
+                >
+                  document-text-outline
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#374151",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "600",
+                    }
+                  }
+                >
+                  CSV
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="Exportar PDF"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "alignItems": "center",
+                    "borderRadius": 8,
+                    "flexDirection": "row",
+                    "gap": 10,
+                    "opacity": 1,
+                    "paddingHorizontal": 12,
+                    "paddingVertical": 9,
+                  }
+                }
+                testID="export-pdf-btn"
+              >
+                <Text
+                  color="#374151"
+                  name="documents-outline"
+                  size={18}
+                >
+                  documents-outline
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#374151",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "600",
+                    }
+                  }
+                >
+                  PDF
+                </Text>
+              </View>
+            </View>
+            <View
+              accessibilityLabel="Descargar"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": false,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#5B2D8B",
+                  "borderRadius": 8,
+                  "elevation": 2,
+                  "height": 38,
+                  "justifyContent": "center",
+                  "opacity": 0.4,
+                  "shadowColor": "#5B2D8B",
+                  "shadowOffset": {
+                    "height": 2,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.2,
+                  "shadowRadius": 3,
+                  "width": 44,
+                }
+              }
+              testID="download-menu-btn"
+            >
+              <Text
+                color="#ffffff"
+                name="download-outline"
+                size={20}
+              >
+                download-outline
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`HourlyDistributionScreen muestra la hora pico y el gráfico de 24 columnas 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "#F7F6F8",
+      "flex": 1,
+    }
+  }
+  testID="hourly-distribution-screen"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#ffffff",
+        "borderBottomColor": "#EDF2F7",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "paddingHorizontal": 20,
+        "paddingVertical": 12,
+      }
+    }
+  >
+    <Text
+      style={
+        {
+          "color": "#6B7280",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+        }
+      }
+    >
+      Reportes
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#9CA3AF",
+          "fontSize": 14,
+        }
+      }
+    >
+         ›   
+    </Text>
+    <Text
+      style={
+        {
+          "color": "#52287D",
+          "fontFamily": "Open Sans",
+          "fontSize": 14,
+          "fontWeight": "600",
+        }
+      }
+    >
+      Distribución horaria
+    </Text>
+  </View>
+  <RCTScrollView
+    contentContainerStyle={
+      [
+        {
+          "flexGrow": 1,
+          "paddingBottom": 90,
+        },
+        undefined,
+      ]
+    }
+    showsVerticalScrollIndicator={false}
+  >
+    <View>
+      <View
+        style={
+          {
+            "gap": 6,
+            "marginBottom": 20,
+            "padding": 20,
+            "paddingBottom": 0,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#1F2937",
+              "fontFamily": "Open Sans",
+              "fontSize": 24,
+              "fontWeight": "700",
+              "lineHeight": 32,
+            }
+          }
+        >
+          Distribución horaria
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#6B7280",
+              "fontFamily": "Open Sans",
+              "fontSize": 14,
+              "fontWeight": "400",
+              "lineHeight": 20,
+            }
+          }
+        >
+          Identifique las franjas de mayor concurrencia.
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignSelf": "center",
+            "maxWidth": 800,
+            "paddingHorizontal": 20,
+            "width": "100%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 12,
+              "marginBottom": 20,
+            }
+          }
+          testID="kpi-cards-container"
+        >
+          <View
+            style={
+              {
+                "backgroundColor": "#5B2D8B",
+                "borderRadius": 12,
+                "elevation": 2,
+                "flex": 1,
+                "paddingTop": 8,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#ffffff",
+                  "borderRadius": 12,
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "gap": 10,
+                  "padding": 12,
+                }
+              }
+              testID="kpi-total-access"
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#F3E8FF",
+                    "borderRadius": 22,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
+                  }
+                }
+              >
+                <Text
+                  color="#5B2D8B"
+                  name="log-in-outline"
+                  size={24}
+                >
+                  log-in-outline
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#9CA3AF",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 10,
+                      "fontWeight": "400",
+                      "letterSpacing": 0.4,
+                      "marginBottom": 2,
+                    }
+                  }
+                >
+                  TOTAL ACCESOS (HOY)
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#111827",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                    }
+                  }
+                  testID="kpi-total-access-val"
+                >
+                  3
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "backgroundColor": "#5B2D8B",
+                "borderRadius": 12,
+                "elevation": 2,
+                "flex": 1,
+                "paddingTop": 8,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#ffffff",
+                  "borderRadius": 12,
+                  "flex": 1,
+                  "flexDirection": "row",
+                  "gap": 10,
+                  "padding": 12,
+                }
+              }
+              testID="kpi-active-users"
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#F3E8FF",
+                    "borderRadius": 22,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
+                  }
+                }
+              >
+                <Text
+                  color="#5B2D8B"
+                  name="people"
+                  size={24}
+                >
+                  people
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#9CA3AF",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 10,
+                      "fontWeight": "400",
+                      "letterSpacing": 0.4,
+                      "marginBottom": 2,
+                    }
+                  }
+                >
+                  USUARIOS ACTIVOS
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#111827",
+                      "fontFamily": "Open Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                    }
+                  }
+                  testID="kpi-active-users-val"
+                >
+                  3
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "gap": 8,
+              "marginBottom": 16,
+              "padding": 16,
+            }
+          }
+          testID="hourly-peak-insight"
+        >
+          <Text
+            style={
+              {
+                "color": "#6B7280",
+                "fontFamily": "Open Sans",
+                "fontSize": 12,
+                "fontWeight": "700",
+                "letterSpacing": 0.4,
+              }
+            }
+          >
+            Hora pico
+          </Text>
+          <Text
+            style={
+              {
+                "color": "#1F2937",
+                "fontFamily": "Open Sans",
+                "fontSize": 16,
+                "fontWeight": "700",
+              }
+            }
+            testID="hourly-peak-12"
+          >
+            12:00 - 13:00 (2 accesos)
+          </Text>
+        </View>
+        <View
+          style={
+            [
+              {
+                "marginBottom": 20,
+              },
+              {
+                "marginBottom": 16,
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#374151",
+                "fontFamily": "Open Sans",
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginBottom": 6,
+              }
+            }
+          >
+            Día
+          </Text>
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "paddingHorizontal": 14,
+                "paddingVertical": 12,
+              }
+            }
+          >
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "flex": 1,
+                  "opacity": 1,
+                }
+              }
+              testID="hourly-day-select"
+            >
+              <Text
+                numberOfLines={1}
+                style={
+                  {
+                    "color": "#4A4A4A",
+                    "flex": 1,
+                    "fontFamily": "Open Sans",
+                    "fontSize": 14,
+                  }
+                }
+              >
+                Todo el período
+              </Text>
+            </View>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "opacity": 1,
+                }
+              }
+            >
+              <Text
+                color="#6B7280"
+                name="calendar-outline"
+                size={18}
+              >
+                calendar-outline
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#ffffff",
+              "borderColor": "#D1D5DB",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "elevation": 2,
+              "marginBottom": 20,
+              "padding": 16,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 2,
+                "width": 0,
+              },
+              "shadowOpacity": 0.04,
+              "shadowRadius": 4,
+            }
+          }
+          testID="chart-card"
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "marginBottom": 12,
+              }
+            }
+          >
+            <Text
+              style={
+                {
+                  "color": "#5B2D8B",
+                  "fontFamily": "Open Sans",
+                  "fontSize": 16,
+                  "fontWeight": "700",
+                }
+              }
+              testID="chart-title"
+            >
+              Accesos por hora
+            </Text>
+            <View
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#F9FAFB",
+                  "borderColor": "#D1D5DB",
+                  "borderRadius": 6,
+                  "borderWidth": 1,
+                  "flexDirection": "row",
+                  "opacity": 1,
+                  "paddingHorizontal": 8,
+                  "paddingVertical": 4,
+                }
+              }
+              testID="period-filter-btn"
+            >
+              <Text
+                style={
+                  {
+                    "color": "#6B7280",
+                    "fontFamily": "Open Sans",
+                    "fontSize": 12,
+                    "fontWeight": "500",
+                  }
+                }
+              >
+                Últimas 24 horas
+              </Text>
+              <Text
+                color="#6B7280"
+                name="filter"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 4,
+                  }
+                }
+              >
+                filter
+              </Text>
+            </View>
+          </View>
+          <View
+            testID="chart-active-container"
+          >
+            <View
+              onLayout={[Function]}
+              style={
+                {
+                  "marginVertical": 8,
+                  "position": "relative",
+                  "width": "100%",
+                }
+              }
+              testID="hourly-distribution-chart"
+            >
+              <Svg
+                height={230}
+                width={340}
+              >
+                <Defs>
+                  <LinearGradient
+                    id="chartGradient"
+                    x1="0"
+                    x2="0"
+                    y1="0"
+                    y2="1"
+                  >
+                    <Stop
+                      offset="0%"
+                      stopColor="#5B2D8B"
+                      stopOpacity={0.22}
+                    />
+                    <Stop
+                      offset="60%"
+                      stopColor="#5B2D8B"
+                      stopOpacity={0.08}
+                    />
+                    <Stop
+                      offset="100%"
+                      stopColor="#5B2D8B"
+                      stopOpacity={0.01}
+                    />
+                  </LinearGradient>
+                </Defs>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={202}
+                  y2={202}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={205.5}
+                >
+                  0
+                </Text>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={156}
+                  y2={156}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={159.5}
+                >
+                  5
+                </Text>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={110}
+                  y2={110}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={113.5}
+                >
+                  10
+                </Text>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={64}
+                  y2={64}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={67.5}
+                >
+                  15
+                </Text>
+                <Line
+                  stroke="#EDF2F7"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={18}
+                  y2={18}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="end"
+                  x={28}
+                  y={21.5}
+                >
+                  20
+                </Text>
+                <Line
+                  stroke="#CBD5E0"
+                  strokeWidth={1}
+                  x1={36}
+                  x2={324}
+                  y1={202}
+                  y2={202}
+                />
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={36}
+                  y={220}
+                >
+                  15
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={86.08695652173913}
+                  y={220}
+                >
+                  19
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={136.17391304347825}
+                  y={220}
+                >
+                  23
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={186.26086956521738}
+                  y={220}
+                >
+                  03
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={236.3478260869565}
+                  y={220}
+                >
+                  07
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={286.4347826086956}
+                  y={220}
+                >
+                  11
+                </Text>
+                <Text
+                  fill="#A0AEC0"
+                  fontSize={10}
+                  fontWeight="500"
+                  textAnchor="middle"
+                  x={324}
+                  y={220}
+                >
+                  14
+                </Text>
+                <Path
+                  d="M 36.0,202.0 C 38.1,202.0 44.3,202.0 48.5,202.0 C 52.7,202.0 56.9,202.0 61.0,202.0 C 65.2,202.0 69.4,202.0 73.6,202.0 C 77.7,202.0 81.9,202.0 86.1,202.0 C 90.3,202.0 94.4,202.0 98.6,202.0 C 102.8,202.0 107.0,202.0 111.1,202.0 C 115.3,202.0 119.5,202.0 123.7,202.0 C 127.8,202.0 132.0,202.0 136.2,202.0 C 140.3,202.0 144.5,202.0 148.7,202.0 C 152.9,202.0 157.0,202.0 161.2,202.0 C 165.4,202.0 169.6,202.0 173.7,202.0 C 177.9,202.0 182.1,202.0 186.3,202.0 C 190.4,202.0 194.6,202.0 198.8,202.0 C 203.0,202.0 207.1,202.0 211.3,202.0 C 215.5,202.0 219.7,202.0 223.8,202.0 C 228.0,202.0 232.2,203.5 236.3,202.0 C 240.5,200.5 244.7,192.8 248.9,192.8 C 253.0,192.8 257.2,200.5 261.4,202.0 C 265.6,203.5 269.7,202.0 273.9,202.0 C 278.1,202.0 282.3,205.1 286.4,202.0 C 290.6,198.9 294.8,183.6 299.0,183.6 C 303.1,183.6 307.3,198.9 311.5,202.0 C 315.7,205.1 321.9,202.0 324.0,202.0 L 324.0,202.0 L 36.0,202.0 Z"
+                  fill="url(#chartGradient)"
+                />
+                <Path
+                  d="M 36.0,202.0 C 38.1,202.0 44.3,202.0 48.5,202.0 C 52.7,202.0 56.9,202.0 61.0,202.0 C 65.2,202.0 69.4,202.0 73.6,202.0 C 77.7,202.0 81.9,202.0 86.1,202.0 C 90.3,202.0 94.4,202.0 98.6,202.0 C 102.8,202.0 107.0,202.0 111.1,202.0 C 115.3,202.0 119.5,202.0 123.7,202.0 C 127.8,202.0 132.0,202.0 136.2,202.0 C 140.3,202.0 144.5,202.0 148.7,202.0 C 152.9,202.0 157.0,202.0 161.2,202.0 C 165.4,202.0 169.6,202.0 173.7,202.0 C 177.9,202.0 182.1,202.0 186.3,202.0 C 190.4,202.0 194.6,202.0 198.8,202.0 C 203.0,202.0 207.1,202.0 211.3,202.0 C 215.5,202.0 219.7,202.0 223.8,202.0 C 228.0,202.0 232.2,203.5 236.3,202.0 C 240.5,200.5 244.7,192.8 248.9,192.8 C 253.0,192.8 257.2,200.5 261.4,202.0 C 265.6,203.5 269.7,202.0 273.9,202.0 C 278.1,202.0 282.3,205.1 286.4,202.0 C 290.6,198.9 294.8,183.6 299.0,183.6 C 303.1,183.6 307.3,198.9 311.5,202.0 C 315.7,205.1 321.9,202.0 324.0,202.0"
+                  fill="none"
+                  stroke="#5B2D8B"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.2}
+                />
+                <Circle
+                  cx={36}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={36}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={48.52173913043478}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={48.52173913043478}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={61.04347826086956}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={61.04347826086956}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={73.56521739130434}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={73.56521739130434}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={86.08695652173913}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={86.08695652173913}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={98.6086956521739}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={98.6086956521739}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={111.13043478260869}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={111.13043478260869}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={123.65217391304348}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={123.65217391304348}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={136.17391304347825}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={136.17391304347825}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={148.69565217391306}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={148.69565217391306}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={161.2173913043478}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={161.2173913043478}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={173.73913043478262}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={173.73913043478262}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={186.26086956521738}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={186.26086956521738}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={198.78260869565216}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={198.78260869565216}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={211.30434782608697}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={211.30434782608697}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={223.82608695652175}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={223.82608695652175}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={236.3478260869565}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={236.3478260869565}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={248.86956521739128}
+                  cy={192.8}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={248.86956521739128}
+                  cy={192.8}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={261.3913043478261}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={261.3913043478261}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={273.9130434782609}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={273.9130434782609}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={286.4347826086956}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={286.4347826086956}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={298.95652173913044}
+                  cy={183.6}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={298.95652173913044}
+                  cy={183.6}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={311.47826086956525}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={311.47826086956525}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+                <Circle
+                  cx={324}
+                  cy={202}
+                  fill="#5B2D8B"
+                  r={4.5}
+                />
+                <Circle
+                  cx={324}
+                  cy={202}
+                  fill="#ffffff"
+                  r={2.5}
+                />
+              </Svg>
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 20,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-0"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 32.52173913043478,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-1"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 45.04347826086956,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-2"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 57.565217391304344,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-3"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 70.08695652173913,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-4"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 82.6086956521739,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-5"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 95.13043478260869,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-6"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 107.65217391304348,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-7"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 120.17391304347825,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-8"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 132.69565217391306,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-9"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 145.2173913043478,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-10"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 157.73913043478262,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-11"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 170.26086956521738,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-12"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 182.78260869565216,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-13"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 195.30434782608697,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-14"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 207.82608695652175,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-15"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 220.3478260869565,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-16"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 232.86956521739128,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 176.8,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-17"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 245.39130434782612,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-18"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 257.9130434782609,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-19"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 270.4347826086956,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-20"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 282.95652173913044,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 167.6,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-21"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 295.47826086956525,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-22"
+              />
+              <View
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onClick={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  {
+                    "borderRadius": 16,
+                    "height": 32,
+                    "left": 308,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 186,
+                    "width": 32,
+                    "zIndex": 10,
+                  }
+                }
+                testID="chart-point-23"
+              />
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 12,
+              "justifyContent": "flex-end",
+              "marginBottom": 20,
+              "zIndex": 10,
+            }
+          }
+        >
+          <View
+            accessibilityLabel="Imprimir"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#ffffff",
+                "borderColor": "#D1D5DB",
+                "borderRadius": 8,
+                "borderWidth": 1,
+                "elevation": 1,
+                "height": 38,
+                "justifyContent": "center",
+                "opacity": 1,
+                "shadowColor": "#000",
+                "shadowOffset": {
+                  "height": 1,
+                  "width": 0,
+                },
+                "shadowOpacity": 0.05,
+                "shadowRadius": 2,
+                "width": 44,
+              }
+            }
+            testID="print-btn"
+          >
+            <Text
+              color="#374151"
+              name="print-outline"
+              size={20}
+            >
+              print-outline
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "position": "relative",
+                "zIndex": 20,
+              }
+            }
+          >
+            <View
+              accessibilityLabel="Descargar"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": false,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onClick={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#5B2D8B",
+                  "borderRadius": 8,
+                  "elevation": 2,
+                  "height": 38,
+                  "justifyContent": "center",
+                  "opacity": 0.4,
+                  "shadowColor": "#5B2D8B",
+                  "shadowOffset": {
+                    "height": 2,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.2,
+                  "shadowRadius": 3,
+                  "width": 44,
+                }
+              }
+              testID="download-menu-btn"
+            >
+              <Text
+                color="#ffffff"
+                name="download-outline"
+                size={20}
+              >
+                download-outline
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;

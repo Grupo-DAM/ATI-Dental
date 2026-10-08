@@ -13,6 +13,10 @@ import {
   parseUserAge,
   normalizeUserGender,
   getAgeBucketKey,
+  calculatePeakHoursDistribution,
+  filterSessionsByDay,
+  listSessionDayKeys,
+  readSessionStartMillis,
 } from '../utils/reports-utils';
 
 describe('reports-utils unit tests', () => {
@@ -257,5 +261,103 @@ describe('reports-utils unit tests', () => {
       expect(getAgeBucketKey(50)).toBe('36_50');
       expect(getAgeBucketKey(51)).toBe('50_plus');
     });
+  });
+});
+
+describe('calculatePeakHoursDistribution', () => {
+  const at = (day: number, hour: number) => new Date(2026, 9, day, hour, 15, 0);
+
+  it('agrupa 24 franjas y marca la hora pico', () => {
+    const sessions = [
+      { id: '1', tiempoInicio: at(1, 10) },
+      { id: '2', tiempoInicio: at(1, 10) },
+      { id: '3', tiempoInicio: at(1, 10) },
+      { id: '4', tiempoInicio: at(1, 8) },
+    ];
+    const result = calculatePeakHoursDistribution(sessions);
+
+    expect(result.slots).toHaveLength(24);
+    expect(result.slots[0].label).toBe('00:00 - 01:00');
+    expect(result.slots[23].label).toBe('23:00 - 00:00');
+    expect(result.total).toBe(4);
+    expect(result.isEmpty).toBe(false);
+    expect(result.isBimodal).toBe(false);
+    expect(result.peaks).toEqual([
+      expect.objectContaining({ hour: 10, label: '10:00 - 11:00', count: 3 }),
+    ]);
+    expect(result.slots[10].percentage).toBe(75);
+    expect(result.slots[8].percentage).toBe(25);
+  });
+
+  it('conserva todas las franjas empatadas', () => {
+    const sessions = [
+      { id: '1', tiempoInicio: at(1, 10) },
+      { id: '2', tiempoInicio: at(1, 10) },
+      { id: '3', tiempoInicio: at(1, 16) },
+      { id: '4', tiempoInicio: at(1, 16) },
+    ];
+    const result = calculatePeakHoursDistribution(sessions);
+
+    expect(result.isBimodal).toBe(true);
+    expect(result.peaks.map((peak) => peak.hour)).toEqual([10, 16]);
+    expect(result.peaks.every((peak) => peak.count === 2)).toBe(true);
+  });
+
+  it('queda vacío cuando no hay marcas de tiempo', () => {
+    const result = calculatePeakHoursDistribution([
+      { id: '1' },
+      { id: '2', fecha: 'no-es-fecha' },
+    ]);
+    expect(result.isEmpty).toBe(true);
+    expect(result.peaks).toEqual([]);
+    expect(result.total).toBe(0);
+    expect(result.slots.every((slot) => slot.count === 0)).toBe(true);
+  });
+
+  it('prioriza tiempoInicio sobre fecha para la hora', () => {
+    const result = calculatePeakHoursDistribution([
+      { id: '1', fecha: at(1, 1), tiempoInicio: at(1, 10) },
+    ]);
+    expect(result.slots[10].count).toBe(1);
+    expect(result.slots[1].count).toBe(0);
+  });
+
+  it('filtra por día sin mezclar otras fechas', () => {
+    const sessions = [
+      { id: '1', tiempoInicio: at(1, 10) },
+      { id: '2', tiempoInicio: at(2, 16) },
+    ];
+    const [firstDay] = listSessionDayKeys(sessions);
+    const filtered = filterSessionsByDay(sessions, firstDay);
+    const result = calculatePeakHoursDistribution(filtered);
+    expect(filtered).toHaveLength(1);
+    expect(result.peaks[0].hour).toBe(10);
+    expect(readSessionStartMillis(sessions[0])).toBe(at(1, 10).getTime());
+  });
+
+  it('limita la serie a las últimas 4 horas', () => {
+    const now = new Date(2026, 9, 8, 15, 30, 0);
+    const result = calculatePeakHoursDistribution([
+      { id: '1', tiempoInicio: new Date(2026, 9, 8, 14, 10, 0) },
+      { id: '2', tiempoInicio: new Date(2026, 9, 8, 8, 0, 0) },
+    ], 4, now);
+
+    expect(result.slots).toHaveLength(4);
+    expect(result.slots.map((slot) => slot.hour)).toEqual([12, 13, 14, 15]);
+    expect(result.total).toBe(1);
+    expect(result.peaks[0].hour).toBe(14);
+    expect(result.isEmpty).toBe(false);
+  });
+
+  it('distribuye 10000 sesiones en menos de 100 ms', () => {
+    const sessions = Array.from({ length: 10000 }, (_, index) => ({
+      id: String(index),
+      tiempoInicio: at(1, index % 24),
+    }));
+    const started = Date.now();
+    const result = calculatePeakHoursDistribution(sessions);
+    expect(Date.now() - started).toBeLessThanOrEqual(100);
+    expect(result.total).toBe(10000);
+    expect(result.slots).toHaveLength(24);
   });
 });

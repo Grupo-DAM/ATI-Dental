@@ -269,4 +269,7 @@ export const createReportsStyles = (theme:any) => StyleSheet.create({
     gap: 8,
     marginBottom: 20,
   },
+  downloadBtnDisabled: {
+    opacity: 0.4,
+  },
 });

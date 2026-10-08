@@ -128,6 +128,8 @@ const mockT = (key: string) => {
     'reports.kpiThisMonth': 'Este mes',
     'reports.mauLegend': 'MAU (Activos Mensuales)',
     'reports.dauLegend': 'DAU (Diarios)',
+    'reports.viewHourlyDistribution': 'Ver Distribución Horaria',
+    'reports.reportTypeHourly': 'Visualizar tiempo de uso por hora',
   };
   return translations[key] || key;
 };
@@ -135,7 +137,9 @@ const mockT = (key: string) => {
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: mockT,
+    i18n: { language: 'es' },
   }),
+  initReactI18next: { type: '3rdParty', init: () => undefined },
 }));
 
 describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () => {
@@ -493,6 +497,14 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
       expect(getByTestId('kpi-mau-value').props.children).toBe(0);
       expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
     });
+  });
+
+  it('ofrece el reporte de tiempo de uso por hora en el selector', () => {
+    const { getByTestId, getByText } = render(<AdminReportsScreen />);
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(getByTestId('type-option-hourly'));
+    expect(getByText('Visualizar tiempo de uso por hora')).toBeTruthy();
+    expect(getByTestId('hourly-empty-state')).toBeTruthy();
   });
 
   it('Función pura: calculateDauMauRatio realiza el cálculo y protege contra MAU = 0', () => {
