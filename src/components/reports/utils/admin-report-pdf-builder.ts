@@ -134,88 +134,128 @@ interface DailySessionBucket {
   dateStr: string;
 }
 
+const REPORT_I18N_ES = {
+  terms: {
+    date: 'Fecha',
+    accessesRecorded: 'Accesos Registrados',
+    avgUsageTime: 'Tiempo Promedio de Uso',
+    accessCount: 'Número de Accesos',
+    users: 'Usuarios',
+    percentage: 'Porcentaje',
+    share: 'Participación',
+    ageRange: 'Rango de Edad',
+    gender: 'Distribución por Género',
+    country: 'País de Residencia',
+    region: 'Distribución por Región',
+    ageDistribution: 'Distribución por Rangos de Edad',
+    genderDistribution: 'Distribución por Género',
+    countryDistribution: 'Distribución por País',
+    regionDistribution: 'Distribución por Regiones',
+    month: 'Mes',
+    dauDaily: 'DAU (Diarios)',
+    mauMonthly: 'MAU (Mensuales)',
+    adoptionRatio: 'Ratio de Adopción',
+    crashRatePercent: 'Tasa de Fallos (%)',
+    retentionCohort: 'Cohorte de Retención',
+    identifier: 'Identificador',
+    retainedPercentage: 'Porcentaje Retenido',
+    years: 'años',
+    cities: 'Ciudades',
+  },
+  meta: {
+    usageCategory: 'Módulo Administrativo · Analítica de Uso',
+    usageFileName: 'Reporte_Tiempo_de_Uso',
+    usageNotes: [
+      'Los minutos reflejan el promedio calculado por sesión activa.',
+      'Datos extraídos de la colección centralizada de sesiones de Cloud Firestore.',
+    ],
+    accessCategory: 'Módulo Administrativo · Concurrencia de Accesos',
+    accessFileName: 'Reporte_Accesos_Diarios',
+    accessNotes: ['Registro cronológico de logins y sesiones iniciadas en la plataforma.'],
+    demoCategory: 'Módulo Administrativo · Población Registrada',
+    demoFileName: 'Reporte_Demografia_Usuarios',
+    demoNotes: ['Distribución segmentada a partir de los perfiles de usuario y pacientes registrados.'],
+    geoCategory: 'Módulo Administrativo · Alcance Geográfico',
+    geoFileName: 'Reporte_Distribucion_Geografica',
+    geoNotes: ['Localización derivada de las direcciones y ciudades reportadas en la ficha de usuario.'],
+    dauMauCategory: 'Módulo Administrativo · Métricas de Producto',
+    dauMauFileName: 'Reporte_Usuarios_Activos_DAU_MAU',
+    dauMauNotes: (targetRatio: number) => [
+      'DAU representa los usuarios únicos activos por día.',
+      'MAU representa los usuarios únicos activos en una ventana de 30 días.',
+      `El objetivo estándar de adopción (Stickiness) de la clínica es del ${targetRatio}%.`,
+    ],
+    crashCategory: 'Módulo Administrativo · Calidad y Estabilidad',
+    crashFileName: 'Reporte_Porcentaje_de_Fallos',
+    crashNotes: ['La tasa de fallos evalúa la proporción de excepciones y cierres inesperados frente a las sesiones totales ejecutadas.'],
+    retentionCategory: 'Módulo Administrativo · Fidelización',
+    retentionFileName: 'Reporte_Tasa_de_Retencion',
+    retentionNotes: ['Análisis de cohortes temporales evaluando el retorno de usuarios tras su fecha de registro inicial.'],
+  },
+};
+
+const REPORT_I18N_EN: typeof REPORT_I18N_ES = {
+  terms: {
+    date: 'Date',
+    accessesRecorded: 'Recorded Accesses',
+    avgUsageTime: 'Average Usage Time',
+    accessCount: 'Number of Accesses',
+    users: 'Users',
+    percentage: 'Percentage',
+    share: 'Share',
+    ageRange: 'Age Range',
+    gender: 'Gender',
+    country: 'Country of Residence',
+    region: 'Region',
+    ageDistribution: 'Distribution by Age Range',
+    genderDistribution: 'Distribution by Gender',
+    countryDistribution: 'Distribution by Country',
+    regionDistribution: 'Distribution by Region',
+    month: 'Month',
+    dauDaily: 'DAU (Daily)',
+    mauMonthly: 'MAU (Monthly)',
+    adoptionRatio: 'Adoption Ratio',
+    crashRatePercent: 'Crash Rate (%)',
+    retentionCohort: 'Retention Cohort',
+    identifier: 'Identifier',
+    retainedPercentage: 'Retained Percentage',
+    years: 'years',
+    cities: 'Cities',
+  },
+  meta: {
+    usageCategory: 'Administrative Module · Usage Analytics',
+    usageFileName: 'Report_Usage_Time',
+    usageNotes: [
+      'Minutes reflect the calculated average per active session.',
+      'Data extracted from Cloud Firestore centralized sessions collection.',
+    ],
+    accessCategory: 'Administrative Module · Access Concurrency',
+    accessFileName: 'Report_Daily_Accesses',
+    accessNotes: ['Chronological record of logins and sessions initiated on the platform.'],
+    demoCategory: 'Administrative Module · Registered Population',
+    demoFileName: 'Report_User_Demographics',
+    demoNotes: ['Segmented distribution based on registered user and patient profiles.'],
+    geoCategory: 'Administrative Module · Geographic Reach',
+    geoFileName: 'Report_Geographic_Distribution',
+    geoNotes: ['Location derived from addresses and cities reported in the user profile.'],
+    dauMauCategory: 'Administrative Module · Product Metrics',
+    dauMauFileName: 'Report_Active_Users_DAU_MAU',
+    dauMauNotes: (targetRatio: number) => [
+      'DAU represents unique active users per day.',
+      'MAU represents unique active users in a 30-day window.',
+      `The clinic standard adoption target (Stickiness) is ${targetRatio}%.`,
+    ],
+    crashCategory: 'Administrative Module · Quality and Stability',
+    crashFileName: 'Report_Crash_Rate',
+    crashNotes: ['The crash rate evaluates the proportion of exceptions and unexpected terminations against total executed sessions.'],
+    retentionCategory: 'Administrative Module · Loyalty',
+    retentionFileName: 'Report_User_Retention_Rate',
+    retentionNotes: ['Cohort analysis evaluating user return after their initial registration date.'],
+  },
+};
+
 function getReportI18nContext(isEn: boolean) {
-  const terms = {
-    date: isEn ? 'Date' : 'Fecha',
-    accessesRecorded: isEn ? 'Recorded Accesses' : 'Accesos Registrados',
-    avgUsageTime: isEn ? 'Average Usage Time' : 'Tiempo Promedio de Uso',
-    accessCount: isEn ? 'Number of Accesses' : 'Número de Accesos',
-    users: isEn ? 'Users' : 'Usuarios',
-    percentage: isEn ? 'Percentage' : 'Porcentaje',
-    share: isEn ? 'Share' : 'Participación',
-    ageRange: isEn ? 'Age Range' : 'Rango de Edad',
-    gender: isEn ? 'Gender' : 'Distribución por Género',
-    country: isEn ? 'Country of Residence' : 'País de Residencia',
-    region: isEn ? 'Region' : 'Distribución por Región',
-    ageDistribution: isEn ? 'Distribution by Age Range' : 'Distribución por Rangos de Edad',
-    genderDistribution: isEn ? 'Distribution by Gender' : 'Distribución por Género',
-    countryDistribution: isEn ? 'Distribution by Country' : 'Distribución por País',
-    regionDistribution: isEn ? 'Distribution by Region' : 'Distribución por Regiones',
-    month: isEn ? 'Month' : 'Mes',
-    dauDaily: isEn ? 'DAU (Daily)' : 'DAU (Diarios)',
-    mauMonthly: isEn ? 'MAU (Monthly)' : 'MAU (Mensuales)',
-    adoptionRatio: isEn ? 'Adoption Ratio' : 'Ratio de Adopción',
-    crashRatePercent: isEn ? 'Crash Rate (%)' : 'Tasa de Fallos (%)',
-    retentionCohort: isEn ? 'Retention Cohort' : 'Cohorte de Retención',
-    identifier: isEn ? 'Identifier' : 'Identificador',
-    retainedPercentage: isEn ? 'Retained Percentage' : 'Porcentaje Retenido',
-    years: isEn ? 'years' : 'años',
-    cities: isEn ? 'Cities' : 'Ciudades',
-  };
-
-  const meta = {
-    usageCategory: isEn ? 'Administrative Module · Usage Analytics' : 'Módulo Administrativo · Analítica de Uso',
-    usageFileName: isEn ? 'Report_Usage_Time' : 'Reporte_Tiempo_de_Uso',
-    usageNotes: isEn
-      ? [
-          'Minutes reflect the calculated average per active session.',
-          'Data extracted from Cloud Firestore centralized sessions collection.',
-        ]
-      : [
-          'Los minutos reflejan el promedio calculado por sesión activa.',
-          'Datos extraídos de la colección centralizada de sesiones de Cloud Firestore.',
-        ],
-    accessCategory: isEn ? 'Administrative Module · Access Concurrency' : 'Módulo Administrativo · Concurrencia de Accesos',
-    accessFileName: isEn ? 'Report_Daily_Accesses' : 'Reporte_Accesos_Diarios',
-    accessNotes: isEn
-      ? ['Chronological record of logins and sessions initiated on the platform.']
-      : ['Registro cronológico de logins y sesiones iniciadas en la plataforma.'],
-    demoCategory: isEn ? 'Administrative Module · Registered Population' : 'Módulo Administrativo · Población Registrada',
-    demoFileName: isEn ? 'Report_User_Demographics' : 'Reporte_Demografia_Usuarios',
-    demoNotes: isEn
-      ? ['Segmented distribution based on registered user and patient profiles.']
-      : ['Distribución segmentada a partir de los perfiles de usuario y pacientes registrados.'],
-    geoCategory: isEn ? 'Administrative Module · Geographic Reach' : 'Módulo Administrativo · Alcance Geográfico',
-    geoFileName: isEn ? 'Report_Geographic_Distribution' : 'Reporte_Distribucion_Geografica',
-    geoNotes: isEn
-      ? ['Location derived from addresses and cities reported in the user profile.']
-      : ['Localización derivada de las direcciones y ciudades reportadas en la ficha de usuario.'],
-    dauMauCategory: isEn ? 'Administrative Module · Product Metrics' : 'Módulo Administrativo · Métricas de Producto',
-    dauMauFileName: isEn ? 'Report_Active_Users_DAU_MAU' : 'Reporte_Usuarios_Activos_DAU_MAU',
-    dauMauNotes: (targetRatio: number) => isEn
-      ? [
-          'DAU represents unique active users per day.',
-          'MAU represents unique active users in a 30-day window.',
-          `The clinic standard adoption target (Stickiness) is ${targetRatio}%.`,
-        ]
-      : [
-          'DAU representa los usuarios únicos activos por día.',
-          'MAU representa los usuarios únicos activos en una ventana de 30 días.',
-          `El objetivo estándar de adopción (Stickiness) de la clínica es del ${targetRatio}%.`,
-        ],
-    crashCategory: isEn ? 'Administrative Module · Quality and Stability' : 'Módulo Administrativo · Calidad y Estabilidad',
-    crashFileName: isEn ? 'Report_Crash_Rate' : 'Reporte_Porcentaje_de_Fallos',
-    crashNotes: isEn
-      ? ['The crash rate evaluates the proportion of exceptions and unexpected terminations against total executed sessions.']
-      : ['La tasa de fallos evalúa la proporción de excepciones y cierres inesperados frente a las sesiones totales ejecutadas.'],
-    retentionCategory: isEn ? 'Administrative Module · Loyalty' : 'Módulo Administrativo · Fidelización',
-    retentionFileName: isEn ? 'Report_User_Retention_Rate' : 'Reporte_Tasa_de_Retencion',
-    retentionNotes: isEn
-      ? ['Cohort analysis evaluating user return after their initial registration date.']
-      : ['Análisis de cohortes temporales evaluando el retorno de usuarios tras su fecha de registro inicial.'],
-  };
-
-  return { terms, meta };
+  return isEn ? REPORT_I18N_EN : REPORT_I18N_ES;
 }
 
 function buildDailySessionBuckets(
@@ -498,7 +538,7 @@ function buildDemographicsReportPdf(
     title: t('reports.genderChartTitle', isEn ? 'Visual Distribution by Gender' : 'Distribución Visual por Género'),
     slices: genderSlices,
     centerValue: totalUsers,
-    centerLabel: t('reports.totalUsers', isEn ? 'Total' : 'Total'),
+    centerLabel: t('reports.totalUsers', 'Total'),
   });
 
   const genderTableHtml = buildCategoryDistributionTableHtml(
@@ -596,7 +636,7 @@ function buildGeographicsReportPdf(
     title: t('reports.chartRegions', isEn ? 'Visual Distribution by Region' : 'Distribución Visual por Región'),
     slices: regionSlices,
     centerValue: totalUsers,
-    centerLabel: t('reports.totalUsers', isEn ? 'Total' : 'Total'),
+    centerLabel: t('reports.totalUsers', 'Total'),
   });
 
   const regionTableHtml = buildCategoryDistributionTableHtml(

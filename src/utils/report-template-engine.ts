@@ -565,7 +565,8 @@ export function buildSvgLineChartHtml(options: SvgLineChartOptions): string {
     });
 
     const pathD = coords.map((c, idx) => `${idx === 0 ? 'M' : 'L'} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
-    const areaD = `${pathD} L ${coords[coords.length - 1].x.toFixed(1)},${(padTop + plotHeight).toFixed(1)} L ${coords[0].x.toFixed(1)},${(padTop + plotHeight).toFixed(1)} Z`;
+    const lastCoord = coords.at(-1) ?? coords[0];
+    const areaD = `${pathD} L ${lastCoord.x.toFixed(1)},${(padTop + plotHeight).toFixed(1)} L ${coords[0].x.toFixed(1)},${(padTop + plotHeight).toFixed(1)} Z`;
 
     const pathHtml = `<path d="${pathD}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
     const areaHtml = `<path d="${areaD}" fill="${s.color}" fill-opacity="0.10" />`;
@@ -771,10 +772,13 @@ export function buildDonutChartHtml(options: DonutChartOptions): string {
   }
 
   const centerDisplay = centerValue !== undefined && centerValue !== null ? String(centerValue) : '';
+  const centerLabelHtml = centerLabel
+    ? `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-size="6.5" font-weight="600" fill="#6B7280" font-family="'Open Sans', sans-serif">${escapeHtml(centerLabel)}</text>`
+    : '';
   const centerTextHtml = centerDisplay
     ? `
       <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-size="12" font-weight="800" fill="#1F2937" font-family="'Open Sans', sans-serif">${escapeHtml(centerDisplay)}</text>
-      ${centerLabel ? `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-size="6.5" font-weight="600" fill="#6B7280" font-family="'Open Sans', sans-serif">${escapeHtml(centerLabel)}</text>` : ''}
+      ${centerLabelHtml}
     `
     : '';
 
@@ -1538,7 +1542,7 @@ async function resolveDescriptivePdfUri(sourceUri: string, fileName?: string): P
   }
 
   try {
-    const cleanFileName = fileName.trim().replace(/[^a-zA-Z0-9_\-]/g, '_');
+    const cleanFileName = fileName.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
     if (!cleanFileName) {
       return sourceUri;
     }

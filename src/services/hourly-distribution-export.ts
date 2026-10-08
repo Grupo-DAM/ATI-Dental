@@ -44,8 +44,11 @@ export function buildHourlyDistributionNotes(
   language: ReportLanguage,
 ): string[] {
   if (language === 'en') {
+    const peakSummary = distribution.peaks
+      .map((p) => `${p.label} (${p.count} accesses, ${p.percentage}%)`)
+      .join(', ');
     const peakText = distribution.peaks.length > 0
-      ? `Peak activity detected: ${distribution.peaks.map((p) => `${p.label} (${p.count} accesses, ${p.percentage}%)`).join(', ')}.`
+      ? `Peak activity detected: ${peakSummary}.`
       : 'No peak activity detected during the selected period.';
     return [
       peakText,
@@ -53,8 +56,11 @@ export function buildHourlyDistributionNotes(
       'Data consolidated from user sessions recorded in Cloud Firestore.',
     ];
   }
+  const peakSummaryEs = distribution.peaks
+    .map((p) => `${p.label} (${p.count} accesos, ${p.percentage}%)`)
+    .join(', ');
   const peakText = distribution.peaks.length > 0
-    ? `Franja(s) de mayor actividad detectada(s): ${distribution.peaks.map((p) => `${p.label} (${p.count} accesos, ${p.percentage}%)`).join(', ')}.`
+    ? `Franja(s) de mayor actividad detectada(s): ${peakSummaryEs}.`
     : 'No se detectaron franjas pico en el período seleccionado.';
   return [
     peakText,

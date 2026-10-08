@@ -11,36 +11,26 @@ import {
   buildMetricCardsHtml,
   buildSvgLineChartHtml,
   buildTableHtml,
-  DEFAULT_CLINIC_INFO,
-  escapeHtml,
-  formatReportDateTime,
   generateAndShareReport,
   generatePdfReport,
-  generateReportCode,
   printReport,
   renderReportHtml,
   REPORT_STRINGS,
-  REPORT_THEME,
   resolveReportLanguage,
   shareReportPdf,
 } from '@/utils/report-template-engine';
 import type {
-  BarChartItem,
   BarChartOptions,
   DonutChartOptions,
-  DonutChartSlice,
   GenerateAndShareReportResult,
   InfoGridItem,
   MetricCardItem,
   RenderReportOptions,
   ReportFileResult,
   ReportLanguage,
-  ReportStrings,
   ShareReportOptions,
   ShareReportResult,
   SvgLineChartOptions,
-  SvgLineChartPoint,
-  SvgLineChartSeries,
   TableConfig,
 } from '@/utils/report-template-engine';
 
@@ -150,7 +140,7 @@ export {
   DEFAULT_CLINIC_INFO,
   REPORT_THEME,
   REPORT_STRINGS,
-};
+} from '@/utils/report-template-engine';
 export type {
   BarChartItem,
   BarChartOptions,
@@ -169,5 +159,5 @@ export type {
   SvgLineChartPoint,
   SvgLineChartSeries,
   TableConfig,
-};
+} from '@/utils/report-template-engine';
 
