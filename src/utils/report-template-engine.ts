@@ -1,5 +1,6 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 import i18n from '@/i18n';
 
@@ -201,6 +202,7 @@ export interface ReportMetadata {
   licenseNumber?: string;
   notes?: string[];
   language?: ReportLanguage;
+  fileName?: string;
 }
 
 export interface TableColumn {
@@ -365,7 +367,7 @@ export function buildTableHtml(config: TableConfig): string {
     .join('');
 
   return `
-    <div class="table-responsive keep-together">
+    <div class="table-responsive">
       <table class="report-table ${striped ? 'table-striped' : ''}">
         <thead>
           <tr>${theadHtml}</tr>
@@ -503,12 +505,16 @@ export function renderReportHtml(options: RenderReportOptions): string {
     `
     : '';
 
+  const documentTitle = metadata.fileName
+    ? `${metadata.fileName} - ${clinic.name}`
+    : `${metadata.title} - ${clinic.name}`;
+
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
-  <title>${escapeHtml(metadata.title)} - ${escapeHtml(clinic.name)}</title>
+  <title>${escapeHtml(documentTitle)}</title>
   <style>
     /* Tipografía Institucional Oficial ATI Dental: Open Sans */
     @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap');
@@ -748,10 +754,17 @@ export function renderReportHtml(options: RenderReportOptions): string {
       color: ${REPORT_THEME.textLight};
     }
 
+    h1, h2, h3, h4 {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
     /* Tablas Corporativas */
     .table-responsive {
       width: 100%;
       margin-bottom: 18px;
+      page-break-inside: auto;
+      break-inside: auto;
     }
 
     .report-table {
@@ -759,6 +772,7 @@ export function renderReportHtml(options: RenderReportOptions): string {
       border-collapse: collapse;
       font-size: 8.5pt;
       page-break-inside: auto;
+      break-inside: auto;
     }
 
     .report-table thead {
@@ -1010,6 +1024,45 @@ export function renderReportHtml(options: RenderReportOptions): string {
 }
 
 /**
+ * Copia el archivo PDF generado en la caché a una ruta con nombre de archivo descriptivo
+ * para que al compartirlo o descargarlo se preserve dicho nombre en lugar de un UUID.
+ */
+async function resolveDescriptivePdfUri(sourceUri: string, fileName?: string): Promise<string> {
+  if (!fileName || Platform.OS === 'web') {
+    return sourceUri;
+  }
+
+  try {
+    const cleanFileName = fileName.trim().replace(/[^a-zA-Z0-9_\-]/g, '_');
+    if (!cleanFileName) {
+      return sourceUri;
+    }
+
+    const baseDir = FileSystem.cacheDirectory || FileSystem.documentDirectory;
+    if (!baseDir) {
+      return sourceUri;
+    }
+
+    const targetUri = `${baseDir}${cleanFileName}.pdf`;
+    try {
+      await FileSystem.deleteAsync(targetUri, { idempotent: true });
+    } catch {
+      // Ignorar si el archivo destino aún no existía
+    }
+
+    await FileSystem.copyAsync({
+      from: sourceUri,
+      to: targetUri,
+    });
+
+    return targetUri;
+  } catch (error) {
+    console.warn('No se pudo renombrar el PDF al nombre descriptivo:', error);
+    return sourceUri;
+  }
+}
+
+/**
  * Compila y renderiza el reporte a un archivo PDF físico utilizando expo-print
  */
 export async function generatePdfReport(options: RenderReportOptions): Promise<ReportFileResult> {
@@ -1026,8 +1079,10 @@ export async function generatePdfReport(options: RenderReportOptions): Promise<R
     height,
   });
 
+  const uri = await resolveDescriptivePdfUri(result.uri, options.metadata.fileName);
+
   return {
-    uri: result.uri,
+    uri,
     numberOfPages: result.numberOfPages,
     base64: result.base64,
   };
@@ -1093,6 +1148,7 @@ export async function generateAndShareReport(
 ): Promise<GenerateAndShareReportResult> {
   const file = await generatePdfReport(options);
   const effectiveShareOptions: ShareReportOptions = {
+    dialogTitle: shareOptions?.dialogTitle || options.metadata.fileName || options.metadata.title,
     language: options.language || options.metadata.language,
     ...shareOptions,
   };

@@ -35,6 +35,7 @@
     "expo-constants": "~55.0.16",
     "expo-dev-client": "~55.0.35",
     "expo-device": "~55.0.17",
+    "expo-file-system": "~55.0.26",
     "expo-font": "~55.0.8",
     "expo-glass-effect": "~55.0.11",
     "expo-image": "~55.0.11",

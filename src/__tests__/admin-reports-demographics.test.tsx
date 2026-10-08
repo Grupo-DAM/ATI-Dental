@@ -88,6 +88,10 @@ jest.mock('react-i18next', () => {
   const t = (key: string) => key;
   return {
     useTranslation: () => ({ t }),
+    initReactI18next: {
+      type: '3rdParty',
+      init: jest.fn(),
+    },
   };
 });
 

@@ -189,6 +189,7 @@ function buildUsageReportPdf(
   return {
     metadata: {
       title: t('reports.chartTitleUsage', 'Tiempo de Uso Diario'),
+      fileName: 'Reporte_Tiempo_de_Uso',
       subtitle: `${t('reports.reportTypeUsage', 'Visualizar tiempo de uso por usuario')} · ${snapshot.periodLabel}`,
       category: 'Módulo Administrativo · Analítica de Uso',
       badge: { label: snapshot.periodLabel, variant: 'primary' },
@@ -268,6 +269,7 @@ function buildAccessReportPdf(
   return {
     metadata: {
       title: t('reports.chartTitle', 'Accesos Diarios al Sistema'),
+      fileName: 'Reporte_Accesos_Diarios',
       subtitle: snapshot.periodLabel,
       category: 'Módulo Administrativo · Concurrencia de Accesos',
       badge: { label: snapshot.periodLabel, variant: 'info' },
@@ -340,6 +342,7 @@ function buildDemographicsReportPdf(
   return {
     metadata: {
       title: t('reports.reportTypeDemographics', 'Demografía de Usuarios'),
+      fileName: 'Reporte_Demografia_Usuarios',
       subtitle: `${t('reports.title', 'Reporte Poblacional')} · ${snapshot.periodLabel}`,
       category: 'Módulo Administrativo · Población Registrada',
       badge: { label: `${totalUsers} Usuarios`, variant: 'primary' },
@@ -414,6 +417,7 @@ function buildGeographicsReportPdf(
   return {
     metadata: {
       title: t('reports.reportTypeGeographics', 'Distribución Geográfica'),
+      fileName: 'Reporte_Distribucion_Geografica',
       subtitle: `${t('reports.title', 'Presencia Geográfica')} · ${snapshot.periodLabel}`,
       category: 'Módulo Administrativo · Alcance Geográfico',
       badge: { label: `${totalCities} Ciudades`, variant: 'primary' },
@@ -479,6 +483,7 @@ function buildDauMauReportPdf(
   return {
     metadata: {
       title: t('reports.reportTypeDauMau', 'Usuarios Activos Diarios vs Mensuales (DAU/MAU)'),
+      fileName: 'Reporte_Usuarios_Activos_DAU_MAU',
       subtitle: `${t('reports.dauMauChartTitle', 'Adopción y Frecuencia de Uso')} · ${snapshot.periodLabel}`,
       category: 'Módulo Administrativo · Métricas de Producto',
       badge: { label: `Ratio: ${dauMauRatio}%`, variant: 'primary' },
@@ -538,6 +543,7 @@ function buildCrashRateReportPdf(
   return {
     metadata: {
       title: t('reports.reportTypeCrashRate', 'Porcentaje de Fallos'),
+      fileName: 'Reporte_Porcentaje_de_Fallos',
       subtitle: `${t('reports.chartTitleCrashRate', 'Estabilidad del Sistema')} · ${snapshot.periodLabel}`,
       category: 'Módulo Administrativo · Calidad y Estabilidad',
       badge: { label: crashRateStr, variant: 'warning' },
@@ -599,6 +605,7 @@ function buildRetentionReportPdf(
   return {
     metadata: {
       title: t('reports.reportTypeRetentionRate', 'Tasa de Retención de Usuarios'),
+      fileName: 'Reporte_Tasa_de_Retencion',
       subtitle: `${t('reports.chartTitleRetentionRate', 'Análisis de Cohortes')} · ${snapshot.periodLabel}`,
       category: 'Módulo Administrativo · Fidelización',
       badge: { label: `D1: ${day1} | D7: ${day7}`, variant: 'info' },

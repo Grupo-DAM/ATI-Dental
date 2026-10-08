@@ -107,6 +107,7 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       const options = buildAdminReportPdfOptions(snapshot, mockT);
 
       expect(options.metadata.title).toBe('Tiempo de Uso Diario');
+      expect(options.metadata.fileName).toBe('Reporte_Tiempo_de_Uso');
       expect(options.metadata.showSignatureBlock).toBe(false);
       expect(options.metadata.badge?.label).toBe('Últimos 7 días');
       expect(options.contentHtml).toContain('TOTAL ACCESOS (HOY)');
@@ -128,6 +129,7 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       const options = buildAdminReportPdfOptions(snapshot, mockT);
 
       expect(options.metadata.title).toBe('Accesos Diarios al Sistema');
+      expect(options.metadata.fileName).toBe('Reporte_Accesos_Diarios');
       expect(options.metadata.showSignatureBlock).toBe(false);
       expect(options.contentHtml).toContain('Número de Accesos');
     });
@@ -154,6 +156,7 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       const options = buildAdminReportPdfOptions(snapshot, mockT);
 
       expect(options.metadata.title).toBe('Demografía de Usuarios');
+      expect(options.metadata.fileName).toBe('Reporte_Demografia_Usuarios');
       expect(options.metadata.showSignatureBlock).toBe(false);
       expect(options.contentHtml).toContain('Distribución por Rangos de Edad');
       expect(options.contentHtml).toContain('Distribución por Género');
@@ -178,6 +181,7 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       const options = buildAdminReportPdfOptions(snapshot, mockT);
 
       expect(options.metadata.title).toBe('Distribución Geográfica');
+      expect(options.metadata.fileName).toBe('Reporte_Distribucion_Geografica');
       expect(options.metadata.showSignatureBlock).toBe(false);
       expect(options.contentHtml).toContain('Venezuela');
       expect(options.contentHtml).toContain('Distribución por País');
@@ -201,6 +205,7 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       const options = buildAdminReportPdfOptions(snapshot, mockT);
 
       expect(options.metadata.title).toBe('Usuarios Activos Diarios vs Mensuales (DAU/MAU)');
+      expect(options.metadata.fileName).toBe('Reporte_Usuarios_Activos_DAU_MAU');
       expect(options.metadata.showSignatureBlock).toBe(false);
       expect(options.contentHtml).toContain('RATIO DAU/MAU');
       expect(options.contentHtml).toContain('33%');
@@ -221,6 +226,7 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       const options = buildAdminReportPdfOptions(snapshot, mockT);
 
       expect(options.metadata.title).toBe('Porcentaje de Fallos');
+      expect(options.metadata.fileName).toBe('Reporte_Porcentaje_de_Fallos');
       expect(options.metadata.showSignatureBlock).toBe(false);
       expect(options.contentHtml).toContain('TASA DE FALLAS');
       expect(options.contentHtml).toContain('1.25%');
@@ -245,6 +251,7 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       const options = buildAdminReportPdfOptions(snapshot, mockT);
 
       expect(options.metadata.title).toBe('Tasa de Retención de Usuarios');
+      expect(options.metadata.fileName).toBe('Reporte_Tasa_de_Retencion');
       expect(options.metadata.showSignatureBlock).toBe(false);
       expect(options.contentHtml).toContain('RETENCIÓN DÍA 1');
       expect(options.contentHtml).toContain('75%');

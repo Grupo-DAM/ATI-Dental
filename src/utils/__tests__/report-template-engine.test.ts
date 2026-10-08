@@ -243,6 +243,18 @@ describe('report-template-engine', () => {
       );
     });
 
+    it('generatePdfReport copia el PDF a un nombre descriptivo cuando metadata.fileName está presente', async () => {
+      const result = await generatePdfReport({
+        metadata: {
+          title: 'Tiempo de Uso Diario',
+          fileName: 'Reporte_Tiempo_de_Uso',
+        },
+        contentHtml: '<p>Contenido</p>',
+      });
+
+      expect(result.uri).toBe('file:///data/user/0/com.atidental/cache/Reporte_Tiempo_de_Uso.pdf');
+    });
+
     it('printReport invoca Print.printAsync con el HTML renderizado', async () => {
       await printReport({
         metadata: { title: 'Impresión de Agenda' },

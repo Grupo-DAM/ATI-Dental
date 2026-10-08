@@ -89,6 +89,10 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: mockT, // Reference estable
   }),
+  initReactI18next: {
+    type: '3rdParty',
+    init: jest.fn(),
+  },
 }));
 // -------------------------------------------------------------
 // 4. SUITE DE PRUEBAS US-29
