@@ -1,5 +1,5 @@
 /**
- * Constructor de opciones de renderizado PDF para los 7 reportes administrativos de ATI Dental (US-02).
+ * Constructor de opciones de renderizado PDF 
  * Transforma los datos en memoria de cada reporte en plantillas estructuradas con la identidad visual corporativa.
  */
 import { ReportService } from '@/services/report-service';
@@ -104,32 +104,118 @@ export function buildAdminReportPdfOptions(
       return buildCrashRateReportPdf(snapshot, t);
     case 'retention_rate':
       return buildRetentionReportPdf(snapshot, t);
-    default:
+    default: {
+      const isEn = language === 'en';
       return {
         metadata: {
-          title: t('reports.title', 'Reportes Administrativos'),
+          title: t('reports.title', isEn ? 'Administrative Reports' : 'Reportes Administrativos'),
           subtitle: periodLabel,
-          category: 'Administración General',
+          category: isEn ? 'General Administration' : 'Administración General',
           showSignatureBlock: false,
           language,
         },
         contentHtml: ReportService.buildAlert(
-          t('reports.emptyState', 'No hay registros disponibles para este reporte.'),
+          t('reports.emptyState', isEn ? 'No records available for this report.' : 'No hay registros disponibles para este reporte.'),
           'info',
         ),
         language,
       };
+    }
   }
 }
 
 // -------------------------------------------------------------
-// HELPERS COMPARTIDOS DE EXTRACCIÓN Y TABLAS (Anti-duplicación Sonar)
+// HELPERS COMPARTIDOS DE EXTRACCIÓN Y TABLAS (Bilingüe y anti-duplicación)
 // -------------------------------------------------------------
 interface DailySessionBucket {
   accesses: number;
   totalMinutes: number;
   dayNum: number;
   dateStr: string;
+}
+
+function getReportI18nContext(isEn: boolean) {
+  const terms = {
+    date: isEn ? 'Date' : 'Fecha',
+    accessesRecorded: isEn ? 'Recorded Accesses' : 'Accesos Registrados',
+    avgUsageTime: isEn ? 'Average Usage Time' : 'Tiempo Promedio de Uso',
+    accessCount: isEn ? 'Number of Accesses' : 'Número de Accesos',
+    users: isEn ? 'Users' : 'Usuarios',
+    percentage: isEn ? 'Percentage' : 'Porcentaje',
+    share: isEn ? 'Share' : 'Participación',
+    ageRange: isEn ? 'Age Range' : 'Rango de Edad',
+    gender: isEn ? 'Gender' : 'Distribución por Género',
+    country: isEn ? 'Country of Residence' : 'País de Residencia',
+    region: isEn ? 'Region' : 'Distribución por Región',
+    ageDistribution: isEn ? 'Distribution by Age Range' : 'Distribución por Rangos de Edad',
+    genderDistribution: isEn ? 'Distribution by Gender' : 'Distribución por Género',
+    countryDistribution: isEn ? 'Distribution by Country' : 'Distribución por País',
+    regionDistribution: isEn ? 'Distribution by Region' : 'Distribución por Regiones',
+    month: isEn ? 'Month' : 'Mes',
+    dauDaily: isEn ? 'DAU (Daily)' : 'DAU (Diarios)',
+    mauMonthly: isEn ? 'MAU (Monthly)' : 'MAU (Mensuales)',
+    adoptionRatio: isEn ? 'Adoption Ratio' : 'Ratio de Adopción',
+    crashRatePercent: isEn ? 'Crash Rate (%)' : 'Tasa de Fallos (%)',
+    retentionCohort: isEn ? 'Retention Cohort' : 'Cohorte de Retención',
+    identifier: isEn ? 'Identifier' : 'Identificador',
+    retainedPercentage: isEn ? 'Retained Percentage' : 'Porcentaje Retenido',
+    years: isEn ? 'years' : 'años',
+    cities: isEn ? 'Cities' : 'Ciudades',
+  };
+
+  const meta = {
+    usageCategory: isEn ? 'Administrative Module · Usage Analytics' : 'Módulo Administrativo · Analítica de Uso',
+    usageFileName: isEn ? 'Report_Usage_Time' : 'Reporte_Tiempo_de_Uso',
+    usageNotes: isEn
+      ? [
+          'Minutes reflect the calculated average per active session.',
+          'Data extracted from Cloud Firestore centralized sessions collection.',
+        ]
+      : [
+          'Los minutos reflejan el promedio calculado por sesión activa.',
+          'Datos extraídos de la colección centralizada de sesiones de Cloud Firestore.',
+        ],
+    accessCategory: isEn ? 'Administrative Module · Access Concurrency' : 'Módulo Administrativo · Concurrencia de Accesos',
+    accessFileName: isEn ? 'Report_Daily_Accesses' : 'Reporte_Accesos_Diarios',
+    accessNotes: isEn
+      ? ['Chronological record of logins and sessions initiated on the platform.']
+      : ['Registro cronológico de logins y sesiones iniciadas en la plataforma.'],
+    demoCategory: isEn ? 'Administrative Module · Registered Population' : 'Módulo Administrativo · Población Registrada',
+    demoFileName: isEn ? 'Report_User_Demographics' : 'Reporte_Demografia_Usuarios',
+    demoNotes: isEn
+      ? ['Segmented distribution based on registered user and patient profiles.']
+      : ['Distribución segmentada a partir de los perfiles de usuario y pacientes registrados.'],
+    geoCategory: isEn ? 'Administrative Module · Geographic Reach' : 'Módulo Administrativo · Alcance Geográfico',
+    geoFileName: isEn ? 'Report_Geographic_Distribution' : 'Reporte_Distribucion_Geografica',
+    geoNotes: isEn
+      ? ['Location derived from addresses and cities reported in the user profile.']
+      : ['Localización derivada de las direcciones y ciudades reportadas en la ficha de usuario.'],
+    dauMauCategory: isEn ? 'Administrative Module · Product Metrics' : 'Módulo Administrativo · Métricas de Producto',
+    dauMauFileName: isEn ? 'Report_Active_Users_DAU_MAU' : 'Reporte_Usuarios_Activos_DAU_MAU',
+    dauMauNotes: (targetRatio: number) => isEn
+      ? [
+          'DAU represents unique active users per day.',
+          'MAU represents unique active users in a 30-day window.',
+          `The clinic standard adoption target (Stickiness) is ${targetRatio}%.`,
+        ]
+      : [
+          'DAU representa los usuarios únicos activos por día.',
+          'MAU representa los usuarios únicos activos en una ventana de 30 días.',
+          `El objetivo estándar de adopción (Stickiness) de la clínica es del ${targetRatio}%.`,
+        ],
+    crashCategory: isEn ? 'Administrative Module · Quality and Stability' : 'Módulo Administrativo · Calidad y Estabilidad',
+    crashFileName: isEn ? 'Report_Crash_Rate' : 'Reporte_Porcentaje_de_Fallos',
+    crashNotes: isEn
+      ? ['The crash rate evaluates the proportion of exceptions and unexpected terminations against total executed sessions.']
+      : ['La tasa de fallos evalúa la proporción de excepciones y cierres inesperados frente a las sesiones totales ejecutadas.'],
+    retentionCategory: isEn ? 'Administrative Module · Loyalty' : 'Módulo Administrativo · Fidelización',
+    retentionFileName: isEn ? 'Report_User_Retention_Rate' : 'Reporte_Tasa_de_Retencion',
+    retentionNotes: isEn
+      ? ['Cohort analysis evaluating user return after their initial registration date.']
+      : ['Análisis de cohortes temporales evaluando el retorno de usuarios tras su fecha de registro inicial.'],
+  };
+
+  return { terms, meta };
 }
 
 function buildDailySessionBuckets(
@@ -164,19 +250,20 @@ function buildSessionActivityMetricsHtml(
   snapshot: AdminReportDataSnapshot,
   t: TranslateFunction,
 ): string {
+  const isEn = snapshot.language === 'en';
   return ReportService.buildMetrics([
     {
-      label: t('reports.totalAccessToday', 'TOTAL ACCESOS (HOY)'),
+      label: t('reports.totalAccessToday', isEn ? 'TOTAL ACCESSES (TODAY)' : 'TOTAL ACCESOS (HOY)'),
       value: snapshot.totalAccessToday ?? 0,
       variant: 'primary',
     },
     {
-      label: t('reports.activeUsers', 'USUARIOS ACTIVOS'),
+      label: t('reports.activeUsers', isEn ? 'ACTIVE USERS' : 'USUARIOS ACTIVOS'),
       value: snapshot.displayedActiveUsers ?? 0,
       variant: 'info',
     },
     {
-      label: t('reports.reportTypeLabel', 'PERÍODO'),
+      label: t('reports.reportTypeLabel', isEn ? 'PERIOD' : 'PERÍODO'),
       value: snapshot.periodLabel,
       variant: 'neutral',
     },
@@ -192,15 +279,18 @@ interface CategoryDistributionItem {
 function buildCategoryDistributionTableHtml(
   firstColumnHeader: string,
   items: CategoryDistributionItem[],
-  percentHeader = 'Porcentaje',
+  percentHeader: string,
+  usersHeader: string,
+  language?: 'es' | 'en',
 ): string {
   return ReportService.buildTable({
     columns: [
       { header: firstColumnHeader, align: 'left', width: '50%' },
-      { header: 'Usuarios', align: 'center', width: '25%' },
+      { header: usersHeader, align: 'center', width: '25%' },
       { header: percentHeader, align: 'right', width: '25%' },
     ],
     rows: items.map((it) => [it.label, it.count, typeof it.percent === 'number' ? `${it.percent}%` : it.percent]),
+    language,
   });
 }
 
@@ -211,6 +301,8 @@ function buildUsageReportPdf(
   snapshot: AdminReportDataSnapshot,
   t: TranslateFunction,
 ): RenderReportOptions {
+  const isEn = snapshot.language === 'en';
+  const { terms, meta } = getReportI18nContext(isEn);
   const buckets = buildDailySessionBuckets(snapshot.sessions ?? [], snapshot.selectedPeriod);
 
   const tableRows = Object.keys(buckets).map((key) => {
@@ -226,11 +318,11 @@ function buildUsageReportPdf(
   });
 
   const chartHtml = ReportService.buildSvgLineChart({
-    title: t('reports.chartTitleUsage', 'Tiempo de Uso Diario'),
-    subtitle: t('reports.minutes', 'Minutos promedio por sesión'),
+    title: t('reports.chartTitleUsage', isEn ? 'Daily Usage Time' : 'Tiempo de Uso Diario'),
+    subtitle: t('reports.minutes', isEn ? 'Average minutes per session' : 'Minutos promedio por sesión'),
     series: [
       {
-        name: t('reports.timeAvg', 'Tiempo Promedio'),
+        name: t('reports.timeAvg', isEn ? 'Average Time' : 'Tiempo Promedio'),
         color: '#5B2D8B',
         points: chartPoints,
         unit: 'min',
@@ -243,25 +335,23 @@ function buildUsageReportPdf(
 
   const tableHtml = ReportService.buildTable({
     columns: [
-      { header: 'Fecha', align: 'left', width: '40%' },
-      { header: 'Accesos Registrados', align: 'center', width: '30%' },
-      { header: 'Tiempo Promedio de Uso', align: 'right', width: '30%' },
+      { header: terms.date, align: 'left', width: '40%' },
+      { header: terms.accessesRecorded, align: 'center', width: '30%' },
+      { header: terms.avgUsageTime, align: 'right', width: '30%' },
     ],
     rows: tableRows,
+    language: snapshot.language,
   });
 
   return {
     metadata: {
-      title: t('reports.chartTitleUsage', 'Tiempo de Uso Diario'),
-      fileName: 'Reporte_Tiempo_de_Uso',
-      subtitle: `${t('reports.reportTypeUsage', 'Visualizar tiempo de uso por usuario')} · ${snapshot.periodLabel}`,
-      category: 'Módulo Administrativo · Analítica de Uso',
+      title: t('reports.chartTitleUsage', isEn ? 'Daily Usage Time' : 'Tiempo de Uso Diario'),
+      fileName: meta.usageFileName,
+      subtitle: `${t('reports.reportTypeUsage', isEn ? 'View usage time per user' : 'Visualizar tiempo de uso por usuario')} · ${snapshot.periodLabel}`,
+      category: meta.usageCategory,
       badge: { label: snapshot.periodLabel, variant: 'primary' },
       showSignatureBlock: false,
-      notes: [
-        'Los minutos reflejan el promedio calculado por sesión activa.',
-        'Datos extraídos de la colección centralizada de sesiones de Cloud Firestore.',
-      ],
+      notes: meta.usageNotes,
       language: snapshot.language,
     },
     contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
@@ -276,6 +366,8 @@ function buildAccessReportPdf(
   snapshot: AdminReportDataSnapshot,
   t: TranslateFunction,
 ): RenderReportOptions {
+  const isEn = snapshot.language === 'en';
+  const { terms, meta } = getReportI18nContext(isEn);
   const buckets = buildDailySessionBuckets(snapshot.sessions ?? [], snapshot.selectedPeriod);
 
   const tableRows = Object.keys(buckets).map((key) => [buckets[key].dateStr, buckets[key].accesses]);
@@ -286,11 +378,11 @@ function buildAccessReportPdf(
   }));
 
   const chartHtml = ReportService.buildSvgLineChart({
-    title: t('reports.chartTitle', 'Accesos Diarios al Sistema'),
-    subtitle: t('reports.totalAccessToday', 'Número de accesos registrados'),
+    title: t('reports.chartTitle', isEn ? 'Daily System Accesses' : 'Accesos Diarios al Sistema'),
+    subtitle: t('reports.totalAccessToday', isEn ? 'Number of recorded accesses' : 'Número de accesos registrados'),
     series: [
       {
-        name: t('reports.totalAccessToday', 'Accesos'),
+        name: t('reports.totalAccessToday', isEn ? 'Accesses' : 'Accesos'),
         color: '#8E59CF',
         points: chartPoints,
       },
@@ -301,23 +393,22 @@ function buildAccessReportPdf(
 
   const tableHtml = ReportService.buildTable({
     columns: [
-      { header: 'Fecha', align: 'left', width: '60%' },
-      { header: 'Número de Accesos', align: 'center', width: '40%' },
+      { header: terms.date, align: 'left', width: '60%' },
+      { header: terms.accessCount, align: 'center', width: '40%' },
     ],
     rows: tableRows,
+    language: snapshot.language,
   });
 
   return {
     metadata: {
-      title: t('reports.chartTitle', 'Accesos Diarios al Sistema'),
-      fileName: 'Reporte_Accesos_Diarios',
+      title: t('reports.chartTitle', isEn ? 'Daily System Accesses' : 'Accesos Diarios al Sistema'),
+      fileName: meta.accessFileName,
       subtitle: snapshot.periodLabel,
-      category: 'Módulo Administrativo · Concurrencia de Accesos',
+      category: meta.accessCategory,
       badge: { label: snapshot.periodLabel, variant: 'info' },
       showSignatureBlock: false,
-      notes: [
-        'Registro cronológico de logins y sesiones iniciadas en la plataforma.',
-      ],
+      notes: meta.accessNotes,
       language: snapshot.language,
     },
     contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
@@ -332,18 +423,20 @@ function buildDemographicsReportPdf(
   snapshot: AdminReportDataSnapshot,
   t: TranslateFunction,
 ): RenderReportOptions {
+  const isEn = snapshot.language === 'en';
+  const { terms, meta } = getReportI18nContext(isEn);
   const m = snapshot.demographicsMetrics;
   const totalUsers = m?.totalUsers ?? 0;
-  const avgAge = m?.averageAge !== null && m?.averageAge !== undefined ? `${m.averageAge} años` : '—';
+  const avgAge = m?.averageAge !== null && m?.averageAge !== undefined ? `${m.averageAge} ${terms.years}` : '—';
 
   const metricsHtml = ReportService.buildMetrics([
     {
-      label: t('reports.kpiTotalUsers', 'TOTAL USUARIOS'),
+      label: t('reports.kpiTotalUsers', isEn ? 'TOTAL USERS' : 'TOTAL USUARIOS'),
       value: totalUsers,
       variant: 'primary',
     },
     {
-      label: t('reports.kpiAverageAge', 'EDAD PROMEDIO'),
+      label: t('reports.kpiAverageAge', isEn ? 'AVERAGE AGE' : 'EDAD PROMEDIO'),
       value: avgAge,
       variant: 'info',
     },
@@ -371,14 +464,17 @@ function buildDemographicsReportPdf(
   });
 
   const ageChartHtml = ReportService.buildBarChart({
-    title: t('reports.ageChartTitle', 'Distribución Visual por Rangos de Edad'),
+    title: t('reports.ageChartTitle', isEn ? 'Visual Distribution by Age Range' : 'Distribución Visual por Rangos de Edad'),
     items: ageItems,
     orientation: 'horizontal',
   });
 
   const ageTableHtml = buildCategoryDistributionTableHtml(
-    t('reports.ageChartTitle', 'Rango de Edad'),
+    terms.ageRange,
     ageItems.map((item) => ({ label: item.label, count: item.value, percent: item.percentage })),
+    terms.percentage,
+    terms.users,
+    snapshot.language,
   );
 
   const genderColors: Record<string, string> = {
@@ -399,31 +495,32 @@ function buildDemographicsReportPdf(
   });
 
   const genderChartHtml = ReportService.buildDonutChart({
-    title: t('reports.genderChartTitle', 'Distribución Visual por Género'),
+    title: t('reports.genderChartTitle', isEn ? 'Visual Distribution by Gender' : 'Distribución Visual por Género'),
     slices: genderSlices,
     centerValue: totalUsers,
-    centerLabel: t('reports.totalUsers', 'Total'),
+    centerLabel: t('reports.totalUsers', isEn ? 'Total' : 'Total'),
   });
 
   const genderTableHtml = buildCategoryDistributionTableHtml(
-    t('reports.genderChartTitle', 'Distribución por Género'),
+    terms.gender,
     genderSlices.map((g) => ({ label: g.label, count: g.value, percent: g.percent })),
+    terms.percentage,
+    terms.users,
+    snapshot.language,
   );
 
   return {
     metadata: {
-      title: t('reports.reportTypeDemographics', 'Demografía de Usuarios'),
-      fileName: 'Reporte_Demografia_Usuarios',
-      subtitle: `${t('reports.title', 'Reporte Poblacional')} · ${snapshot.periodLabel}`,
-      category: 'Módulo Administrativo · Población Registrada',
-      badge: { label: `${totalUsers} Usuarios`, variant: 'primary' },
+      title: t('reports.reportTypeDemographics', isEn ? 'User Demographics' : 'Demografía de Usuarios'),
+      fileName: meta.demoFileName,
+      subtitle: `${t('reports.title', isEn ? 'Population Report' : 'Reporte Poblacional')} · ${snapshot.periodLabel}`,
+      category: meta.demoCategory,
+      badge: { label: `${totalUsers} ${terms.users}`, variant: 'primary' },
       showSignatureBlock: false,
-      notes: [
-        'Distribución segmentada a partir de los perfiles de usuario y pacientes registrados.',
-      ],
+      notes: meta.demoNotes,
       language: snapshot.language,
     },
-    contentHtml: `${metricsHtml}<h3 style="margin: 16px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por Rangos de Edad</h3>${ageChartHtml}${ageTableHtml}<h3 style="margin: 20px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por Género</h3>${genderChartHtml}${genderTableHtml}`,
+    contentHtml: `${metricsHtml}<h3 style="margin: 16px 0 8px; color: #5B2D8B; font-size: 11pt;">${terms.ageDistribution}</h3>${ageChartHtml}${ageTableHtml}<h3 style="margin: 20px 0 8px; color: #5B2D8B; font-size: 11pt;">${terms.genderDistribution}</h3>${genderChartHtml}${genderTableHtml}`,
     language: snapshot.language,
   };
 }
@@ -435,6 +532,8 @@ function buildGeographicsReportPdf(
   snapshot: AdminReportDataSnapshot,
   t: TranslateFunction,
 ): RenderReportOptions {
+  const isEn = snapshot.language === 'en';
+  const { terms, meta } = getReportI18nContext(isEn);
   const g = snapshot.geographicsMetrics;
   const totalCities = g?.totalCities ?? 0;
   const totalUsers = g?.totalUsers ?? 0;
@@ -443,18 +542,18 @@ function buildGeographicsReportPdf(
 
   const metricsHtml = ReportService.buildMetrics([
     {
-      label: t('reports.kpiCities', 'CIUDADES'),
+      label: t('reports.kpiCities', isEn ? 'CITIES' : 'CIUDADES'),
       value: totalCities,
       variant: 'primary',
     },
     {
-      label: t('reports.kpiPrincipal', 'PAÍS PRINCIPAL'),
+      label: t('reports.kpiPrincipal', isEn ? 'MAIN COUNTRY' : 'PAÍS PRINCIPAL'),
       value: mainCountry,
-      hint: `${mainPercent}% del total`,
+      hint: `${mainPercent}% ${isEn ? 'of total' : 'del total'}`,
       variant: 'info',
     },
     {
-      label: t('reports.kpiTotalUsers', 'TOTAL USUARIOS'),
+      label: t('reports.kpiTotalUsers', isEn ? 'TOTAL USERS' : 'TOTAL USUARIOS'),
       value: totalUsers,
       variant: 'neutral',
     },
@@ -472,15 +571,17 @@ function buildGeographicsReportPdf(
   });
 
   const countryChartHtml = ReportService.buildBarChart({
-    title: t('reports.chartTopCountries', 'Distribución Visual por Países'),
+    title: t('reports.chartTopCountries', isEn ? 'Visual Distribution by Countries' : 'Distribución Visual por Países'),
     items: countryItems,
     orientation: 'horizontal',
   });
 
   const countryTableHtml = buildCategoryDistributionTableHtml(
-    t('reports.chartTopCountries', 'País de Residencia'),
+    terms.country,
     countryItems.map((c) => ({ label: c.label, count: c.value, percent: c.percentage })),
-    'Participación',
+    terms.share,
+    terms.users,
+    snapshot.language,
   );
 
   const regionPalette = ['#5B2D8B', '#8E59CF', '#B39DDB', '#D4C4E8', '#EDE4F5'];
@@ -492,31 +593,32 @@ function buildGeographicsReportPdf(
   }));
 
   const regionChartHtml = ReportService.buildDonutChart({
-    title: t('reports.chartRegions', 'Distribución Visual por Región'),
+    title: t('reports.chartRegions', isEn ? 'Visual Distribution by Region' : 'Distribución Visual por Región'),
     slices: regionSlices,
     centerValue: totalUsers,
-    centerLabel: t('reports.totalUsers', 'Total'),
+    centerLabel: t('reports.totalUsers', isEn ? 'Total' : 'Total'),
   });
 
   const regionTableHtml = buildCategoryDistributionTableHtml(
-    t('reports.chartRegions', 'Distribución por Región'),
+    terms.region,
     regionSlices.map((r) => ({ label: r.label, count: r.value, percent: r.percent })),
+    terms.percentage,
+    terms.users,
+    snapshot.language,
   );
 
   return {
     metadata: {
-      title: t('reports.reportTypeGeographics', 'Distribución Geográfica'),
-      fileName: 'Reporte_Distribucion_Geografica',
-      subtitle: `${t('reports.title', 'Presencia Geográfica')} · ${snapshot.periodLabel}`,
-      category: 'Módulo Administrativo · Alcance Geográfico',
-      badge: { label: `${totalCities} Ciudades`, variant: 'primary' },
+      title: t('reports.reportTypeGeographics', isEn ? 'Geographic Distribution' : 'Distribución Geográfica'),
+      fileName: meta.geoFileName,
+      subtitle: `${t('reports.title', isEn ? 'Geographic Presence' : 'Presencia Geográfica')} · ${snapshot.periodLabel}`,
+      category: meta.geoCategory,
+      badge: { label: `${totalCities} ${terms.cities}`, variant: 'primary' },
       showSignatureBlock: false,
-      notes: [
-        'Localización derivada de las direcciones y ciudades reportadas en la ficha de usuario.',
-      ],
+      notes: meta.geoNotes,
       language: snapshot.language,
     },
-    contentHtml: `${metricsHtml}<h3 style="margin: 16px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por País</h3>${countryChartHtml}${countryTableHtml}<h3 style="margin: 20px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por Regiones</h3>${regionChartHtml}${regionTableHtml}`,
+    contentHtml: `${metricsHtml}<h3 style="margin: 16px 0 8px; color: #5B2D8B; font-size: 11pt;">${terms.countryDistribution}</h3>${countryChartHtml}${countryTableHtml}<h3 style="margin: 20px 0 8px; color: #5B2D8B; font-size: 11pt;">${terms.regionDistribution}</h3>${regionChartHtml}${regionTableHtml}`,
     language: snapshot.language,
   };
 }
@@ -528,6 +630,8 @@ function buildDauMauReportPdf(
   snapshot: AdminReportDataSnapshot,
   t: TranslateFunction,
 ): RenderReportOptions {
+  const isEn = snapshot.language === 'en';
+  const { terms, meta } = getReportI18nContext(isEn);
   const dauValue = snapshot.dauValue ?? 0;
   const mauValue = snapshot.mauValue ?? 0;
   const dauMauRatio = snapshot.dauMauRatio ?? calculateDauMauRatio(dauValue, mauValue);
@@ -537,19 +641,19 @@ function buildDauMauReportPdf(
     {
       label: t('reports.kpiRatio', 'RATIO DAU/MAU'),
       value: `${dauMauRatio}%`,
-      hint: `Meta: ${DAU_MAU_TARGET_RATIO}%`,
+      hint: `${isEn ? 'Target' : 'Meta'}: ${DAU_MAU_TARGET_RATIO}%`,
       variant: 'primary',
     },
     {
-      label: t('reports.kpiDau', 'DAU (DIARIOS)'),
+      label: t('reports.kpiDau', isEn ? 'DAU (DAILY)' : 'DAU (DIARIOS)'),
       value: dauValue,
-      hint: t('reports.kpiDailyAvg', 'Prom. diario'),
+      hint: t('reports.kpiDailyAvg', isEn ? 'Daily avg.' : 'Prom. diario'),
       variant: 'info',
     },
     {
-      label: t('reports.kpiMau', 'MAU (MENSUALES)'),
+      label: t('reports.kpiMau', isEn ? 'MAU (MONTHLY)' : 'MAU (MENSUALES)'),
       value: mauValue,
-      hint: t('reports.kpiThisMonth', 'Este mes'),
+      hint: t('reports.kpiThisMonth', isEn ? 'This month' : 'Este mes'),
       variant: 'neutral',
     },
   ]);
@@ -558,11 +662,16 @@ function buildDauMauReportPdf(
   const mauPoints = dataPoints.map((pt) => ({ label: pt.label, value: pt.mau }));
 
   const chartHtml = ReportService.buildSvgLineChart({
-    title: t('reports.dauMauChartTitle', 'Evolución de Usuarios Activos (DAU vs MAU)'),
-    subtitle: t('reports.adoptionRatio', `Ratio actual: ${dauMauRatio}% · Objetivo: ${DAU_MAU_TARGET_RATIO}%`),
+    title: t('reports.dauMauChartTitle', isEn ? 'Active Users Trend (DAU vs MAU)' : 'Evolución de Usuarios Activos (DAU vs MAU)'),
+    subtitle: t(
+      'reports.adoptionRatio',
+      isEn
+        ? `Current ratio: ${dauMauRatio}% · Target: ${DAU_MAU_TARGET_RATIO}%`
+        : `Ratio actual: ${dauMauRatio}% · Objetivo: ${DAU_MAU_TARGET_RATIO}%`,
+    ),
     series: [
-      { name: 'MAU (Mensuales)', color: '#0284C7', points: mauPoints },
-      { name: 'DAU (Diarios)', color: '#5B2D8B', points: dauPoints },
+      { name: terms.mauMonthly, color: '#0284C7', points: mauPoints },
+      { name: terms.dauDaily, color: '#5B2D8B', points: dauPoints },
     ],
   });
 
@@ -573,27 +682,24 @@ function buildDauMauReportPdf(
 
   const tableHtml = ReportService.buildTable({
     columns: [
-      { header: 'Mes', align: 'left', width: '25%' },
-      { header: 'DAU (Diarios)', align: 'center', width: '25%' },
-      { header: 'MAU (Mensuales)', align: 'center', width: '25%' },
-      { header: 'Ratio de Adopción', align: 'right', width: '25%' },
+      { header: terms.month, align: 'left', width: '25%' },
+      { header: terms.dauDaily, align: 'center', width: '25%' },
+      { header: terms.mauMonthly, align: 'center', width: '25%' },
+      { header: terms.adoptionRatio, align: 'right', width: '25%' },
     ],
     rows,
+    language: snapshot.language,
   });
 
   return {
     metadata: {
-      title: t('reports.reportTypeDauMau', 'Usuarios Activos Diarios vs Mensuales (DAU/MAU)'),
-      fileName: 'Reporte_Usuarios_Activos_DAU_MAU',
-      subtitle: `${t('reports.dauMauChartTitle', 'Adopción y Frecuencia de Uso')} · ${snapshot.periodLabel}`,
-      category: 'Módulo Administrativo · Métricas de Producto',
+      title: t('reports.reportTypeDauMau', isEn ? 'Daily vs Monthly Active Users (DAU/MAU)' : 'Usuarios Activos Diarios vs Mensuales (DAU/MAU)'),
+      fileName: meta.dauMauFileName,
+      subtitle: `${t('reports.dauMauChartTitle', isEn ? 'Adoption and Usage Frequency' : 'Adopción y Frecuencia de Uso')} · ${snapshot.periodLabel}`,
+      category: meta.dauMauCategory,
       badge: { label: `Ratio: ${dauMauRatio}%`, variant: 'primary' },
       showSignatureBlock: false,
-      notes: [
-        'DAU representa los usuarios únicos activos por día.',
-        'MAU representa los usuarios únicos activos en una ventana de 30 días.',
-        `El objetivo estándar de adopción (Stickiness) de la clínica es del ${DAU_MAU_TARGET_RATIO}%.`,
-      ],
+      notes: meta.dauMauNotes(DAU_MAU_TARGET_RATIO),
       language: snapshot.language,
     },
     contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
@@ -608,6 +714,8 @@ function buildCrashRateReportPdf(
   snapshot: AdminReportDataSnapshot,
   t: TranslateFunction,
 ): RenderReportOptions {
+  const isEn = snapshot.language === 'en';
+  const { terms, meta } = getReportI18nContext(isEn);
   const crashRateStr = snapshot.calculatedCrashRateString ?? '0.00%';
   const totalCrashes = snapshot.totalCrashesValue ?? 0;
   const affectedUsers = snapshot.affectedUsersValue ?? 0;
@@ -615,17 +723,17 @@ function buildCrashRateReportPdf(
 
   const metricsHtml = ReportService.buildMetrics([
     {
-      label: t('reports.crashRateToday', 'TASA DE FALLAS'),
+      label: t('reports.crashRateToday', isEn ? 'CRASH RATE' : 'TASA DE FALLAS'),
       value: crashRateStr,
       variant: 'warning',
     },
     {
-      label: t('reports.totalCrashesToday', 'TOTAL DE FALLAS'),
+      label: t('reports.totalCrashesToday', isEn ? 'TOTAL CRASHES' : 'TOTAL DE FALLAS'),
       value: totalCrashes,
       variant: 'primary',
     },
     {
-      label: t('reports.affectedUsers', 'USUARIOS AFECTADOS'),
+      label: t('reports.affectedUsers', isEn ? 'AFFECTED USERS' : 'USUARIOS AFECTADOS'),
       value: affectedUsers,
       variant: 'neutral',
     },
@@ -637,40 +745,39 @@ function buildCrashRateReportPdf(
   }));
 
   const chartHtml = ReportService.buildSvgLineChart({
-    title: t('reports.chartTitleCrashRate', 'Tendencia de Estabilidad y Tasa de Fallos'),
-    subtitle: t('reports.crashRate', 'Porcentaje de fallos diarios por sesión'),
+    title: t('reports.chartTitleCrashRate', isEn ? 'Stability Trend and Crash Rate' : 'Tendencia de Estabilidad y Tasa de Fallos'),
+    subtitle: t('reports.crashRate', isEn ? 'Percentage of daily crashes per session' : 'Porcentaje de fallos diarios por sesión'),
     series: [
       {
-        name: t('reports.crashRate', 'Tasa de Fallos'),
+        name: t('reports.crashRate', isEn ? 'Crash Rate' : 'Tasa de Fallos'),
         color: '#D97706',
         points,
       },
     ],
     valueSuffix: '%',
-    targetLine: { value: 1.0, label: 'Umbral 1.0%', color: '#DC2626' },
+    targetLine: { value: 1.0, label: isEn ? 'Threshold 1.0%' : 'Umbral 1.0%', color: '#DC2626' },
   });
 
   const rows = dataPoints.map((pt) => [pt.date || pt.label, `${pt.value.toFixed(2)}%`]);
 
   const tableHtml = ReportService.buildTable({
     columns: [
-      { header: 'Fecha', align: 'left', width: '60%' },
-      { header: 'Tasa de Fallos (%)', align: 'center', width: '40%' },
+      { header: terms.date, align: 'left', width: '60%' },
+      { header: terms.crashRatePercent, align: 'center', width: '40%' },
     ],
     rows,
+    language: snapshot.language,
   });
 
   return {
     metadata: {
-      title: t('reports.reportTypeCrashRate', 'Porcentaje de Fallos'),
-      fileName: 'Reporte_Porcentaje_de_Fallos',
-      subtitle: `${t('reports.chartTitleCrashRate', 'Estabilidad del Sistema')} · ${snapshot.periodLabel}`,
-      category: 'Módulo Administrativo · Calidad y Estabilidad',
+      title: t('reports.reportTypeCrashRate', isEn ? 'Crash Rate Percentage' : 'Porcentaje de Fallos'),
+      fileName: meta.crashFileName,
+      subtitle: `${t('reports.chartTitleCrashRate', isEn ? 'System Stability' : 'Estabilidad del Sistema')} · ${snapshot.periodLabel}`,
+      category: meta.crashCategory,
       badge: { label: crashRateStr, variant: 'warning' },
       showSignatureBlock: false,
-      notes: [
-        'La tasa de fallos evalúa la proporción de excepciones y cierres inesperados frente a las sesiones totales ejecutadas.',
-      ],
+      notes: meta.crashNotes,
       language: snapshot.language,
     },
     contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
@@ -685,6 +792,8 @@ function buildRetentionReportPdf(
   snapshot: AdminReportDataSnapshot,
   t: TranslateFunction,
 ): RenderReportOptions {
+  const isEn = snapshot.language === 'en';
+  const { terms, meta } = getReportI18nContext(isEn);
   const day1 = snapshot.day1String ?? '0%';
   const day7 = snapshot.day7String ?? '0%';
   const day30 = snapshot.day30String ?? '0%';
@@ -692,21 +801,21 @@ function buildRetentionReportPdf(
 
   const metricsHtml = ReportService.buildMetrics([
     {
-      label: t('reports.retentionKpiDay1', 'RETENCIÓN DÍA 1'),
+      label: t('reports.retentionKpiDay1', isEn ? 'DAY 1 RETENTION' : 'RETENCIÓN DÍA 1'),
       value: day1,
-      hint: t('reports.retentionDay1Sub', '24 horas'),
+      hint: t('reports.retentionDay1Sub', isEn ? '24 hours' : '24 horas'),
       variant: 'primary',
     },
     {
-      label: t('reports.retentionKpiDay7', 'RETENCIÓN DÍA 7'),
+      label: t('reports.retentionKpiDay7', isEn ? 'DAY 7 RETENTION' : 'RETENCIÓN DÍA 7'),
       value: day7,
-      hint: t('reports.retentionDay7Sub', '7 días'),
+      hint: t('reports.retentionDay7Sub', isEn ? '7 days' : '7 días'),
       variant: 'info',
     },
     {
-      label: t('reports.retentionKpiDay30', 'RETENCIÓN DÍA 30'),
+      label: t('reports.retentionKpiDay30', isEn ? 'DAY 30 RETENTION' : 'RETENCIÓN DÍA 30'),
       value: day30,
-      hint: t('reports.retentionDay30Sub', '30 días'),
+      hint: t('reports.retentionDay30Sub', isEn ? '30 days' : '30 días'),
       variant: 'neutral',
     },
   ]);
@@ -720,8 +829,8 @@ function buildRetentionReportPdf(
   }));
 
   const chartHtml = ReportService.buildBarChart({
-    title: t('reports.chartTitleRetentionRate', 'Curva de Retención de Cohortes'),
-    subtitle: t('reports.retentionRate', 'Porcentaje de retención D1, D7 y D30'),
+    title: t('reports.chartTitleRetentionRate', isEn ? 'Cohort Retention Curve' : 'Curva de Retención de Cohortes'),
+    subtitle: t('reports.retentionRate', isEn ? 'Retention percentage D1, D7 and D30' : 'Porcentaje de retención D1, D7 y D30'),
     items: retentionItems,
     orientation: 'vertical',
   });
@@ -730,27 +839,27 @@ function buildRetentionReportPdf(
 
   const tableHtml = ReportService.buildTable({
     columns: [
-      { header: 'Cohorte de Retención', align: 'left', width: '40%' },
-      { header: 'Identificador', align: 'center', width: '30%' },
-      { header: 'Porcentaje Retenido', align: 'right', width: '30%' },
+      { header: terms.retentionCohort, align: 'left', width: '40%' },
+      { header: terms.identifier, align: 'center', width: '30%' },
+      { header: terms.retainedPercentage, align: 'right', width: '30%' },
     ],
     rows,
+    language: snapshot.language,
   });
 
   return {
     metadata: {
-      title: t('reports.reportTypeRetentionRate', 'Tasa de Retención de Usuarios'),
-      fileName: 'Reporte_Tasa_de_Retencion',
-      subtitle: `${t('reports.chartTitleRetentionRate', 'Análisis de Cohortes')} · ${snapshot.periodLabel}`,
-      category: 'Módulo Administrativo · Fidelización',
+      title: t('reports.reportTypeRetentionRate', isEn ? 'User Retention Rate' : 'Tasa de Retención de Usuarios'),
+      fileName: meta.retentionFileName,
+      subtitle: `${t('reports.chartTitleRetentionRate', isEn ? 'Cohort Analysis' : 'Análisis de Cohortes')} · ${snapshot.periodLabel}`,
+      category: meta.retentionCategory,
       badge: { label: `D1: ${day1} | D7: ${day7}`, variant: 'info' },
       showSignatureBlock: false,
-      notes: [
-        'Análisis de cohortes temporales evaluando el retorno de usuarios tras su fecha de registro inicial.',
-      ],
+      notes: meta.retentionNotes,
       language: snapshot.language,
     },
     contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
     language: snapshot.language,
   };
 }
+
