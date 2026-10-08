@@ -133,6 +133,7 @@ const mockT = (key: string) => {
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: mockT,
+    i18n: { language: 'es' },
   }),
   initReactI18next: {
     type: '3rdParty',

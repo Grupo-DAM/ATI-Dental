@@ -87,7 +87,7 @@ jest.mock('@/components/reports/dau-mau-line-chart', () => ({ DauMauLineChart: (
 jest.mock('react-i18next', () => {
   const t = (key: string) => key;
   return {
-    useTranslation: () => ({ t }),
+    useTranslation: () => ({ t, i18n: { language: 'es' } }),
     initReactI18next: {
       type: '3rdParty',
       init: jest.fn(),

@@ -17,7 +17,7 @@ export const AVAILABLE_PERIODS: PeriodOption[] = [7, 15, 30];
 export const DAU_MAU_TARGET_RATIO = 50;
 export const CRASH_RATE_TOLERANCE_LIMIT = 0.1;
 
-export type ReportType = 'usage' | 'access' | 'dau_mau' | 'crash_rate' | 'retention_rate' | 'demographics' | 'geographics';
+export type ReportType = 'usage' | 'access' | 'hourly' | 'dau_mau' | 'crash_rate' | 'retention_rate' | 'demographics' | 'geographics';
 
 export interface RetentionDataPoint {
   cohort: string;
@@ -93,4 +93,19 @@ export interface UserGeographicsMetrics {
   totalUsers: number;
   countryBuckets: CountryBucket[];
   regionSlices: RegionSlice[];
+}
+
+export interface HourlySlot {
+  hour: number;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface PeakHoursDistribution {
+  slots: HourlySlot[];
+  total: number;
+  peaks: HourlySlot[];
+  isBimodal: boolean;
+  isEmpty: boolean;
 }

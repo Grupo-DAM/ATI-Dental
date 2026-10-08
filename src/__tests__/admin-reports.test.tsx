@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
+import * as Sharing from 'expo-sharing';
 
 import AdminReportsScreen from '@/app/(tabs)/admin/reports';
 import { UsageLineChart } from '@/components/reports/usage-line-chart';
@@ -31,6 +32,18 @@ jest.mock('expo-router', () => ({
 
 jest.mock('@/components/app-header', () => ({
   AppHeader: () => null,
+}));
+
+jest.mock('expo-file-system', () => ({
+  File: jest.fn().mockImplementation((_location?: string, name?: string) => ({
+    create: jest.fn(),
+    write: jest.fn(),
+    copy: jest.fn(),
+    delete: jest.fn(),
+    exists: false,
+    uri: name ? `file:///cache/${name}` : 'file:///tmp/print.pdf',
+  })),
+  Paths: { cache: 'cache-dir' },
 }));
 
 let mockUser: any = {
@@ -131,6 +144,8 @@ const mockT = (key: string) => {
     'reports.kpiThisMonth': 'Este mes',
     'reports.mauLegend': 'MAU (Activos Mensuales)',
     'reports.dauLegend': 'DAU (Diarios)',
+    'reports.viewHourlyDistribution': 'Ver Distribución Horaria',
+    'reports.reportTypeHourly': 'Visualizar tiempo de uso por hora',
   };
   return translations[key] || key;
 };
@@ -163,6 +178,7 @@ jest.mock('@/services/report-service', () => ({
     buildDonutChart: jest.fn(() => '<div>donut-chart</div>'),
     buildInfoGrid: jest.fn(() => '<div>grid</div>'),
     buildAlert: jest.fn(() => '<div>alert</div>'),
+    resolveLanguage: jest.fn((lang?: string) => (lang?.startsWith('en') ? 'en' : 'es')),
   },
 }));
 
@@ -607,6 +623,87 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
       expect(getByTestId('kpi-dau-value').props.children).toBe(0);
       expect(getByTestId('kpi-mau-value').props.children).toBe(0);
       expect(getByTestId('reports-dau-mau-chart')).toBeTruthy();
+    });
+  });
+
+  it('ofrece el reporte de tiempo de uso por hora en el selector', () => {
+    const { getByTestId, getByText } = render(<AdminReportsScreen />);
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(getByTestId('type-option-hourly'));
+    expect(getByText('Visualizar tiempo de uso por hora')).toBeTruthy();
+    expect(getByTestId('hourly-empty-state')).toBeTruthy();
+  });
+
+  it('exporta PDF y CSV del reporte por hora', async () => {
+    mockOnSnapshot = jest.fn((onNext) => {
+      onNext({
+        docs: [{ id: 's1', data: () => ({ id: 's1', tiempoInicio: new Date() }) }],
+        empty: false,
+      });
+      return jest.fn();
+    });
+
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(getByTestId('type-option-hourly'));
+    expect(await findByTestId('hourly-distribution-chart')).toBeTruthy();
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-pdf-btn'));
+    });
+    await waitFor(() => {
+      expect(Sharing.shareAsync).toHaveBeenCalledWith(
+        expect.stringMatching(/Accesos-por-hora_\d{4}-\d{2}-\d{2}_ultimas-24-horas\.pdf$/),
+        expect.objectContaining({ mimeType: 'application/pdf' }),
+      );
+    });
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    await waitFor(() => {
+      expect(Sharing.shareAsync).toHaveBeenCalledWith(
+        expect.stringMatching(/Accesos-por-hora_.*_ultimas-24-horas\.csv$/),
+        expect.objectContaining({ mimeType: 'text/csv' }),
+      );
+    });
+  });
+
+  it('avisa cuando falla la exportación del reporte por hora', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { File } = require('expo-file-system');
+    mockOnSnapshot = jest.fn((onNext) => {
+      onNext({
+        docs: [{ id: 's1', data: () => ({ id: 's1', tiempoInicio: new Date() }) }],
+        empty: false,
+      });
+      return jest.fn();
+    });
+    (File as jest.Mock).mockImplementation(() => {
+      throw new Error('disk');
+    });
+
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(getByTestId('type-option-hourly'));
+    expect(await findByTestId('hourly-distribution-chart')).toBeTruthy();
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-pdf-btn'));
+    });
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith('reports.hourlyExportError', '');
+    });
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith('reports.hourlyExportError', '');
     });
   });
 

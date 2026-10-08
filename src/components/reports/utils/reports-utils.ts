@@ -6,6 +6,8 @@ import {
   AgeBucketKey,
   AVAILABLE_PERIODS,
   GenderBucket,
+  HourlySlot,
+  PeakHoursDistribution,
   SessionRecord,
   UserDemographicsMetrics,
   UserDemographicsRecord,
@@ -269,4 +271,114 @@ export function aggregateUserDemographics(
         ageBuckets: AGE_BUCKET_ORDER.map((key) => ({ key, count: ageCounts[key] })),
         genderSlices,
     };
+}
+
+function padClock(value: number): string {
+    return String(value).padStart(2, '0');
+}
+
+export function formatHourlyRangeLabel(hour: number): string {
+    const start = padClock(hour);
+    const end = padClock((hour + 1) % 24);
+    return `${start}:00 - ${end}:00`;
+}
+
+export function readSessionStartMillis(record: SessionRecord): number | null {
+    const fromStart = parseFlexibleTimestamp(record.tiempoInicio);
+    if (fromStart !== null) return fromStart;
+    return parseFlexibleTimestamp(record.fecha);
+}
+
+export function formatSessionDayKey(millis: number): string {
+    const date = new Date(millis);
+    const month = padClock(date.getMonth() + 1);
+    const day = padClock(date.getDate());
+    return `${date.getFullYear()}-${month}-${day}`;
+}
+
+export function formatDayKeyLabel(dayKey: string): string {
+    const [year, month, day] = dayKey.split('-');
+    if (!year || !month || !day) return dayKey;
+    return `${day}/${month}/${year}`;
+}
+
+export function listSessionDayKeys(sessions: SessionRecord[]): string[] {
+    const keys = new Set<string>();
+    sessions.forEach((session) => {
+        const millis = readSessionStartMillis(session);
+        if (millis === null) return;
+        keys.add(formatSessionDayKey(millis));
+    });
+    return [...keys].sort((left, right) => left.localeCompare(right));
+}
+
+export function filterSessionsByDay(sessions: SessionRecord[], dayKey: string | null): SessionRecord[] {
+    if (!dayKey) return sessions;
+    return sessions.filter((session) => {
+        const millis = readSessionStartMillis(session);
+        if (millis === null) return false;
+        return formatSessionDayKey(millis) === dayKey;
+    });
+}
+
+function percentageOf(count: number, total: number): number {
+    if (total <= 0) return 0;
+    return Math.round((count * 1000) / total) / 10;
+}
+
+function buildDistribution(counts: number[], hours: number[]): PeakHoursDistribution {
+    const total = counts.reduce((sum, count) => sum + count, 0);
+    const maxCount = Math.max(...counts, 0);
+    const slots: HourlySlot[] = counts.map((count, index) => ({
+        hour: hours[index],
+        label: formatHourlyRangeLabel(hours[index]),
+        count,
+        percentage: percentageOf(count, total),
+    }));
+    const peaks = maxCount > 0 ? slots.filter((slot) => slot.count === maxCount) : [];
+    return {
+        slots,
+        total,
+        peaks,
+        isBimodal: peaks.length > 1,
+        isEmpty: total === 0,
+    };
+}
+
+export type HourWindow = 4 | 12 | 24;
+
+export function calculatePeakHoursDistribution(
+    sessions: SessionRecord[],
+    windowHours?: HourWindow,
+    now: Date = new Date(),
+): PeakHoursDistribution {
+    if (!windowHours) {
+        const counts = Array.from({ length: 24 }, () => 0);
+        sessions.forEach((session) => {
+            const millis = readSessionStartMillis(session);
+            if (millis === null) return;
+            counts[new Date(millis).getHours()] += 1;
+        });
+        return buildDistribution(counts, counts.map((_, hour) => hour));
+    }
+
+    const start = new Date(now);
+    start.setMinutes(0, 0, 0);
+    start.setHours(start.getHours() - (windowHours - 1));
+    const startMs = start.getTime();
+    const counts = Array.from({ length: windowHours }, () => 0);
+    const hours = Array.from({ length: windowHours }, (_, index) => {
+        const slot = new Date(start);
+        slot.setHours(start.getHours() + index);
+        return slot.getHours();
+    });
+
+    sessions.forEach((session) => {
+        const millis = readSessionStartMillis(session);
+        if (millis === null || millis < startMs || millis > now.getTime()) return;
+        const index = Math.floor((millis - startMs) / 3600000);
+        if (index >= 0 && index < windowHours) counts[index] += 1;
+    });
+
+    return buildDistribution(counts, hours);
 }
