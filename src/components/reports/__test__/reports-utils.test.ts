@@ -15,6 +15,7 @@ import {
   getAgeBucketKey,
   calculatePeakHoursDistribution,
   filterSessionsByDay,
+  formatDayKeyLabel,
   listSessionDayKeys,
   readSessionStartMillis,
 } from '../utils/reports-utils';
@@ -347,6 +348,20 @@ describe('calculatePeakHoursDistribution', () => {
     expect(result.total).toBe(1);
     expect(result.peaks[0].hour).toBe(14);
     expect(result.isEmpty).toBe(false);
+  });
+
+  it('arma 12 franjas e ignora sesiones sin hora', () => {
+    const now = new Date(2026, 9, 8, 15, 30, 0);
+    const result = calculatePeakHoursDistribution([
+      { id: '1', tiempoInicio: new Date(2026, 9, 8, 15, 5, 0) },
+      { id: '2' },
+    ], 12, now);
+    expect(result.slots).toHaveLength(12);
+    expect(result.slots[0].hour).toBe(4);
+    expect(result.total).toBe(1);
+    expect(formatDayKeyLabel('incompleta')).toBe('incompleta');
+    expect(filterSessionsByDay([{ id: '3' }], '2026-10-08')).toEqual([]);
+    expect(listSessionDayKeys([{ id: '3' }])).toEqual([]);
   });
 
   it('distribuye 10000 sesiones en menos de 100 ms', () => {

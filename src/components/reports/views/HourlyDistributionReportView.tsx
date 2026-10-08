@@ -193,7 +193,7 @@ export function HourlyDistributionReportView({
               <Ionicons name="close-circle-outline" size={18} color={theme.pageSubtitle} />
             </TouchableOpacity>
           ) : null}
-          <TouchableOpacity onPress={() => setShowDayPicker(true)} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => setShowDayPicker(true)} activeOpacity={0.7} testID="hourly-day-calendar">
             <Ionicons name="calendar-outline" size={18} color={theme.pageSubtitle} />
           </TouchableOpacity>
         </View>

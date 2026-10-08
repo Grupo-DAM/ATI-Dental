@@ -65,6 +65,49 @@ describe('exportación de distribución horaria', () => {
     expect(shared).toBe(true);
   });
 
+  it('entrecomilla celdas con coma o comillas y reemplaza un archivo previo', async () => {
+    const quoted = buildHourlyDistributionCsv(distribution, {
+      slot: 'Franja, "hora"',
+      count: 'Concurrencia',
+      percent: 'Porcentaje',
+    });
+    expect(quoted).toContain('"Franja, ""hora"""');
+
+    const file = {
+      exists: true,
+      delete: jest.fn(),
+      create: jest.fn(),
+      write: jest.fn(),
+      uri: 'file:///cache/distribucion.csv',
+    };
+    (File as unknown as jest.Mock).mockImplementation(() => file);
+    (Sharing.shareAsync as jest.Mock).mockClear();
+    (Sharing.isAvailableAsync as jest.Mock).mockResolvedValueOnce(false);
+
+    const shared = await shareHourlyDistributionCsv(quoted, 'Exportar distribución horaria', 'Accesos-por-hora_2026-10-08_ultimas-24-horas.csv');
+
+    expect(file.delete).toHaveBeenCalled();
+    expect(Sharing.shareAsync).not.toHaveBeenCalled();
+    expect(shared).toBe(false);
+  });
+
+  it('borra el PDF previo y usa la fecha de emisión si no hay día', async () => {
+    const destination = {
+      exists: true,
+      delete: jest.fn(),
+      uri: 'file:///cache/Accesos-por-hora_2026-10-08_ultimas-24-horas.pdf',
+    };
+    const source = { copy: jest.fn() };
+    (File as unknown as jest.Mock).mockImplementation((_location: string, name?: string) => (
+      name ? destination : source
+    ));
+
+    const baseName = buildHourlyExportBaseName(24, null, new Date(2026, 9, 8));
+    expect(baseName).toBe('Accesos-por-hora_2026-10-08_ultimas-24-horas');
+    await shareNamedHourlyPdf('file:///tmp/print.pdf', baseName, 'Exportar distribución horaria');
+    expect(destination.delete).toHaveBeenCalled();
+  });
+
   it('nombra el PDF con el día y la ventana de horas', async () => {
     const destination = {
       exists: false,

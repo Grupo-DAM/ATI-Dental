@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { router } from 'expo-router';
 
@@ -25,10 +25,18 @@ jest.mock('@/components/app-header', () => ({
 
 jest.mock('@react-native-community/datetimepicker', () => {
   const ReactLib = require('react');
-  const { View } = require('react-native');
+  const { Pressable } = require('react-native');
   return {
     __esModule: true,
-    default: (props: { testID?: string }) => ReactLib.createElement(View, { testID: props.testID }),
+    default: (props: {
+      testID?: string;
+      locale?: string;
+      onChange?: (event: { type?: string }, date?: Date) => void;
+    }) => ReactLib.createElement(Pressable, {
+      testID: props.testID,
+      accessibilityLabel: props.locale,
+      onPress: () => props.onChange?.({ type: 'set' }, new Date(2026, 9, 7, 12, 0, 0)),
+    }),
   };
 });
 
@@ -54,6 +62,8 @@ jest.mock('@/services/hourly-distribution-export', () => {
 
 let mockUser: any = { uid: 'admin-1', email: 'admin@atidental.com', rol: 'admin' };
 let mockAuthLoading = false;
+let mockLanguage = 'es';
+let mockSessionError: { code?: string; message?: string } | null = null;
 let mockSessions: { id: string; tiempoInicio: Date }[] = [];
 
 jest.mock('@/hooks/use-auth', () => ({
@@ -65,7 +75,11 @@ jest.mock('@/config/firebase', () => ({
     collection: (name?: string) => ({
       doc: () => ({ onSnapshot: () => jest.fn() }),
       where: () => ({
-        onSnapshot: (onNext: (snap: any) => void) => {
+        onSnapshot: (onNext: (snap: any) => void, onError?: (error: unknown) => void) => {
+          if (mockSessionError && onError) {
+            onError(mockSessionError);
+            return jest.fn();
+          }
           onNext({
             docs: mockSessions.map((session) => ({
               id: session.id,
@@ -114,6 +128,8 @@ const translations: Record<string, string> = {
   'reports.period15Days': 'Últimos 15 días',
   'reports.period30Days': 'Últimos 30 días',
   'reports.loading': 'Cargando reportes...',
+  'reports.permissionError': 'No tienes permisos en Firestore para consultar las sesiones del sistema.',
+  'reports.errorLoad': 'Error al cargar',
   'reports.accessDenied': 'Esta pantalla es exclusiva para administradores.',
   'reports.sessionRequired': 'Debes iniciar sesión para continuar.',
   'reports.download': 'Descargar',
@@ -125,7 +141,7 @@ const translations: Record<string, string> = {
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => translations[key] || key,
-    i18n: { language: 'es' },
+    i18n: { get language() { return mockLanguage; } },
   }),
   initReactI18next: { type: '3rdParty', init: () => undefined },
 }));
@@ -152,6 +168,8 @@ describe('HourlyDistributionScreen', () => {
     jest.clearAllMocks();
     mockUser = { uid: 'admin-1', email: 'admin@atidental.com', rol: 'admin' };
     mockAuthLoading = false;
+    mockLanguage = 'es';
+    mockSessionError = null;
     mockSessions = [];
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     pdfSpy = jest.spyOn(ReportService, 'generatePdf').mockResolvedValue({
@@ -278,5 +296,139 @@ describe('HourlyDistributionScreen', () => {
       expect(router.replace).toHaveBeenCalledWith('/(tabs)/home');
     });
     expect(ReportService.generatePdf).not.toHaveBeenCalled();
+  });
+
+  it('pide sesión cuando no hay usuario', async () => {
+    mockUser = null;
+    render(<HourlyDistributionScreen />);
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith('Debes iniciar sesión para continuar.', '');
+      expect(router.replace).toHaveBeenCalledWith('/(tabs)/home');
+    });
+  });
+
+  it('no redirige mientras la sesión todavía carga', () => {
+    mockAuthLoading = true;
+    mockUser = null;
+    render(<HourlyDistributionScreen />);
+    expect(alertSpy).not.toHaveBeenCalled();
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it('filtra un día con el calendario y vuelve a todo el período', async () => {
+    mockSessions = [{ id: '1', tiempoInicio: hoursBack(1) }];
+    const view = render(<HourlyDistributionScreen />);
+    expect(await view.findByText('Todo el período')).toBeTruthy();
+
+    fireEvent.press(view.getByTestId('hourly-day-select'));
+    fireEvent.press(view.getByTestId('hourly-day-picker'));
+    expect(view.getByText('07/10/2026')).toBeTruthy();
+    fireEvent.press(view.getByTestId('hourly-day-confirm'));
+
+    fireEvent.press(view.getByTestId('hourly-day-calendar'));
+    expect(view.getByTestId('hourly-day-picker')).toBeTruthy();
+    fireEvent.press(view.getByTestId('hourly-day-confirm'));
+
+    fireEvent.press(view.getByTestId('hourly-day-clear'));
+    expect(view.getByText('Todo el período')).toBeTruthy();
+  });
+
+  it('abre el calendario en inglés', async () => {
+    mockLanguage = 'en';
+    mockSessions = [{ id: '1', tiempoInicio: hoursBack(1) }];
+    const view = render(<HourlyDistributionScreen />);
+    expect(await view.findByTestId('hourly-day-select')).toBeTruthy();
+    fireEvent.press(view.getByTestId('hourly-day-select'));
+    expect(view.getByTestId('hourly-day-picker').props.accessibilityLabel).toBe('en-US');
+  });
+
+  it('recorta la serie a las últimas 12 horas', async () => {
+    const recent = hoursBack(1);
+    mockSessions = [{ id: '1', tiempoInicio: recent }];
+    const view = render(<HourlyDistributionScreen />);
+    expect(await view.findByTestId(`hourly-peak-${recent.getHours()}`)).toBeTruthy();
+
+    fireEvent.press(view.getByTestId('period-filter-btn'));
+    fireEvent.press(view.getByTestId('hourly-window-12'));
+
+    await waitFor(() => {
+      expect(view.getByText('Últimas 12 horas')).toBeTruthy();
+      expect(view.getByTestId('chart-point-11')).toBeTruthy();
+      expect(view.queryByTestId('chart-point-23')).toBeNull();
+    });
+  });
+
+  it('bloquea la exportación cuando Firestore rechaza la consulta', async () => {
+    mockSessionError = { code: 'firestore/permission-denied', message: 'permission-denied' };
+    const view = render(<HourlyDistributionScreen />);
+    expect(await view.findByText('No tienes permisos en Firestore para consultar las sesiones del sistema.')).toBeTruthy();
+    expect(view.getByTestId('download-menu-btn').props.accessibilityState.disabled).toBe(true);
+  });
+
+  it('muestra el error genérico de carga', async () => {
+    mockSessionError = { message: 'unavailable' };
+    const view = render(<HourlyDistributionScreen />);
+    expect(await view.findByText('Error al cargar')).toBeTruthy();
+  });
+
+  it('avisa al imprimir y cierra el menú de descarga', async () => {
+    const recent = hoursBack(1);
+    mockSessions = [{ id: '1', tiempoInicio: recent }];
+    const view = render(<HourlyDistributionScreen />);
+    expect(await view.findByTestId(`hourly-peak-${recent.getHours()}`)).toBeTruthy();
+
+    fireEvent.press(view.getByTestId('print-btn'));
+    expect(alertSpy).toHaveBeenCalledWith('Imprimir', 'Enviando reporte a la impresora...');
+
+    fireEvent.press(view.getByTestId('download-menu-btn'));
+    expect(view.getByTestId('export-menu-popover')).toBeTruthy();
+    fireEvent.press(view.getByTestId('export-menu-backdrop'));
+    expect(view.queryByTestId('export-menu-popover')).toBeNull();
+    fireEvent.press(view.getByTestId('download-menu-btn'));
+    fireEvent.press(view.getByTestId('download-menu-btn'));
+    expect(view.queryByTestId('export-menu-popover')).toBeNull();
+  });
+
+  it('imprime con window.print en web', async () => {
+    const print = jest.fn();
+    const previousOs = Platform.OS;
+    const previousWindow = globalThis.window;
+    Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'web' });
+    Object.defineProperty(globalThis, 'window', { configurable: true, value: { print } });
+    try {
+      mockSessions = [{ id: '1', tiempoInicio: hoursBack(1) }];
+      const view = render(<HourlyDistributionScreen />);
+      expect(await view.findByTestId('print-btn')).toBeTruthy();
+      fireEvent.press(view.getByTestId('print-btn'));
+      expect(print).toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(Platform, 'OS', { configurable: true, get: () => previousOs });
+      Object.defineProperty(globalThis, 'window', { configurable: true, value: previousWindow });
+    }
+  });
+
+  it('avisa si el PDF o el CSV no se pueden generar', async () => {
+    const recent = hoursBack(1);
+    mockSessions = [{ id: '1', tiempoInicio: recent }];
+    pdfSpy.mockRejectedValueOnce(new Error('pdf'));
+    (shareHourlyDistributionCsv as jest.Mock).mockRejectedValueOnce(new Error('csv'));
+    const view = render(<HourlyDistributionScreen />);
+    expect(await view.findByTestId(`hourly-peak-${recent.getHours()}`)).toBeTruthy();
+
+    fireEvent.press(view.getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(view.getByTestId('export-pdf-btn'));
+    });
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith('No se pudo generar el reporte. Intente de nuevo.', '');
+    });
+
+    fireEvent.press(view.getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(view.getByTestId('export-csv-btn'));
+    });
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith('No se pudo generar el reporte. Intente de nuevo.', '');
+    });
   });
 });

@@ -470,6 +470,7 @@ exports[`HourlyDistributionScreen exporta PDF y CSV desde el menú de descarga 1
                   "opacity": 1,
                 }
               }
+              testID="hourly-day-calendar"
             >
               <Text
                 color="#6B7280"
@@ -2924,6 +2925,7 @@ exports[`HourlyDistributionScreen muestra la hora pico y el gráfico de 24 colum
                   "opacity": 1,
                 }
               }
+              testID="hourly-day-calendar"
             >
               <Text
                 color="#6B7280"

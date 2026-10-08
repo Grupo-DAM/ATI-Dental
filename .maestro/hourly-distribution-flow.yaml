@@ -60,6 +60,12 @@ appId: com.proyect1.ATIDental
 - assertVisible:
     id: "download-menu-btn"
 
+- assertVisible:
+    id: "hourly-day-select"
+
+- assertVisible:
+    id: "period-filter-btn"
+
 - runFlow:
     when:
       visible:
