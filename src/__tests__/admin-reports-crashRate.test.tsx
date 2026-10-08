@@ -87,8 +87,10 @@ const mockT = (key: string) => {
 // 2. Retornar la referencia fija en useTranslation
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: mockT, // Reference estable
+    t: mockT,
+    i18n: { language: 'es' },
   }),
+  initReactI18next: { type: '3rdParty', init: () => undefined },
 }));
 // -------------------------------------------------------------
 // 4. SUITE DE PRUEBAS US-29

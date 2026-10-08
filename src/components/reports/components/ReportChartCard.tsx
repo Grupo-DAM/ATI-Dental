@@ -12,6 +12,8 @@ interface ReportChartCardProps {
   readonly loading?: boolean;
   readonly queryError?: string | null;
   readonly hasData?: boolean;
+  readonly emptyMessage?: string;
+  readonly emptyTestID?: string;
   readonly children: ReactNode;
 }
 
@@ -22,6 +24,8 @@ export function ReportChartCard({
   loading = false,
   queryError = null,
   hasData = true,
+  emptyMessage,
+  emptyTestID = 'chart-empty-state',
   children,
 }: ReportChartCardProps) {
   const { t } = useTranslation();
@@ -53,11 +57,11 @@ export function ReportChartCard({
 
     if (!hasData) {
       return (
-        <View style={styles.emptyContainer} testID="chart-empty-state">
+        <View style={styles.emptyContainer} testID={emptyTestID}>
           <View style={styles.emptyIconCircle}>
             <Ionicons name="analytics-outline" size={36} color={theme.chartLegendText} />
           </View>
-          <Text style={styles.emptyText}>{t('reports.emptyState')}</Text>
+          <Text style={styles.emptyText}>{emptyMessage ?? t('reports.emptyState')}</Text>
         </View>
       );
     }
