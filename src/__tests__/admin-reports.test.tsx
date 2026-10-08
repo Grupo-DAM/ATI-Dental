@@ -107,9 +107,13 @@ const mockT = (key: string) => {
     'reports.period7Days': 'Últimos 7 días',
     'reports.emptyState': 'No hay registros de tiempo de uso en este rango de fechas',
     'reports.print': 'Imprimir',
+    'reports.download': 'Descargar',
     'reports.exportPdf': 'Exportar PDF',
+    'reports.exportCsv': 'Exportar CSV',
     'reports.pdfExportSuccess': 'Reporte generado con éxito',
     'reports.pdfExportMessage': 'El archivo PDF ha sido preparado para su descarga.',
+    'reports.csvExportSuccess': 'Archivo CSV generado',
+    'reports.csvExportMessage': 'Los datos tabulares han sido preparados para su descarga.',
     'reports.printTriggered': 'Enviando reporte a la impresora...',
     'reports.accessDenied': 'Esta pantalla es exclusiva para administradores.',
     'reports.sessionRequired': 'Debes iniciar sesión para continuar.',
@@ -345,17 +349,43 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
     expect(getByTestId('chart-title').props.children).toBe('Accesos Diarios al Sistema');
   });
 
-  it('Ejecuta acciones de Imprimir y Exportar a PDF', () => {
-    const { getByTestId } = render(<AdminReportsScreen />);
+  it('Ejecuta acciones de Imprimir y Exportar con menú de selección (PDF y CSV)', () => {
+    const { getByTestId, queryByTestId } = render(<AdminReportsScreen />);
 
+    // Imprimir
     fireEvent.press(getByTestId('print-btn'));
     expect(alertSpy).toHaveBeenCalledWith('Imprimir', 'Enviando reporte a la impresora...');
 
+    // Popover inicialmente cerrado
+    expect(queryByTestId('export-menu-popover')).toBeNull();
+
+    // Abrir menú de descarga
+    fireEvent.press(getByTestId('download-menu-btn'));
+    expect(getByTestId('export-menu-popover')).toBeTruthy();
+
+    // Exportar a PDF
     fireEvent.press(getByTestId('export-pdf-btn'));
     expect(alertSpy).toHaveBeenCalledWith(
       'Reporte generado con éxito',
       'El archivo PDF ha sido preparado para su descarga.'
     );
+    expect(queryByTestId('export-menu-popover')).toBeNull();
+
+    // Abrir menú y Exportar a CSV
+    fireEvent.press(getByTestId('download-menu-btn'));
+    expect(getByTestId('export-menu-popover')).toBeTruthy();
+    fireEvent.press(getByTestId('export-csv-btn'));
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+    expect(queryByTestId('export-menu-popover')).toBeNull();
+
+    // Abrir y cerrar al tocar el backdrop
+    fireEvent.press(getByTestId('download-menu-btn'));
+    expect(getByTestId('export-menu-popover')).toBeTruthy();
+    fireEvent.press(getByTestId('export-menu-backdrop'));
+    expect(queryByTestId('export-menu-popover')).toBeNull();
   });
 
   it('Snapshot: verifica la estructura visual sin regresiones', () => {
