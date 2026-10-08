@@ -241,6 +241,58 @@ export interface RenderReportOptions {
   language?: ReportLanguage;
 }
 
+export interface SvgLineChartPoint {
+  label: string;
+  value: number;
+}
+
+export interface SvgLineChartSeries {
+  name?: string;
+  color: string;
+  points: SvgLineChartPoint[];
+  unit?: string;
+}
+
+export interface SvgLineChartOptions {
+  title?: string;
+  subtitle?: string;
+  series: SvgLineChartSeries[];
+  height?: number;
+  valueSuffix?: string;
+  targetLine?: { value: number; label: string; color?: string };
+}
+
+export interface BarChartItem {
+  label: string;
+  value: number;
+  formattedValue?: string;
+  percentage?: number;
+  color?: string;
+}
+
+export interface BarChartOptions {
+  title?: string;
+  subtitle?: string;
+  items: BarChartItem[];
+  orientation?: 'horizontal' | 'vertical';
+  height?: number;
+}
+
+export interface DonutChartSlice {
+  label: string;
+  value: number;
+  percent: number;
+  color: string;
+}
+
+export interface DonutChartOptions {
+  title?: string;
+  subtitle?: string;
+  slices: DonutChartSlice[];
+  centerValue?: string | number;
+  centerLabel?: string;
+}
+
 export interface ReportFileResult {
   uri: string;
   numberOfPages: number;
@@ -441,6 +493,321 @@ export function buildAlertBoxHtml(message: string, variant: 'info' | 'warning' |
   return `
     <div class="alert-box alert-${variant} keep-together">
       <p>${escapeHtml(message)}</p>
+    </div>
+  `;
+}
+
+function buildChartHeaderHtml(title?: string, subtitle?: string): string {
+  if (!title && !subtitle) return '';
+  return `
+    <div class="report-chart-header">
+      ${title ? `<h4 class="report-chart-title">${escapeHtml(title)}</h4>` : ''}
+      ${subtitle ? `<span class="report-chart-subtitle">${escapeHtml(subtitle)}</span>` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Helper para renderizar gráficos de líneas/tendencias SVG vectoriales
+ */
+export function buildSvgLineChartHtml(options: SvgLineChartOptions): string {
+  const { title, subtitle, series, height = 130, valueSuffix = '', targetLine } = options;
+  if (!series || series.length === 0) return '';
+
+  const headerHtml = buildChartHeaderHtml(title, subtitle);
+  const allValues = series.flatMap((s) => (s.points || []).map((p) => Number(p.value) || 0));
+  let maxValue = allValues.length > 0 ? Math.max(...allValues, 0) : 10;
+  if (targetLine?.value && targetLine.value > maxValue) {
+    maxValue = targetLine.value * 1.15;
+  }
+  if (maxValue === 0) maxValue = 10;
+  maxValue = Math.ceil(maxValue * 1.1);
+
+  const svgWidth = 620;
+  const svgHeight = height;
+  const padLeft = 38;
+  const padRight = 20;
+  const padTop = 15;
+  const padBottom = 26;
+  const plotWidth = svgWidth - padLeft - padRight;
+  const plotHeight = svgHeight - padTop - padBottom;
+
+  const yTicks = [0, Math.round(maxValue / 2), maxValue];
+  const gridHtml = yTicks
+    .map((tick) => {
+      const y = padTop + plotHeight - (tick / maxValue) * plotHeight;
+      return `
+        <line x1="${padLeft}" y1="${y.toFixed(1)}" x2="${(padLeft + plotWidth).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#E5E7EB" stroke-width="1" />
+        <text x="${padLeft - 6}" y="${(y + 3).toFixed(1)}" text-anchor="end" font-size="7" fill="#6B7280" font-family="'Open Sans', sans-serif">${tick}${escapeHtml(valueSuffix)}</text>
+      `;
+    })
+    .join('');
+
+  let targetLineHtml = '';
+  if (targetLine && targetLine.value > 0) {
+    const tY = padTop + plotHeight - Math.min(Math.max(targetLine.value / maxValue, 0), 1) * plotHeight;
+    const tColor = targetLine.color || '#DC2626';
+    targetLineHtml = `
+      <line x1="${padLeft}" y1="${tY.toFixed(1)}" x2="${(padLeft + plotWidth).toFixed(1)}" y2="${tY.toFixed(1)}" stroke="${tColor}" stroke-dasharray="4,4" stroke-width="1.5" />
+      <text x="${(padLeft + plotWidth - 4).toFixed(1)}" y="${(tY - 3).toFixed(1)}" font-size="7" fill="${tColor}" text-anchor="end" font-weight="700" font-family="'Open Sans', sans-serif">${escapeHtml(targetLine.label)}</text>
+    `;
+  }
+
+  const seriesElements = series.map((s) => {
+    const points = s.points || [];
+    if (points.length === 0) return { path: '', area: '', dots: '' };
+
+    const coords = points.map((p, idx) => {
+      const x = padLeft + (idx / Math.max(points.length - 1, 1)) * plotWidth;
+      const normalized = Math.min(Math.max((Number(p.value) || 0) / maxValue, 0), 1);
+      const y = padTop + plotHeight - normalized * plotHeight;
+      return { x, y };
+    });
+
+    const pathD = coords.map((c, idx) => `${idx === 0 ? 'M' : 'L'} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+    const areaD = `${pathD} L ${coords[coords.length - 1].x.toFixed(1)},${(padTop + plotHeight).toFixed(1)} L ${coords[0].x.toFixed(1)},${(padTop + plotHeight).toFixed(1)} Z`;
+
+    const pathHtml = `<path d="${pathD}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
+    const areaHtml = `<path d="${areaD}" fill="${s.color}" fill-opacity="0.10" />`;
+    const dotsHtml = coords
+      .map((c) => `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="2.5" fill="#FFFFFF" stroke="${s.color}" stroke-width="1.5" />`)
+      .join('');
+
+    return { path: pathHtml, area: areaHtml, dots: dotsHtml };
+  });
+
+  const firstSeriesPoints = series[0]?.points || [];
+  let xLabelsHtml = '';
+  if (firstSeriesPoints.length > 0) {
+    const step = Math.max(1, Math.ceil(firstSeriesPoints.length / 8));
+    const labels: { x: number; text: string }[] = [];
+    firstSeriesPoints.forEach((p, idx) => {
+      const isLast = idx === firstSeriesPoints.length - 1;
+      if (idx % step === 0 || isLast) {
+        const x = padLeft + (idx / Math.max(firstSeriesPoints.length - 1, 1)) * plotWidth;
+        labels.push({ x, text: p.label });
+      }
+    });
+
+    xLabelsHtml = labels
+      .map((lbl) => `<text x="${lbl.x.toFixed(1)}" y="${(padTop + plotHeight + 14).toFixed(1)}" font-size="7" fill="#6B7280" text-anchor="middle" font-family="'Open Sans', sans-serif">${escapeHtml(lbl.text)}</text>`)
+      .join('');
+  }
+
+  const hasMultipleOrNamed = series.length > 1 || (series.length === 1 && Boolean(series[0].name));
+  const legendHtml = hasMultipleOrNamed
+    ? `
+      <div class="chart-legend">
+        ${series
+          .map(
+            (s) => `
+          <span class="chart-legend-item">
+            <span class="chart-legend-color" style="background-color: ${s.color};"></span>
+            <span>${escapeHtml(s.name || '')}</span>
+          </span>
+        `,
+          )
+          .join('')}
+      </div>
+    `
+    : '';
+
+  return `
+    <div class="report-chart-card keep-together">
+      ${headerHtml}
+      <div class="chart-svg-container">
+        <svg viewBox="0 0 ${svgWidth} ${svgHeight}" width="100%" height="${svgHeight}" preserveAspectRatio="xMidYMid meet">
+          ${gridHtml}
+          ${targetLineHtml}
+          ${seriesElements.map((e) => e.area).join('')}
+          ${seriesElements.map((e) => e.path).join('')}
+          ${seriesElements.map((e) => e.dots).join('')}
+          ${xLabelsHtml}
+        </svg>
+      </div>
+      ${legendHtml}
+    </div>
+  `;
+}
+
+function buildHorizontalBarChartHtml(headerHtml: string, items: BarChartItem[]): string {
+  const maxVal = Math.max(...items.map((it) => it.value), 1);
+
+  const rowsHtml = items
+    .map((item) => {
+      const pct = typeof item.percentage === 'number'
+        ? Math.min(Math.max(item.percentage, 0), 100)
+        : Math.min(Math.max(Math.round((item.value / maxVal) * 100), 0), 100);
+      const color = item.color || REPORT_THEME.primary;
+      const formatted = item.formattedValue || `${item.value} (${pct}%)`;
+
+      return `
+        <div class="bar-chart-row">
+          <div class="bar-chart-label" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</div>
+          <div class="bar-chart-track">
+            <div class="bar-chart-fill" style="width: ${pct}%; background-color: ${color};"></div>
+          </div>
+          <div class="bar-chart-values">${escapeHtml(formatted)}</div>
+        </div>
+      `;
+    })
+    .join('');
+
+  return `
+    <div class="report-chart-card keep-together">
+      ${headerHtml}
+      <div style="padding-top: 4px;">
+        ${rowsHtml}
+      </div>
+    </div>
+  `;
+}
+
+function buildVerticalBarChartHtml(headerHtml: string, items: BarChartItem[], height: number): string {
+  const svgWidth = 500;
+  const svgHeight = height;
+  const padLeft = 35;
+  const padRight = 20;
+  const padTop = 20;
+  const padBottom = 26;
+  const plotWidth = svgWidth - padLeft - padRight;
+  const plotHeight = svgHeight - padTop - padBottom;
+
+  const yTicks = [0, 25, 50, 75, 100];
+  const gridHtml = yTicks
+    .map((tick) => {
+      const y = padTop + plotHeight - (tick / 100) * plotHeight;
+      return `
+        <line x1="${padLeft}" y1="${y.toFixed(1)}" x2="${(padLeft + plotWidth).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="${padLeft - 5}" y="${(y + 3).toFixed(1)}" text-anchor="end" font-size="7" fill="#6B7280" font-family="'Open Sans', sans-serif">${tick}%</text>
+      `;
+    })
+    .join('');
+
+  const slotWidth = plotWidth / Math.max(items.length, 1);
+  const barWidth = Math.min(Math.max(slotWidth * 0.42, 28), 54);
+
+  const barsHtml = items
+    .map((item, idx) => {
+      const pct = Math.min(Math.max(item.percentage ?? item.value, 0), 100);
+      const barH = (pct / 100) * plotHeight;
+      const x = padLeft + idx * slotWidth + (slotWidth - barWidth) / 2;
+      const y = padTop + plotHeight - barH;
+      const color = item.color || REPORT_THEME.primary;
+      const textVal = item.formattedValue || `${pct}%`;
+
+      return `
+        <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${Math.max(barH, 2).toFixed(1)}" rx="3" fill="${color}" />
+        <text x="${(x + barWidth / 2).toFixed(1)}" y="${(y - 4).toFixed(1)}" text-anchor="middle" font-size="8" font-weight="700" fill="${color}" font-family="'Open Sans', sans-serif">${escapeHtml(textVal)}</text>
+        <text x="${(x + barWidth / 2).toFixed(1)}" y="${(padTop + plotHeight + 14).toFixed(1)}" text-anchor="middle" font-size="7.5" font-weight="600" fill="#4B5563" font-family="'Open Sans', sans-serif">${escapeHtml(item.label)}</text>
+      `;
+    })
+    .join('');
+
+  return `
+    <div class="report-chart-card keep-together">
+      ${headerHtml}
+      <div class="chart-svg-container">
+        <svg viewBox="0 0 ${svgWidth} ${svgHeight}" width="100%" height="${svgHeight}" preserveAspectRatio="xMidYMid meet">
+          ${gridHtml}
+          ${barsHtml}
+        </svg>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Helper para renderizar gráficos de barras horizontales o verticales
+ */
+export function buildBarChartHtml(options: BarChartOptions): string {
+  const { title, subtitle, items = [], orientation = 'horizontal', height = 130 } = options;
+  if (!items || items.length === 0) return '';
+
+  const headerHtml = buildChartHeaderHtml(title, subtitle);
+
+  if (orientation === 'vertical') {
+    return buildVerticalBarChartHtml(headerHtml, items, height);
+  }
+
+  return buildHorizontalBarChartHtml(headerHtml, items);
+}
+
+/**
+ * Helper para renderizar gráficos circulares (Donut) vectoriales con leyenda
+ */
+export function buildDonutChartHtml(options: DonutChartOptions): string {
+  const { title, subtitle, slices = [], centerValue, centerLabel } = options;
+  if (!slices || slices.length === 0) return '';
+
+  const headerHtml = buildChartHeaderHtml(title, subtitle);
+
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius;
+  const cx = 55;
+  const cy = 55;
+  const strokeWidth = 16;
+
+  let accumOffset = 0;
+  const totalPercent = slices.reduce((sum, s) => sum + (s.percent || 0), 0);
+
+  let circlesHtml = '';
+  if (totalPercent <= 0) {
+    circlesHtml = `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="#E5E7EB" stroke-width="${strokeWidth}" />`;
+  } else {
+    circlesHtml = slices
+      .map((s) => {
+        const pct = Math.max(s.percent || 0, 0);
+        const sliceLen = (pct / 100) * circumference;
+        const remaining = Math.max(circumference - sliceLen, 0);
+        const dashOffset = -accumOffset;
+        accumOffset += sliceLen;
+
+        return `
+          <circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="${s.color}" stroke-width="${strokeWidth}" stroke-dasharray="${sliceLen.toFixed(1)} ${remaining.toFixed(1)}" stroke-dashoffset="${dashOffset.toFixed(1)}" transform="rotate(-90 ${cx} ${cy})" />
+        `;
+      })
+      .join('');
+  }
+
+  const centerDisplay = centerValue !== undefined && centerValue !== null ? String(centerValue) : '';
+  const centerTextHtml = centerDisplay
+    ? `
+      <text x="${cx}" y="${cy - 2}" text-anchor="middle" font-size="12" font-weight="800" fill="#1F2937" font-family="'Open Sans', sans-serif">${escapeHtml(centerDisplay)}</text>
+      ${centerLabel ? `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-size="6.5" font-weight="600" fill="#6B7280" font-family="'Open Sans', sans-serif">${escapeHtml(centerLabel)}</text>` : ''}
+    `
+    : '';
+
+  const legendListHtml = slices
+    .map(
+      (s) => `
+      <div class="donut-row">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background-color: ${s.color}; display: inline-block;"></span>
+          <span style="color: #374151; font-weight: 600;">${escapeHtml(s.label)}</span>
+        </div>
+        <div style="color: #1F2937; font-weight: 700;">
+          ${s.value} <span style="color: #6B7280; font-weight: 400; font-size: 7.5pt;">(${s.percent}%)</span>
+        </div>
+      </div>
+    `,
+    )
+    .join('');
+
+  return `
+    <div class="report-chart-card keep-together">
+      ${headerHtml}
+      <div class="donut-layout">
+        <div class="donut-svg-wrap">
+          <svg viewBox="0 0 110 110" width="110" height="110">
+            ${circlesHtml}
+            ${centerTextHtml}
+          </svg>
+        </div>
+        <div class="donut-details">
+          ${legendListHtml}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -845,6 +1212,144 @@ export function renderReportHtml(options: RenderReportOptions): string {
       background-color: #ECFDF5;
       border-color: #10B981;
       color: #064E3B;
+    }
+
+    /* Gráficos Corporativos Integrados */
+    .report-chart-card {
+      background-color: ${REPORT_THEME.white};
+      border: 1px solid ${REPORT_THEME.border};
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    .report-chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid ${REPORT_THEME.border};
+    }
+
+    .report-chart-title {
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: ${REPORT_THEME.primaryDark};
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .report-chart-subtitle {
+      font-size: 7.5pt;
+      color: ${REPORT_THEME.textMuted};
+      font-weight: 500;
+    }
+
+    .chart-svg-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 6px;
+      font-size: 7.5pt;
+      color: ${REPORT_THEME.textDark};
+    }
+
+    .chart-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .chart-legend-color {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    /* Barras Horizontales Visuales */
+    .bar-chart-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 8pt;
+    }
+
+    .bar-chart-label {
+      width: 110px;
+      font-weight: 600;
+      color: ${REPORT_THEME.textDark};
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 8px;
+    }
+
+    .bar-chart-track {
+      flex: 1;
+      height: 12px;
+      background-color: ${REPORT_THEME.backgroundAlt};
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      margin: 0 8px;
+      border: 1px solid ${REPORT_THEME.border};
+    }
+
+    .bar-chart-fill {
+      height: 100%;
+      border-radius: 6px;
+      background-color: ${REPORT_THEME.primary};
+    }
+
+    .bar-chart-values {
+      width: 85px;
+      text-align: right;
+      font-weight: 700;
+      color: ${REPORT_THEME.textDark};
+      font-size: 7.5pt;
+    }
+
+    /* Donut Chart Layout */
+    .donut-layout {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 16px;
+      padding: 4px 0;
+    }
+
+    .donut-svg-wrap {
+      flex-shrink: 0;
+    }
+
+    .donut-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .donut-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 8pt;
+      padding: 2px 4px;
+      border-radius: 3px;
     }
 
     /* Notas de Control */

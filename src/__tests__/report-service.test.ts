@@ -108,4 +108,27 @@ describe('ReportService', () => {
     });
     expect(tableEn).toContain('No records available to display.');
   });
+
+  it('expone métodos para construir gráficos corporativos (línea, barra, donut)', () => {
+    const lineHtml = ReportService.buildSvgLineChart({
+      title: 'Uso Diario',
+      series: [{ color: '#5B2D8B', points: [{ label: '1', value: 10 }] }],
+    });
+    expect(lineHtml).toContain('Uso Diario');
+    expect(lineHtml).toContain('<svg');
+
+    const barHtml = ReportService.buildBarChart({
+      title: 'Edades',
+      items: [{ label: '18-25', value: 10, percentage: 50 }],
+    });
+    expect(barHtml).toContain('Edades');
+    expect(barHtml).toContain('bar-chart-row');
+
+    const donutHtml = ReportService.buildDonutChart({
+      title: 'Género',
+      slices: [{ label: 'F', value: 5, percent: 50, color: '#5B2D8B' }],
+    });
+    expect(donutHtml).toContain('Género');
+    expect(donutHtml).toContain('donut-layout');
+  });
 });

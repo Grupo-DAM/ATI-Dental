@@ -41,7 +41,7 @@ export interface AdminReportDataSnapshot {
   totalCrashesValue?: number;
   affectedUsersValue?: number;
   calculatedCrashRateString?: string;
-  crashRateData?: { label: string; value: number }[];
+  crashRateData?: { label: string; value: number; date?: string }[];
   // 7: Retención
   retentionData?: RetentionDataPoint[];
   day1String?: string;
@@ -159,6 +159,26 @@ function buildUsageReportPdf(
     return [b.dateStr, b.accesses, `${avgMin} min`];
   });
 
+  const chartPoints = Object.keys(buckets).map((key) => {
+    const b = buckets[key];
+    const avgMin = b.accesses > 0 ? Math.round(b.totalMinutes / b.accesses) : 0;
+    return { label: b.dateStr.slice(5), value: avgMin };
+  });
+
+  const chartHtml = ReportService.buildSvgLineChart({
+    title: t('reports.chartTitleUsage', 'Tiempo de Uso Diario'),
+    subtitle: t('reports.minutes', 'Minutos promedio por sesión'),
+    series: [
+      {
+        name: t('reports.timeAvg', 'Tiempo Promedio'),
+        color: '#5B2D8B',
+        points: chartPoints,
+        unit: 'min',
+      },
+    ],
+    valueSuffix: ' min',
+  });
+
   const metricsHtml = ReportService.buildMetrics([
     {
       label: t('reports.totalAccessToday', 'TOTAL ACCESOS (HOY)'),
@@ -200,7 +220,7 @@ function buildUsageReportPdf(
       ],
       language: snapshot.language,
     },
-    contentHtml: `${metricsHtml}${tableHtml}`,
+    contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
     language: snapshot.language,
   };
 }
@@ -238,6 +258,23 @@ function buildAccessReportPdf(
   const tableRows = Object.keys(buckets).map((key) => {
     const b = buckets[key];
     return [b.dateStr, b.accesses];
+  });
+
+  const chartPoints = Object.keys(buckets).map((key) => {
+    const b = buckets[key];
+    return { label: b.dateStr.slice(5), value: b.accesses };
+  });
+
+  const chartHtml = ReportService.buildSvgLineChart({
+    title: t('reports.chartTitle', 'Accesos Diarios al Sistema'),
+    subtitle: t('reports.totalAccessToday', 'Número de accesos registrados'),
+    series: [
+      {
+        name: t('reports.totalAccessToday', 'Accesos'),
+        color: '#8E59CF',
+        points: chartPoints,
+      },
+    ],
   });
 
   const metricsHtml = ReportService.buildMetrics([
@@ -279,7 +316,7 @@ function buildAccessReportPdf(
       ],
       language: snapshot.language,
     },
-    contentHtml: `${metricsHtml}${tableHtml}`,
+    contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
     language: snapshot.language,
   };
 }
@@ -308,12 +345,34 @@ function buildDemographicsReportPdf(
     },
   ]);
 
-  const ageRows = (m?.ageBuckets ?? []).map((b) => {
+  const ageColors: Record<string, string> = {
+    '18_25': '#C4B0DC',
+    '26_35': '#5B2D8B',
+    '36_50': '#9B7BB8',
+    '50_plus': '#D4C4E8',
+    unspecified: '#EDE4F5',
+  };
+
+  const ageItems = (m?.ageBuckets ?? []).map((b) => {
     const labelKey = `reports.ageRange${b.key.charAt(0).toUpperCase() + b.key.slice(1)}`;
     const label = t(labelKey, b.key.replaceAll('_', ' '));
-    const percent = totalUsers > 0 ? `${Math.round((b.count / totalUsers) * 100)}%` : '0%';
-    return [label, b.count, percent];
+    const percent = totalUsers > 0 ? Math.round((b.count / totalUsers) * 100) : 0;
+    return {
+      label,
+      value: b.count,
+      percentage: percent,
+      formattedValue: `${b.count} (${percent}%)`,
+      color: ageColors[b.key] || '#5B2D8B',
+    };
   });
+
+  const ageChartHtml = ReportService.buildBarChart({
+    title: t('reports.ageChartTitle', 'Distribución Visual por Rangos de Edad'),
+    items: ageItems,
+    orientation: 'horizontal',
+  });
+
+  const ageRows = ageItems.map((item) => [item.label, item.value, `${item.percentage}%`]);
 
   const ageTableHtml = ReportService.buildTable({
     columns: [
@@ -324,11 +383,31 @@ function buildDemographicsReportPdf(
     rows: ageRows,
   });
 
-  const genderRows = (m?.genderSlices ?? []).map((g) => {
+  const genderColors: Record<string, string> = {
+    female: '#5B2D8B',
+    male: '#B39DDB',
+    unspecified: '#EDE4F5',
+  };
+
+  const genderSlices = (m?.genderSlices ?? []).map((g) => {
     const labelKey = `reports.gender${g.key.charAt(0).toUpperCase() + g.key.slice(1)}`;
     const label = t(labelKey, g.key);
-    return [label, g.count, `${g.percent}%`];
+    return {
+      label,
+      value: g.count,
+      percent: g.percent,
+      color: genderColors[g.key] || '#5B2D8B',
+    };
   });
+
+  const genderChartHtml = ReportService.buildDonutChart({
+    title: t('reports.genderChartTitle', 'Distribución Visual por Género'),
+    slices: genderSlices,
+    centerValue: totalUsers,
+    centerLabel: t('reports.totalUsers', 'Total'),
+  });
+
+  const genderRows = genderSlices.map((g) => [g.label, g.value, `${g.percent}%`]);
 
   const genderTableHtml = ReportService.buildTable({
     columns: [
@@ -352,7 +431,7 @@ function buildDemographicsReportPdf(
       ],
       language: snapshot.language,
     },
-    contentHtml: `${metricsHtml}<h3 style="margin: 16px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por Rangos de Edad</h3>${ageTableHtml}<h3 style="margin: 20px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por Género</h3>${genderTableHtml}`,
+    contentHtml: `${metricsHtml}<h3 style="margin: 16px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por Rangos de Edad</h3>${ageChartHtml}${ageTableHtml}<h3 style="margin: 20px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por Género</h3>${genderChartHtml}${genderTableHtml}`,
     language: snapshot.language,
   };
 }
@@ -389,10 +468,24 @@ function buildGeographicsReportPdf(
     },
   ]);
 
-  const countryRows = (g?.countryBuckets ?? []).map((c) => {
-    const percent = totalUsers > 0 ? `${Math.round((c.count / totalUsers) * 100)}%` : '0%';
-    return [c.label, c.count, percent];
+  const countryItems = (g?.countryBuckets ?? []).map((c) => {
+    const percent = totalUsers > 0 ? Math.round((c.count / totalUsers) * 100) : 0;
+    return {
+      label: c.label,
+      value: c.count,
+      percentage: percent,
+      formattedValue: `${c.count} (${percent}%)`,
+      color: '#5B2D8B',
+    };
   });
+
+  const countryChartHtml = ReportService.buildBarChart({
+    title: t('reports.chartTopCountries', 'Distribución Visual por Países'),
+    items: countryItems,
+    orientation: 'horizontal',
+  });
+
+  const countryRows = countryItems.map((c) => [c.label, c.value, `${c.percentage}%`]);
 
   const countryTableHtml = ReportService.buildTable({
     columns: [
@@ -403,7 +496,22 @@ function buildGeographicsReportPdf(
     rows: countryRows,
   });
 
-  const regionRows = (g?.regionSlices ?? []).map((r) => [r.label, r.count, `${r.percent}%`]);
+  const regionPalette = ['#5B2D8B', '#8E59CF', '#B39DDB', '#D4C4E8', '#EDE4F5'];
+  const regionSlices = (g?.regionSlices ?? []).map((r, i) => ({
+    label: r.label,
+    value: r.count,
+    percent: r.percent,
+    color: regionPalette[i % regionPalette.length],
+  }));
+
+  const regionChartHtml = ReportService.buildDonutChart({
+    title: t('reports.chartRegions', 'Distribución Visual por Región'),
+    slices: regionSlices,
+    centerValue: totalUsers,
+    centerLabel: t('reports.totalUsers', 'Total'),
+  });
+
+  const regionRows = regionSlices.map((r) => [r.label, r.value, `${r.percent}%`]);
 
   const regionTableHtml = ReportService.buildTable({
     columns: [
@@ -427,7 +535,7 @@ function buildGeographicsReportPdf(
       ],
       language: snapshot.language,
     },
-    contentHtml: `${metricsHtml}<h3 style="margin: 16px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por País</h3>${countryTableHtml}<h3 style="margin: 20px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por Regiones</h3>${regionTableHtml}`,
+    contentHtml: `${metricsHtml}<h3 style="margin: 16px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por País</h3>${countryChartHtml}${countryTableHtml}<h3 style="margin: 20px 0 8px; color: #5B2D8B; font-size: 11pt;">Distribución por Regiones</h3>${regionChartHtml}${regionTableHtml}`,
     language: snapshot.language,
   };
 }
@@ -465,6 +573,18 @@ function buildDauMauReportPdf(
     },
   ]);
 
+  const dauPoints = dataPoints.map((pt) => ({ label: pt.label, value: pt.dau }));
+  const mauPoints = dataPoints.map((pt) => ({ label: pt.label, value: pt.mau }));
+
+  const chartHtml = ReportService.buildSvgLineChart({
+    title: t('reports.dauMauChartTitle', 'Evolución de Usuarios Activos (DAU vs MAU)'),
+    subtitle: t('reports.adoptionRatio', `Ratio actual: ${dauMauRatio}% · Objetivo: ${DAU_MAU_TARGET_RATIO}%`),
+    series: [
+      { name: 'MAU (Mensuales)', color: '#0284C7', points: mauPoints },
+      { name: 'DAU (Diarios)', color: '#5B2D8B', points: dauPoints },
+    ],
+  });
+
   const rows = dataPoints.map((pt) => {
     const ratio = pt.mau > 0 ? `${Math.round((pt.dau / pt.mau) * 100)}%` : '0%';
     return [pt.label, pt.dau, pt.mau, ratio];
@@ -495,7 +615,7 @@ function buildDauMauReportPdf(
       ],
       language: snapshot.language,
     },
-    contentHtml: `${metricsHtml}${tableHtml}`,
+    contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
     language: snapshot.language,
   };
 }
@@ -530,11 +650,30 @@ function buildCrashRateReportPdf(
     },
   ]);
 
-  const rows = dataPoints.map((pt) => [pt.label, `${pt.value.toFixed(2)}%`]);
+  const points = dataPoints.map((pt) => ({
+    label: pt.date ? pt.date.slice(5) : pt.label,
+    value: pt.value,
+  }));
+
+  const chartHtml = ReportService.buildSvgLineChart({
+    title: t('reports.chartTitleCrashRate', 'Tendencia de Estabilidad y Tasa de Fallos'),
+    subtitle: t('reports.crashRate', 'Porcentaje de fallos diarios por sesión'),
+    series: [
+      {
+        name: t('reports.crashRate', 'Tasa de Fallos'),
+        color: '#D97706',
+        points,
+      },
+    ],
+    valueSuffix: '%',
+    targetLine: { value: 1.0, label: 'Umbral 1.0%', color: '#DC2626' },
+  });
+
+  const rows = dataPoints.map((pt) => [pt.date || pt.label, `${pt.value.toFixed(2)}%`]);
 
   const tableHtml = ReportService.buildTable({
     columns: [
-      { header: 'Día / Intervalo', align: 'left', width: '60%' },
+      { header: 'Fecha', align: 'left', width: '60%' },
       { header: 'Tasa de Fallos (%)', align: 'center', width: '40%' },
     ],
     rows,
@@ -553,7 +692,7 @@ function buildCrashRateReportPdf(
       ],
       language: snapshot.language,
     },
-    contentHtml: `${metricsHtml}${tableHtml}`,
+    contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
     language: snapshot.language,
   };
 }
@@ -591,6 +730,21 @@ function buildRetentionReportPdf(
     },
   ]);
 
+  const retentionItems = dataPoints.map((d) => ({
+    label: `${d.cohort} (${d.label})`,
+    value: d.percentage,
+    percentage: d.percentage,
+    formattedValue: `${d.percentage}%`,
+    color: '#5B2D8B',
+  }));
+
+  const chartHtml = ReportService.buildBarChart({
+    title: t('reports.chartTitleRetentionRate', 'Curva de Retención de Cohortes'),
+    subtitle: t('reports.retentionRate', 'Porcentaje de retención D1, D7 y D30'),
+    items: retentionItems,
+    orientation: 'vertical',
+  });
+
   const rows = dataPoints.map((d) => [d.cohort, d.label, `${d.percentage}%`]);
 
   const tableHtml = ReportService.buildTable({
@@ -615,7 +769,7 @@ function buildRetentionReportPdf(
       ],
       language: snapshot.language,
     },
-    contentHtml: `${metricsHtml}${tableHtml}`,
+    contentHtml: `${metricsHtml}${chartHtml}${tableHtml}`,
     language: snapshot.language,
   };
 }

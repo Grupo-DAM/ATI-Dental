@@ -212,7 +212,7 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       expect(options.contentHtml).toContain('Jul');
     });
 
-    it('6. Construye reporte PDF para tasa de fallos (crash_rate)', () => {
+    it('6. Construye reporte PDF para tasa de fallos (crash_rate) con gráfico y fechas completas', () => {
       const snapshot: AdminReportDataSnapshot = {
         reportType: 'crash_rate',
         selectedPeriod: 15,
@@ -220,7 +220,10 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
         totalCrashesValue: 3,
         affectedUsersValue: 2,
         calculatedCrashRateString: '1.25%',
-        crashRateData: [{ label: '1', value: 1.25 }],
+        crashRateData: [
+          { label: '1', date: '2026-10-08', value: 1.25 },
+          { label: '2', value: 0.5 },
+        ],
       };
 
       const options = buildAdminReportPdfOptions(snapshot, mockT);
@@ -231,9 +234,12 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       expect(options.contentHtml).toContain('TASA DE FALLAS');
       expect(options.contentHtml).toContain('1.25%');
       expect(options.contentHtml).toContain('TOTAL DE FALLAS');
+      expect(options.contentHtml).toContain('2026-10-08');
+      expect(options.contentHtml).toContain('report-chart-card');
+      expect(options.contentHtml).toContain('Tendencia de Estabilidad y Tasa de Fallos');
     });
 
-    it('7. Construye reporte PDF para tasa de retención (retention_rate)', () => {
+    it('7. Construye reporte PDF para tasa de retención (retention_rate) con gráfico visual', () => {
       const snapshot: AdminReportDataSnapshot = {
         reportType: 'retention_rate',
         selectedPeriod: 30,
@@ -256,6 +262,8 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
       expect(options.contentHtml).toContain('RETENCIÓN DÍA 1');
       expect(options.contentHtml).toContain('75%');
       expect(options.contentHtml).toContain('Cohorte de Retención');
+      expect(options.contentHtml).toContain('report-chart-card');
+      expect(options.contentHtml).toContain('Curva de Retención de Cohortes');
     });
 
     it('Maneja reportType desconocido con alerta neutral', () => {
@@ -354,8 +362,8 @@ describe('admin-report-pdf-builder (US-02: Exportación e Impresión del Reporte
           demographicsMetrics: {
             totalUsers: 0,
             averageAge: null,
-            ageBuckets: [{ key: '18_25', count: 0 }],
-            genderSlices: [{ key: 'unspecified', count: 0, percent: 0 }],
+            ageBuckets: [{ key: '18_25', count: 0 }, { key: 'custom_key' as any, count: 0 }],
+            genderSlices: [{ key: 'unspecified', count: 0, percent: 0 }, { key: 'custom_gender' as any, count: 0, percent: 0 }],
           },
         };
         const optionsZero = buildAdminReportPdfOptions(snapshotZero, mockT);
