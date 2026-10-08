@@ -15,7 +15,7 @@ export interface HourlyCsvHeaders {
 function csvCell(value: string | number): string {
   const text = String(value);
   if (/[",\n\r]/.test(text)) {
-    return `"${text.replace(/"/g, '""')}"`;
+    return `"${text.replaceAll('"', '""')}"`;
   }
   return text;
 }

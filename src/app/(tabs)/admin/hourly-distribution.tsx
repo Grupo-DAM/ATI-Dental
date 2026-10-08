@@ -75,7 +75,7 @@ export default function HourlyDistributionScreen() {
   }), [distribution?.isBimodal, t]);
 
   const handlePrint = useCallback(() => {
-    if (Platform.OS === 'web' && typeof globalThis.window !== 'undefined') {
+    if (Platform.OS === 'web' && globalThis.window !== undefined) {
       globalThis.window.print();
       return;
     }
