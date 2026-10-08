@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import {
   buildHourlyDistributionCsv,
+  buildHourlyDistributionNotes,
   buildHourlyDistributionReportHtml,
   buildHourlyExportBaseName,
   shareHourlyDistributionCsv,
@@ -86,12 +87,23 @@ export default function HourlyDistributionScreen() {
     if (!user || !isAdminUser(user) || !distribution || distribution.isEmpty) return;
     setShowExportMenu(false);
     try {
-      const contentHtml = buildHourlyDistributionReportHtml(distribution, csvHeaders, language);
+      const notes = buildHourlyDistributionNotes(distribution, language);
+      const contentHtml = buildHourlyDistributionReportHtml(
+        distribution,
+        {
+          ...csvHeaders,
+          chartTitle: t('reports.hourlyChartTitle', 'Accesos por hora'),
+          chartSubtitle: `${windowLabel} · ${dayLabel}`,
+        },
+        language,
+      );
       const file = await ReportService.generatePdf({
         metadata: {
           title: t('reports.hourlyPdfTitle'),
           subtitle: `${windowLabel} · ${dayLabel}`,
           category: t('reports.hourlyPdfCategory'),
+          badge: { label: windowLabel, variant: 'primary' },
+          notes,
           showSignatureBlock: false,
           language,
         },

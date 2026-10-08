@@ -222,6 +222,22 @@ jest.mock('expo-sharing', () => ({
   useIncomingShare: jest.fn(() => ({ resolvedSharedPayloads: [], isResolving: false })),
 }));
 
+// Mocks de expo-file-system
+const mockFileSystem = {
+  cacheDirectory: 'file:///data/user/0/com.atidental/cache/',
+  documentDirectory: 'file:///data/user/0/com.atidental/documents/',
+  bundleDirectory: 'file:///data/user/0/com.atidental/bundle/',
+  copyAsync: jest.fn(() => Promise.resolve()),
+  moveAsync: jest.fn(() => Promise.resolve()),
+  deleteAsync: jest.fn(() => Promise.resolve()),
+  getInfoAsync: jest.fn(() => Promise.resolve({ exists: true, isDirectory: false })),
+  makeDirectoryAsync: jest.fn(() => Promise.resolve()),
+  readAsStringAsync: jest.fn(() => Promise.resolve('')),
+  writeAsStringAsync: jest.fn(() => Promise.resolve()),
+};
+jest.mock('expo-file-system', () => mockFileSystem);
+jest.mock('expo-file-system/legacy', () => mockFileSystem);
+
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );

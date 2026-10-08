@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Alert, Platform, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform, Pressable, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -12,13 +12,29 @@ import { isAdminUser } from '@/constants/user-roles';
 
 // 1. Estilos, Tipos y Utilidades
 import { createReportsStyles } from '@/constants/styles/reports.styles';
-import { PeriodOption, ReportType } from '@/components/reports/types';
+import {
+  PeriodOption,
+  ReportType,
+  UserDemographicsMetrics,
+  UserGeographicsMetrics,
+  RetentionDataPoint,
+} from '@/components/reports/types';
 import { generatePeriodOptions } from '@/components/reports/utils/reports-utils';
+import { DauMauDataPoint } from '@/components/reports/dau-mau-line-chart';
+import { ChartDataPoint } from '@/components/reports/usage-line-chart';
 
 // 2. Hook de datos (Sesiones y Usuarios)
 import { useAdminSessions } from '@/components/reports/hooks/useAdminSessions';
 
-// 3. Vistas Modulares
+// 3. Servicio de Reportes y Generador PDF (US-02)
+import { ReportService } from '@/services/report-service';
+import {
+  buildAdminReportPdfOptions,
+  hasReportData,
+  AdminReportDataSnapshot,
+} from '@/components/reports/utils/admin-report-pdf-builder';
+
+// 4. Vistas Modulares
 import { UsageReportView } from '@/components/reports/views/UsageReportView';
 import { DauMauReportView } from '@/components/reports/views/DauMauReportView';
 import { CrashRateReportView } from '@/components/reports/views/CrashRateReportView';
@@ -28,12 +44,12 @@ import { UserGeographicsReportView } from '@/components/reports/views/UserGeogra
 import { HourlyDistributionReportView, HourlyDistributionSnapshot } from '@/components/reports/views/HourlyDistributionReportView';
 import {
   buildHourlyDistributionCsv,
+  buildHourlyDistributionNotes,
   buildHourlyDistributionReportHtml,
   buildHourlyExportBaseName,
   shareHourlyDistributionCsv,
   shareNamedHourlyPdf,
 } from '@/services/hourly-distribution-export';
-import { ReportService } from '@/services/report-service';
 
 
 // 4. RE-EXPORTS (Crucial para no romper tests unitarios de Jest)
@@ -58,6 +74,7 @@ export default function AdminReportsScreen() {
   const [showPeriodModal, setShowPeriodModal] = useState(false);
   const [showReportTypeModal, setShowReportTypeModal] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [hourlySnapshot, setHourlySnapshot] = useState<HourlyDistributionSnapshot | null>(null);
   const rememberHourlySnapshot = useCallback((next: HourlyDistributionSnapshot) => {
     setHourlySnapshot(next);
@@ -89,6 +106,28 @@ export default function AdminReportsScreen() {
     activeUsersCount,
     displayedActiveUsers,
   } = useAdminSessions(user, authLoading, selectedPeriod, t);
+
+  // Estados para datos analíticos de las vistas secundarias reportados mediante onDataReady
+  const [demographicsData, setDemographicsData] = useState<UserDemographicsMetrics | null>(null);
+  const [geographicsData, setGeographicsData] = useState<UserGeographicsMetrics | null>(null);
+  const [dauMauMetrics, setDauMauMetrics] = useState<{
+    dauValue: number;
+    mauValue: number;
+    dauMauRatio: number;
+    dauMauData: DauMauDataPoint[];
+  } | null>(null);
+  const [crashRateMetrics, setCrashRateMetrics] = useState<{
+    totalCrashesValue: number;
+    affectedUsersValue: number;
+    calculatedCrashRateString: string;
+    crashRateData: ChartDataPoint[];
+  } | null>(null);
+  const [retentionMetrics, setRetentionMetrics] = useState<{
+    retentionData: RetentionDataPoint[];
+    day1String: string;
+    day7String: string;
+    day30String: string;
+  } | null>(null);
 
   // Etiqueta del período
   const periodLabel = useMemo(() => {
@@ -139,13 +178,45 @@ export default function AdminReportsScreen() {
     { name: 'retention_rate', testID: 'type-option-retention-rate', label: t('reports.reportTypeRetentionRate') },
   ];
 
-  const handlePrint = useCallback(() => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.print();
-      return;
-    }
-    Alert.alert(t('reports.print'), t('reports.printTriggered'));
-  }, [t]);
+  // Snapshot consolidado de los datos actuales del reporte activo
+  const currentSnapshot = useMemo<AdminReportDataSnapshot>(() => ({
+    reportType: selectedReportType,
+    selectedPeriod,
+    periodLabel,
+    language: (i18n?.language?.startsWith('en') ? 'en' : 'es'),
+    sessions,
+    totalAccessToday,
+    displayedActiveUsers,
+    demographicsMetrics: demographicsData,
+    geographicsMetrics: geographicsData,
+    dauValue: dauMauMetrics?.dauValue,
+    mauValue: dauMauMetrics?.mauValue,
+    dauMauRatio: dauMauMetrics?.dauMauRatio,
+    dauMauData: dauMauMetrics?.dauMauData,
+    totalCrashesValue: crashRateMetrics?.totalCrashesValue,
+    affectedUsersValue: crashRateMetrics?.affectedUsersValue,
+    calculatedCrashRateString: crashRateMetrics?.calculatedCrashRateString,
+    crashRateData: crashRateMetrics?.crashRateData,
+    retentionData: retentionMetrics?.retentionData,
+    day1String: retentionMetrics?.day1String,
+    day7String: retentionMetrics?.day7String,
+    day30String: retentionMetrics?.day30String,
+  }), [
+    selectedReportType,
+    selectedPeriod,
+    periodLabel,
+    i18n?.language,
+    sessions,
+    totalAccessToday,
+    displayedActiveUsers,
+    demographicsData,
+    geographicsData,
+    dauMauMetrics,
+    crashRateMetrics,
+    retentionMetrics,
+  ]);
+
+  const hasData = useMemo(() => hasReportData(currentSnapshot), [currentSnapshot]);
 
   const hourlyDistribution = hourlySnapshot?.distribution;
   const blockHourlyExport = selectedReportType === 'hourly' && (
@@ -153,41 +224,116 @@ export default function AdminReportsScreen() {
   );
   const language = ReportService.resolveLanguage(i18n.language);
 
-  const handleExportPdf = useCallback(() => {
-    setShowExportMenu(false);
-    if (selectedReportType !== 'hourly' || !hourlyDistribution || hourlyDistribution.isEmpty) {
-      if (selectedReportType !== 'hourly') {
-        Alert.alert(t('reports.pdfExportSuccess'), t('reports.pdfExportMessage'));
+  const handlePrint = useCallback(async () => {
+    if (isExporting) return;
+
+    if (selectedReportType === 'hourly') {
+      if (blockHourlyExport || !hourlyDistribution) {
+        Alert.alert(t('reports.title'), t('reports.exportNoData'));
+        return;
       }
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.print();
+        return;
+      }
+      Alert.alert(t('reports.print'), t('reports.printTriggered'));
       return;
     }
-    const headers = {
-      slot: t('reports.hourlyCsvSlot'),
-      count: t('reports.hourlyCsvCount'),
-      percent: t('reports.hourlyCsvPercent'),
-      peak: hourlyDistribution.isBimodal ? t('reports.hourlyPeaksTitle') : t('reports.hourlyPeakTitle'),
-    };
-    const contentHtml = buildHourlyDistributionReportHtml(hourlyDistribution, headers, language);
-    const fileBaseName = buildHourlyExportBaseName(
-      hourlySnapshot?.windowHours ?? 24,
-      hourlySnapshot?.dayKey ?? null,
-    );
-    void ReportService.generatePdf({
-      metadata: {
-        title: t('reports.hourlyPdfTitle'),
-        subtitle: `${hourlySnapshot?.windowLabel ?? ''} · ${hourlySnapshot?.dayLabel ?? ''}`,
-        category: t('reports.hourlyPdfCategory'),
-        showSignatureBlock: false,
+
+    if (!hasData) {
+      Alert.alert(t('reports.title'), t('reports.exportNoData'));
+      return;
+    }
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.print();
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      const options = buildAdminReportPdfOptions(currentSnapshot, t);
+      await ReportService.print(options);
+      Alert.alert(t('reports.print'), t('reports.printTriggered'));
+    } catch (error) {
+      console.error('Error al imprimir reporte:', error);
+      Alert.alert(t('reports.title'), t('reports.printError'));
+    } finally {
+      setIsExporting(false);
+    }
+  }, [blockHourlyExport, currentSnapshot, hasData, hourlyDistribution, isExporting, selectedReportType, t]);
+
+  const handleExportPdf = useCallback(async () => {
+    setShowExportMenu(false);
+    if (isExporting) return;
+
+    if (selectedReportType === 'hourly') {
+      if (!hourlyDistribution || hourlyDistribution.isEmpty) {
+        return;
+      }
+      const headers = {
+        slot: t('reports.hourlyCsvSlot'),
+        count: t('reports.hourlyCsvCount'),
+        percent: t('reports.hourlyCsvPercent'),
+        peak: hourlyDistribution.isBimodal ? t('reports.hourlyPeaksTitle') : t('reports.hourlyPeakTitle'),
+        chartTitle: t('reports.hourlyChartTitle', 'Accesos por hora'),
+        chartSubtitle: `${hourlySnapshot?.windowLabel ?? ''} · ${hourlySnapshot?.dayLabel ?? ''}`,
+      };
+      const notes = buildHourlyDistributionNotes(hourlyDistribution, language);
+      const contentHtml = buildHourlyDistributionReportHtml(hourlyDistribution, headers, language);
+      const fileBaseName = buildHourlyExportBaseName(
+        hourlySnapshot?.windowHours ?? 24,
+        hourlySnapshot?.dayKey ?? null,
+      );
+      void ReportService.generatePdf({
+        metadata: {
+          title: t('reports.hourlyPdfTitle'),
+          subtitle: `${hourlySnapshot?.windowLabel ?? ''} · ${hourlySnapshot?.dayLabel ?? ''}`,
+          category: t('reports.hourlyPdfCategory'),
+          badge: { label: hourlySnapshot?.windowLabel ?? '24h', variant: 'primary' },
+          notes,
+          showSignatureBlock: false,
+          language,
+        },
+        contentHtml,
         language,
-      },
-      contentHtml,
-      language,
-      pageSize: 'A4',
-    }).then((file) => shareNamedHourlyPdf(file.uri, fileBaseName, t('reports.hourlyExportDialog')))
-      .catch(() => {
-        Alert.alert(t('reports.hourlyExportError'), '');
-      });
-  }, [hourlyDistribution, hourlySnapshot?.dayKey, hourlySnapshot?.dayLabel, hourlySnapshot?.windowHours, hourlySnapshot?.windowLabel, language, selectedReportType, t]);
+        pageSize: 'A4',
+      }).then((file) => shareNamedHourlyPdf(file.uri, fileBaseName, t('reports.hourlyExportDialog')))
+        .catch(() => {
+          Alert.alert(t('reports.hourlyExportError'), '');
+        });
+      return;
+    }
+
+    if (!hasData) {
+      Alert.alert(t('reports.title'), t('reports.exportNoData'));
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      const options = buildAdminReportPdfOptions(currentSnapshot, t);
+      await ReportService.generateAndShare(options);
+      Alert.alert(t('reports.pdfExportSuccess'), t('reports.pdfExportMessage'));
+    } catch (error) {
+      console.error('Error al exportar reporte PDF:', error);
+      Alert.alert(t('reports.title'), t('reports.exportError'));
+    } finally {
+      setIsExporting(false);
+    }
+  }, [
+    currentSnapshot,
+    hasData,
+    hourlyDistribution,
+    hourlySnapshot?.dayKey,
+    hourlySnapshot?.dayLabel,
+    hourlySnapshot?.windowHours,
+    hourlySnapshot?.windowLabel,
+    isExporting,
+    language,
+    selectedReportType,
+    t,
+  ]);
 
   const handleExportCsv = useCallback(() => {
     setShowExportMenu(false);
@@ -278,6 +424,7 @@ export default function AdminReportsScreen() {
             authLoading={authLoading}
             periodLabel={periodLabel}
             onOpenPeriodModal={() => setShowPeriodModal(true)}
+            onDataReady={setDemographicsData}
           />
         )}
 
@@ -287,6 +434,7 @@ export default function AdminReportsScreen() {
             authLoading={authLoading}
             periodLabel={periodLabel}
             onOpenPeriodModal={() => setShowPeriodModal(true)}
+            onDataReady={setGeographicsData}
           />
         )}
 
@@ -298,6 +446,7 @@ export default function AdminReportsScreen() {
             activeUsersCount={activeUsersCount}
             periodLabel={periodLabel}
             onOpenPeriodModal={() => setShowPeriodModal(true)}
+            onDataReady={setDauMauMetrics}
           />
         )}
 
@@ -309,6 +458,7 @@ export default function AdminReportsScreen() {
             totalSessionsCount={sessions.length}
             periodLabel={periodLabel}
             onOpenPeriodModal={() => setShowPeriodModal(true)}
+            onDataReady={setCrashRateMetrics}
           />
         )}
 
@@ -316,6 +466,7 @@ export default function AdminReportsScreen() {
           <RetentionReportView
             user={user}
             authLoading={authLoading}
+            onDataReady={setRetentionMetrics}
           />
         )}
 
@@ -333,13 +484,18 @@ export default function AdminReportsScreen() {
         {/* Acciones de pie: Imprimir y Descargar con Popover (PDF / CSV) */}
         <View style={styles.actionsRow}>
           <TouchableOpacity
-            style={styles.printBtn}
+            style={[styles.printBtn, isExporting && { opacity: 0.6 }]}
             onPress={handlePrint}
             activeOpacity={0.7}
+            disabled={isExporting}
             testID="print-btn"
             accessibilityLabel={t('reports.print')}
           >
-            <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
+            {isExporting ? (
+              <ActivityIndicator size="small" color={theme.fieldLabel} testID="print-spinner" />
+            ) : (
+              <Ionicons name="print-outline" size={20} color={theme.fieldLabel} />
+            )}
           </TouchableOpacity>
 
           <View style={styles.downloadContainer}>
@@ -366,6 +522,7 @@ export default function AdminReportsScreen() {
                     style={styles.exportMenuItem}
                     onPress={handleExportPdf}
                     activeOpacity={0.7}
+                    disabled={isExporting}
                     testID="export-pdf-btn"
                     accessibilityLabel={t('reports.exportPdf')}
                   >
@@ -377,18 +534,26 @@ export default function AdminReportsScreen() {
             )}
 
             <TouchableOpacity
-              style={[styles.downloadBtn, blockHourlyExport && styles.downloadBtnDisabled]}
+              style={[
+                styles.downloadBtn,
+                isExporting && { opacity: 0.6 },
+                blockHourlyExport && styles.downloadBtnDisabled,
+              ]}
               onPress={() => {
-                if (blockHourlyExport) return;
+                if (blockHourlyExport || isExporting) return;
                 setShowExportMenu((prev) => !prev);
               }}
               activeOpacity={0.7}
-              disabled={blockHourlyExport}
+              disabled={isExporting || blockHourlyExport}
               testID="download-menu-btn"
               accessibilityLabel={t('reports.download')}
               accessibilityState={{ disabled: blockHourlyExport }}
             >
-              <Ionicons name="download-outline" size={20} color={theme.overMain} />
+              {isExporting ? (
+                <ActivityIndicator size="small" color={theme.overMain} testID="download-spinner" />
+              ) : (
+                <Ionicons name="download-outline" size={20} color={theme.overMain} />
+              )}
             </TouchableOpacity>
           </View>
         </View>

@@ -4,8 +4,11 @@ import { Platform } from 'react-native';
 
 import {
   buildAlertBoxHtml,
+  buildBarChartHtml,
+  buildDonutChartHtml,
   buildInfoGridHtml,
   buildMetricCardsHtml,
+  buildSvgLineChartHtml,
   buildTableHtml,
   DEFAULT_CLINIC_INFO,
   escapeHtml,
@@ -243,6 +246,18 @@ describe('report-template-engine', () => {
       );
     });
 
+    it('generatePdfReport copia el PDF a un nombre descriptivo cuando metadata.fileName está presente', async () => {
+      const result = await generatePdfReport({
+        metadata: {
+          title: 'Tiempo de Uso Diario',
+          fileName: 'Reporte_Tiempo_de_Uso',
+        },
+        contentHtml: '<p>Contenido</p>',
+      });
+
+      expect(result.uri).toBe('file:///data/user/0/com.atidental/cache/Reporte_Tiempo_de_Uso.pdf');
+    });
+
     it('printReport invoca Print.printAsync con el HTML renderizado', async () => {
       await printReport({
         metadata: { title: 'Impresión de Agenda' },
@@ -459,6 +474,159 @@ describe('report-template-engine', () => {
       const resEn = await shareReportPdf('file:///test.pdf', { language: 'en' });
       expect(resEn.message).toBe(REPORT_STRINGS.en.shareUnavailableError);
       expect(resEn.message).toContain('The share function is not available on this device.');
+    });
+  });
+
+  describe('Generadores de Gráficos Integrados para Reportes', () => {
+    describe('buildSvgLineChartHtml', () => {
+      it('retorna cadena vacía si no hay series', () => {
+        expect(buildSvgLineChartHtml({ series: [] })).toBe('');
+      });
+
+      it('construye gráfico SVG con línea única, grid y valores', () => {
+        const html = buildSvgLineChartHtml({
+          title: 'Tiempo de Uso Diario',
+          subtitle: 'Minutos',
+          series: [
+            {
+              name: 'Promedio',
+              color: '#5B2D8B',
+              points: [
+                { label: '01', value: 10 },
+                { label: '02', value: 25 },
+                { label: '03', value: 15 },
+              ],
+            },
+          ],
+          valueSuffix: ' min',
+          targetLine: { value: 30, label: 'Meta 30 min', color: '#EF4444' },
+        });
+
+        expect(html).toContain('Tiempo de Uso Diario');
+        expect(html).toContain('Minutos');
+        expect(html).toContain('Meta 30 min');
+        expect(html).toContain('<svg');
+        expect(html).toContain('stroke="#5B2D8B"');
+      });
+
+      it('maneja múltiples series con leyenda y puntos vacíos', () => {
+        const html = buildSvgLineChartHtml({
+          series: [
+            {
+              name: 'DAU',
+              color: '#5B2D8B',
+              points: [{ label: 'Oct', value: 40 }],
+            },
+            {
+              name: 'MAU',
+              color: '#0284C7',
+              points: [],
+            },
+          ],
+        });
+
+        expect(html).toContain('chart-legend');
+        expect(html).toContain('DAU');
+        expect(html).toContain('MAU');
+      });
+
+      it('maneja series donde todos los valores son 0', () => {
+        const html = buildSvgLineChartHtml({
+          series: [
+            {
+              color: '#5B2D8B',
+              points: [{ label: '1', value: 0 }],
+            },
+          ],
+        });
+        expect(html).toContain('<svg');
+      });
+    });
+
+    describe('buildBarChartHtml', () => {
+      it('retorna cadena vacía si items está vacío', () => {
+        expect(buildBarChartHtml({ items: [] })).toBe('');
+      });
+
+      it('renderiza barras horizontales con porcentajes y valores', () => {
+        const html = buildBarChartHtml({
+          title: 'Distribución por Edad',
+          items: [
+            { label: '18 a 25', value: 15, percentage: 30, color: '#C4B0DC' },
+            { label: '26 a 35', value: 35, percentage: 70 },
+          ],
+          orientation: 'horizontal',
+        });
+
+        expect(html).toContain('Distribución por Edad');
+        expect(html).toContain('bar-chart-row');
+        expect(html).toContain('18 a 25');
+        expect(html).toContain('30%');
+      });
+
+      it('calcula porcentaje automáticamente si no viene definido en horizontal', () => {
+        const html = buildBarChartHtml({
+          items: [
+            { label: 'Grupo A', value: 50 },
+            { label: 'Grupo B', value: 100 },
+          ],
+        });
+
+        expect(html).toContain('Grupo A');
+        expect(html).toContain('50%');
+      });
+
+      it('renderiza barras verticales SVG para cohortes de retención', () => {
+        const html = buildBarChartHtml({
+          title: 'Retención de Cohortes',
+          orientation: 'vertical',
+          height: 140,
+          items: [
+            { label: 'Día 1', value: 75, percentage: 75, formattedValue: '75%' },
+            { label: 'Día 7', value: 50, percentage: 50, formattedValue: '50%' },
+            { label: 'Día 30', value: 35, percentage: 35, formattedValue: '35%' },
+          ],
+        });
+
+        expect(html).toContain('Retención de Cohortes');
+        expect(html).toContain('<svg');
+        expect(html).toContain('Día 1');
+        expect(html).toContain('75%');
+      });
+    });
+
+    describe('buildDonutChartHtml', () => {
+      it('retorna cadena vacía si slices está vacío', () => {
+        expect(buildDonutChartHtml({ slices: [] })).toBe('');
+      });
+
+      it('renderiza gráfico Donut con leyenda y valores centrales', () => {
+        const html = buildDonutChartHtml({
+          title: 'Distribución por Género',
+          slices: [
+            { label: 'Femenino', value: 60, percent: 60, color: '#5B2D8B' },
+            { label: 'Masculino', value: 40, percent: 40, color: '#B39DDB' },
+          ],
+          centerValue: 100,
+          centerLabel: 'Pacientes',
+        });
+
+        expect(html).toContain('Distribución por Género');
+        expect(html).toContain('donut-layout');
+        expect(html).toContain('Femenino');
+        expect(html).toContain('100');
+        expect(html).toContain('Pacientes');
+      });
+
+      it('renderiza círculo neutral cuando el porcentaje total es 0', () => {
+        const html = buildDonutChartHtml({
+          slices: [
+            { label: 'Sin datos', value: 0, percent: 0, color: '#E5E7EB' },
+          ],
+        });
+
+        expect(html).toContain('stroke="#E5E7EB"');
+      });
     });
   });
 });

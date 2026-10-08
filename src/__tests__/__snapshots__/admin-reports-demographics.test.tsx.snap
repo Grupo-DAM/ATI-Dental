@@ -1185,7 +1185,7 @@ exports[`AdminReportsScreen demografía de usuarios genera snapshot del layout d
               {
                 "busy": undefined,
                 "checked": undefined,
-                "disabled": undefined,
+                "disabled": false,
                 "expanded": undefined,
                 "selected": undefined,
               }

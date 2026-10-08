@@ -5,32 +5,32 @@
  */
 import {
   buildAlertBoxHtml,
+  buildBarChartHtml,
+  buildDonutChartHtml,
   buildInfoGridHtml,
   buildMetricCardsHtml,
+  buildSvgLineChartHtml,
   buildTableHtml,
-  DEFAULT_CLINIC_INFO,
-  escapeHtml,
-  formatReportDateTime,
   generateAndShareReport,
   generatePdfReport,
-  generateReportCode,
   printReport,
   renderReportHtml,
   REPORT_STRINGS,
-  REPORT_THEME,
   resolveReportLanguage,
   shareReportPdf,
 } from '@/utils/report-template-engine';
 import type {
+  BarChartOptions,
+  DonutChartOptions,
   GenerateAndShareReportResult,
   InfoGridItem,
   MetricCardItem,
   RenderReportOptions,
   ReportFileResult,
   ReportLanguage,
-  ReportStrings,
   ShareReportOptions,
   ShareReportResult,
+  SvgLineChartOptions,
   TableConfig,
 } from '@/utils/report-template-engine';
 
@@ -88,6 +88,27 @@ export class ReportService {
   }
 
   /**
+   * Constructor de gráficos de líneas o tendencias SVG
+   */
+  static buildSvgLineChart(options: SvgLineChartOptions): string {
+    return buildSvgLineChartHtml(options);
+  }
+
+  /**
+   * Constructor de gráficos de barras horizontales o verticales
+   */
+  static buildBarChart(options: BarChartOptions): string {
+    return buildBarChartHtml(options);
+  }
+
+  /**
+   * Constructor de gráficos circulares (Donut) con leyenda
+   */
+  static buildDonutChart(options: DonutChartOptions): string {
+    return buildDonutChartHtml(options);
+  }
+
+  /**
    * Constructor de fichas de información en cuadrícula
    */
   static buildInfoGrid(items: InfoGridItem[]): string {
@@ -119,8 +140,12 @@ export {
   DEFAULT_CLINIC_INFO,
   REPORT_THEME,
   REPORT_STRINGS,
-};
+} from '@/utils/report-template-engine';
 export type {
+  BarChartItem,
+  BarChartOptions,
+  DonutChartOptions,
+  DonutChartSlice,
   GenerateAndShareReportResult,
   InfoGridItem,
   MetricCardItem,
@@ -130,5 +155,9 @@ export type {
   ReportStrings,
   ShareReportOptions,
   ShareReportResult,
+  SvgLineChartOptions,
+  SvgLineChartPoint,
+  SvgLineChartSeries,
   TableConfig,
-};
+} from '@/utils/report-template-engine';
+

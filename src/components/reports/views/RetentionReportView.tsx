@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks/use-theme';
@@ -7,15 +7,24 @@ import { RetentionBarChart } from '@/components/reports/retention-bar-chart';
 import { useRetentionMetrics } from '../hooks/useRetentionMetrics';
 import { createReportsStyles } from '../../../constants/styles/reports.styles';
 import { ReportChartCard } from '../components/ReportChartCard';
+import type { RetentionDataPoint } from '../types';
+import type { UserProfile } from '@/hooks/use-auth';
 
 interface RetentionReportViewProps {
-  user: any;
+  user: UserProfile | null;
   authLoading: boolean;
+  onDataReady?: (data: {
+    retentionData: RetentionDataPoint[];
+    day1String: string;
+    day7String: string;
+    day30String: string;
+  }) => void;
 }
 
 export function RetentionReportView({
   user,
   authLoading,
+  onDataReady,
 }: RetentionReportViewProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -34,6 +43,10 @@ export function RetentionReportView({
     enabled: true,
     t,
   });
+
+  useEffect(() => {
+    onDataReady?.({ retentionData, day1String, day7String, day30String });
+  }, [retentionData, day1String, day7String, day30String, onDataReady]);
 
   return (
     <>

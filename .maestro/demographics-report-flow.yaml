@@ -81,13 +81,11 @@ appId: com.proyect1.ATIDental
       id: "print-btn"
     direction: DOWN
     timeout: 15000
-    speed: 60
-    visibilityPercentage: 100
-    centerElement: true
+    speed: 40
 - assertVisible:
     id: "print-btn"
 - assertVisible:
-    id: "export-pdf-btn"
+    id: "download-menu-btn"
 
 - tapOn:
     id: "menu-btn"
