@@ -1,6 +1,8 @@
 import * as Print from 'expo-print';
 import { Platform } from 'react-native';
 import {
+  buildWeeklyAgendaDocumentTitle,
+  buildWeeklyAgendaFileName,
   buildWeeklyAgendaHtml,
   countWeeklyAppointments,
   formatAgendaDateReadable,
@@ -355,6 +357,33 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
     });
   });
 
+  describe('buildWeeklyAgendaFileName y buildWeeklyAgendaDocumentTitle [Nombres descriptivos para descargas]', () => {
+    it('construye nombres de archivo descriptivos sin caer en "Document"', () => {
+      const fileNameEs = buildWeeklyAgendaFileName(sampleWeeklyAgenda, { language: 'es' });
+      const fileNameEn = buildWeeklyAgendaFileName(sampleWeeklyAgenda, { language: 'en' });
+
+      expect(fileNameEs).toBe('Reporte_Agenda_Semanal_ATI_Dental_2026-06-08_2026-06-14');
+      expect(fileNameEn).toBe('Weekly_Schedule_Report_ATI_Dental_2026-06-08_2026-06-14');
+
+      const customName = buildWeeklyAgendaFileName(sampleWeeklyAgenda, { fileName: 'Mi_Agenda_Personalizada' });
+      expect(customName).toBe('Mi_Agenda_Personalizada');
+    });
+
+    it('construye títulos formales para la cabecera HTML <title> y el visor del navegador', () => {
+      const titleEs = buildWeeklyAgendaDocumentTitle(sampleWeeklyAgenda, { language: 'es' });
+      const titleEn = buildWeeklyAgendaDocumentTitle(sampleWeeklyAgenda, { language: 'en' });
+
+      expect(titleEs).toBe('Reporte de Agenda Semanal - ATI DENTAL (2026-06-08 - 2026-06-14)');
+      expect(titleEn).toBe('Weekly Schedule Report - ATI DENTAL (2026-06-08 - 2026-06-14)');
+    });
+
+    it('buildWeeklyAgendaHtml asigna el título descriptivo a la etiqueta <title> en lugar de "Document"', () => {
+      const html = buildWeeklyAgendaHtml(sampleWeeklyAgenda, { language: 'es' });
+      expect(html).toContain('<title>Reporte de Agenda Semanal - ATI DENTAL (2026-06-08 - 2026-06-14)</title>');
+      expect(html).not.toContain('<title>Document</title>');
+    });
+  });
+
   describe('printWeeklyAgenda y generateWeeklyAgendaPdf [Interacción con expo-print]', () => {
     it('printWeeklyAgenda invoca Print.printAsync con el HTML generado en plataforma nativa', async () => {
       await printWeeklyAgenda(sampleWeeklyAgenda, { language: 'es' });
@@ -365,17 +394,17 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
       expect(callArg.html).toContain('Reporte de Agenda Semanal');
     });
 
-    it('generateWeeklyAgendaPdf invoca Print.printToFileAsync con dimensiones A4', async () => {
+    it('generateWeeklyAgendaPdf invoca Print.printToFileAsync y copia el PDF a un nombre descriptivo', async () => {
       const result = await generateWeeklyAgendaPdf(sampleWeeklyAgenda, { language: 'es' });
 
       expect(Print.printToFileAsync).toHaveBeenCalledTimes(1);
       const callArg = (Print.printToFileAsync as jest.Mock).mock.calls[0][0];
       expect(callArg.width).toBe(595);
       expect(callArg.height).toBe(842);
-      expect(result.uri).toBe('file:///data/user/0/com.atidental/cache/test.pdf');
+      expect(result.uri).toBe('file:///data/user/0/com.atidental/cache/Reporte_Agenda_Semanal_ATI_Dental_2026-06-08_2026-06-14.pdf');
     });
 
-    it('printWeeklyAgenda maneja la impresión en plataforma Web vía window.print', async () => {
+    it('printWeeklyAgenda maneja la impresión en plataforma Web asignando el título descriptivo a la ventana', async () => {
       const originalOS = Platform.OS;
       (Platform as any).OS = 'web';
 
@@ -383,6 +412,7 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
       const mockDocument = {
         write: jest.fn(),
         close: jest.fn(),
+        title: '',
       };
       const mockWindow = {
         document: mockDocument,
@@ -396,6 +426,7 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
 
       expect(window.open).toHaveBeenCalledWith('', '_blank');
       expect(mockDocument.write).toHaveBeenCalled();
+      expect(mockDocument.title).toBe('Reporte de Agenda Semanal - ATI DENTAL (2026-06-08 - 2026-06-14)');
       expect(mockPrint).toHaveBeenCalled();
 
       (window as any).open = originalOpen;

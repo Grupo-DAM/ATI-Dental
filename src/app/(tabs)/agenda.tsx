@@ -30,7 +30,7 @@ import { getAllowedStatusTransitions } from '@/utils/appointment-schedule';
 import { NotificationToast } from '@/components/notification-toast';
 import { ScheduleAppointmentButton } from '@/components/schedule-appointment-button';
 import { createAgendaStyles } from '@/constants/styles/agenda.styles';
-import { printWeeklyAgenda } from '@/services/weekly-agenda-report';
+import { buildWeeklyAgendaFileName, printWeeklyAgenda } from '@/services/weekly-agenda-report';
 
 interface WeekHeaderProps {
   readonly monthYear: string;
@@ -410,9 +410,13 @@ export default function AgendaScreen() {
         ? authUser?.displayName || (authUser as any)?.nombre || authUser?.email
         : undefined;
 
+      const language = i18n?.language?.startsWith('en') ? 'en' : 'es';
+      const fileName = buildWeeklyAgendaFileName(agenda, { language });
+
       await printWeeklyAgenda(agenda, {
-        language: i18n?.language?.startsWith('en') ? 'en' : 'es',
+        language,
         dentistName,
+        fileName,
       });
     } catch (error) {
       console.error('Error al imprimir agenda semanal:', error);

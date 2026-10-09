@@ -4,6 +4,7 @@
  * con soporte bilingüe (ES / EN), traducción de tratamientos y paginación limpia A4.
  */
 import * as Print from 'expo-print';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 
 import {
@@ -80,6 +81,7 @@ export interface WeeklyAgendaReportOptions {
   clinicInfo?: Partial<typeof DEFAULT_CLINIC_INFO>;
   customTitle?: string;
   customSubtitle?: string;
+  fileName?: string;
 }
 
 const STATUS_TEXT: Record<'es' | 'en', Record<AppointmentStatus, string>> = {
@@ -318,6 +320,85 @@ export function getMonochromeLogoSvg(): string {
 }
 
 /**
+ * Construye el título formal del documento para la cabecera HTML <title> y el diálogo de impresión
+ */
+export function buildWeeklyAgendaDocumentTitle(
+  agenda: WeeklyAgenda,
+  options: WeeklyAgendaReportOptions = {}
+): string {
+  if (options.fileName) {
+    return options.fileName;
+  }
+  const language = resolveReportLanguage(options.language);
+  const prefix = language === 'en' ? 'Weekly Schedule Report' : 'Reporte de Agenda Semanal';
+  const clinicName = options.clinicInfo?.name || DEFAULT_CLINIC_INFO.name;
+  const start = agenda?.weekStart || '';
+  const end = agenda?.weekEnd || '';
+  if (start && end) {
+    return `${prefix} - ${clinicName} (${start} - ${end})`;
+  }
+  return `${prefix} - ${clinicName}`;
+}
+
+/**
+ * Construye un nombre de archivo descriptivo normalizado para descargas y almacenamiento de PDF
+ */
+export function buildWeeklyAgendaFileName(
+  agenda: WeeklyAgenda,
+  options: WeeklyAgendaReportOptions = {}
+): string {
+  if (options.fileName) {
+    return options.fileName.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+  }
+  const language = resolveReportLanguage(options.language);
+  const prefix = language === 'en' ? 'Weekly_Schedule_Report' : 'Reporte_Agenda_Semanal';
+  const start = (agenda?.weekStart || '').replace(/[^0-9-]/g, '');
+  const end = (agenda?.weekEnd || '').replace(/[^0-9-]/g, '');
+  if (start && end) {
+    return `${prefix}_ATI_Dental_${start}_${end}`;
+  }
+  return `${prefix}_ATI_Dental`;
+}
+
+/**
+ * Copia el archivo PDF generado en la caché a una ruta con nombre de archivo descriptivo
+ */
+export async function resolveDescriptivePdfUri(sourceUri: string, fileName?: string): Promise<string> {
+  if (!fileName || Platform.OS === 'web') {
+    return sourceUri;
+  }
+
+  try {
+    const cleanFileName = fileName.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+    if (!cleanFileName) {
+      return sourceUri;
+    }
+
+    const baseDir = FileSystem.cacheDirectory || FileSystem.documentDirectory;
+    if (!baseDir) {
+      return sourceUri;
+    }
+
+    const targetUri = `${baseDir}${cleanFileName}.pdf`;
+    try {
+      await FileSystem.deleteAsync(targetUri, { idempotent: true });
+    } catch {
+      // Ignorar si el archivo destino aún no existía
+    }
+
+    await FileSystem.copyAsync({
+      from: sourceUri,
+      to: targetUri,
+    });
+
+    return targetUri;
+  } catch (error) {
+    console.warn('No se pudo renombrar el PDF al nombre descriptivo:', error);
+    return sourceUri;
+  }
+}
+
+/**
  * Genera el documento HTML completo corporativo a color para la agenda semanal
  */
 export function buildWeeklyAgendaHtml(
@@ -332,6 +413,7 @@ export function buildWeeklyAgendaHtml(
   };
 
   const reportTitle = options.customTitle || strings.defaultTitle;
+  const documentTitle = options.fileName || buildWeeklyAgendaDocumentTitle(agenda, options);
   const reportSubtitle = options.customSubtitle || strings.defaultSubtitle;
   const reportCode = generateReportCode('AGE');
   const formattedEmission = formatReportDateTime(options.generatedAt, language);
@@ -414,7 +496,7 @@ export function buildWeeklyAgendaHtml(
 <html lang="${language}">
 <head>
   <meta charset="utf-8">
-  <title>${escapeHtml(reportTitle)}</title>
+  <title>${escapeHtml(documentTitle)}</title>
   <style>
     @page {
       size: A4 portrait;
@@ -858,17 +940,35 @@ export async function printWeeklyAgenda(
   options: WeeklyAgendaReportOptions = {}
 ): Promise<void> {
   const html = buildWeeklyAgendaHtml(agenda, options);
+  const documentTitle = options.fileName || buildWeeklyAgendaDocumentTitle(agenda, options);
 
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(html);
       printWindow.document.close();
+      try {
+        printWindow.document.title = documentTitle;
+      } catch {
+        // En caso de restricciones del navegador
+      }
       printWindow.focus();
       printWindow.print();
       return;
     }
-    window.print();
+
+    // Fallback si popup fue bloqueado por el navegador
+    const previousTitle = typeof document !== 'undefined' ? document.title : '';
+    try {
+      if (typeof document !== 'undefined') {
+        document.title = documentTitle;
+      }
+      window.print();
+    } finally {
+      if (typeof document !== 'undefined') {
+        document.title = previousTitle;
+      }
+    }
     return;
   }
 
@@ -883,6 +983,7 @@ export async function generateWeeklyAgendaPdf(
   options: WeeklyAgendaReportOptions = {}
 ): Promise<ReportFileResult> {
   const html = buildWeeklyAgendaHtml(agenda, options);
+  const fileName = options.fileName || buildWeeklyAgendaFileName(agenda, options);
 
   const result = await Print.printToFileAsync({
     html,
@@ -890,9 +991,12 @@ export async function generateWeeklyAgendaPdf(
     height: 842,
   });
 
+  const uri = await resolveDescriptivePdfUri(result.uri, fileName);
+
   return {
-    uri: result.uri,
+    uri,
     numberOfPages: result.numberOfPages,
     base64: result.base64,
   };
 }
+
