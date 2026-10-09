@@ -56,14 +56,19 @@ export function KPICard(
             {tinyType ? (
                 <View style={styles.kpiCardThree} testID={cardTestID}>
                   <View style={styles.kpiHeaderSmall}>
-                    <Ionicons name={iconName} size={iconSize} color={theme.logo} />
-                    <Text style={styles.kpiLabelSmall}>{label}</Text>
+                    <View style={styles.kpiHeaderLeft}>
+                      <Ionicons name={iconName} size={iconSize} color={theme.logo} />
+                      <Text style={styles.kpiLabelSmall} numberOfLines={2}>
+                        {label}
+                      </Text>
+                    </View>
                     {infoTooltip && (
                       <InfoTooltip
                         title={infoTooltip.title}
                         description={infoTooltip.description}
                         calculationNote={infoTooltip.calculationNote}
                         testID={infoTestID}
+                        iconSize={12}
                       />
                     )}
                   </View>
@@ -159,10 +164,12 @@ const createStyle = (theme:any) => StyleSheet.create({
     fontFamily: 'Open Sans',
   },
   kpiCardThree: {
-    flex:1,
+    flex: 1,
     backgroundColor: theme.backgroundElement,
     borderRadius: 12,
-    padding: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -172,11 +179,21 @@ const createStyle = (theme:any) => StyleSheet.create({
   kpiHeaderSmall: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'space-between',
     marginBottom: 6,
+    width: '100%',
+  },
+  kpiHeaderLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    minWidth: 0,
+    marginRight: 4,
   },
   kpiLabelSmall: {
-    fontSize: 10,
+    flex: 1,
+    fontSize: 9.5,
     fontWeight: '700',
     color: theme.pageSubtitle,
     fontFamily: 'Open Sans',

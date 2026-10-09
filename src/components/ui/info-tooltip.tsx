@@ -27,7 +27,7 @@ export function InfoTooltip({
   calculationNote,
   testID,
   iconName = 'information-circle-outline',
-  iconSize = 13,
+  iconSize = 12,
   iconColor,
   closeButtonText,
 }: Readonly<InfoTooltipProps>) {
@@ -124,7 +124,7 @@ const createStyles = (theme: any) =>
     trigger: {
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 2,
+      padding: 1,
     },
     backdrop: {
       flex: 1,
