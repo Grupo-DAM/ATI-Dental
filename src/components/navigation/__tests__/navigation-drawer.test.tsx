@@ -218,4 +218,17 @@ describe('NavigationDrawer', () => {
     // La interfaz permanece interactiva
     expect(monthlySummaryItem).toBeTruthy();
   });
+
+  it('ejecuta la transición de cierre cuando visible cambia a false', () => {
+    useAuth.mockReturnValue({
+      user: { uid: '1', email: 'admin@test.com', rol: 'admin' },
+      logout: jest.fn(),
+    });
+
+    const { rerender } = render(<NavigationDrawer visible={true} onClose={jest.fn()} />);
+    expect(screen.getByTestId('nav-drawer-close')).toBeTruthy();
+
+    rerender(<NavigationDrawer visible={false} onClose={jest.fn()} />);
+  });
 });
+

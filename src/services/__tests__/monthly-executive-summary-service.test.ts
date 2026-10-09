@@ -38,10 +38,14 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
 
     it('agrega accesos y minutos correctamente según timestamp de sesión', () => {
       const now = new Date();
+      const oldDate = new Date();
+      oldDate.setDate(now.getDate() - 60); // Más de 30 días en el pasado (fuera de buckets)
+
       const sessions = [
         { id: '1', fecha: now.toISOString(), duracion: 120 },
         { id: '2', fecha: now.getTime(), duracion: 60 },
         { id: '3', fecha: 'fecha-invalida' }, // Se descarta
+        { id: '4', fecha: oldDate.toISOString(), duracion: 45 }, // Fuera de buckets (bucket undefined)
       ];
       const buckets = build30DayBuckets(sessions);
       const lastBucket = buckets[buckets.length - 1];
@@ -85,6 +89,8 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
         docs: [
           { id: 't1', data: () => ({ estimatedCost: 100000, treatmentDate: todayStr }) },
           { id: 't2', data: () => ({ estimatedCost: 300000, treatmentDate: todayStr }) },
+          { id: 't3', data: () => ({ estimatedCost: 'invalido', createdAt: todayStr }) }, // fallback a createdAt con costo inválido
+          { id: 't4', data: () => ({ estimatedCost: 50000, treatmentDate: '2020-01-01' }) }, // anterior al mes
         ],
       });
 
@@ -93,6 +99,7 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
           { id: 'c1', data: () => ({ date: todayStr }) },
           { id: 'c2', data: () => ({ date: todayStr }) },
           { id: 'c3', data: () => ({ date: todayStr }) },
+          { id: 'c4', data: () => ({ date: '2020-01-01' }) }, // cita antigua (fuera del mes)
         ],
       });
 
@@ -133,10 +140,38 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
       expect(data.dailyAverageAccesses).toBe(0.1);
       expect(data.totalPatients).toBe(3);
       expect(data.activePatients).toBe(2);
-      expect(data.monthlyTreatmentsCount).toBe(2);
+      expect(data.monthlyTreatmentsCount).toBe(3); // t1, t2, t3 (t4 excluida)
       expect(data.monthlyEstimatedCost).toBe(400000);
-      expect(data.averageTreatmentCost).toBe(200000);
-      expect(data.monthlyAppointmentsCount).toBe(3);
+      expect(data.averageTreatmentCost).toBe(133333);
+      expect(data.monthlyAppointmentsCount).toBe(3); // c1, c2, c3 (c4 excluida)
+    });
+
+    it('soporta estructura alternativa de metricas_estabilidad y usuarios inactivos totales', async () => {
+      const mockGetUsers = jest.fn().mockResolvedValue({
+        docs: [{ id: 'u1', data: () => ({ estado: 'inactivo' }) }],
+      });
+
+      const mockGetStability = jest.fn().mockResolvedValue({
+        data: { crashes: 3 }, // Sin función data(), propiedad alternative crashes
+      });
+
+      (firestore as unknown as jest.Mock).mockReturnValue({
+        collection: jest.fn((colName: string) => {
+          if (colName === 'usuarios') return { get: mockGetUsers };
+          if (colName === 'metricas_estabilidad') {
+            return { doc: jest.fn(() => ({ get: mockGetStability })) };
+          }
+          return {
+            where: jest.fn(() => ({ get: jest.fn().mockResolvedValue({ docs: [] }) })),
+            get: jest.fn().mockResolvedValue({ docs: [] }),
+          };
+        }),
+      });
+
+      const data = await fetchMonthlyExecutiveSummaryData();
+
+      expect(data.activeUsers).toBe(1); // Fallback al total docs si activeDocs es 0
+      expect(data.totalCrashes).toBe(3);
     });
 
     it('maneja fallos de red o excepciones en Firestore de manera resiliente', async () => {
@@ -250,8 +285,8 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
       );
     });
 
-    it('genera y comparte el reporte si el usuario es administrador', async () => {
-      const adminUser = { uid: '1', rol: 'admin', nombre: 'Admin User' };
+    it('genera y comparte el reporte si el usuario es administrador usando idioma por defecto y displayName', async () => {
+      const adminUser = { uid: '1', rol: 'admin', displayName: 'Manager Admin' };
 
       (firestore as unknown as jest.Mock).mockReturnValue({
         collection: jest.fn(() => ({
@@ -270,10 +305,14 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
         share: { shared: true },
       });
 
-      const result = await exportMonthlyExecutiveSummary(adminUser, 'es');
+      // Invocar sin pasar language explícitamente para evaluar valor por defecto 'es'
+      const result = await exportMonthlyExecutiveSummary(adminUser);
 
       expect(ReportService.generateAndShare).toHaveBeenCalled();
+      const passedOptions = (ReportService.generateAndShare as jest.Mock).mock.calls[0][0];
+      expect(passedOptions.metadata.signatureTitle).toBe('Manager Admin');
       expect(result.share.shared).toBe(true);
     });
   });
 });
+
