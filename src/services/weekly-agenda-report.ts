@@ -5,6 +5,7 @@
  */
 import * as Print from 'expo-print';
 import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
 
 import {
@@ -942,8 +943,9 @@ export async function printWeeklyAgenda(
   agenda: WeeklyAgenda,
   options: WeeklyAgendaReportOptions = {}
 ): Promise<void> {
-  const html = buildWeeklyAgendaHtml(agenda, options);
+  const fileName = options.fileName || buildWeeklyAgendaFileName(agenda, options);
   const documentTitle = options.fileName || buildWeeklyAgendaDocumentTitle(agenda, options);
+  const html = buildWeeklyAgendaHtml(agenda, { ...options, fileName });
 
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     const originalDocumentTitle = typeof document !== 'undefined' ? document.title : '';
@@ -1013,7 +1015,52 @@ export async function printWeeklyAgenda(
     return;
   }
 
-  await Print.printAsync({ html });
+  // En plataformas nativas (Android / iOS):
+  // Si pasamos { html }, expo-print en Android invoca internamente:
+  // webView.createPrintDocumentAdapter("Document"), lo que hardcodea el nombre del trabajo de impresión
+  // en el Print Spooler de Android a "Document" (provocando que al "Guardar como PDF" se guarde como Document.pdf).
+  // Al generar primero el archivo físico con generateWeeklyAgendaPdf() y luego imprimir pasando { uri },
+  // PrintDocumentAdapter de Android utiliza el último segmento del URI (uri.lastPathSegment),
+  // garantizando que Android Print Spooler asigne el nombre descriptivo (ej: Reporte_Agenda_Semanal_ATI_Dental_...)
+  // al archivo cuando el usuario presiona "Guardar como PDF".
+  const pdfResult = await generateWeeklyAgendaPdf(agenda, {
+    ...options,
+    fileName,
+  });
+
+  await Print.printAsync({ uri: pdfResult.uri });
+}
+
+/**
+ * Despliega el menú nativo de compartición (Share Sheet) para enviar o guardar
+ * el archivo PDF de la agenda semanal directamente con su nombre descriptivo.
+ */
+export async function shareWeeklyAgendaPdf(
+  agenda: WeeklyAgenda,
+  options: WeeklyAgendaReportOptions = {}
+): Promise<void> {
+  const fileName = options.fileName || buildWeeklyAgendaFileName(agenda, options);
+  const pdfResult = await generateWeeklyAgendaPdf(agenda, {
+    ...options,
+    fileName,
+  });
+
+  if (Platform.OS !== 'web') {
+    const isAvailable = await Sharing.isAvailableAsync();
+    if (isAvailable) {
+      await Sharing.shareAsync(pdfResult.uri, {
+        mimeType: 'application/pdf',
+        UTI: 'com.adobe.pdf',
+        dialogTitle: fileName,
+      });
+      return;
+    }
+  }
+
+  await printWeeklyAgenda(agenda, {
+    ...options,
+    fileName,
+  });
 }
 
 /**

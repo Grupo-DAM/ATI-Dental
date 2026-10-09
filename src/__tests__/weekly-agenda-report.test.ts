@@ -1,4 +1,5 @@
 import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
 import {
   buildWeeklyAgendaDocumentTitle,
@@ -13,6 +14,7 @@ import {
   getStatusBadgeClass,
   isWeeklyAgendaEmpty,
   printWeeklyAgenda,
+  shareWeeklyAgendaPdf,
   translateTreatmentName,
 } from '@/services/weekly-agenda-report';
 import { Appointment, WeeklyAgenda, buildWeeklyAgenda } from '@/services/agenda-service';
@@ -385,13 +387,22 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
   });
 
   describe('printWeeklyAgenda y generateWeeklyAgendaPdf [Interacción con expo-print]', () => {
-    it('printWeeklyAgenda invoca Print.printAsync con el HTML generado en plataforma nativa', async () => {
+    it('printWeeklyAgenda invoca Print.printAsync con el URI descriptivo en plataforma nativa para evitar que Android use "Document"', async () => {
       await printWeeklyAgenda(sampleWeeklyAgenda, { language: 'es' });
 
+      expect(Print.printToFileAsync).toHaveBeenCalled();
       expect(Print.printAsync).toHaveBeenCalledTimes(1);
       const callArg = (Print.printAsync as jest.Mock).mock.calls[0][0];
-      expect(callArg.html).toContain('Carlos Mendoza');
-      expect(callArg.html).toContain('Reporte de Agenda Semanal');
+      expect(callArg.uri).toContain('Reporte_Agenda_Semanal_ATI_Dental_2026-06-08_2026-06-14.pdf');
+    });
+
+    it('shareWeeklyAgendaPdf invoca Sharing.shareAsync con el URI descriptivo generado', async () => {
+      await shareWeeklyAgendaPdf(sampleWeeklyAgenda, { language: 'es' });
+
+      expect(Sharing.shareAsync).toHaveBeenCalled();
+      const [uriArg, optionsArg] = (Sharing.shareAsync as jest.Mock).mock.calls[0];
+      expect(uriArg).toContain('Reporte_Agenda_Semanal_ATI_Dental_2026-06-08_2026-06-14.pdf');
+      expect(optionsArg.mimeType).toBe('application/pdf');
     });
 
     it('generateWeeklyAgendaPdf invoca Print.printToFileAsync y copia el PDF a un nombre descriptivo', async () => {
