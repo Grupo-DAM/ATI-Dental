@@ -375,7 +375,11 @@
       "datePickerUnavailable": "El calendario requiere reconstruir la app (npx expo run:android) para cargar el módulo nativo.",
       "successTitle": "Paciente registrado",
       "successMessage": "Los datos del paciente se han capturado. El guardado en el sistema se conectará más adelante.",
-      "saveError": "Ocurrió un error al guardar el paciente. Por favor verifique su conexión e intente nuevamente."
+      "saveError": "Ocurrió un error al guardar el paciente. Por favor verifique su conexión e intente nuevamente.",
+      "missingDocumentType": "Debe seleccionar un tipo de documento.",
+      "emptyDocumentNumber": "Debe ingresar el número de documento.",
+      "invalidDocumentLength": "La longitud del documento no es válida para este tipo.",
+      "documentMustBeNumeric": "Este documento debe contener únicamente números."
     },
     "accessDeniedTitle": "Acceso Denegado",
     "accessDeniedMessage": "Esta sección está restringida únicamente a odontólogos y asistentes."

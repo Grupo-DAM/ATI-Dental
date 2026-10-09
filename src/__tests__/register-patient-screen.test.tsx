@@ -176,11 +176,15 @@ describe('RegisterPatientScreen', () => {
   it('conserva los valores ingresados en el formulario', () => {
     render(<RegisterPatientScreen />);
     fireEvent.changeText(screen.getByTestId('input-full-name'), 'Juan Pérez');
-    fireEvent.changeText(screen.getByTestId('input-document'), '123456789');
+
+    // Seleccionar tipo V primero
+    fireEvent.press(screen.getByTestId('btn-select-doc-type'));
+    fireEvent.press(screen.getByTestId('doc-type-option-V'));
+    fireEvent.changeText(screen.getByTestId('input-document'), '12345678');
     fireEvent.changeText(screen.getByTestId('input-phone'), '5550000000');
 
     expect(screen.getByTestId('input-full-name').props.value).toBe('Juan Pérez');
-    expect(screen.getByTestId('input-document').props.value).toBe('123456789');
+    expect(screen.getByTestId('input-document').props.value).toBe('12345678');
     expect(screen.getByTestId('input-phone').props.value).toBe('5550000000');
   });
 
@@ -369,6 +373,8 @@ describe('RegisterPatientScreen', () => {
       
       // Llenar campos requeridos para pasar la validación
       fireEvent.changeText(screen.getByTestId('input-full-name'), 'Ana');
+      fireEvent.press(screen.getByTestId('btn-select-doc-type'));
+      fireEvent.press(screen.getByTestId('doc-type-option-V'));
       fireEvent.changeText(screen.getByTestId('input-document'), '123456');
       
       await act(async () => {
@@ -501,7 +507,9 @@ describe('RegisterPatientScreen', () => {
 
     render(<RegisterPatientScreen />);
     fireEvent.changeText(screen.getByTestId('input-full-name'), 'Juan Pérez');
-    fireEvent.changeText(screen.getByTestId('input-document'), '123456789');
+    fireEvent.press(screen.getByTestId('btn-select-doc-type'));
+    fireEvent.press(screen.getByTestId('doc-type-option-V'));
+    fireEvent.changeText(screen.getByTestId('input-document'), '12345678');
     fireEvent.press(screen.getByTestId('btn-submit-patient'));
 
     await waitFor(() => {
@@ -513,7 +521,7 @@ describe('RegisterPatientScreen', () => {
 
     // Se verifica que la información no se eliminó
     expect(screen.getByTestId('input-full-name').props.value).toBe('Juan Pérez');
-    expect(screen.getByTestId('input-document').props.value).toBe('123456789');
+    expect(screen.getByTestId('input-document').props.value).toBe('12345678');
     alertSpy.mockRestore();
   });
 
@@ -607,7 +615,7 @@ describe('RegisterPatientScreen', () => {
 
     // Verificamos que las alternativas en español de populateFormWithPatient funcionaron
     expect(screen.getByTestId('input-full-name').props.value).toBe('María Delgado');
-    expect(screen.getByTestId('input-document').props.value).toBe('V-11111');
+    expect(screen.getByTestId('input-document').props.value).toBe('11111');
     expect(screen.getByTestId('input-phone').props.value).toBe('04140000000');
     expect(screen.getByTestId('input-address').props.value).toBe('Av. Principal');
     expect(screen.getByTestId('input-allergies').props.value).toBe('Ninguna');

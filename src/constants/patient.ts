@@ -23,3 +23,31 @@ export function isPatientGender(value: string): value is PatientGender {
 export function getPatientGenderLabelKey(gender: PatientGender): `registerPatient.genders.${PatientGender}` {
   return `registerPatient.genders.${gender}`;
 }
+
+//Tipos de Documento de Identidad
+export const DOCUMENT_TYPES = {
+  V: 'V', // Venezolano
+  E: 'E', // Extranjero
+  J: 'J', // Jurídico
+  P: 'P', // Pasaporte
+} as const;
+
+export type DocumentType = (typeof DOCUMENT_TYPES)[keyof typeof DOCUMENT_TYPES];
+
+export const DOCUMENT_TYPE_VALUES: DocumentType[] = ['V', 'E', 'J', 'P'];
+
+export interface DocumentTypeConfig {
+  type: DocumentType;
+  label: string;
+  isNumericOnly: boolean;
+  minLength: number;
+  maxLength: number;
+  placeholder: string;
+}
+
+export const DOCUMENT_CONFIGS: Record<DocumentType, DocumentTypeConfig> = {
+  V: { type: 'V', label: 'V - Venezolano', isNumericOnly: true, minLength: 6, maxLength: 8, placeholder: '12345678' },
+  E: { type: 'E', label: 'E - Extranjero', isNumericOnly: true, minLength: 6, maxLength: 9, placeholder: '123456789' },
+  J: { type: 'J', label: 'J - Jurídico', isNumericOnly: true, minLength: 8, maxLength: 10, placeholder: '123456789' },
+  P: { type: 'P', label: 'P - Pasaporte', isNumericOnly: false, minLength: 6, maxLength: 12, placeholder: 'ABC123456' },
+};
