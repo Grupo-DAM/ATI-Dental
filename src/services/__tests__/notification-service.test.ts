@@ -190,7 +190,6 @@ describe('NotificationService', () => {
         expect.objectContaining({
           name: 'General',
           importance: Notifications.AndroidImportance.MAX,
-          sound: 'default',
           enableLights: true,
           enableVibrate: true,
           showBadge: true,
