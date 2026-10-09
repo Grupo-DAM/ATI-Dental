@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { createTabBarStyles } from '@/constants/styles/global.styles';
 import { CreateElementModal } from '@/components/create-element-modal';
 import { CreatableElementOption } from '@/constants/create-element-options';
+import { isAdminUser, isOdontologoUser, isAsistenteUser } from '@/constants/user-roles';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function AppTabs() {
   const colors = useTheme();
@@ -62,6 +64,9 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
     activeRouteName === 'patient-file' ||
     activeRouteName === 'patients/clinical-history' ||
     activeRouteName === 'patients/register-consultation';
+
+  const { user } = useAuth();
+  const isNotExernalUser = (isAdminUser(user) || isOdontologoUser(user) || isAsistenteUser(user));
 
   const handleNavigate = (routeName: string) => {
     navigation.navigate(routeName);
@@ -118,23 +123,25 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
       </TouchableOpacity>
 
       {/* 2. EXPLORE (PACIENTES) TAB */}
-      <TouchableOpacity
-        testID="explore-tab"
-        onPress={() => handleNavigate('patients/patients-list')}
-        style={styles.tabItem}>
-        <Image
-          source={require('@/assets/expo.icon/Assets/lista.svg')}
-          style={styles.icon}
-          tintColor={isPatientsSection ? colors.main : colors.textSecondary}
-        />
-        <Text
-          style={[
-            styles.label,
-            { color: isPatientsSection ? colors.main : colors.textSecondary },
-          ]}>
-          {t('tabs.explore')}
-        </Text>
-      </TouchableOpacity>
+      {isNotExernalUser && 
+        <TouchableOpacity
+          testID="explore-tab"
+          onPress={() => handleNavigate('patients/patients-list')}
+          style={styles.tabItem}>
+          <Image
+            source={require('@/assets/expo.icon/Assets/lista.svg')}
+            style={styles.icon}
+            tintColor={isPatientsSection ? colors.main : colors.textSecondary}
+          />
+          <Text
+            style={[
+              styles.label,
+              { color: isPatientsSection ? colors.main : colors.textSecondary },
+            ]}>
+            {t('tabs.explore')}
+          </Text>
+        </TouchableOpacity>
+      }
 
       <View style={styles.floatingButtonContainer}>
         <TouchableOpacity
@@ -153,23 +160,26 @@ function CustomTabBar({ state, navigation }: Readonly<CustomTabBarProps>) {
       </View>
 
       {/* 4. AGENDA TAB */}
-      <TouchableOpacity
-        testID="agenda-tab"
-        onPress={() => handleNavigate('agenda')}
-        style={styles.tabItem}>
-        <Image
-          source={require('@/assets/expo.icon/Assets/agenda-pencil-left.svg')}
-          style={styles.icon}
-          tintColor={activeRouteName === 'agenda' ? colors.main : colors.textSecondary}
-        />
-        <Text
-          style={[
-            styles.label,
-            { color: activeRouteName === 'agenda' ? colors.main : colors.textSecondary },
-          ]}>
-          {t('tabs.agenda')}
-        </Text>
-      </TouchableOpacity>
+      
+      {isNotExernalUser && 
+        <TouchableOpacity
+          testID="agenda-tab"
+          onPress={() => handleNavigate('agenda')}
+          style={styles.tabItem}>
+          <Image
+            source={require('@/assets/expo.icon/Assets/agenda-pencil-left.svg')}
+            style={styles.icon}
+            tintColor={activeRouteName === 'agenda' ? colors.main : colors.textSecondary}
+          />
+          <Text
+            style={[
+              styles.label,
+              { color: activeRouteName === 'agenda' ? colors.main : colors.textSecondary },
+            ]}>
+            {t('tabs.agenda')}
+          </Text>
+        </TouchableOpacity>
+      }
 
       {/* 5. PROFILE TAB */}
       <TouchableOpacity
