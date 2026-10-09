@@ -4,6 +4,8 @@ import { Image } from 'expo-image';
 import { type Href, useRouter, useSegments } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -22,6 +24,8 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useTranslation } from 'react-i18next';
+import { exportMonthlyExecutiveSummary } from '@/services/monthly-executive-summary-service';
+import { ReportLanguage } from '@/services/report-service';
 
 import {
   NavigationMenuIconSlot,
@@ -48,9 +52,10 @@ type MenuItem = {
 
 type AdminSubItem = {
   testID: string;
-  route: string;
-  segment: string;
+  route?: string;
+  segment?: string;
   labelKey: string;
+  isAction?: boolean;
 };
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.1';
@@ -114,19 +119,40 @@ const ADMIN_SUBMENU_ITEMS: AdminSubItem[] = [
     segment: 'update-contact-info',
     labelKey: 'navigation.adminContactInfo',
   },
+  {
+    testID: 'nav-item-admin-monthly-summary',
+    labelKey: 'navigation.adminMonthlySummary',
+    isAction: true,
+  },
 ];
 
 export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawerProps>) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const segments = useSegments();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { user, logout } = useAuth();
   const [adminExpanded, setAdminExpanded] = useState(false);
+  const [isExportingMonthlySummary, setIsExportingMonthlySummary] = useState(false);
   const [isMounted, setIsMounted] = useState(visible);
   const wasVisibleRef = useRef(visible);
   const translateX = useSharedValue(width);
+
+  const handleExportMonthlySummary = useCallback(async () => {
+    if (isExportingMonthlySummary) return;
+    setIsExportingMonthlySummary(true);
+    try {
+      const currentLang = (i18n.language?.startsWith('en') ? 'en' : 'es') as ReportLanguage;
+      await exportMonthlyExecutiveSummary(user, currentLang);
+      onClose();
+    } catch (error) {
+      console.error('Error exporting monthly summary:', error);
+      Alert.alert(t('common.error', 'Error'), t('reports.exportError', 'No se pudo generar el resumen mensual.'));
+    } finally {
+      setIsExportingMonthlySummary(false);
+    }
+  }, [isExportingMonthlySummary, user, i18n.language, onClose, t]);
 
   const unmountDrawer = useCallback(() => {
     wasVisibleRef.current = false;
@@ -270,13 +296,30 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
                       key={item.testID}
                       testID={item.testID}
                       accessibilityRole="button"
-                      onPress={() => navigateTo(item.route)}
+                      disabled={item.isAction && isExportingMonthlySummary}
+                      onPress={() => {
+                        if (item.isAction) {
+                          handleExportMonthlySummary();
+                        } else if (item.route) {
+                          navigateTo(item.route);
+                        }
+                      }}
                       style={({ pressed }) => [
                         styles.subMenuItem,
-                        activeSegment === item.segment && styles.menuItemActive,
+                        item.segment && activeSegment === item.segment && styles.menuItemActive,
                         pressed && styles.pressed,
                       ]}>
-                      <Text style={styles.subMenuItemText}>{t(item.labelKey)}</Text>
+                      <View style={styles.subMenuItemContent}>
+                        <Text style={styles.subMenuItemText}>{t(item.labelKey)}</Text>
+                        {item.isAction && isExportingMonthlySummary ? (
+                          <ActivityIndicator
+                            testID="monthly-summary-loading"
+                            size="small"
+                            color="#FFFFFF"
+                            style={styles.actionSpinner}
+                          />
+                        ) : null}
+                      </View>
                     </Pressable>
                   ))}
                 </View>
@@ -394,6 +437,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     fontFamily: 'Open Sans',
+  },
+  subMenuItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  actionSpinner: {
+    marginLeft: 8,
   },
   footer: {
     paddingHorizontal: 12,

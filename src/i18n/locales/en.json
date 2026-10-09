@@ -75,6 +75,7 @@
     "adminUsers": "Manage Users",
     "adminReports": "Generate Reports",
     "adminContactInfo": "Update contact information",
+    "adminMonthlySummary": "Export Monthly Summary",
     "comingSoon": "This section will be available soon.",
     "logout": "Log out",
     "defaultUser": "User",
