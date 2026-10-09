@@ -83,6 +83,7 @@ export interface WeeklyAgendaReportOptions {
   customTitle?: string;
   customSubtitle?: string;
   fileName?: string;
+  pageSize?: 'A4' | 'letter';
 }
 
 const STATUS_TEXT: Record<'es' | 'en', Record<AppointmentStatus, string>> = {
@@ -497,14 +498,15 @@ export function buildWeeklyAgendaHtml(
 <html lang="${language}">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
   <title>${escapeHtml(documentTitle)}</title>
   <script>
     try { document.title = ${JSON.stringify(documentTitle)}; } catch (e) {}
   </script>
   <style>
     @page {
-      size: A4 portrait;
-      margin: 14mm 12mm 14mm 12mm;
+      size: ${options.pageSize === 'A4' ? 'A4 portrait' : 'letter portrait'};
+      margin: 8mm 8mm 8mm 8mm;
     }
 
     * {
@@ -513,19 +515,22 @@ export function buildWeeklyAgendaHtml(
       print-color-adjust: exact !important;
     }
 
-    body {
+    html, body {
+      width: 100%;
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 9pt;
-      line-height: 1.35;
+      font-size: 8.5pt;
+      line-height: 1.3;
       color: #141018;
       background-color: #FFFFFF;
     }
 
     .report-container {
       width: 100%;
+      max-width: 100%;
       margin: 0 auto;
+      box-sizing: border-box;
     }
 
     .keep-together {
@@ -540,8 +545,8 @@ export function buildWeeklyAgendaHtml(
       justify-content: space-between;
       align-items: flex-start;
       border-bottom: 2.5px solid #5B2D8B;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .header-brand {
@@ -594,8 +599,8 @@ export function buildWeeklyAgendaHtml(
       border: 1px solid #D8B4FE;
       border-left: 5px solid #5B2D8B;
       border-radius: 6px;
-      padding: 10px 14px;
-      margin-bottom: 16px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
     }
 
     .title-info h2 {
@@ -634,8 +639,8 @@ export function buildWeeklyAgendaHtml(
     .metrics-row {
       display: flex;
       flex-direction: row;
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     .metric-card {
@@ -643,7 +648,7 @@ export function buildWeeklyAgendaHtml(
       border: 1px solid #E9D5FF;
       border-top: 3px solid #5B2D8B;
       border-radius: 6px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       background-color: #FFFFFF;
     }
 
@@ -682,7 +687,7 @@ export function buildWeeklyAgendaHtml(
 
     /* Tablas y Días de la Agenda */
     .day-section {
-      margin-bottom: 18px;
+      margin-bottom: 8px;
     }
 
     .day-header {
@@ -691,7 +696,7 @@ export function buildWeeklyAgendaHtml(
       align-items: center;
       background-color: #F3E8FF;
       border-left: 4px solid #5B2D8B;
-      padding: 6px 10px;
+      padding: 5px 8px;
       margin-bottom: 0;
       border-radius: 4px 4px 0 0;
     }
@@ -733,7 +738,7 @@ export function buildWeeklyAgendaHtml(
       font-weight: 700;
       border-bottom: 1.5px solid #D8B4FE;
       border-top: 1px solid #E9D5FF;
-      padding: 6px 8px;
+      padding: 4px 6px;
       font-size: 7.5pt;
       text-transform: uppercase;
       letter-spacing: 0.3px;
@@ -742,7 +747,7 @@ export function buildWeeklyAgendaHtml(
 
     .agenda-table td {
       border-bottom: 1px solid #F3E8FF;
-      padding: 6px 8px;
+      padding: 4px 6px;
       font-size: 8pt;
       color: #1F2937;
       vertical-align: middle;
@@ -849,8 +854,8 @@ export function buildWeeklyAgendaHtml(
     /* Pie de Página Institucional */
     .report-footer {
       border-top: 1.5px solid #E9D5FF;
-      padding-top: 8px;
-      margin-top: 20px;
+      padding-top: 6px;
+      margin-top: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -1070,13 +1075,17 @@ export async function generateWeeklyAgendaPdf(
   agenda: WeeklyAgenda,
   options: WeeklyAgendaReportOptions = {}
 ): Promise<ReportFileResult> {
-  const html = buildWeeklyAgendaHtml(agenda, options);
   const fileName = options.fileName || buildWeeklyAgendaFileName(agenda, options);
+  const html = buildWeeklyAgendaHtml(agenda, { ...options, fileName });
+
+  const isA4 = options.pageSize === 'A4';
+  const width = isA4 ? 595 : 612;
+  const height = isA4 ? 842 : 792;
 
   const result = await Print.printToFileAsync({
     html,
-    width: 595,
-    height: 842,
+    width,
+    height,
   });
 
   const uri = await resolveDescriptivePdfUri(result.uri, fileName);

@@ -410,9 +410,15 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
 
       expect(Print.printToFileAsync).toHaveBeenCalledTimes(1);
       const callArg = (Print.printToFileAsync as jest.Mock).mock.calls[0][0];
-      expect(callArg.width).toBe(595);
-      expect(callArg.height).toBe(842);
+      expect(callArg.width).toBe(612);
+      expect(callArg.height).toBe(792);
       expect(result.uri).toBe('file:///data/user/0/com.atidental/cache/Reporte_Agenda_Semanal_ATI_Dental_2026-06-08_2026-06-14.pdf');
+
+      // Prueba con pageSize: 'A4'
+      await generateWeeklyAgendaPdf(sampleWeeklyAgenda, { language: 'es', pageSize: 'A4' });
+      const callArgA4 = (Print.printToFileAsync as jest.Mock).mock.calls[1][0];
+      expect(callArgA4.width).toBe(595);
+      expect(callArgA4.height).toBe(842);
     });
 
     it('printWeeklyAgenda maneja la impresión en plataforma Web asignando el título descriptivo a la ventana', async () => {
