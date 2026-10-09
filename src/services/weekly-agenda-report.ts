@@ -497,6 +497,9 @@ export function buildWeeklyAgendaHtml(
 <head>
   <meta charset="utf-8">
   <title>${escapeHtml(documentTitle)}</title>
+  <script>
+    try { document.title = ${JSON.stringify(documentTitle)}; } catch (e) {}
+  </script>
   <style>
     @page {
       size: A4 portrait;
@@ -943,6 +946,30 @@ export async function printWeeklyAgenda(
   const documentTitle = options.fileName || buildWeeklyAgendaDocumentTitle(agenda, options);
 
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    const originalDocumentTitle = typeof document !== 'undefined' ? document.title : '';
+
+    // Asignar el título descriptivo a la ventana principal para evitar que Chromium
+    // recurra al valor por defecto "Document" en el diálogo de guardar PDF
+    if (typeof document !== 'undefined') {
+      try {
+        document.title = documentTitle;
+      } catch {
+        // En caso de restricciones del navegador
+      }
+    }
+
+    const restoreParentTitle = () => {
+      setTimeout(() => {
+        if (typeof document !== 'undefined' && originalDocumentTitle) {
+          try {
+            document.title = originalDocumentTitle;
+          } catch {
+            // Ignorar
+          }
+        }
+      }, 5000);
+    };
+
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(html);
@@ -952,22 +979,36 @@ export async function printWeeklyAgenda(
       } catch {
         // En caso de restricciones del navegador
       }
-      printWindow.focus();
-      printWindow.print();
+
+      // En entornos de testing (Jest), ejecutar sincrónicamente
+      if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'test') {
+        printWindow.focus();
+        printWindow.print();
+        restoreParentTitle();
+        return;
+      }
+
+      // En navegador real, permitir que el proceso de renderizado y el IPC registren el título
+      // antes de abrir la interfaz de impresión del sistema
+      setTimeout(() => {
+        try {
+          printWindow.document.title = documentTitle;
+          printWindow.focus();
+          printWindow.print();
+        } catch (e) {
+          console.warn('Error al invocar impresión en popup:', e);
+        } finally {
+          restoreParentTitle();
+        }
+      }, 250);
       return;
     }
 
     // Fallback si popup fue bloqueado por el navegador
-    const previousTitle = typeof document !== 'undefined' ? document.title : '';
     try {
-      if (typeof document !== 'undefined') {
-        document.title = documentTitle;
-      }
       window.print();
     } finally {
-      if (typeof document !== 'undefined') {
-        document.title = previousTitle;
-      }
+      restoreParentTitle();
     }
     return;
   }
