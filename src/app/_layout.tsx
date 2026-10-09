@@ -8,10 +8,16 @@ import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { AuthProvider } from '@/hooks/use-auth';
 import { Colors } from '@/constants/theme';
 import '@/i18n';
+import {
+  initNotifications,
+} from '@/services/notification-service';
 
 LogBox.ignoreLogs([
   'This method is deprecated (as well as all React Native Firebase namespaced API)',
 ]);
+
+// Inicializar canales, handlers y tareas en segundo plano de forma temprana
+initNotifications();
 
 // -------------------------------------------------------------
 // CAPTURADOR GLOBAL DE ERRORES (Optimizado y No Bloqueante)
