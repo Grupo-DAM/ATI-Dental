@@ -1,7 +1,7 @@
 /**
  * Servicio de Generación de Reportes e Impresión de Agenda Semanal (US-33).
- * Procesa la agenda semanal cargada en memoria y genera una plantilla monocromática
- * optimizada para impresión física en blanco y negro, ahorro de tinta y paginación limpia.
+ * Genera el reporte institucional en color corporativo de ATI Dental (#5B2D8B)
+ * con soporte bilingüe (ES / EN), traducción de tratamientos y paginación limpia A4.
  */
 import * as Print from 'expo-print';
 import { Platform } from 'react-native';
@@ -106,6 +106,8 @@ const DAY_NAMES_FULL: Record<'es' | 'en', string[]> = {
 
 const STRINGS_AGENDA = {
   es: {
+    clinicTagline: 'Clínica Odontológica Especializada',
+    taxIdLabel: 'RIF',
     defaultTitle: 'Reporte de Agenda Semanal',
     defaultSubtitle: 'Listado cronológico de citas programadas',
     weekLabel: 'Semana',
@@ -128,6 +130,8 @@ const STRINGS_AGENDA = {
     pageFooter: 'Agenda Semanal de Consultas · ATI Dental',
   },
   en: {
+    clinicTagline: 'Specialized Dental Clinic',
+    taxIdLabel: 'Tax ID',
     defaultTitle: 'Weekly Schedule Report',
     defaultSubtitle: 'Chronological list of scheduled appointments',
     weekLabel: 'Week',
@@ -150,6 +154,111 @@ const STRINGS_AGENDA = {
     pageFooter: 'Weekly Appointment Schedule · ATI Dental',
   },
 };
+
+/**
+ * Diccionario de traducción de tratamientos dentales (Español -> Inglés)
+ * indexado por clave normalizada (sin acentos, en minúsculas)
+ */
+export const TREATMENT_TRANSLATIONS_EN: Record<string, string> = {
+  // Citas de ejemplo en agenda semanal
+  'consulta diagnostica': 'Diagnostic Consultation',
+  'blanqueamiento dental': 'Teeth Whitening',
+  'endodoncia': 'Endodontics (Root Canal)',
+  'limpieza profunda': 'Deep Cleaning',
+  'extraccion molar': 'Molar Extraction',
+  'ajuste ortodoncia': 'Orthodontic Adjustment',
+  'cirugia de cordal': 'Wisdom Tooth Surgery',
+  'protesis fija': 'Fixed Prosthesis',
+  'profilaxis': 'Dental Prophylaxis',
+  'tratamiento periodontal': 'Periodontal Treatment',
+  'restauracion con resina': 'Resin Restoration',
+  'control de brackets': 'Braces Checkup',
+  'limpieza y fluorizacion': 'Cleaning and Fluoridation',
+
+  // Tratamientos clínicos y pruebas unitarias
+  'limpieza dental profilactica': 'Prophylactic Dental Cleaning',
+  'extraccion muela del juicio': 'Wisdom Tooth Extraction',
+  'endodoncia pieza 16': 'Endodontics Tooth 16',
+  'revision general': 'General Checkup',
+  'consulta general': 'General Consultation',
+  'consulta reciente': 'Recent Consultation',
+  'limpieza dental': 'Dental Cleaning',
+  'limpieza': 'Dental Cleaning',
+  'extraccion de muela': 'Tooth Extraction',
+  'extraccion': 'Tooth Extraction',
+  'colocacion de brackets': 'Braces Placement',
+  'brackets metalicos': 'Metal Braces',
+  'brackets': 'Braces',
+  'ortodoncia': 'Orthodontics',
+  'implante dental': 'Dental Implant',
+  'implante': 'Dental Implant',
+  'tratamiento de conducto': 'Root Canal Treatment',
+  'conducto': 'Root Canal Treatment',
+  'control de ortodoncia': 'Orthodontic Checkup',
+  'control y limpieza': 'Checkup & Cleaning',
+  'control': 'Checkup',
+  'resina compuesta': 'Composite Resin',
+  'resina': 'Resin Restoration',
+  'profilaxis dental': 'Dental Prophylaxis',
+  'evaluacion periodontal': 'Periodontal Evaluation',
+  'blanqueamiento': 'Teeth Whitening',
+  'carillas dentales': 'Dental Veneers',
+  'corona dental': 'Dental Crown',
+  'puente dental': 'Dental Bridge',
+  'cirugia oral': 'Oral Surgery',
+  'radiografia dental': 'Dental X-Ray',
+};
+
+/**
+ * Normaliza un término clínico para búsqueda insensible a acentos y mayúsculas
+ */
+export function normalizeTreatmentKey(str: string): string {
+  return str
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Traduce el nombre de un tratamiento clínico al idioma seleccionado si es inglés
+ */
+export function translateTreatmentName(
+  treatment: string | undefined | null,
+  language: ReportLanguage
+): string {
+  if (!treatment || language !== 'en') return treatment || '';
+  const normalized = normalizeTreatmentKey(treatment);
+  if (TREATMENT_TRANSLATIONS_EN[normalized]) {
+    return TREATMENT_TRANSLATIONS_EN[normalized];
+  }
+  const pieceMatch = normalized.match(/^(endodoncia|resina|extraccion|corona|implante)\s+pieza\s+(\d+)$/i);
+  if (pieceMatch) {
+    const base = translateTreatmentName(pieceMatch[1], 'en');
+    return `${base} Tooth ${pieceMatch[2]}`;
+  }
+  return treatment;
+}
+
+/**
+ * Retorna la clase CSS adecuada para colorear el badge de estado
+ */
+export function getStatusBadgeClass(status: AppointmentStatus): string {
+  switch (status) {
+    case 'CONFIRMADO':
+      return 'status-confirmed';
+    case 'EN ESPERA':
+      return 'status-pending';
+    case 'EN PROGRESO':
+      return 'status-inprogress';
+    case 'COMPLETADO':
+      return 'status-completed';
+    case 'CANCELADO':
+      return 'status-cancelled';
+    default:
+      return 'status-pending';
+  }
+}
 
 /**
  * Cuenta el total de citas programadas a lo largo de toda la semana
@@ -188,21 +297,28 @@ export function formatAgendaDateReadable(
 }
 
 /**
- * Renderiza el logo corporativo de ATI Dental en versión monocromática optimizada para tinta
+ * Renderiza el logo corporativo de ATI Dental en color institucional
  */
-function getMonochromeLogoSvg(): string {
+export function getCorporateLogoSvg(): string {
   return `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="44" height="44">
-      <rect width="54" height="54" rx="8" fill="#FFFFFF" stroke="#111111" stroke-width="2.5" />
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 54" width="46" height="46" class="brand-logo">
+      <rect width="54" height="54" rx="12" fill="#5B2D8B" />
       <g transform="translate(15, 14.5)">
-        <path d="M18.6667 0C20.1333 0 21.3889 0.543227 22.4333 1.62968C23.4778 2.71613 24 4.02219 24 5.54785C24 5.80213 23.9833 6.14309 23.95 6.57074C23.9167 6.99838 23.8667 7.4896 23.8 8.04438L21.9667 22.018C21.8556 22.8964 21.4722 23.613 20.8167 24.1678C20.1611 24.7226 19.4111 25 18.5667 25C18.0556 25 17.5833 24.8844 17.15 24.6533C16.7167 24.4221 16.3556 24.0985 16.0667 23.6824L12.5 18.2732C12.4556 18.1808 12.3833 18.1172 12.2833 18.0825C12.1833 18.0479 12.0778 18.0305 11.9667 18.0305C11.8778 18.0305 11.7 18.1345 11.4333 18.3426L7.96667 23.5784C7.65556 24.0407 7.27222 24.3932 6.81667 24.6359C6.36111 24.8786 5.87778 25 5.36667 25C4.52222 25 3.77778 24.7168 3.13333 24.1505C2.48889 23.5841 2.11111 22.8618 2 21.9834L0.2 8.04438C0.133333 7.4896 0.0833333 6.99838 0.05 6.57074C0.0166667 6.14309 0 5.80213 0 5.54785C0 4.02219 0.522222 2.71613 1.56667 1.62968C2.61111 0.543227 3.86667 0 5.33333 0C6.13333 0 6.77222 0.109802 7.25 0.329405C7.72778 0.549007 8.18889 0.785946 8.63333 1.04022C9.07778 1.2945 9.55 1.53144 10.05 1.75104C10.55 1.97064 11.2 2.08044 12 2.08044C12.8 2.08044 13.45 1.97064 13.95 1.75104C14.45 1.53144 14.9222 1.2945 15.3667 1.04022C15.8111 0.785946 16.2778 0.549007 16.7667 0.329405C17.2556 0.109802 17.8889 0 18.6667 0Z" fill="#111111" />
+        <path d="M18.6667 0C20.1333 0 21.3889 0.543227 22.4333 1.62968C23.4778 2.71613 24 4.02219 24 5.54785C24 5.80213 23.9833 6.14309 23.95 6.57074C23.9167 6.99838 23.8667 7.4896 23.8 8.04438L21.9667 22.018C21.8556 22.8964 21.4722 23.613 20.8167 24.1678C20.1611 24.7226 19.4111 25 18.5667 25C18.0556 25 17.5833 24.8844 17.15 24.6533C16.7167 24.4221 16.3556 24.0985 16.0667 23.6824L12.5 18.2732C12.4556 18.1808 12.3833 18.1172 12.2833 18.0825C12.1833 18.0479 12.0778 18.0305 11.9667 18.0305C11.8778 18.0305 11.7 18.1345 11.4333 18.3426L7.96667 23.5784C7.65556 24.0407 7.27222 24.3932 6.81667 24.6359C6.36111 24.8786 5.87778 25 5.36667 25C4.52222 25 3.77778 24.7168 3.13333 24.1505C2.48889 23.5841 2.11111 22.8618 2 21.9834L0.2 8.04438C0.133333 7.4896 0.0833333 6.99838 0.05 6.57074C0.0166667 6.14309 0 5.80213 0 5.54785C0 4.02219 0.522222 2.71613 1.56667 1.62968C2.61111 0.543227 3.86667 0 5.33333 0C6.13333 0 6.77222 0.109802 7.25 0.329405C7.72778 0.549007 8.18889 0.785946 8.63333 1.04022C9.07778 1.2945 9.55 1.53144 10.05 1.75104C10.55 1.97064 11.2 2.08044 12 2.08044C12.8 2.08044 13.45 1.97064 13.95 1.75104C14.45 1.53144 14.9222 1.2945 15.3667 1.04022C15.8111 0.785946 16.2778 0.549007 16.7667 0.329405C17.2556 0.109802 17.8889 0 18.6667 0ZM18.6667 2.77393C18.1556 2.77393 17.7056 2.88373 17.3167 3.10333C16.9278 3.32293 16.5 3.55987 16.0333 3.81415C15.5667 4.06842 15.0222 4.30536 14.4 4.52497C13.7778 4.74457 12.9778 4.85437 12 4.85437C11.0222 4.85437 10.2222 4.74457 9.6 4.52497C8.97778 4.30536 8.43333 4.06842 7.96667 3.81415C7.5 3.55987 7.07222 3.32293 6.68333 3.10333C6.29444 2.88373 5.84444 2.77393 5.33333 2.77393C4.6 2.77393 3.97222 3.04554 3.45 3.58877C2.92778 4.13199 2.66667 4.78502 2.66667 5.54785C2.66667 5.73278 2.67778 5.99861 2.7 6.34535C2.72222 6.69209 2.76667 7.09663 2.83333 7.55895L4.66667 21.6019C4.68889 21.7869 4.76667 21.9313 4.9 22.0354C5.03333 22.1394 5.18889 22.1914 5.36667 22.1914C5.47778 22.1914 5.57778 22.1683 5.66667 22.1221C5.75556 22.0758 5.82222 22.0065 5.86667 21.914L9.23333 16.7822C9.54444 16.3199 9.94444 15.9501 10.4333 15.6727C10.9222 15.3953 11.4444 15.2566 12 15.2566C12.5556 15.2566 13.0778 15.3953 13.5667 15.6727C14.0556 15.9501 14.4556 16.3199 14.7667 16.7822L18.2 22.018C18.2444 22.0874 18.3 22.1394 18.3667 22.1741C18.4333 22.2087 18.5111 22.2261 18.6 22.2261C18.7778 22.2261 18.9389 22.1741 19.0833 22.07C19.2278 21.966 19.3111 21.8215 19.3333 21.6366L21.1667 7.55895C21.2333 7.09663 21.2778 6.69209 21.3 6.34535C21.3222 5.99861 21.3333 5.73278 21.3333 5.54785C21.3333 4.78502 21.0722 4.13199 20.55 3.58877C20.0278 3.04554 19.4 2.77393 18.6667 2.77393Z" fill="#FFFFFF"/>
       </g>
     </svg>
   `;
 }
 
 /**
- * Genera el documento HTML completo monocromático para la agenda semanal
+ * Alias retrocompatible para consumidores previos
+ */
+export function getMonochromeLogoSvg(): string {
+  return getCorporateLogoSvg();
+}
+
+/**
+ * Genera el documento HTML completo corporativo a color para la agenda semanal
  */
 export function buildWeeklyAgendaHtml(
   agenda: WeeklyAgenda,
@@ -220,6 +336,7 @@ export function buildWeeklyAgendaHtml(
   const reportCode = generateReportCode('AGE');
   const formattedEmission = formatReportDateTime(options.generatedAt, language);
   const dentistIssuer = options.dentistName || strings.allDentists;
+  const clinicTagline = options.clinicInfo?.tagline || strings.clinicTagline;
 
   const totalAppointments = countWeeklyAppointments(agenda);
   const daysWithAppointments = agenda.days.filter((d) => d.appointments && d.appointments.length > 0).length;
@@ -250,13 +367,15 @@ export function buildWeeklyAgendaHtml(
             const chairDisplay = appt.chair
               ? `${strings.chairPrefix} ${appt.chair.replace(/\D/g, '') || appt.chair}`
               : '-';
+            const localizedTreatment = translateTreatmentName(appt.treatmentName, language);
+            const badgeClass = getStatusBadgeClass(appt.status);
 
             return `
               <tr class="appointment-row">
                 <td class="col-time">${escapeHtml(timeDisplay)}</td>
                 <td class="col-patient"><strong>${escapeHtml(appt.patientName)}</strong></td>
-                <td class="col-treatment">${escapeHtml(appt.treatmentName)}</td>
-                <td class="col-status"><span class="status-badge">${escapeHtml(statusLabel)}</span></td>
+                <td class="col-treatment">${escapeHtml(localizedTreatment)}</td>
+                <td class="col-status"><span class="status-badge ${badgeClass}">${escapeHtml(statusLabel)}</span></td>
                 <td class="col-chair">${escapeHtml(chairDisplay)}</td>
               </tr>
             `;
@@ -272,11 +391,11 @@ export function buildWeeklyAgendaHtml(
             <table class="agenda-table">
               <thead>
                 <tr>
-                  <th style="width: 15%;">${escapeHtml(strings.colTime)}</th>
-                  <th style="width: 30%;">${escapeHtml(strings.colPatient)}</th>
-                  <th style="width: 30%;">${escapeHtml(strings.colTreatment)}</th>
-                  <th style="width: 15%;">${escapeHtml(strings.colStatus)}</th>
-                  <th style="width: 10%;">${escapeHtml(strings.colChair)}</th>
+                  <th style="width: 14%;">${escapeHtml(strings.colTime)}</th>
+                  <th style="width: 28%;">${escapeHtml(strings.colPatient)}</th>
+                  <th style="width: 32%;">${escapeHtml(strings.colTreatment)}</th>
+                  <th style="width: 14%;">${escapeHtml(strings.colStatus)}</th>
+                  <th style="width: 12%;">${escapeHtml(strings.colChair)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -314,7 +433,7 @@ export function buildWeeklyAgendaHtml(
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: 9pt;
       line-height: 1.35;
-      color: #111111;
+      color: #141018;
       background-color: #FFFFFF;
     }
 
@@ -328,15 +447,15 @@ export function buildWeeklyAgendaHtml(
       break-inside: avoid !important;
     }
 
-    /* Membrete Monocromático de Ahorro de Tinta */
+    /* Membrete Corporativo Oficial en Color */
     .report-header {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 2px solid #111111;
-      padding-bottom: 10px;
-      margin-bottom: 14px;
+      border-bottom: 2.5px solid #5B2D8B;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .header-brand {
@@ -350,62 +469,66 @@ export function buildWeeklyAgendaHtml(
       margin: 0;
       font-size: 16pt;
       font-weight: 800;
-      color: #000000;
+      color: #5B2D8B;
       letter-spacing: 0.5px;
     }
 
     .brand-titles .tagline {
       margin: 2px 0 0 0;
-      font-size: 8pt;
-      color: #333333;
-      font-weight: 500;
+      font-size: 8.5pt;
+      color: #52287D;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
     .brand-titles .tax-id {
-      margin: 1px 0 0 0;
-      font-size: 7pt;
-      color: #555555;
+      margin: 2px 0 0 0;
+      font-size: 7.5pt;
+      color: #6B7280;
     }
 
     .header-clinic-meta {
       text-align: right;
       font-size: 7.5pt;
-      color: #333333;
+      color: #4B5563;
+      line-height: 1.4;
     }
 
     .header-clinic-meta p {
       margin: 1px 0;
     }
 
-    /* Identificador del Reporte y Semana */
+    /* Franja de Identificación de Agenda */
     .title-banner {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: 1.5px solid #222222;
-      border-radius: 4px;
+      background-color: #FAF5FF;
+      border: 1px solid #D8B4FE;
+      border-left: 5px solid #5B2D8B;
+      border-radius: 6px;
       padding: 10px 14px;
-      margin-bottom: 14px;
-      background-color: #FAFAFA;
+      margin-bottom: 16px;
     }
 
     .title-info h2 {
       margin: 0;
       font-size: 13pt;
       font-weight: 700;
-      color: #000000;
+      color: #52287D;
     }
 
     .title-info .subtitle {
       margin: 3px 0 0 0;
       font-size: 8pt;
-      color: #444444;
+      color: #6B7280;
     }
 
     .meta-box {
       text-align: right;
       font-size: 7.5pt;
-      color: #333333;
+      color: #4B5563;
     }
 
     .code-badge {
@@ -413,42 +536,62 @@ export function buildWeeklyAgendaHtml(
       font-family: monospace;
       font-size: 8pt;
       font-weight: bold;
-      border: 1px solid #111111;
-      padding: 2px 6px;
-      border-radius: 3px;
-      margin-bottom: 3px;
+      color: #5B2D8B;
+      background-color: #F3E8FF;
+      border: 1px solid #D8B4FE;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-bottom: 4px;
     }
 
-    /* Resumen de Métricas / KPIs Monocromático */
+    /* Resumen de Métricas / KPIs en Color */
     .metrics-row {
       display: flex;
       flex-direction: row;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     .metric-card {
       flex: 1;
-      border: 1px solid #666666;
-      border-radius: 4px;
-      padding: 8px 10px;
+      border: 1px solid #E9D5FF;
+      border-top: 3px solid #5B2D8B;
+      border-radius: 6px;
+      padding: 10px 12px;
       background-color: #FFFFFF;
+    }
+
+    .metric-card.metric-days {
+      border-top-color: #7C3AED;
+    }
+
+    .metric-card.metric-confirmed {
+      border-top-color: #059669;
     }
 
     .metric-label {
       font-size: 7pt;
       text-transform: uppercase;
-      color: #555555;
+      color: #6B7280;
       font-weight: 600;
+      letter-spacing: 0.3px;
       display: block;
     }
 
     .metric-value {
-      font-size: 14pt;
+      font-size: 15pt;
       font-weight: 800;
-      color: #000000;
-      margin-top: 2px;
+      color: #5B2D8B;
+      margin-top: 3px;
       display: block;
+    }
+
+    .metric-card.metric-days .metric-value {
+      color: #7C3AED;
+    }
+
+    .metric-card.metric-confirmed .metric-value {
+      color: #059669;
     }
 
     /* Tablas y Días de la Agenda */
@@ -460,23 +603,29 @@ export function buildWeeklyAgendaHtml(
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #F0F0F0;
-      border-left: 4px solid #111111;
-      padding: 5px 8px;
-      margin-bottom: 4px;
+      background-color: #F3E8FF;
+      border-left: 4px solid #5B2D8B;
+      padding: 6px 10px;
+      margin-bottom: 0;
+      border-radius: 4px 4px 0 0;
     }
 
     .day-title {
       font-weight: 700;
-      font-size: 9pt;
-      color: #000000;
+      font-size: 8.5pt;
+      color: #52287D;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
     .day-count {
       font-size: 7.5pt;
-      color: #555555;
+      color: #5B2D8B;
       font-weight: 600;
+      background-color: #FFFFFF;
+      border: 1px solid #D8B4FE;
+      border-radius: 10px;
+      padding: 1px 8px;
     }
 
     .agenda-table {
@@ -484,6 +633,8 @@ export function buildWeeklyAgendaHtml(
       border-collapse: collapse;
       page-break-inside: auto;
       break-inside: auto;
+      border: 1px solid #E9D5FF;
+      border-top: none;
     }
 
     .agenda-table thead {
@@ -491,22 +642,47 @@ export function buildWeeklyAgendaHtml(
     }
 
     .agenda-table th {
-      background-color: #FFFFFF;
-      color: #000000;
+      background-color: #FAF5FF;
+      color: #52287D;
       font-weight: 700;
-      border-bottom: 1.5px solid #000000;
-      padding: 5px 6px;
+      border-bottom: 1.5px solid #D8B4FE;
+      border-top: 1px solid #E9D5FF;
+      padding: 6px 8px;
       font-size: 7.5pt;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
       text-align: left;
     }
 
     .agenda-table td {
-      border-bottom: 1px solid #CCCCCC;
-      padding: 5px 6px;
+      border-bottom: 1px solid #F3E8FF;
+      padding: 6px 8px;
       font-size: 8pt;
-      color: #111111;
+      color: #1F2937;
       vertical-align: middle;
+    }
+
+    .agenda-table tbody tr:nth-child(even) {
+      background-color: #FDFAFF;
+    }
+
+    .col-time {
+      color: #5B2D8B;
+      font-weight: 700;
+    }
+
+    .col-patient strong {
+      color: #111827;
+      font-weight: 600;
+    }
+
+    .col-treatment {
+      color: #374151;
+    }
+
+    .col-chair {
+      color: #6B7280;
+      font-weight: 500;
     }
 
     .appointment-row {
@@ -514,28 +690,60 @@ export function buildWeeklyAgendaHtml(
       break-inside: avoid !important;
     }
 
+    /* Badges Semánticos en Color */
     .status-badge {
       display: inline-block;
-      border: 1px solid #111111;
-      padding: 1px 4px;
-      border-radius: 2px;
+      padding: 2px 7px;
+      border-radius: 10px;
       font-size: 6.5pt;
       font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .status-badge.status-confirmed {
+      background-color: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+    }
+
+    .status-badge.status-pending {
+      background-color: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+    }
+
+    .status-badge.status-inprogress {
+      background-color: #EFF6FF;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+    }
+
+    .status-badge.status-completed {
+      background-color: #F0FDF4;
+      color: #166534;
+      border: 1px solid #BBF7D0;
+    }
+
+    .status-badge.status-cancelled {
+      background-color: #FEF2F2;
+      color: #B91C1C;
+      border: 1px solid #FECACA;
     }
 
     /* Estado Vacío de la Semana */
     .empty-agenda-card {
-      border: 1.5px dashed #666666;
-      border-radius: 6px;
+      border: 1.5px dashed #D8B4FE;
+      border-radius: 8px;
       padding: 28px 16px;
       text-align: center;
       margin: 20px 0;
-      background-color: #FAFAFA;
+      background-color: #FAF5FF;
     }
 
     .empty-agenda-icon {
-      font-size: 24pt;
+      font-size: 26pt;
       margin-bottom: 8px;
     }
 
@@ -543,25 +751,25 @@ export function buildWeeklyAgendaHtml(
       margin: 0;
       font-size: 11pt;
       font-weight: 700;
-      color: #000000;
+      color: #52287D;
     }
 
     .empty-agenda-desc {
       margin: 6px 0 0 0;
       font-size: 8.5pt;
-      color: #555555;
+      color: #6B7280;
     }
 
     /* Pie de Página Institucional */
     .report-footer {
-      border-top: 1px solid #666666;
-      padding-top: 6px;
+      border-top: 1.5px solid #E9D5FF;
+      padding-top: 8px;
       margin-top: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 7pt;
-      color: #555555;
+      color: #6B7280;
     }
 
     .footer-left {
@@ -570,19 +778,21 @@ export function buildWeeklyAgendaHtml(
 
     .footer-right {
       text-align: right;
+      color: #5B2D8B;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
   <div class="report-container">
-    <!-- Membrete Institucional Monocromático -->
+    <!-- Membrete Institucional en Color -->
     <header class="report-header">
       <div class="header-brand">
-        ${getMonochromeLogoSvg()}
+        ${getCorporateLogoSvg()}
         <div class="brand-titles">
           <h1>${escapeHtml(clinic.name)}</h1>
-          <p class="tagline">${escapeHtml(clinic.tagline)}</p>
-          <p class="tax-id">RIF / Tax ID: ${escapeHtml(clinic.taxId)}</p>
+          <p class="tagline">${escapeHtml(clinicTagline)}</p>
+          <p class="tax-id">${escapeHtml(strings.taxIdLabel)}: ${escapeHtml(clinic.taxId)}</p>
         </div>
       </div>
       <div class="header-clinic-meta">
@@ -611,11 +821,11 @@ export function buildWeeklyAgendaHtml(
         <span class="metric-label">${escapeHtml(strings.totalAppointments)}</span>
         <span class="metric-value">${totalAppointments}</span>
       </div>
-      <div class="metric-card">
+      <div class="metric-card metric-days">
         <span class="metric-label">${escapeHtml(strings.daysWithActivity)}</span>
         <span class="metric-value">${daysWithAppointments} / ${agenda.days.length}</span>
       </div>
-      <div class="metric-card">
+      <div class="metric-card metric-confirmed">
         <span class="metric-label">${escapeHtml(strings.confirmedAppointments)}</span>
         <span class="metric-value">${confirmedCount}</span>
       </div>

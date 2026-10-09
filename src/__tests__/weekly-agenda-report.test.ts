@@ -7,10 +7,13 @@ import {
   formatReportDateTime,
   generateReportCode,
   generateWeeklyAgendaPdf,
+  getCorporateLogoSvg,
+  getStatusBadgeClass,
   isWeeklyAgendaEmpty,
   printWeeklyAgenda,
+  translateTreatmentName,
 } from '@/services/weekly-agenda-report';
-import { Appointment, WeeklyAgenda } from '@/services/agenda-service';
+import { Appointment, WeeklyAgenda, buildWeeklyAgenda } from '@/services/agenda-service';
 
 describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)', () => {
   const mockAppointmentsMonday: Appointment[] = [
@@ -214,10 +217,14 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
       expect(html).toContain('Luis Fernández');
       expect(html).toContain('Endodoncia Pieza 16');
 
-      // Reglas de ahorro de tinta y CSS anti-corte
+      // Reglas de color corporativo, badges semánticos y CSS anti-corte
       expect(html).toContain('page-break-inside: avoid !important');
       expect(html).toContain('break-inside: avoid !important');
-      expect(html).toContain('background-color: #FFFFFF');
+      expect(html).toContain('#5B2D8B');
+      expect(html).toContain('status-confirmed');
+      expect(html).toContain('status-pending');
+      expect(html).toContain('Clínica Odontológica Especializada');
+      expect(html).toContain('RIF:');
     });
 
     it('incluye el resumen de indicadores clave (KPIs de la semana)', () => {
@@ -228,6 +235,22 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
       expect(html).toContain('2 / 7');
       expect(html).toContain('Citas confirmadas');
       expect(html).toContain('1');
+    });
+
+    it('aplica la paleta oficial de ATI Dental y logotipo corporativo con fondo morado', () => {
+      const html = buildWeeklyAgendaHtml(sampleWeeklyAgenda, { language: 'es' });
+      const logoSvg = getCorporateLogoSvg();
+
+      expect(logoSvg).toContain('fill="#5B2D8B"');
+      expect(logoSvg).toContain('brand-logo');
+      expect(html).toContain('brand-logo');
+      expect(html).toContain('#FAF5FF');
+      expect(html).toContain('#D8B4FE');
+      expect(getStatusBadgeClass('CONFIRMADO')).toBe('status-confirmed');
+      expect(getStatusBadgeClass('EN ESPERA')).toBe('status-pending');
+      expect(getStatusBadgeClass('EN PROGRESO')).toBe('status-inprogress');
+      expect(getStatusBadgeClass('COMPLETADO')).toBe('status-completed');
+      expect(getStatusBadgeClass('CANCELADO')).toBe('status-cancelled');
     });
   });
 
@@ -253,8 +276,8 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
     });
   });
 
-  describe('buildWeeklyAgendaHtml [Soporte Multi-idioma]', () => {
-    it('genera todas las cabeceras, títulos y estados en inglés cuando language es "en"', () => {
+  describe('buildWeeklyAgendaHtml [Soporte Multi-idioma y Traducción de Tratamientos]', () => {
+    it('genera todas las cabeceras, títulos, estados y tratamientos en inglés cuando language es "en"', () => {
       const html = buildWeeklyAgendaHtml(sampleWeeklyAgenda, {
         language: 'en',
         dentistName: 'Dr. John Doe',
@@ -270,6 +293,65 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
       expect(html).toContain('Pending');
       expect(html).toContain('In Progress');
       expect(html).toContain('Total appointments');
+
+      // Membrete en inglés
+      expect(html).toContain('Specialized Dental Clinic');
+      expect(html).toContain('Tax ID:');
+
+      // Traducciones automáticas de tratamientos clínicos al inglés
+      expect(html).toContain('Prophylactic Dental Cleaning');
+      expect(html).toContain('Wisdom Tooth Extraction');
+      expect(html).toContain('Endodontics Tooth 16');
+    });
+
+    it('translateTreatmentName traduce correctamente todos los tratamientos de agenda-service', () => {
+      expect(translateTreatmentName('Consulta Diagnóstica', 'en')).toBe('Diagnostic Consultation');
+      expect(translateTreatmentName('Blanqueamiento Dental', 'en')).toBe('Teeth Whitening');
+      expect(translateTreatmentName('Endodoncia', 'en')).toBe('Endodontics (Root Canal)');
+      expect(translateTreatmentName('Limpieza Profunda', 'en')).toBe('Deep Cleaning');
+      expect(translateTreatmentName('Extracción Molar', 'en')).toBe('Molar Extraction');
+      expect(translateTreatmentName('Ajuste Ortodoncia', 'en')).toBe('Orthodontic Adjustment');
+      expect(translateTreatmentName('Cirugía de Cordal', 'en')).toBe('Wisdom Tooth Surgery');
+      expect(translateTreatmentName('Prótesis Fija', 'en')).toBe('Fixed Prosthesis');
+      expect(translateTreatmentName('Profilaxis', 'en')).toBe('Dental Prophylaxis');
+      expect(translateTreatmentName('Tratamiento Periodontal', 'en')).toBe('Periodontal Treatment');
+      expect(translateTreatmentName('Restauración con Resina', 'en')).toBe('Resin Restoration');
+      expect(translateTreatmentName('Control de Brackets', 'en')).toBe('Braces Checkup');
+      expect(translateTreatmentName('Limpieza y Fluorización', 'en')).toBe('Cleaning and Fluoridation');
+
+      // Preserva en español si el idioma del reporte es 'es'
+      expect(translateTreatmentName('Limpieza Profunda', 'es')).toBe('Limpieza Profunda');
+      // Preserva tratamiento desconocido o vacío
+      expect(translateTreatmentName('', 'en')).toBe('');
+      expect(translateTreatmentName('Tratamiento Especial X', 'en')).toBe('Tratamiento Especial X');
+    });
+
+    it('traduce todos los tratamientos de la semana al inglés al generar la plantilla completa', () => {
+      const fullWeekAgenda = buildWeeklyAgenda(new Date('2026-10-05T12:00:00Z'));
+      const htmlEn = buildWeeklyAgendaHtml(fullWeekAgenda, { language: 'en' });
+
+      // Citas del Lunes
+      expect(htmlEn).toContain('Diagnostic Consultation');
+      expect(htmlEn).toContain('Teeth Whitening');
+      expect(htmlEn).toContain('Endodontics (Root Canal)');
+
+      // Citas del Martes
+      expect(htmlEn).toContain('Deep Cleaning');
+      expect(htmlEn).toContain('Molar Extraction');
+      expect(htmlEn).toContain('Orthodontic Adjustment');
+
+      // Citas del Miércoles
+      expect(htmlEn).toContain('Wisdom Tooth Surgery');
+      expect(htmlEn).toContain('Fixed Prosthesis');
+      expect(htmlEn).toContain('Dental Prophylaxis');
+
+      // Citas del Jueves
+      expect(htmlEn).toContain('Periodontal Treatment');
+      expect(htmlEn).toContain('Resin Restoration');
+
+      // Citas del Viernes
+      expect(htmlEn).toContain('Braces Checkup');
+      expect(htmlEn).toContain('Cleaning and Fluoridation');
     });
   });
 
