@@ -755,28 +755,66 @@ export function hasClinicalRecordExportableData(record?: ClinicalRecord | null):
   return hasConsultations || hasTreatments;
 }
 
+const PATIENT_GRID_LABELS = {
+  en: {
+    fullName: 'Full Name',
+    patientCode: 'Patient Code',
+    documentId: 'ID / Document',
+    age: 'Age',
+    years: 'years',
+    phone: 'Phone',
+    email: 'Email',
+    bloodType: 'Blood Type',
+    allergies: 'Known Allergies',
+    conditions: 'Medical History',
+    noneRecorded: 'None recorded',
+  },
+  es: {
+    fullName: 'Nombre Completo',
+    patientCode: 'Código de Paciente',
+    documentId: 'Cédula / Documento',
+    age: 'Edad',
+    years: 'años',
+    phone: 'Teléfono',
+    email: 'Correo Electrónico',
+    bloodType: 'Grupo Sanguíneo',
+    allergies: 'Alergias Conocidas',
+    conditions: 'Antecedentes Médicos',
+    noneRecorded: 'Ninguna registrada',
+  },
+} as const;
+
+function resolveAgeLabel(birthDate?: string, yearsSuffix = 'años'): string {
+  const age = calculateAge(birthDate);
+  if (age === null) {
+    return 'N/A';
+  }
+  return `${age} ${yearsSuffix}`;
+}
+
+function resolveClinicalList(items?: string[], fallback?: string, defaultEmpty = 'Ninguna registrada'): string {
+  if (Array.isArray(items) && items.length > 0) {
+    return items.join(', ');
+  }
+  return fallback || defaultEmpty;
+}
+
 function buildPatientInfoGridHtml(patient?: Patient, lang: ReportLanguage = 'es'): string {
-  const age = calculateAge(patient?.birthDate);
-  const ageLabel = age !== null ? `${age} ${lang === 'en' ? 'years' : 'años'}` : 'N/A';
-
-  const allergies = Array.isArray(patient?.knownAllergies) && patient.knownAllergies.length > 0
-    ? patient.knownAllergies.join(', ')
-    : patient?.allergies || (lang === 'en' ? 'None recorded' : 'Ninguna registrada');
-
-  const conditions = Array.isArray(patient?.medicalHistory) && patient.medicalHistory.length > 0
-    ? patient.medicalHistory.join(', ')
-    : patient?.conditions || (lang === 'en' ? 'None recorded' : 'Ninguna registrada');
+  const labels = PATIENT_GRID_LABELS[lang] || PATIENT_GRID_LABELS.es;
+  const ageLabel = resolveAgeLabel(patient?.birthDate, labels.years);
+  const allergies = resolveClinicalList(patient?.knownAllergies, patient?.allergies, labels.noneRecorded);
+  const conditions = resolveClinicalList(patient?.medicalHistory, patient?.conditions, labels.noneRecorded);
 
   return ReportService.buildInfoGrid([
-    { label: lang === 'en' ? 'Full Name' : 'Nombre Completo', value: patient?.fullName || 'N/A' },
-    { label: lang === 'en' ? 'Patient Code' : 'Código de Paciente', value: patient?.patientCode || 'N/A' },
-    { label: lang === 'en' ? 'ID / Document' : 'Cédula / Documento', value: patient?.documentId || 'N/A' },
-    { label: lang === 'en' ? 'Age' : 'Edad', value: ageLabel },
-    { label: lang === 'en' ? 'Phone' : 'Teléfono', value: patient?.phone || 'N/A' },
-    { label: lang === 'en' ? 'Email' : 'Correo Electrónico', value: patient?.email || 'N/A' },
-    { label: lang === 'en' ? 'Blood Type' : 'Grupo Sanguíneo', value: patient?.bloodType || 'N/A' },
-    { label: lang === 'en' ? 'Known Allergies' : 'Alergias Conocidas', value: allergies },
-    { label: lang === 'en' ? 'Medical History' : 'Antecedentes Médicos', value: conditions },
+    { label: labels.fullName, value: patient?.fullName || 'N/A' },
+    { label: labels.patientCode, value: patient?.patientCode || 'N/A' },
+    { label: labels.documentId, value: patient?.documentId || 'N/A' },
+    { label: labels.age, value: ageLabel },
+    { label: labels.phone, value: patient?.phone || 'N/A' },
+    { label: labels.email, value: patient?.email || 'N/A' },
+    { label: labels.bloodType, value: patient?.bloodType || 'N/A' },
+    { label: labels.allergies, value: allergies },
+    { label: labels.conditions, value: conditions },
   ]);
 }
 
@@ -837,6 +875,144 @@ export function inferToothStateFromContext(contextText: string, fallbackState?: 
   return fallbackState || 'healthy';
 }
 
+const ODONTOGRAM_LINE_REGEX = /\b(?:Pieza|Diente|Tooth)\b[\s#]+(\d{2})(?::\s*([^;\n.]+))?/i;
+const FINDINGS_PIECE_REGEX = /\b(?:Pieza|Diente|Tooth)(?:\s+tratada)?\b[\s:#]+(\d{2})/i;
+const CONTEXT_PIECE_REGEX = /\b(?:Pieza|Diente|Tooth)(?:\s+tratada)?\b[\s:#]+(\d{2})/gi;
+const TREATMENT_PIECE_DIGITS_REGEX = /\b(\d{2})\b/g;
+
+function resolveToothState(
+  toothNum: number,
+  rawContext: string,
+  combinedContext: string,
+  record?: ClinicalRecord,
+  explicitState?: string
+): string {
+  if (explicitState) {
+    return explicitState;
+  }
+  const odontogramTooth = record?.odontogram?.teeth?.[toothNum];
+  if (odontogramTooth?.generalStates && odontogramTooth.generalStates.length > 0) {
+    return odontogramTooth.generalStates[0];
+  }
+  const inferred = inferToothStateFromContext(rawContext);
+  if (inferred === 'healthy') {
+    const broaderState = inferToothStateFromContext(combinedContext);
+    if (broaderState !== 'healthy') {
+      return broaderState;
+    }
+  }
+  return inferred;
+}
+
+function createToothAdder(
+  teethMap: Map<number, ResolvedToothSummary>,
+  combinedContext: string,
+  record?: ClinicalRecord,
+  lang: ReportLanguage = 'es'
+) {
+  return (toothNum: number, rawContext: string, explicitState?: string) => {
+    if (!isValidFdiToothNumber(toothNum) || teethMap.has(toothNum)) {
+      return;
+    }
+    const stateKey = resolveToothState(toothNum, rawContext, combinedContext, record, explicitState);
+    const stateMeta = TOOTH_COLOR_MAP[stateKey.toLowerCase()] || {
+      hex: '#5B2D8B',
+      es: stateKey,
+      en: stateKey,
+    };
+    teethMap.set(toothNum, {
+      number: toothNum,
+      state: stateKey,
+      color: stateMeta.hex,
+      label: lang === 'en' ? stateMeta.en : stateMeta.es,
+    });
+  };
+}
+
+function extractPiecesFromOdontogramText(
+  odontogramaText: string,
+  addTooth: (num: number, context: string, explicitState?: string) => void
+): void {
+  const lines = odontogramaText.split('\n');
+  for (const line of lines) {
+    const match = ODONTOGRAM_LINE_REGEX.exec(line);
+    if (match) {
+      const num = Number.parseInt(match[1], 10);
+      const conditionText = match[2] || line;
+      addTooth(num, conditionText, inferToothStateFromContext(conditionText));
+    }
+  }
+}
+
+function extractPiecesFromDetailedFindings(
+  findings: string[],
+  addTooth: (num: number, context: string, explicitState?: string) => void
+): void {
+  for (const item of findings) {
+    const match = FINDINGS_PIECE_REGEX.exec(item);
+    if (match) {
+      const num = Number.parseInt(match[1], 10);
+      addTooth(num, item);
+    }
+  }
+}
+
+function extractPiecesFromCombinedContext(
+  combinedContext: string,
+  addTooth: (num: number, context: string, explicitState?: string) => void
+): void {
+  const regex = new RegExp(CONTEXT_PIECE_REGEX.source, 'gi');
+  let match = regex.exec(combinedContext);
+  while (match !== null) {
+    const num = Number.parseInt(match[1], 10);
+    const start = Math.max(0, match.index - 30);
+    const end = Math.min(combinedContext.length, match.index + 50);
+    const snippet = combinedContext.substring(start, end);
+    addTooth(num, snippet);
+    match = regex.exec(combinedContext);
+  }
+}
+
+function isTreatmentMatchingConsultation(treatment: Treatment, consultation: Consultation): boolean {
+  if (treatment.treatmentDate && consultation.consultationDate) {
+    const treatDay = treatment.treatmentDate.slice(0, 10);
+    const consultDay = consultation.consultationDate.slice(0, 10);
+    if (treatDay === consultDay) {
+      return true;
+    }
+  }
+  return Boolean(
+    consultation.title &&
+    treatment.treatmentName &&
+    consultation.title.includes(treatment.treatmentName)
+  );
+}
+
+function extractPiecesFromTreatments(
+  consultation: Consultation,
+  record: ClinicalRecord | undefined,
+  addTooth: (num: number, context: string, explicitState?: string) => void
+): void {
+  if (!record?.treatments) {
+    return;
+  }
+  for (const t of record.treatments) {
+    if (!t.dentalPiece || t.dentalPiece === 'Toda la boca' || t.dentalPiece === 'General') {
+      continue;
+    }
+    if (!isTreatmentMatchingConsultation(t, consultation)) {
+      continue;
+    }
+    const pieceDigits = t.dentalPiece.match(TREATMENT_PIECE_DIGITS_REGEX);
+    if (pieceDigits) {
+      for (const d of pieceDigits) {
+        const num = Number.parseInt(d, 10);
+        addTooth(num, `${t.treatmentName} ${t.category || ''}`, inferToothStateFromContext(t.treatmentName));
+      }
+    }
+  }
+}
+
 export function extractConsultationDentalPieces(
   c: Consultation,
   record?: ClinicalRecord,
@@ -852,92 +1028,18 @@ export function extractConsultationDentalPieces(
     c.notas,
   ].filter(Boolean).join(' ');
 
-  const addTooth = (toothNum: number, rawContext: string, explicitState?: string) => {
-    if (!isValidFdiToothNumber(toothNum)) return;
-    if (teethMap.has(toothNum)) return;
-
-    let stateKey = explicitState;
-    if (!stateKey) {
-      const odontogramTooth = record?.odontogram?.teeth?.[toothNum];
-      if (odontogramTooth?.generalStates && odontogramTooth.generalStates.length > 0) {
-        stateKey = odontogramTooth.generalStates[0];
-      }
-    }
-    if (!stateKey) {
-      stateKey = inferToothStateFromContext(rawContext);
-      if (stateKey === 'healthy') {
-        const broaderState = inferToothStateFromContext(combinedContext);
-        if (broaderState !== 'healthy') {
-          stateKey = broaderState;
-        }
-      }
-    }
-
-    const stateMeta = TOOTH_COLOR_MAP[stateKey.toLowerCase()] || {
-      hex: '#5B2D8B',
-      es: stateKey,
-      en: stateKey,
-    };
-
-    teethMap.set(toothNum, {
-      number: toothNum,
-      state: stateKey,
-      color: stateMeta.hex,
-      label: lang === 'en' ? stateMeta.en : stateMeta.es,
-    });
-  };
+  const addTooth = createToothAdder(teethMap, combinedContext, record, lang);
 
   if (c.odontograma) {
-    const lines = c.odontograma.split('\n');
-    for (const line of lines) {
-      const match = line.match(/(?:Pieza|Diente|Tooth)\s*#?\s*(\d{2})(?:\s*:\s*([^\n;.]+))?/i);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        const conditionText = match[2] || line;
-        addTooth(num, conditionText, inferToothStateFromContext(conditionText));
-      }
-    }
+    extractPiecesFromOdontogramText(c.odontograma, addTooth);
   }
 
   if (Array.isArray(c.diagnosticoDetallado)) {
-    for (const item of c.diagnosticoDetallado) {
-      const match = item.match(/(?:Pieza|Diente|Tooth)(?:\s+tratada)?\s*[:#]?\s*(\d{2})/i);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        addTooth(num, item);
-      }
-    }
+    extractPiecesFromDetailedFindings(c.diagnosticoDetallado, addTooth);
   }
 
-  const pattern = /(?:Pieza|Diente|Tooth)\s*(?:tratada\s*)?[:#]?\s*(\d{2})/gi;
-  let match: RegExpExecArray | null;
-  while ((match = pattern.exec(combinedContext)) !== null) {
-    const num = parseInt(match[1], 10);
-    const start = Math.max(0, match.index - 30);
-    const end = Math.min(combinedContext.length, match.index + 50);
-    const snippet = combinedContext.substring(start, end);
-    addTooth(num, snippet);
-  }
-
-  if (record?.treatments) {
-    for (const t of record.treatments) {
-      if (t.dentalPiece && t.dentalPiece !== 'Toda la boca' && t.dentalPiece !== 'General') {
-        const isDateMatch = t.treatmentDate && c.consultationDate &&
-          t.treatmentDate.substring(0, 10) === c.consultationDate.substring(0, 10);
-        const isNameMatch = c.title && t.treatmentName && c.title.includes(t.treatmentName);
-
-        if (isDateMatch || isNameMatch) {
-          const pieceDigits = t.dentalPiece.match(/\b(\d{2})\b/g);
-          if (pieceDigits) {
-            for (const d of pieceDigits) {
-              const num = parseInt(d, 10);
-              addTooth(num, `${t.treatmentName} ${t.category || ''}`, inferToothStateFromContext(t.treatmentName));
-            }
-          }
-        }
-      }
-    }
-  }
+  extractPiecesFromCombinedContext(combinedContext, addTooth);
+  extractPiecesFromTreatments(c, record, addTooth);
 
   return Array.from(teethMap.values()).sort((a, b) => a.number - b.number);
 }
@@ -1004,6 +1106,98 @@ function buildTeethLegendHtml(lang: ReportLanguage = 'es'): string {
   `;
 }
 
+const CONSULTATION_CARD_LABELS = {
+  en: {
+    defaultTitle: 'Dental Consultation',
+    reason: 'Reason:',
+    diagnosis: 'Diagnosis:',
+    defaultDiagnosis: 'No diagnosis recorded',
+    detailedFindings: 'Detailed Findings:',
+    procedures: 'Procedures Performed:',
+    evolutionNotes: 'Evolution Notes:',
+    nextAppointment: 'Next Appointment:',
+    defaultDoctor: 'Dr. Odontólogo',
+  },
+  es: {
+    defaultTitle: 'Consulta Odontológica',
+    reason: 'Motivo:',
+    diagnosis: 'Diagnóstico:',
+    defaultDiagnosis: 'Sin diagnóstico registrado',
+    detailedFindings: 'Hallazgos Detallados:',
+    procedures: 'Procedimientos Realizados:',
+    evolutionNotes: 'Notas de Evolución:',
+    nextAppointment: 'Próxima Cita:',
+    defaultDoctor: 'Dr. Odontólogo',
+  },
+} as const;
+
+function buildDetailedFindingsHtml(findings?: string[], label = 'Hallazgos Detallados:'): string {
+  if (!Array.isArray(findings) || findings.length === 0) {
+    return '';
+  }
+  const itemsHtml = findings.map((d) => '<li>' + escapeHtml(d) + '</li>').join('');
+  return `<div class="consultation-field"><strong>${label}</strong> <ul>${itemsHtml}</ul></div>`;
+}
+
+function buildConsultationFieldHtml(value: string | undefined, label: string): string {
+  if (!value) {
+    return '';
+  }
+  return `<div class="consultation-field"><strong>${label}</strong> ${escapeHtml(value)}</div>`;
+}
+
+function buildNextAppointmentBadgeHtml(proximaCita: string | undefined, label: string): string {
+  if (!proximaCita || proximaCita === 'No programada') {
+    return '';
+  }
+  return `<span class="consultation-next-badge"><strong>${label}</strong> ${escapeHtml(proximaCita)}</span>`;
+}
+
+function buildSingleConsultationCardHtml(
+  c: Consultation,
+  doctorFallback: string | undefined,
+  lang: ReportLanguage,
+  record?: ClinicalRecord
+): string {
+  const labels = CONSULTATION_CARD_LABELS[lang] || CONSULTATION_CARD_LABELS.es;
+  const dateStr = formatReportDateTime(c.consultationDate, lang);
+  const teethSummaries = extractConsultationDentalPieces(c, record, lang);
+  const teethSummaryHtml = buildTeethSummaryHtml(teethSummaries, lang);
+
+  const title = c.title || labels.defaultTitle;
+  const reason = c.motivo || 'N/A';
+  const diagnosis = c.diagnostico || labels.defaultDiagnosis;
+  const doctorName = c.doctor || doctorFallback || labels.defaultDoctor;
+
+  const detailedDiagHtml = buildDetailedFindingsHtml(c.diagnosticoDetallado, labels.detailedFindings);
+  const performedTreatmentsHtml = buildConsultationFieldHtml(c.tratamientosRealizados, labels.procedures);
+  const notesHtml = buildConsultationFieldHtml(c.notas, labels.evolutionNotes);
+  const nextApptHtml = buildNextAppointmentBadgeHtml(c.proximaCita, labels.nextAppointment);
+
+  return `
+    <div class="consultation-card keep-together">
+      <div class="consultation-card-header">
+        <h4 class="consultation-card-title">${escapeHtml(title)}</h4>
+        <span class="consultation-card-date">${escapeHtml(dateStr)}</span>
+      </div>
+      <div class="consultation-field">
+        <strong>${labels.reason}</strong> ${escapeHtml(reason)}
+      </div>
+      <div class="consultation-field">
+        <strong>${labels.diagnosis}</strong> ${escapeHtml(diagnosis)}
+      </div>
+      ${detailedDiagHtml}
+      ${teethSummaryHtml}
+      ${performedTreatmentsHtml}
+      ${notesHtml}
+      <div class="consultation-card-footer">
+        <span><strong>Doctor:</strong> ${escapeHtml(doctorName)}</span>
+        ${nextApptHtml}
+      </div>
+    </div>
+  `;
+}
+
 function buildConsultationsListHtml(
   consultations: Consultation[],
   doctorFallback?: string,
@@ -1020,49 +1214,8 @@ function buildConsultationsListHtml(
   }
 
   const legendHtml = buildTeethLegendHtml(lang);
-
   const cardsHtml = consultations
-    .map((c) => {
-      const dateStr = formatReportDateTime(c.consultationDate, lang);
-      const teethSummaries = extractConsultationDentalPieces(c, record, lang);
-      const teethSummaryHtml = buildTeethSummaryHtml(teethSummaries, lang);
-
-      const detailedDiagHtml = Array.isArray(c.diagnosticoDetallado) && c.diagnosticoDetallado.length > 0
-        ? `<div class="consultation-field"><strong>${lang === 'en' ? 'Detailed Findings:' : 'Hallazgos Detallados:'}</strong> <ul>${c.diagnosticoDetallado.map((d) => `<li>${escapeHtml(d)}</li>`).join('')}</ul></div>`
-        : '';
-      const performedTreatmentsHtml = c.tratamientosRealizados
-        ? `<div class="consultation-field"><strong>${lang === 'en' ? 'Procedures Performed:' : 'Procedimientos Realizados:'}</strong> ${escapeHtml(c.tratamientosRealizados)}</div>`
-        : '';
-      const notesHtml = c.notas
-        ? `<div class="consultation-field"><strong>${lang === 'en' ? 'Evolution Notes:' : 'Notas de Evolución:'}</strong> ${escapeHtml(c.notas)}</div>`
-        : '';
-      const nextApptHtml = c.proximaCita && c.proximaCita !== 'No programada'
-        ? `<span class="consultation-next-badge"><strong>${lang === 'en' ? 'Next Appointment:' : 'Próxima Cita:'}</strong> ${escapeHtml(c.proximaCita)}</span>`
-        : '';
-
-      return `
-        <div class="consultation-card keep-together">
-          <div class="consultation-card-header">
-            <h4 class="consultation-card-title">${escapeHtml(c.title || (lang === 'en' ? 'Dental Consultation' : 'Consulta Odontológica'))}</h4>
-            <span class="consultation-card-date">${escapeHtml(dateStr)}</span>
-          </div>
-          <div class="consultation-field">
-            <strong>${lang === 'en' ? 'Reason:' : 'Motivo:'}</strong> ${escapeHtml(c.motivo || 'N/A')}
-          </div>
-          <div class="consultation-field">
-            <strong>${lang === 'en' ? 'Diagnosis:' : 'Diagnóstico:'}</strong> ${escapeHtml(c.diagnostico || (lang === 'en' ? 'No diagnosis recorded' : 'Sin diagnóstico registrado'))}
-          </div>
-          ${detailedDiagHtml}
-          ${teethSummaryHtml}
-          ${performedTreatmentsHtml}
-          ${notesHtml}
-          <div class="consultation-card-footer">
-            <span><strong>${lang === 'en' ? 'Doctor:' : 'Doctor:'}</strong> ${escapeHtml(c.doctor || doctorFallback || 'Dr. Odontólogo')}</span>
-            ${nextApptHtml}
-          </div>
-        </div>
-      `;
-    })
+    .map((c) => buildSingleConsultationCardHtml(c, doctorFallback, lang, record))
     .join('');
 
   return `${legendHtml}${cardsHtml}`;
@@ -1309,6 +1462,10 @@ export function getClinicalRecordRenderOptions(
     </div>
   `;
 
+  const activeLabel = lang === 'en' ? 'Active' : 'Activo';
+  const recordLabel = lang === 'en' ? 'Record' : 'Expediente';
+  const badgeLabel = patient?.status === 'activo' ? activeLabel : recordLabel;
+
   return {
     metadata: {
       title: lang === 'en' ? 'DENTAL CLINICAL RECORD' : 'HISTORIA CLÍNICA ODONTOLÓGICA',
@@ -1316,9 +1473,7 @@ export function getClinicalRecordRenderOptions(
       reportCode: `HC-${code}-${new Date().getFullYear()}`,
       category: lang === 'en' ? 'Clinical Record' : 'Expediente Clínico Odontológico',
       badge: {
-        label: patient?.status === 'activo'
-          ? (lang === 'en' ? 'Active' : 'Activo')
-          : (lang === 'en' ? 'Record' : 'Expediente'),
+        label: badgeLabel,
         variant: 'primary',
       },
       generatedBy: options?.doctorName || (lang === 'en' ? 'Attending Dentist' : 'Dr. Odontólogo Responsable'),
