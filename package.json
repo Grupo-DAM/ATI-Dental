@@ -72,6 +72,7 @@
     "@testing-library/react-native": "^13.3.3",
     "@types/jest": "29.5.14",
     "@types/react": "~19.2.2",
+    "babel-preset-expo": "^57.0.14",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~55.0.1",
     "patch-package": "^8.0.1",
