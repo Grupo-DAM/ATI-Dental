@@ -43,10 +43,13 @@ const languageDetector: LanguageDetectorAsyncModule = {
   },
 };
 
-i18n
-  .use(languageDetector)
-  .use(initReactI18next)
-  .init({
+i18n.use(languageDetector);
+
+if (initReactI18next) {
+  i18n.use(initReactI18next);
+}
+
+i18n.init({
     resources: {
       en: { translation: en },
       es: { translation: es },

@@ -25,7 +25,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useTranslation } from 'react-i18next';
 import { exportMonthlyExecutiveSummary } from '@/services/monthly-executive-summary-service';
-import { ReportLanguage } from '@/services/report-service';
 
 import {
   NavigationMenuIconSlot,
@@ -143,7 +142,7 @@ export function NavigationDrawer({ visible, onClose }: Readonly<NavigationDrawer
     if (isExportingMonthlySummary) return;
     setIsExportingMonthlySummary(true);
     try {
-      const currentLang = (i18n.language?.startsWith('en') ? 'en' : 'es') as ReportLanguage;
+      const currentLang = i18n.language?.startsWith('en') ? 'en' : 'es';
       await exportMonthlyExecutiveSummary(user, currentLang);
       onClose();
     } catch (error) {
