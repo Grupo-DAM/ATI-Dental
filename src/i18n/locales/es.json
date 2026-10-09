@@ -574,6 +574,21 @@
     "optionsMessage": "Opciones para la cita de {{name}}",
     "viewDetails": "Ver detalles",
     "close": "Cerrar",
+    "printAgenda": "Imprimir Agenda",
+    "printAgendaTitle": "Reporte de Agenda Semanal",
+    "printAgendaSubtitle": "Listado cronológico de citas programadas",
+    "printNoAppointments": "No se registran citas programadas para la presente semana.",
+    "printError": "Ocurrió un error al procesar la impresión de la agenda.",
+    "printSuccess": "Envío a impresión completado",
+    "printWeekRange": "Semana del {{start}} al {{end}}",
+    "printTableHeaders": {
+      "time": "Hora",
+      "patient": "Paciente",
+      "treatment": "Tratamiento / Motivo",
+      "status": "Estado",
+      "chair": "Sillón",
+      "dentist": "Odontólogo"
+    },
     "months": {
       "0": "ENERO",
       "1": "FEBRERO",

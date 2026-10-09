@@ -42,6 +42,32 @@ export const createAgendaStyles = (theme: any) => {
             alignSelf: 'flex-start',
             marginTop: 10,
         },
+        headerActionsRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 10,
+            gap: 10,
+        },
+        printButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            paddingHorizontal: 12,
+            paddingVertical: 7,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.border,
+            backgroundColor: theme.backgroundElement,
+        },
+        printButtonDisabled: {
+            opacity: 0.6,
+        },
+        printButtonText: {
+            fontSize: 13,
+            fontWeight: '600',
+            color: theme.text,
+        },
         dentistName: {
             fontSize: 12,
             marginTop: 2,
