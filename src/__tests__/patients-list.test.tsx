@@ -101,6 +101,10 @@ jest.mock('expo-image', () => {
   };
 });
 
+jest.mock('@/services/patient-directory-export', () => ({
+  exportPatientDirectoryPdf: jest.fn(() => Promise.resolve()),
+}));
+
 jest.spyOn(Alert, 'alert');
 
 describe('AdminUserList (Patients List) - Criterios de Aceptación', () => {

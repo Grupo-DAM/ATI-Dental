@@ -399,7 +399,10 @@
     "registerPatient": "Register Patient",
     "accessDeniedTitle": "Access Denied",
     "odontologoOnlyView": "You don't have dentist's credentials to access the patients list.",
-    "odontologoOnlyViewAlert": "Only dental personnel have access to this section."
+    "odontologoOnlyViewAlert": "Only dental personnel have access to this section.",
+    "exportPdf": "Export List to PDF",
+    "noPatientsToExport": "No patients to export in the current list",
+    "exportError": "An error occurred while exporting the patient list."
   },
   "admin-users": {
     "title": "List of Users",
