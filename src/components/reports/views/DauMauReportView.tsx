@@ -63,6 +63,12 @@ export function DauMauReportView({
           hasSubLabel
           accentSubLabel
           subLabel={`Meta: ${DAU_MAU_TARGET_RATIO}%`}
+          infoTooltip={{
+            title: t('reports.kpiRatioTooltipTitle'),
+            description: t('reports.kpiRatioTooltipDesc'),
+            calculationNote: `(DAU / MAU) × 100`,
+          }}
+          infoTestID="kpi-ratio-info-icon"
         />
         <KPICard
           tinyType
@@ -73,6 +79,11 @@ export function DauMauReportView({
           cardTestID="kpi-card-dau"
           hasSubLabel
           subLabel={t('reports.kpiDailyAvg')}
+          infoTooltip={{
+            title: t('reports.kpiDauTooltipTitle'),
+            description: t('reports.kpiDauTooltipDesc'),
+          }}
+          infoTestID="kpi-dau-info-icon"
         />
         <KPICard
           tinyType
@@ -83,6 +94,11 @@ export function DauMauReportView({
           cardTestID="kpi-card-mau"
           hasSubLabel
           subLabel={t('reports.kpiThisMonth')}
+          infoTooltip={{
+            title: t('reports.kpiMauTooltipTitle'),
+            description: t('reports.kpiMauTooltipDesc'),
+          }}
+          infoTestID="kpi-mau-info-icon"
         />
       </View>
 
