@@ -489,26 +489,26 @@ export const mapDemographicsToCsvRows = (demographics: UserDemographicsMetrics):
 export const mapGeographicsToCsvRows = (geographics: UserGeographicsMetrics): CsvDataRow[] => {
   const rows: CsvDataRow[] = [];
 
-  // Map Country Buckets
   if (Array.isArray(geographics.countryBuckets)) {
-    geographics.countryBuckets.forEach((bucket) => {
+    geographics.countryBuckets.forEach((bucket: any) => {
+      const countryName = bucket.country || bucket.key || bucket.label || bucket.name || 'Desconocido';
       rows.push({
         fecha: 'N/A',
-        valor: bucket.count ?? bucket.count ?? 0,
+        valor: bucket.count ?? bucket.usersCount ?? 0,
         unidad: 'usuarios',
-        metrica: `País: ${bucket.key || bucket.label || 'Desconocido'}`,
+        metrica: `País: ${countryName}`,
       });
     });
   }
 
-  // Map Region Slices
   if (Array.isArray(geographics.regionSlices)) {
-    geographics.regionSlices.forEach((slice) => {
+    geographics.regionSlices.forEach((slice: any) => {
+      const regionName = slice.region || slice.key || slice.label || slice.name || 'Desconocida';
       rows.push({
         fecha: 'N/A',
-        valor: slice.count ?? slice.percent ?? 0,
+        valor: slice.count ?? slice.value ?? 0,
         unidad: 'usuarios',
-        metrica: `Región: ${slice.key || slice.label || 'Desconocida'}`,
+        metrica: `Región: ${regionName}`,
       });
     });
   }
