@@ -1,5 +1,6 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 import {
   buildWeeklyAgendaDocumentTitle,
@@ -11,9 +12,12 @@ import {
   generateReportCode,
   generateWeeklyAgendaPdf,
   getCorporateLogoSvg,
+  getMonochromeLogoSvg,
   getStatusBadgeClass,
   isWeeklyAgendaEmpty,
   printWeeklyAgenda,
+  resolveDescriptivePdfUri,
+  resolveReportLanguage,
   shareWeeklyAgendaPdf,
   translateTreatmentName,
 } from '@/services/weekly-agenda-report';
@@ -448,6 +452,94 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
 
       (window as any).open = originalOpen;
       (Platform as any).OS = originalOS;
+    });
+
+    it('printWeeklyAgenda maneja la impresión en plataforma Web cuando el popup es bloqueado', async () => {
+      const originalOS = Platform.OS;
+      (Platform as any).OS = 'web';
+
+      const originalOpen = window.open;
+      const originalPrint = window.print;
+      (window as any).open = jest.fn(() => null);
+      (window as any).print = jest.fn();
+
+      await printWeeklyAgenda(sampleWeeklyAgenda, { language: 'es' });
+
+      expect(window.print).toHaveBeenCalled();
+
+      (window as any).open = originalOpen;
+      (window as any).print = originalPrint;
+      (Platform as any).OS = originalOS;
+    });
+
+    it('shareWeeklyAgendaPdf realiza fallback a printWeeklyAgenda cuando Sharing no está disponible', async () => {
+      jest.spyOn(Sharing, 'isAvailableAsync').mockResolvedValueOnce(false);
+      const printToFileSpy = jest.spyOn(Print, 'printToFileAsync');
+
+      await shareWeeklyAgendaPdf(sampleWeeklyAgenda, { language: 'es' });
+
+      expect(Print.printAsync).toHaveBeenCalled();
+    });
+  });
+
+  describe('Cobertura exhaustiva de ramas y utilidades para SonarQube Quality Gate', () => {
+    it('resolveReportLanguage maneja locales con prefijo "en", otros idiomas e indefinido', () => {
+      expect(resolveReportLanguage('en-US')).toBe('en');
+      expect(resolveReportLanguage('en-GB')).toBe('en');
+      expect(resolveReportLanguage('fr')).toBe('es');
+      expect(resolveReportLanguage('pt-BR')).toBe('es');
+      expect(resolveReportLanguage(undefined)).toBe('es');
+      expect(resolveReportLanguage('')).toBe('es');
+    });
+
+    it('translateTreatmentName traduce tratamientos dinámicos con número de pieza dental', () => {
+      expect(translateTreatmentName('Endodoncia Pieza 16', 'en')).toBe('Endodontics Tooth 16');
+      expect(translateTreatmentName('Resina Pieza 12', 'en')).toBe('Resin Restoration Tooth 12');
+      expect(translateTreatmentName('Extracción Pieza 38', 'en')).toBe('Tooth Extraction Tooth 38');
+      expect(translateTreatmentName('Implante Pieza 46', 'en')).toBe('Dental Implant Tooth 46');
+      expect(translateTreatmentName('Tratamiento Desconocido', 'en')).toBe('Tratamiento Desconocido');
+      expect(translateTreatmentName('Endodoncia', 'es')).toBe('Endodoncia');
+    });
+
+    it('getStatusBadgeClass retorna clase por defecto ante estados no contemplados', () => {
+      expect(getStatusBadgeClass('CONFIRMADO')).toBe('status-confirmed');
+      expect(getStatusBadgeClass('EN ESPERA')).toBe('status-pending');
+      expect(getStatusBadgeClass('EN PROGRESO')).toBe('status-inprogress');
+      expect(getStatusBadgeClass('COMPLETADO')).toBe('status-completed');
+      expect(getStatusBadgeClass('CANCELADO')).toBe('status-cancelled');
+      expect(getStatusBadgeClass('DESCONOCIDO' as any)).toBe('status-pending');
+    });
+
+    it('getMonochromeLogoSvg delega en getCorporateLogoSvg manteniendo retrocompatibilidad', () => {
+      const svg = getMonochromeLogoSvg();
+      expect(svg).toContain('<svg');
+      expect(svg).toContain('#5B2D8B');
+    });
+
+    it('buildWeeklyAgendaDocumentTitle y buildWeeklyAgendaFileName soportan fileName custom y agendas sin fechas', () => {
+      expect(buildWeeklyAgendaDocumentTitle(sampleWeeklyAgenda, { fileName: 'MiDocumento' })).toBe('MiDocumento');
+      expect(buildWeeklyAgendaDocumentTitle({} as any)).toBe('Reporte de Agenda Semanal - ATI DENTAL');
+
+      expect(buildWeeklyAgendaFileName(sampleWeeklyAgenda, { fileName: 'Reporte Especial #1' })).toBe('Reporte_Especial__1');
+      expect(buildWeeklyAgendaFileName({} as any)).toBe('Reporte_Agenda_Semanal_ATI_Dental');
+    });
+
+    it('resolveDescriptivePdfUri maneja parámetros vacíos, plataforma Web y fallos de archivo', async () => {
+      const source = 'file:///cache/temp.pdf';
+      expect(await resolveDescriptivePdfUri(source, '')).toBe(source);
+      expect(await resolveDescriptivePdfUri(source, '   ')).toBe(source);
+
+      const originalOS = Platform.OS;
+      (Platform as any).OS = 'web';
+      expect(await resolveDescriptivePdfUri(source, 'Reporte')).toBe(source);
+      (Platform as any).OS = originalOS;
+
+      // Simular fallo en FileSystem.copyAsync
+      jest.spyOn(FileSystem, 'copyAsync').mockRejectedValueOnce(new Error('Permiso denegado'));
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const fallback = await resolveDescriptivePdfUri(source, 'Reporte_Fallo');
+      expect(fallback).toBe(source);
+      warnSpy.mockRestore();
     });
   });
 });

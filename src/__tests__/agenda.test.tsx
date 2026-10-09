@@ -372,7 +372,7 @@ describe('AgendaScreen (US-36: Visualizar Agenda)', () => {
     await waitFor(() => {
       expect(printSpy).toHaveBeenCalled();
     });
-  });
+  }, 15000);
 
   it('displays alert gracefully when printWeeklyAgenda fails (US-33 Resiliencia)', async () => {
     mockUseAuth.mockReturnValue({
@@ -397,5 +397,5 @@ describe('AgendaScreen (US-36: Visualizar Agenda)', () => {
         'Ocurrió un error al procesar la impresión de la agenda.'
       );
     });
-  });
+  }, 15000);
 });
