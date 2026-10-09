@@ -10,12 +10,15 @@ import {
   getVisitDatesByPatient,
   getStoredPatientVisitDates,
   updateOdontogram,
+  hasClinicalRecordExportableData,
+  buildClinicalRecordPdfHtml,
+  exportClinicalRecordToPdf,
 } from '@/services/clinical-record-service';
 import { firestore } from '@/config/firebase';
 import { getSessionToken } from '@/utils/secure-storage';
 import { getPatientById } from '@/services/patient-service';
 import { getTreatmentsByPatientId } from '@/services/treatment-service';
-import { OdontogramData } from '@/types/clinical-record';
+import { ClinicalRecord, OdontogramData } from '@/types/clinical-record';
 
 jest.mock('@/utils/secure-storage', () => ({
   getSessionToken: jest.fn(),
@@ -695,6 +698,186 @@ describe('Clinical Record Service', () => {
         new Date(2026, 9, 1)
       );
       expect(dates.lastVisit).toBe('2026-05-10');
+    });
+  });
+
+  describe('Exportación de Historia Clínica a PDF (US-22)', () => {
+    const mockFullRecord: ClinicalRecord = {
+      patient: mockPatient,
+      consultations: [
+        {
+          id: 'c-1',
+          patientId: 'p-100',
+          consultationDate: '2023-10-15T10:00:00Z',
+          title: 'Consulta General',
+          motivo: 'Dolor en molar inferior',
+          diagnostico: 'Caries en pieza 46',
+          diagnosticoDetallado: ['Caries de esmalte', 'Sensibilidad leve'],
+          tratamientosRealizados: 'Obturación con resina',
+          notas: 'Paciente tolera bien el tratamiento',
+          doctor: 'Dr. Perez',
+          proximaCita: '20 Nov 2023',
+        },
+      ],
+      treatments: [mockTreatment],
+      odontogram: {
+        patientId: 'p-100',
+        status: 'ready',
+        isAdult: true,
+        updatedAt: '2023-10-15T10:00:00Z',
+        teeth: {},
+      },
+    };
+
+    describe('hasClinicalRecordExportableData', () => {
+      it('retorna false si el record es nulo o indefinido', () => {
+        expect(hasClinicalRecordExportableData(null)).toBe(false);
+        expect(hasClinicalRecordExportableData(undefined)).toBe(false);
+      });
+
+      it('retorna false si no hay consultas ni tratamientos', () => {
+        const emptyRecord: ClinicalRecord = {
+          patient: mockPatient,
+          consultations: [],
+          treatments: [],
+          odontogram: { patientId: 'p-100', status: 'empty', isAdult: true, updatedAt: '', teeth: {} },
+        };
+        expect(hasClinicalRecordExportableData(emptyRecord)).toBe(false);
+      });
+
+      it('retorna true si posee al menos una consulta', () => {
+        const recordWithConsultation: ClinicalRecord = {
+          patient: mockPatient,
+          consultations: [mockFullRecord.consultations[0]],
+          treatments: [],
+          odontogram: { patientId: 'p-100', status: 'empty', isAdult: true, updatedAt: '', teeth: {} },
+        };
+        expect(hasClinicalRecordExportableData(recordWithConsultation)).toBe(true);
+      });
+
+      it('retorna true si posee al menos un tratamiento', () => {
+        const recordWithTreatment: ClinicalRecord = {
+          patient: mockPatient,
+          consultations: [],
+          treatments: [mockTreatment],
+          odontogram: { patientId: 'p-100', status: 'empty', isAdult: true, updatedAt: '', teeth: {} },
+        };
+        expect(hasClinicalRecordExportableData(recordWithTreatment)).toBe(true);
+      });
+    });
+
+    describe('buildClinicalRecordPdfHtml', () => {
+      it('compila el documento HTML con membrete oficial, datos del paciente y reglas de impresión', () => {
+        const html = buildClinicalRecordPdfHtml(mockFullRecord, {
+          language: 'es',
+          doctorName: 'Dr. Alejandro Lopez',
+          licenseNumber: 'MPPS-12345',
+        });
+
+        // Membrete institucional ATI Dental
+        expect(html).toContain('ATI DENTAL');
+        expect(html).toContain('HISTORIA CLÍNICA ODONTOLÓGICA');
+
+        // Datos del paciente (sin ID interno de BD)
+        expect(html).toContain('Ana Morales');
+        expect(html).toContain('#P-0042');
+        expect(html).toContain('V-11223344');
+        expect(html).toContain('ana@ejemplo.com');
+        expect(html).toContain('ibuprofeno');
+        expect(html).toContain('asma');
+        expect(html).not.toContain('ID Interno');
+
+        // Historial de consultas
+        expect(html).toContain('Consulta General');
+        expect(html).toContain('Dolor en molar inferior');
+        expect(html).toContain('Caries en pieza 46');
+        expect(html).toContain('Caries de esmalte');
+        expect(html).toContain('Obturación con resina');
+        expect(html).toContain('Dr. Perez');
+
+        // Historial de tratamientos
+        expect(html).toContain('Profilaxis Dental');
+        expect(html).toContain('Toda la boca');
+        expect(html).toContain('Preventivo');
+
+        // Firma y sello estandarizados (Escenario 3)
+        expect(html).toContain('signature-section');
+        expect(html).toContain('Dr. Alejandro Lopez');
+        expect(html).toContain('MPPS-12345');
+        expect(html).toContain('Sello Institucional ATI Dental');
+
+        // Reglas CSS anti-corte de página
+        expect(html).toContain('keep-together');
+        expect(html).toContain('page-break-inside: avoid !important');
+      });
+
+      it('compila correctamente con soporte para idioma inglés', () => {
+        const html = buildClinicalRecordPdfHtml(mockFullRecord, {
+          language: 'en',
+          doctorName: 'Dr. Smith',
+        });
+
+        expect(html).toContain('DENTAL CLINICAL RECORD');
+        expect(html).toContain('Patient Clinical Record &amp; Background');
+        expect(html).toContain('Dr. Smith');
+        expect(html).toContain('Treating Specialist - ATI Dental');
+      });
+
+      it('muestra avisos amigables si las consultas o tratamientos están vacíos pero el otro tiene datos', () => {
+        const recordWithoutConsultations: ClinicalRecord = {
+          patient: mockPatient,
+          consultations: [],
+          treatments: [mockTreatment],
+          odontogram: mockFullRecord.odontogram,
+        };
+        const htmlNoConsultations = buildClinicalRecordPdfHtml(recordWithoutConsultations, { language: 'es' });
+        expect(htmlNoConsultations).toContain('No se registran consultas previas');
+        expect(htmlNoConsultations).toContain('Profilaxis Dental');
+
+        const recordWithoutTreatments: ClinicalRecord = {
+          patient: mockPatient,
+          consultations: mockFullRecord.consultations,
+          treatments: [],
+          odontogram: mockFullRecord.odontogram,
+        };
+        const htmlNoTreatments = buildClinicalRecordPdfHtml(recordWithoutTreatments, { language: 'es' });
+        expect(htmlNoTreatments).toContain('No se registran tratamientos previos');
+        expect(htmlNoTreatments).toContain('Consulta General');
+      });
+    });
+
+    describe('exportClinicalRecordToPdf', () => {
+      it('lanza un error síncrono si el paciente no tiene consultas ni tratamientos (Escenario 2)', async () => {
+        const emptyRecord: ClinicalRecord = {
+          patient: mockPatient,
+          consultations: [],
+          treatments: [],
+          odontogram: mockFullRecord.odontogram,
+        };
+
+        await expect(exportClinicalRecordToPdf(emptyRecord)).rejects.toThrow(
+          'El paciente no registra consultas ni tratamientos para exportar'
+        );
+      });
+
+      it('genera el archivo PDF y abre el diálogo nativo de compartir (Escenario 1)', async () => {
+        const result = await exportClinicalRecordToPdf(mockFullRecord, {
+          doctorName: 'Dr. Smith',
+        });
+
+        expect(result).toBeDefined();
+        expect(result.file.uri).toContain('.pdf');
+        expect(result.share.shared).toBe(true);
+      });
+
+      it('maneja cancelaciones o fallos de compartir retornando shared=false de forma limpia (Escenario 4)', async () => {
+        const Sharing = require('expo-sharing');
+        Sharing.shareAsync.mockRejectedValueOnce(new Error('User dismissed share dialog'));
+
+        const result = await exportClinicalRecordToPdf(mockFullRecord);
+        expect(result.share.shared).toBe(false);
+        expect(result.share.message).toContain('User dismissed share dialog');
+      });
     });
   });
 });

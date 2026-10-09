@@ -5,8 +5,21 @@ import { getPatientById, PATIENTS_COLLECTION, Patient } from '@/services/patient
 import { getTreatmentsByPatientId, Treatment } from '@/services/treatment-service';
 import { ClinicalRecord, ClinicalRecordResponse, Consultation, OdontogramData } from '@/types/clinical-record';
 import { parseAppointmentDateKey } from '@/utils/appointment-schedule';
-import { parseDateRobustly } from '@/utils/date-utils';
+import { calculateAge, parseDateRobustly } from '@/utils/date-utils';
 import { summarizePatientVisits, VisitStamp } from '@/utils/patient-visits';
+import {
+  ReportService,
+  REPORT_THEME,
+  escapeHtml,
+  formatReportDateTime,
+  resolveReportLanguage,
+} from '@/services/report-service';
+import type {
+  GenerateAndShareReportResult,
+  RenderReportOptions,
+  ReportLanguage,
+  ShareReportOptions,
+} from '@/services/report-service';
 
 export const HISTORIAS_CLINICAS_COLLECTION = 'historias_clinicas';
 export const CONSULTATIONS_COLLECTION = 'historias_clinicas';
@@ -720,4 +733,318 @@ export async function updateOdontogram(
     console.error('[clinical-record-service] Error writing odontogram to Firestore:', firestoreError);
     throw new Error(firestoreError?.message || 'Error de red al guardar el odontograma clínico.');
   }
+}
+
+export interface ClinicalRecordExportOptions {
+  doctorName?: string;
+  licenseNumber?: string;
+  language?: string;
+}
+
+/**
+ * Determina si una historia clínica posee datos clínicos (consultas o tratamientos)
+ * aptos para ser exportados a PDF (Criterio de Aceptación - Escenario 2).
+ */
+export function hasClinicalRecordExportableData(record?: ClinicalRecord | null): boolean {
+  if (!record) return false;
+  const hasConsultations = Array.isArray(record.consultations) && record.consultations.length > 0;
+  const hasTreatments = Array.isArray(record.treatments) && record.treatments.length > 0;
+  return hasConsultations || hasTreatments;
+}
+
+function buildPatientInfoGridHtml(patient?: Patient, lang: ReportLanguage = 'es'): string {
+  const age = calculateAge(patient?.birthDate);
+  const ageLabel = age !== null ? `${age} ${lang === 'en' ? 'years' : 'años'}` : 'N/A';
+
+  const allergies = Array.isArray(patient?.knownAllergies) && patient.knownAllergies.length > 0
+    ? patient.knownAllergies.join(', ')
+    : patient?.allergies || (lang === 'en' ? 'None recorded' : 'Ninguna registrada');
+
+  const conditions = Array.isArray(patient?.medicalHistory) && patient.medicalHistory.length > 0
+    ? patient.medicalHistory.join(', ')
+    : patient?.conditions || (lang === 'en' ? 'None recorded' : 'Ninguna registrada');
+
+  return ReportService.buildInfoGrid([
+    { label: lang === 'en' ? 'Full Name' : 'Nombre Completo', value: patient?.fullName || 'N/A' },
+    { label: lang === 'en' ? 'Patient Code' : 'Código de Paciente', value: patient?.patientCode || 'N/A' },
+    { label: lang === 'en' ? 'ID / Document' : 'Cédula / Documento', value: patient?.documentId || 'N/A' },
+    { label: lang === 'en' ? 'Age' : 'Edad', value: ageLabel },
+    { label: lang === 'en' ? 'Phone' : 'Teléfono', value: patient?.phone || 'N/A' },
+    { label: lang === 'en' ? 'Email' : 'Correo Electrónico', value: patient?.email || 'N/A' },
+    { label: lang === 'en' ? 'Blood Type' : 'Grupo Sanguíneo', value: patient?.bloodType || 'N/A' },
+    { label: lang === 'en' ? 'Known Allergies' : 'Alergias Conocidas', value: allergies },
+    { label: lang === 'en' ? 'Medical History' : 'Antecedentes Médicos', value: conditions },
+  ]);
+}
+
+function buildConsultationsListHtml(
+  consultations: Consultation[],
+  doctorFallback?: string,
+  lang: ReportLanguage = 'es'
+): string {
+  if (consultations.length === 0) {
+    return ReportService.buildAlert(
+      lang === 'en'
+        ? 'No prior dental consultations recorded.'
+        : 'No se registran consultas previas en el expediente.',
+      'info'
+    );
+  }
+
+  return consultations
+    .map((c) => {
+      const dateStr = formatReportDateTime(c.consultationDate, lang);
+      const detailedDiagHtml = Array.isArray(c.diagnosticoDetallado) && c.diagnosticoDetallado.length > 0
+        ? `<div class="consultation-field"><strong>${lang === 'en' ? 'Detailed Findings:' : 'Hallazgos Detallados:'}</strong> <ul>${c.diagnosticoDetallado.map((d) => `<li>${escapeHtml(d)}</li>`).join('')}</ul></div>`
+        : '';
+      const performedTreatmentsHtml = c.tratamientosRealizados
+        ? `<div class="consultation-field"><strong>${lang === 'en' ? 'Procedures Performed:' : 'Procedimientos Realizados:'}</strong> ${escapeHtml(c.tratamientosRealizados)}</div>`
+        : '';
+      const notesHtml = c.notas
+        ? `<div class="consultation-field"><strong>${lang === 'en' ? 'Evolution Notes:' : 'Notas de Evolución:'}</strong> ${escapeHtml(c.notas)}</div>`
+        : '';
+      const nextApptHtml = c.proximaCita && c.proximaCita !== 'No programada'
+        ? `<span class="consultation-next-badge"><strong>${lang === 'en' ? 'Next Appointment:' : 'Próxima Cita:'}</strong> ${escapeHtml(c.proximaCita)}</span>`
+        : '';
+
+      return `
+        <div class="consultation-card keep-together">
+          <div class="consultation-card-header">
+            <h4 class="consultation-card-title">${escapeHtml(c.title || (lang === 'en' ? 'Dental Consultation' : 'Consulta Odontológica'))}</h4>
+            <span class="consultation-card-date">${escapeHtml(dateStr)}</span>
+          </div>
+          <div class="consultation-field">
+            <strong>${lang === 'en' ? 'Reason:' : 'Motivo:'}</strong> ${escapeHtml(c.motivo || 'N/A')}
+          </div>
+          <div class="consultation-field">
+            <strong>${lang === 'en' ? 'Diagnosis:' : 'Diagnóstico:'}</strong> ${escapeHtml(c.diagnostico || (lang === 'en' ? 'No diagnosis recorded' : 'Sin diagnóstico registrado'))}
+          </div>
+          ${detailedDiagHtml}
+          ${performedTreatmentsHtml}
+          ${notesHtml}
+          <div class="consultation-card-footer">
+            <span><strong>${lang === 'en' ? 'Doctor:' : 'Doctor:'}</strong> ${escapeHtml(c.doctor || doctorFallback || 'Dr. Odontólogo')}</span>
+            ${nextApptHtml}
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+function buildTreatmentsTableHtml(treatments: Treatment[], lang: ReportLanguage = 'es'): string {
+  if (treatments.length === 0) {
+    return ReportService.buildAlert(
+      lang === 'en'
+        ? 'No dental procedures or treatments recorded.'
+        : 'No se registran tratamientos previos en el expediente.',
+      'info'
+    );
+  }
+
+  const tableColumns = [
+    { header: lang === 'en' ? 'Date' : 'Fecha', width: '15%' },
+    { header: lang === 'en' ? 'Treatment / Procedure' : 'Procedimiento / Tratamiento', width: '25%' },
+    { header: lang === 'en' ? 'Dental Piece' : 'Pieza Dental', width: '15%' },
+    { header: lang === 'en' ? 'Status' : 'Estado', width: '15%' },
+    { header: lang === 'en' ? 'Category' : 'Categoría', width: '15%' },
+    { header: lang === 'en' ? 'Attending Dentist' : 'Odontólogo Responsable', width: '15%' },
+  ];
+
+  const tableRows = treatments.map((t) => [
+    formatReportDateTime(t.treatmentDate, lang).split(' ')[0],
+    t.treatmentName || 'N/A',
+    t.dentalPiece || (lang === 'en' ? 'General' : 'General / Toda la boca'),
+    t.status || 'N/A',
+    t.category || '-',
+    t.responsibleDentist || '-',
+  ]);
+
+  return ReportService.buildTable({
+    columns: tableColumns,
+    rows: tableRows,
+    language: lang,
+  });
+}
+
+export function getClinicalRecordRenderOptions(
+  record: ClinicalRecord,
+  options?: ClinicalRecordExportOptions
+): RenderReportOptions {
+  const lang = resolveReportLanguage(options?.language);
+  const patient = record.patient;
+  const patientName = patient?.fullName || (lang === 'en' ? 'Patient' : 'Paciente');
+  const code = (patient?.patientCode || 'PT').replace(/[^a-zA-Z0-9]/g, '');
+  const cleanFileName = `Historia_Clinica_${patientName.trim().replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+
+  const patientGridHtml = buildPatientInfoGridHtml(patient, lang);
+  const consultationsBodyHtml = buildConsultationsListHtml(record.consultations || [], options?.doctorName, lang);
+  const treatmentsBodyHtml = buildTreatmentsTableHtml(record.treatments || [], lang);
+
+  const customStyles = `
+    .section-title-bar {
+      margin: 16px 0 10px 0;
+      padding-bottom: 4px;
+      border-bottom: 2px solid ${REPORT_THEME.primary};
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .section-title-bar h3 {
+      margin: 0;
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: ${REPORT_THEME.primaryDark};
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .consultation-card {
+      border: 1px solid ${REPORT_THEME.border};
+      border-left: 4px solid ${REPORT_THEME.primary};
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      background-color: ${REPORT_THEME.white};
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    .consultation-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      border-bottom: 1px dashed ${REPORT_THEME.border};
+      padding-bottom: 4px;
+    }
+    .consultation-card-title {
+      font-size: 9.5pt;
+      font-weight: 700;
+      color: ${REPORT_THEME.textDark};
+      margin: 0;
+    }
+    .consultation-card-date {
+      font-size: 8pt;
+      color: ${REPORT_THEME.textMuted};
+      font-weight: 600;
+    }
+    .consultation-field {
+      margin-bottom: 4px;
+      font-size: 8.5pt;
+      line-height: 1.35;
+      color: ${REPORT_THEME.textDark};
+    }
+    .consultation-field ul {
+      margin: 2px 0 2px 16px;
+      padding: 0;
+    }
+    .consultation-field li {
+      margin-bottom: 2px;
+    }
+    .consultation-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 4px;
+      border-top: 1px solid #F3F4F6;
+      font-size: 7.5pt;
+      color: ${REPORT_THEME.textMuted};
+    }
+    .consultation-next-badge {
+      background-color: ${REPORT_THEME.primarySoft};
+      color: ${REPORT_THEME.primaryDark};
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+    .report-table tr {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+  `;
+
+  const contentHtml = `
+    <div class="patient-section keep-together">
+      <div class="section-title-bar">
+        <h3>${escapeHtml(lang === 'en' ? 'Patient Clinical Record & Background' : 'Datos del Paciente y Antecedentes')}</h3>
+      </div>
+      ${patientGridHtml}
+    </div>
+
+    <div class="consultations-section">
+      <div class="section-title-bar">
+        <h3>${escapeHtml(lang === 'en' ? 'Chronological Consultation History & Evolution' : 'Historial de Consultas y Evolución')}</h3>
+      </div>
+      ${consultationsBodyHtml}
+    </div>
+
+    <div class="treatments-section">
+      <div class="section-title-bar">
+        <h3>${escapeHtml(lang === 'en' ? 'Detailed Dental Treatments History' : 'Historial Detallado de Tratamientos Odontológicos')}</h3>
+      </div>
+      ${treatmentsBodyHtml}
+    </div>
+  `;
+
+  return {
+    metadata: {
+      title: lang === 'en' ? 'DENTAL CLINICAL RECORD' : 'HISTORIA CLÍNICA ODONTOLÓGICA',
+      subtitle: `${lang === 'en' ? 'Patient' : 'Paciente'}: ${patientName}`,
+      reportCode: `HC-${code}-${new Date().getFullYear()}`,
+      category: lang === 'en' ? 'Clinical Record' : 'Expediente Clínico Odontológico',
+      badge: {
+        label: patient?.status === 'activo'
+          ? (lang === 'en' ? 'Active' : 'Activo')
+          : (lang === 'en' ? 'Record' : 'Expediente'),
+        variant: 'primary',
+      },
+      generatedBy: options?.doctorName || (lang === 'en' ? 'Attending Dentist' : 'Dr. Odontólogo Responsable'),
+      showSignatureBlock: true,
+      signatureTitle: options?.doctorName || (lang === 'en' ? 'Attending Dentist' : 'Dr. Odontólogo Responsable'),
+      signatureSubtitle: lang === 'en' ? 'Treating Specialist - ATI Dental' : 'Especialista Tratante - ATI Dental',
+      licenseNumber: options?.licenseNumber,
+      fileName: cleanFileName,
+      language: lang,
+    },
+    contentHtml,
+    customStyles,
+    pageSize: 'A4',
+    orientation: 'portrait',
+    language: lang,
+  };
+}
+
+/**
+ * Genera el documento HTML completo del expediente clínico odontológico,
+ * aplicando el membrete corporativo, datos del paciente, historial de consultas y tratamientos.
+ */
+export function buildClinicalRecordPdfHtml(
+  record: ClinicalRecord,
+  options?: ClinicalRecordExportOptions
+): string {
+  const renderOptions = getClinicalRecordRenderOptions(record, options);
+  return ReportService.renderHtml(renderOptions);
+}
+
+/**
+ * Exporta y comparte el expediente clínico dental completo a PDF (Criterios US-22).
+ * Compila la plantilla corporativa en segundo plano y despliega de forma nativa la hoja de compartir.
+ */
+export async function exportClinicalRecordToPdf(
+  record: ClinicalRecord,
+  options?: ClinicalRecordExportOptions & { shareOptions?: ShareReportOptions }
+): Promise<GenerateAndShareReportResult> {
+  if (!hasClinicalRecordExportableData(record)) {
+    throw new Error('El paciente no registra consultas ni tratamientos para exportar');
+  }
+
+  const renderOptions = getClinicalRecordRenderOptions(record, options);
+  const lang = resolveReportLanguage(options?.language);
+  const patientName = record.patient?.fullName || (lang === 'en' ? 'Patient' : 'Paciente');
+
+  return ReportService.generateAndShare(renderOptions, {
+    dialogTitle: `${lang === 'en' ? 'Clinical Record' : 'Historia Clínica'} - ${patientName}`,
+    mimeType: 'application/pdf',
+    language: lang,
+    ...options?.shareOptions,
+  });
 }
