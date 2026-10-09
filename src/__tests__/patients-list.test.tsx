@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import AdminUserList from '@/app/(tabs)/patients/patients-list';
 import { isAsistenteUser } from '@/constants/user-roles';
@@ -54,6 +54,7 @@ jest.mock('@/hooks/use-theme', () => ({
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
+    i18n: { language: 'es' },
     t: (key: string) => {
       const translations: Record<string, string> = {
         'patients-list.title': 'Lista de Pacientes',
@@ -241,7 +242,8 @@ describe('Pruebas de cobertura adicional para AdminUserList', () => {
 
   beforeEach(() => {
     mockPush.mockClear();
-    (Alert.alert as jest.Mock).mockClear(); // <--- Limpia los llamados previos de Alert
+    (Alert.alert as jest.Mock).mockClear();
+    mockUseNetInfo.mockReturnValue({ isConnected: true });
   });
 
   it('ejecuta la vista detallada y presionado largo del paciente', () => {
@@ -301,14 +303,16 @@ describe('Pruebas de cobertura adicional para AdminUserList', () => {
     const { getByTestId } = render(<AdminUserList />);
     const exportBtn = getByTestId('btn-export-patients-pdf');
 
-    await fireEvent.press(exportBtn);
+    fireEvent.press(exportBtn);
 
-    expect(exportPatientDirectoryPdf).toHaveBeenCalledWith(
-      expect.objectContaining({
-        patients: expect.any(Array),
-        generatedBy: 'Dra. María',
-      })
-    );
+    await waitFor(() => {
+      expect(exportPatientDirectoryPdf).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patients: expect.any(Array),
+          generatedBy: 'Dra. María',
+        })
+      );
+    });
   });
 
   it('maneja el error al exportar PDF mostrando alerta si el servicio falla', async () => {
@@ -324,11 +328,13 @@ describe('Pruebas de cobertura adicional para AdminUserList', () => {
     const { getByTestId } = render(<AdminUserList />);
     const exportBtn = getByTestId('btn-export-patients-pdf');
 
-    await fireEvent.press(exportBtn);
+    fireEvent.press(exportBtn);
 
-    expect(Alert.alert).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.any(String)
-    );
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String)
+      );
+    });
   });
 });

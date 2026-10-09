@@ -67,7 +67,7 @@ export default function AdminUserList() {
     try {
       await exportPatientDirectoryPdf({
         patients: dataToExport,
-        language: (i18n.language?.startsWith('en') ? 'en' : 'es'),
+        language: (i18n?.language?.startsWith('en') ? 'en' : 'es'),
         generatedBy: authUser?.displayName || authUser?.email || t('navigation.roles.admin'),
         searchQuery: filter.searchQuery,
       });
