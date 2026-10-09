@@ -192,7 +192,7 @@ describe('Patient Service (Persistence Layer)', () => {
       await expect(getPatientByEmail('error@example.com')).rejects.toThrow('Network error');
     });
   });
-  describe('Directorio de Pacientes - Exportación PDF (US-34)', () => {
+  describe('Directorio de Pacientes - Exportación PDF', () => {
     const mockPatientA = {
       id: 'p-1',
       patientCode: 'PAC-001',
@@ -270,6 +270,20 @@ describe('Patient Service (Persistence Layer)', () => {
       );
 
       spy.mockRestore();
+    });
+
+    it('mapea correctamente el contacto cuando el paciente solo tiene teléfono sin correo', () => {
+      const mockPatientPhoneOnly = {
+        fullName: 'Pedro Rodríguez',
+        phone: '+584125556677',
+      };
+      const row = mapPatientToDirectoryRow(mockPatientPhoneOnly);
+      expect(row[2]).toBe('+584125556677');
+    });
+
+    it('construye el HTML del directorio usando opciones por defecto cuando no se pasan parámetros adicionales', () => {
+      const result = buildPatientDirectoryHtml([mockPatientA] as any);
+      expect(result.metadata.title).toBe('Directorio de Pacientes');
     });
   });
 });
