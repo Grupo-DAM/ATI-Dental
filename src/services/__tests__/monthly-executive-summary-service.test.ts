@@ -51,7 +51,7 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
   });
 
   describe('fetchMonthlyExecutiveSummaryData', () => {
-    it('recupera sesiones, conteo de usuarios y métricas de estabilidad desde Firestore', async () => {
+    it('recupera sesiones, usuarios, estabilidad, pacientes, tratamientos y citas desde Firestore', async () => {
       const mockGetSessions = jest.fn().mockResolvedValue({
         docs: [
           { id: 's1', data: () => ({ fecha: new Date().getTime(), duracion: 60 }) },
@@ -72,6 +72,30 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
         data: () => ({ totalCrashes: 1 }),
       });
 
+      const mockGetPatients = jest.fn().mockResolvedValue({
+        docs: [
+          { id: 'p1', data: () => ({ status: 'activo' }) },
+          { id: 'p2', data: () => ({ status: 'activo' }) },
+          { id: 'p3', data: () => ({ status: 'inactivo' }) },
+        ],
+      });
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const mockGetTreatments = jest.fn().mockResolvedValue({
+        docs: [
+          { id: 't1', data: () => ({ estimatedCost: 100000, treatmentDate: todayStr }) },
+          { id: 't2', data: () => ({ estimatedCost: 300000, treatmentDate: todayStr }) },
+        ],
+      });
+
+      const mockGetAppointments = jest.fn().mockResolvedValue({
+        docs: [
+          { id: 'c1', data: () => ({ date: todayStr }) },
+          { id: 'c2', data: () => ({ date: todayStr }) },
+          { id: 'c3', data: () => ({ date: todayStr }) },
+        ],
+      });
+
       (firestore as unknown as jest.Mock).mockReturnValue({
         collection: jest.fn((colName: string) => {
           if (colName === 'sesiones') {
@@ -87,6 +111,15 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
               doc: jest.fn(() => ({ get: mockGetStability })),
             };
           }
+          if (colName === 'pacientes') {
+            return { get: mockGetPatients };
+          }
+          if (colName === 'tratamientos') {
+            return { get: mockGetTreatments };
+          }
+          if (colName === 'citas') {
+            return { get: mockGetAppointments };
+          }
           return { get: jest.fn().mockResolvedValue({ docs: [] }) };
         }),
       });
@@ -98,6 +131,12 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
       expect(data.totalCrashes).toBe(1);
       expect(data.crashRatePercent).toBe('50.00%');
       expect(data.dailyAverageAccesses).toBe(0.1);
+      expect(data.totalPatients).toBe(3);
+      expect(data.activePatients).toBe(2);
+      expect(data.monthlyTreatmentsCount).toBe(2);
+      expect(data.monthlyEstimatedCost).toBe(400000);
+      expect(data.averageTreatmentCost).toBe(200000);
+      expect(data.monthlyAppointmentsCount).toBe(3);
     });
 
     it('maneja fallos de red o excepciones en Firestore de manera resiliente', async () => {
@@ -113,6 +152,12 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
       expect(data.activeUsers).toBe(0);
       expect(data.totalCrashes).toBe(0);
       expect(data.crashRatePercent).toBe('0.00%');
+      expect(data.totalPatients).toBe(0);
+      expect(data.activePatients).toBe(0);
+      expect(data.monthlyTreatmentsCount).toBe(0);
+      expect(data.monthlyEstimatedCost).toBe(0);
+      expect(data.averageTreatmentCost).toBe(0);
+      expect(data.monthlyAppointmentsCount).toBe(0);
       expect(data.sessions).toEqual([]);
     });
   });
@@ -125,6 +170,12 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
       totalCrashes: 2,
       crashRatePercent: '2.00%',
       sessions: [{ id: '1', fecha: new Date().getTime(), duracion: 300 }],
+      totalPatients: 120,
+      activePatients: 110,
+      monthlyTreatmentsCount: 45,
+      monthlyEstimatedCost: 18500000,
+      averageTreatmentCost: 411111,
+      monthlyAppointmentsCount: 60,
     };
 
     it('genera el reporte ejecutivo completo con gráficos, tabla y firmas en español', () => {
@@ -139,11 +190,12 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
       expect(options.metadata.signatureSubtitle).toBe('Administrador de Sistema · ATI Dental');
       expect(options.metadata.fileName).toContain('Resumen_Ejecutivo_Mensual_');
 
-      expect(ReportService.buildMetrics).toHaveBeenCalled();
+      expect(ReportService.buildMetrics).toHaveBeenCalledTimes(2);
       expect(ReportService.buildSvgLineChart).toHaveBeenCalled();
-      expect(ReportService.buildTable).toHaveBeenCalled();
-      expect(options.metadata.notes).toHaveLength(3);
+      expect(ReportService.buildTable).toHaveBeenCalledTimes(2);
+      expect(options.metadata.notes).toHaveLength(4);
       expect(options.language).toBe('es');
+      expect(options.contentHtml).toContain('Resumen Clínico y Financiero');
     });
 
     it('soporta la generación bilingüe en inglés (en)', () => {
@@ -156,8 +208,9 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
       expect(options.metadata.signatureTitle).toBe('Medical & Administrative Direction');
       expect(options.metadata.signatureSubtitle).toBe('System Administrator · ATI Dental');
       expect(options.metadata.fileName).toContain('Executive_Monthly_Summary_');
-      expect(options.metadata.notes?.[0]).toContain('operational and activity indicators');
+      expect(options.metadata.notes?.[0]).toContain('clinical, financial, and operational');
       expect(options.language).toBe('en');
+      expect(options.contentHtml).toContain('Clinical & Financial Summary');
     });
 
     it('maneja el caso borde de período sin sesiones con alerta explicativa y métricas en cero', () => {
@@ -168,6 +221,12 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
         totalCrashes: 0,
         crashRatePercent: '0.00%',
         sessions: [],
+        totalPatients: 0,
+        activePatients: 0,
+        monthlyTreatmentsCount: 0,
+        monthlyEstimatedCost: 0,
+        averageTreatmentCost: 0,
+        monthlyAppointmentsCount: 0,
       };
 
       const options = buildMonthlyExecutiveSummaryHtml(emptyData, 'es');
@@ -177,7 +236,8 @@ describe('monthly-executive-summary-service (US-35 / Issue #31)', () => {
         'info'
       );
       expect(ReportService.buildSvgLineChart).not.toHaveBeenCalled();
-      expect(ReportService.buildTable).not.toHaveBeenCalled();
+      // Se genera la tabla clínica pero no la de concurrencia
+      expect(ReportService.buildTable).toHaveBeenCalledTimes(1);
       expect(options.contentHtml).toContain('alert-info');
     });
   });

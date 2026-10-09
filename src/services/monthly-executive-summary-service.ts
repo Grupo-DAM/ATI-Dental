@@ -1,6 +1,6 @@
 /**
  * Servicio ejecutivo de Resumen Mensual (US-35 / Issue #31)
- * Consolida indicadores operativos y de actividad del mes (30 días)
+ * Consolida indicadores clínicos, financieros y de actividad de plataforma del mes (30 días)
  * para exportación gerencial en PDF con membrete institucional y bloque de firmas.
  */
 import { firestore } from '@/config/firebase';
@@ -19,12 +19,21 @@ import {
 } from '@/services/report-service';
 
 export interface MonthlyExecutiveMetrics {
+  // Concurrencia y plataforma
   totalAccesses: number;
   dailyAverageAccesses: number;
   activeUsers: number;
   totalCrashes: number;
   crashRatePercent: string;
   sessions: SessionRecord[];
+
+  // Indicadores Clínicos y Financieros
+  totalPatients: number;
+  activePatients: number;
+  monthlyTreatmentsCount: number;
+  monthlyEstimatedCost: number;
+  averageTreatmentCost: number;
+  monthlyAppointmentsCount: number;
 }
 
 export interface DailyExecutiveSummaryBucket {
@@ -63,11 +72,18 @@ export async function fetchMonthlyExecutiveSummaryData(): Promise<MonthlyExecuti
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - 29);
   startDate.setHours(0, 0, 0, 0);
+  const startDateStr = startDate.toISOString().split('T')[0];
 
   let sessions: SessionRecord[] = [];
   let activeUsers = 0;
   let totalCrashes = 0;
+  let totalPatients = 0;
+  let activePatients = 0;
+  let monthlyTreatmentsCount = 0;
+  let monthlyEstimatedCost = 0;
+  let monthlyAppointmentsCount = 0;
 
+  // 1. Sesiones de usuario (Últimos 30 días)
   try {
     const sessionsSnap = await firestore()
       .collection('sesiones')
@@ -75,9 +91,10 @@ export async function fetchMonthlyExecutiveSummaryData(): Promise<MonthlyExecuti
       .get();
     sessions = sessionsSnap?.docs?.map((doc: any) => ({ id: doc.id, ...doc.data() })) ?? [];
   } catch {
-    // Manejo resiliente ante errores de red o emuladores
+    // Manejo resiliente
   }
 
+  // 2. Usuarios del sistema
   try {
     const usersSnap = await firestore().collection('usuarios').get();
     if (usersSnap?.docs) {
@@ -91,6 +108,7 @@ export async function fetchMonthlyExecutiveSummaryData(): Promise<MonthlyExecuti
     // Manejo resiliente
   }
 
+  // 3. Métricas de estabilidad y fallos
   try {
     const stabilityDoc = await firestore()
       .collection('metricas_estabilidad')
@@ -104,9 +122,59 @@ export async function fetchMonthlyExecutiveSummaryData(): Promise<MonthlyExecuti
     // Manejo resiliente
   }
 
+  // 4. Pacientes registrados en la clínica
+  try {
+    const patientsSnap = await firestore().collection('pacientes').get();
+    if (patientsSnap?.docs) {
+      totalPatients = patientsSnap.docs.length;
+      activePatients = patientsSnap.docs.filter((doc: any) => {
+        const data = doc.data() || {};
+        return data.status !== 'inactivo';
+      }).length;
+    }
+  } catch {
+    // Manejo resiliente
+  }
+
+  // 5. Tratamientos y costos del mes
+  try {
+    const treatmentsSnap = await firestore().collection('tratamientos').get();
+    if (treatmentsSnap?.docs) {
+      treatmentsSnap.docs.forEach((doc: any) => {
+        const t = doc.data() || {};
+        const tDate = t.treatmentDate || t.createdAt;
+        const fallsInMonth = !tDate || String(tDate) >= startDateStr;
+        if (fallsInMonth) {
+          monthlyTreatmentsCount += 1;
+          const cost = Number(t.estimatedCost || 0);
+          if (!Number.isNaN(cost) && cost > 0) {
+            monthlyEstimatedCost += cost;
+          }
+        }
+      });
+    }
+  } catch {
+    // Manejo resiliente
+  }
+
+  // 6. Citas médicas en agenda
+  try {
+    const appointmentsSnap = await firestore().collection('citas').get();
+    if (appointmentsSnap?.docs) {
+      monthlyAppointmentsCount = appointmentsSnap.docs.filter((doc: any) => {
+        const a = doc.data() || {};
+        return !a.date || String(a.date) >= startDateStr;
+      }).length;
+    }
+  } catch {
+    // Manejo resiliente
+  }
+
   const totalAccesses = sessions.length;
   const dailyAverageAccesses = Math.round((totalAccesses / 30) * 10) / 10;
   const crashRatePercent = calculateCrashRatePercentage(totalCrashes, totalAccesses);
+  const averageTreatmentCost =
+    monthlyTreatmentsCount > 0 ? Math.round(monthlyEstimatedCost / monthlyTreatmentsCount) : 0;
 
   return {
     totalAccesses,
@@ -115,14 +183,20 @@ export async function fetchMonthlyExecutiveSummaryData(): Promise<MonthlyExecuti
     totalCrashes,
     crashRatePercent,
     sessions,
+    totalPatients,
+    activePatients,
+    monthlyTreatmentsCount,
+    monthlyEstimatedCost,
+    averageTreatmentCost,
+    monthlyAppointmentsCount,
   };
 }
 
 const STRINGS = {
   title: ['Resumen Ejecutivo Mensual', 'Executive Monthly Summary'],
   subtitle: [
-    'Indicadores de Actividad y Desempeño Operativo · Últimos 30 días',
-    'Activity Indicators and Operational Performance · Last 30 days',
+    'Indicadores Clínicos, Financieros y Operativos · Últimos 30 días',
+    'Clinical, Financial and Operational Indicators · Last 30 days',
   ],
   category: [
     'Módulo Administrativo · Resumen Gerencial',
@@ -130,10 +204,25 @@ const STRINGS = {
   ],
   badge: ['30 DÍAS', '30 DAYS'],
   fileName: ['Resumen_Ejecutivo_Mensual', 'Executive_Monthly_Summary'],
-  cardAccesses: ['ACCESOS TOTALES (MES)', 'TOTAL ACCESSES (MONTH)'],
+  cardPatients: ['PACIENTES TOTALES', 'TOTAL PATIENTS'],
+  cardTreatments: ['TRATAMIENTOS (MES)', 'TREATMENTS (MONTH)'],
+  cardEstimatedCost: ['COSTOS ESTIMADOS', 'ESTIMATED COSTS'],
+  cardAccesses: ['ACCESOS TOTALES', 'TOTAL ACCESSES'],
   cardDailyAvg: ['PROMEDIO DIARIO', 'DAILY AVERAGE'],
-  cardUsers: ['USUARIOS ACTIVOS', 'ACTIVE USERS'],
   cardCrashRate: ['TASA DE FALLOS', 'CRASH RATE'],
+  secClinicalTitle: ['Resumen Clínico y Financiero', 'Clinical & Financial Summary'],
+  colIndicator: ['Indicador', 'Indicator'],
+  colValue: ['Valor', 'Value'],
+  colDetail: ['Detalle / Observación', 'Detail / Observation'],
+  rowPatients: ['Pacientes Registrados', 'Registered Patients'],
+  rowPatientsDetail: ['Activos en la clínica', 'Active in clinic'],
+  rowTreatments: ['Tratamientos Realizados', 'Completed Treatments'],
+  rowTreatmentsDetail: ['Costo Promedio: ', 'Average Cost: '],
+  rowCosts: ['Costos Totales Estimados', 'Total Estimated Costs'],
+  rowCostsDetail: ['Presupuesto de procedimientos', 'Procedures budget'],
+  rowAppointments: ['Citas Programadas', 'Scheduled Appointments'],
+  rowAppointmentsDetail: ['Citas en agenda médica', 'Medical agenda appointments'],
+  secConcurrencyTitle: ['Concurrencia y Actividad en Plataforma', 'Platform Concurrency & Activity'],
   noActivityAlert: [
     'Sin actividad de sesiones registrada en el período seleccionado.',
     'No session activity recorded during the selected period.',
@@ -151,17 +240,24 @@ const STRINGS = {
   ],
   notes: [
     [
-      'El presente informe consolida los indicadores operativos y de actividad registrados en los últimos 30 días.',
-      'Documento estructurado para respaldo gerencial y auditoría de la plataforma.',
+      'El presente informe consolida los indicadores clínicos, financieros y de actividad operativa registrados en los últimos 30 días.',
+      'Los costos reflejan los presupuestos estimados acumulados de los tratamientos correspondientes al período.',
+      'Documento estructurado para respaldo gerencial, toma de decisiones y auditoría de la plataforma.',
       'Datos extraídos de forma segura desde Cloud Firestore.',
     ],
     [
-      'This report consolidates operational and activity indicators recorded over the last 30 days.',
-      'Structured document for managerial backup and platform auditing.',
+      'This report consolidates clinical, financial, and operational activity indicators recorded over the last 30 days.',
+      'Costs reflect the cumulative estimated budgets of treatments corresponding to the period.',
+      'Structured document for managerial backup, decision making, and platform auditing.',
       'Data securely extracted from Cloud Firestore.',
     ],
   ],
 } as const;
+
+function formatCurrency(amount: number): string {
+  const safeAmount = typeof amount === 'number' && Number.isFinite(amount) ? amount : 0;
+  return `$${safeAmount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+}
 
 export function buildMonthlyExecutiveSummaryHtml(
   data: MonthlyExecutiveMetrics,
@@ -172,7 +268,26 @@ export function buildMonthlyExecutiveSummaryHtml(
   const isEn = language === 'en';
   const hasSessions = data.sessions && data.sessions.length > 0;
 
-  const kpiCards = ReportService.buildMetrics([
+  // 1. Tarjetas de Indicadores Clave (KPIs)
+  const clinicalKpis = ReportService.buildMetrics([
+    {
+      label: STRINGS.cardPatients[i],
+      value: data.totalPatients,
+      variant: 'primary',
+    },
+    {
+      label: STRINGS.cardTreatments[i],
+      value: data.monthlyTreatmentsCount,
+      variant: 'info',
+    },
+    {
+      label: STRINGS.cardEstimatedCost[i],
+      value: formatCurrency(data.monthlyEstimatedCost),
+      variant: 'neutral',
+    },
+  ]);
+
+  const platformKpis = ReportService.buildMetrics([
     {
       label: STRINGS.cardAccesses[i],
       value: data.totalAccesses,
@@ -184,23 +299,51 @@ export function buildMonthlyExecutiveSummaryHtml(
       variant: 'neutral',
     },
     {
-      label: STRINGS.cardUsers[i],
-      value: data.activeUsers,
-      variant: 'info',
-    },
-    {
       label: STRINGS.cardCrashRate[i],
       value: data.crashRatePercent,
       variant: 'warning',
     },
   ]);
 
-  let detailHtml = '';
+  // 2. Tabla Resumen Clínico y Financiero
+  const clinicalTableHtml = ReportService.buildTable({
+    columns: [
+      { header: STRINGS.colIndicator[i], align: 'left', width: '40%' },
+      { header: STRINGS.colValue[i], align: 'center', width: '25%' },
+      { header: STRINGS.colDetail[i], align: 'left', width: '35%' },
+    ],
+    rows: [
+      [
+        STRINGS.rowPatients[i],
+        data.totalPatients,
+        `${STRINGS.rowPatientsDetail[i]}: ${data.activePatients}`,
+      ],
+      [
+        STRINGS.rowTreatments[i],
+        data.monthlyTreatmentsCount,
+        `${STRINGS.rowTreatmentsDetail[i]}${formatCurrency(data.averageTreatmentCost)}`,
+      ],
+      [
+        STRINGS.rowCosts[i],
+        formatCurrency(data.monthlyEstimatedCost),
+        STRINGS.rowCostsDetail[i],
+      ],
+      [
+        STRINGS.rowAppointments[i],
+        data.monthlyAppointmentsCount,
+        STRINGS.rowAppointmentsDetail[i],
+      ],
+    ],
+    language,
+  });
+
+  // 3. Sección de Concurrencia y Actividad
+  let concurrencySectionHtml = '';
 
   if (!hasSessions) {
     const alertHtml = ReportService.buildAlert(STRINGS.noActivityAlert[i], 'info');
-    detailHtml = `
-      <div style="margin-top: 20px;">
+    concurrencySectionHtml = `
+      <div style="margin-top: 16px;">
         ${alertHtml}
       </div>
     `;
@@ -239,7 +382,7 @@ export function buildMonthlyExecutiveSummaryHtml(
       language,
     });
 
-    detailHtml = `
+    concurrencySectionHtml = `
       ${chartHtml}
       <div style="margin-top: 14px;">
         ${tableHtml}
@@ -249,6 +392,21 @@ export function buildMonthlyExecutiveSummaryHtml(
 
   const todayStr = new Date().toISOString().split('T')[0];
   const fileName = `${STRINGS.fileName[i]}_${todayStr}`;
+
+  const contentHtml = `
+    ${clinicalKpis}
+    <div style="margin-top: 8px;">
+      ${platformKpis}
+    </div>
+    <h3 style="margin: 20px 0 10px; color: #5B2D8B; font-size: 11pt; font-family: 'Open Sans', sans-serif;">
+      ${STRINGS.secClinicalTitle[i]}
+    </h3>
+    ${clinicalTableHtml}
+    <h3 style="margin: 24px 0 10px; color: #5B2D8B; font-size: 11pt; font-family: 'Open Sans', sans-serif;">
+      ${STRINGS.secConcurrencyTitle[i]}
+    </h3>
+    ${concurrencySectionHtml}
+  `;
 
   return {
     metadata: {
@@ -266,7 +424,7 @@ export function buildMonthlyExecutiveSummaryHtml(
       notes: [...STRINGS.notes[i]],
       language,
     },
-    contentHtml: `${kpiCards}${detailHtml}`,
+    contentHtml,
     language,
   };
 }
