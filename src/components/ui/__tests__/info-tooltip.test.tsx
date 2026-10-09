@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import { InfoTooltip } from '../info-tooltip';
 
 jest.mock('@expo/vector-icons', () => {
@@ -90,5 +90,38 @@ describe('InfoTooltip Component', () => {
     fireEvent.press(getByTestId('kpi-dau-info-icon'));
     expect(getByText('Aceptar')).toBeTruthy();
     expect(queryByTestId('kpi-dau-info-icon-note')).toBeNull();
+  });
+
+  it('handles onRequestClose and prevents card press propagation', () => {
+    const { getByTestId } = render(<InfoTooltip {...defaultProps} />);
+
+    fireEvent.press(getByTestId('kpi-dau-info-icon'));
+    const modal = getByTestId('kpi-dau-info-icon-modal');
+    act(() => {
+      modal.props.onRequestClose();
+    });
+
+    fireEvent.press(getByTestId('kpi-dau-info-icon'));
+    const card = getByTestId('kpi-dau-info-icon-content');
+    const stopPropagationMock = jest.fn();
+    fireEvent.press(card, { stopPropagation: stopPropagationMock });
+    expect(stopPropagationMock).toHaveBeenCalled();
+  });
+
+  it('renders correctly with default props when testID is omitted', () => {
+    const { getByLabelText, getByTestId } = render(
+      <InfoTooltip
+        title="Default Title"
+        description="Default Desc"
+        calculationNote="Fórmula de cálculo"
+      />
+    );
+
+    fireEvent.press(getByLabelText('Default Title'));
+    expect(getByTestId('info-tooltip-modal')).toBeTruthy();
+    expect(getByTestId('info-tooltip-title')).toBeTruthy();
+    expect(getByTestId('info-tooltip-description')).toBeTruthy();
+    expect(getByTestId('info-tooltip-note')).toBeTruthy();
+    expect(getByTestId('info-tooltip-close-button')).toBeTruthy();
   });
 });
