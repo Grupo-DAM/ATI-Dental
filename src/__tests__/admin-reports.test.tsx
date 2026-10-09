@@ -46,6 +46,19 @@ jest.mock('expo-file-system', () => ({
   Paths: { cache: 'cache-dir' },
 }));
 
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  shareAsync: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('@/components/reports/utils/reports-utils', () => {
+  const original = jest.requireActual('@/components/reports/utils/reports-utils');
+  return {
+    ...original,
+    exportChartDataToCsv: jest.fn(() => Promise.resolve()),
+  };
+});
+
 let mockUser: any = {
   uid: 'admin-123',
   email: 'admin@atidental.com',
@@ -206,8 +219,8 @@ jest.mock('@/components/reports/views/UserGeographicsReportView', () => ({
         mainCountry: 'Venezuela',
         mainCountryPercent: 100,
         totalUsers: 15,
-        countryBuckets: [{ key: 'Venezuela', count: 15 }],
-        regionSlices: [{ key: 'Caracas', count: 15 }],
+        countryBuckets: [{ country: 'Venezuela', count: 15 }],
+        regionSlices: [{ region: 'Caracas', count: 15 }],
       });
     }, [onDataReady]);
     return null;
@@ -795,16 +808,14 @@ describe('Pruebas de Exportación y Cambio de Vistas para Cobertura Completa', (
   it('Exporta correctamente a CSV y PDF en vista de Demografía', async () => {
     const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
 
-    // 1. Abrir selector de tipo de reporte
+    // 1. Abrir selector y presionar Demografía
     fireEvent.press(getByTestId('report-type-select'));
-
-    // 2. Esperar y presionar la opción de Demografía
     const demoOption = await findByTestId('type-option-demographics');
     await act(async () => {
       fireEvent.press(demoOption);
     });
 
-    // 3. Exportar CSV
+    // 2. Exportar CSV
     fireEvent.press(getByTestId('download-menu-btn'));
     await act(async () => {
       fireEvent.press(getByTestId('export-csv-btn'));
@@ -815,7 +826,7 @@ describe('Pruebas de Exportación y Cambio de Vistas para Cobertura Completa', (
       'Los datos tabulares han sido preparados para su descarga.'
     );
 
-    // 4. Exportar PDF
+    // 3. Exportar PDF
     fireEvent.press(getByTestId('download-menu-btn'));
     await act(async () => {
       fireEvent.press(getByTestId('export-pdf-btn'));
@@ -830,7 +841,7 @@ describe('Pruebas de Exportación y Cambio de Vistas para Cobertura Completa', (
   it('Exporta correctamente a CSV en vistas de Geografía, Crash Rate y Retención', async () => {
     const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
 
-    // --- 1. Vista de Geografía ---
+    // --- Geografía ---
     fireEvent.press(getByTestId('report-type-select'));
     const geoOption = await findByTestId('type-option-geographics');
     await act(async () => {
@@ -846,7 +857,7 @@ describe('Pruebas de Exportación y Cambio de Vistas para Cobertura Completa', (
       'Los datos tabulares han sido preparados para su descarga.'
     );
 
-    // --- 2. Vista de Tasa de fallos (Crash Rate) ---
+    // --- Crash Rate ---
     fireEvent.press(getByTestId('report-type-select'));
     const crashOption = await findByTestId('type-option-crash-rate');
     await act(async () => {
@@ -862,7 +873,7 @@ describe('Pruebas de Exportación y Cambio de Vistas para Cobertura Completa', (
       'Los datos tabulares han sido preparados para su descarga.'
     );
 
-    // --- 3. Vista de Tasa de retención ---
+    // --- Retención ---
     fireEvent.press(getByTestId('report-type-select'));
     const retentionOption = await findByTestId('type-option-retention-rate');
     await act(async () => {
