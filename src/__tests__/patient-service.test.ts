@@ -5,7 +5,13 @@ import {
   PATIENTS_COLLECTION,
   PatientInput,
 } from '@/services/patient-service';
+import {
+  mapPatientToDirectoryRow,
+  buildPatientDirectoryHtml,
+  exportPatientDirectoryPdf,
+} from '@/services/patient-directory-export';
 import { firestore } from '@/config/firebase';
+import { ReportService } from '@/services/report-service';
 
 describe('Patient Service (Persistence Layer)', () => {
   const mockFirestoreInstance = firestore();
@@ -184,6 +190,100 @@ describe('Patient Service (Persistence Layer)', () => {
 
       const { getPatientByEmail } = require('@/services/patient-service');
       await expect(getPatientByEmail('error@example.com')).rejects.toThrow('Network error');
+    });
+  });
+  describe('Directorio de Pacientes - Exportación PDF', () => {
+    const mockPatientA = {
+      id: 'p-1',
+      patientCode: 'PAC-001',
+      fullName: 'Carlos Gómez',
+      phone: '+584141112233',
+      email: 'carlos@test.com',
+      lastVisit: '2025-01-15',
+      nextAppointment: '2025-02-20',
+    };
+
+    const mockPatientB = {
+      id: 'p-2',
+      patientCode: '',
+      fullName: 'Ana Pérez',
+      phone: '',
+      email: 'ana@test.com',
+      ultima_visita: '',
+      proxima_cita: '',
+    };
+
+    it('mapea un paciente a la fila con las 5 columnas requeridas y oculta el ID interno', () => {
+      const row = mapPatientToDirectoryRow(mockPatientA);
+      expect(row).toHaveLength(5);
+      expect(row[0]).toBe('PAC-001');
+      expect(row[1]).toBe('Carlos Gómez');
+      expect(row[2]).toBe('+584141112233 / carlos@test.com');
+      // No debe contener el ID interno de Firestore
+      expect(row).not.toContain('p-1');
+    });
+
+    it('aplica valores por defecto seguros ("—") cuando faltan datos en el paciente', () => {
+      const row = mapPatientToDirectoryRow(mockPatientB);
+      expect(row[0]).toBe('—');
+      expect(row[1]).toBe('Ana Pérez');
+      expect(row[2]).toBe('ana@test.com');
+      expect(row[3]).toBe('—');
+      expect(row[4]).toBe('—');
+    });
+
+    it('construye la estructura HTML del directorio con membrete, métricas y reglas anti-corte', () => {
+      const result = buildPatientDirectoryHtml([mockPatientA, mockPatientB] as any, {
+        patients: [mockPatientA, mockPatientB] as any,
+        language: 'es',
+      });
+
+      expect(result.metadata.title).toBe('Directorio de Pacientes');
+      expect(result.metadata.category).toBe('Directorio Clínico');
+      expect(result.contentHtml).toContain('TOTAL DE PACIENTES');
+      expect(result.contentHtml).toContain('PAC-001');
+      expect(result.contentHtml).toContain('Carlos Gómez');
+      // Verifica las reglas CSS anti-corte requeridas
+      expect(result.customStyles).toContain('page-break-inside: avoid');
+    });
+
+    it('llama a ReportService.generateAndShare con los parámetros adecuados', async () => {
+      const spy = jest.spyOn(ReportService, 'generateAndShare').mockResolvedValueOnce({
+        file: { uri: 'file://mock-dir.pdf', numberOfPages: 1 },
+        share: { shared: true },
+      });
+
+      await exportPatientDirectoryPdf({
+        patients: [mockPatientA] as any,
+        language: 'es',
+        generatedBy: 'Dr. Valerio',
+      });
+
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            title: 'Directorio de Pacientes',
+            generatedBy: 'Dr. Valerio',
+          }),
+        }),
+        expect.any(Object)
+      );
+
+      spy.mockRestore();
+    });
+
+    it('mapea correctamente el contacto cuando el paciente solo tiene teléfono sin correo', () => {
+      const mockPatientPhoneOnly = {
+        fullName: 'Pedro Rodríguez',
+        phone: '+584125556677',
+      };
+      const row = mapPatientToDirectoryRow(mockPatientPhoneOnly);
+      expect(row[2]).toBe('+584125556677');
+    });
+
+    it('construye el HTML del directorio usando opciones por defecto cuando no se pasan parámetros adicionales', () => {
+      const result = buildPatientDirectoryHtml([mockPatientA] as any);
+      expect(result.metadata.title).toBe('Patient Directory');
     });
   });
 });

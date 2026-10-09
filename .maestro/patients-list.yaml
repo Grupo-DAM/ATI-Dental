@@ -52,6 +52,16 @@ appId: com.proyect1.ATIDental
       timeout: 5000
 
 - scrollUntilVisible:
+    element:
+      id: "btn-export-patients-pdf"
+    direction: DOWN
+    timeout: 10000
+    speed: 40
+
+- assertVisible:
+    id: "btn-export-patients-pdf"
+
+- scrollUntilVisible:
       element:
           id: "list-pages"
       direction: DOWN
@@ -71,6 +81,15 @@ appId: com.proyect1.ATIDental
       visible:
         id: "list-patients-screen"
       timeout: 5000
+
+- scrollUntilVisible:
+    element:
+      id: "btn-export-patients-pdf"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    id: "btn-export-patients-pdf"
 
 - tapOn:
     id: "menu-btn"

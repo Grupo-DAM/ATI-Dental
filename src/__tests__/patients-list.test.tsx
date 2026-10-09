@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import AdminUserList from '@/app/(tabs)/patients/patients-list';
 import { isAsistenteUser } from '@/constants/user-roles';
@@ -54,6 +54,7 @@ jest.mock('@/hooks/use-theme', () => ({
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
+    i18n: { language: 'es' },
     t: (key: string) => {
       const translations: Record<string, string> = {
         'patients-list.title': 'Lista de Pacientes',
@@ -100,6 +101,10 @@ jest.mock('expo-image', () => {
     Image: (props: any) => <View testID="expo-image" {...props} />,
   };
 });
+
+jest.mock('@/services/patient-directory-export', () => ({
+  exportPatientDirectoryPdf: jest.fn(() => Promise.resolve()),
+}));
 
 jest.spyOn(Alert, 'alert');
 
@@ -237,7 +242,8 @@ describe('Pruebas de cobertura adicional para AdminUserList', () => {
 
   beforeEach(() => {
     mockPush.mockClear();
-    (Alert.alert as jest.Mock).mockClear(); // <--- Limpia los llamados previos de Alert
+    (Alert.alert as jest.Mock).mockClear();
+    mockUseNetInfo.mockReturnValue({ isConnected: true });
   });
 
   it('ejecuta la vista detallada y presionado largo del paciente', () => {
@@ -264,5 +270,71 @@ describe('Pruebas de cobertura adicional para AdminUserList', () => {
     // Disparar onLongPress
     cards[0].props.onLongPress();
     expect(Alert.alert).toHaveBeenCalledWith('Opciones del paciente');
+  });
+
+  it('ejecuta la edición de paciente (handleEditPatient)', () => {
+    mockUseAuth.mockReturnValue({ user: { role: 'odontologo' }, loading: false });
+    mockUsePatients.mockReturnValue({
+      patients: mockPatientsData,
+      isRetrying: false,
+      handleRetryConnection: jest.fn()
+    });
+
+    const { UNSAFE_getAllByType } = render(<AdminUserList />);
+    const cards = UNSAFE_getAllByType(require('@/components/users-list/user-card').UserCard);
+
+    // Disparar onEdit
+    cards[0].props.onEdit();
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/(tabs)/patients/register-patient',
+      params: { patientId: 'p1', patientData: JSON.stringify(mockPatientsData[0]) },
+    });
+  });
+
+  it('ejecuta la exportación a PDF exitosamente (handleExportPdf)', async () => {
+    const { exportPatientDirectoryPdf } = require('@/services/patient-directory-export');
+    mockUseAuth.mockReturnValue({ user: { role: 'admin', displayName: 'Dra. María' }, loading: false });
+    mockUsePatients.mockReturnValue({
+      patients: mockPatientsData,
+      isRetrying: false,
+      handleRetryConnection: jest.fn()
+    });
+
+    const { getByTestId } = render(<AdminUserList />);
+    const exportBtn = getByTestId('btn-export-patients-pdf');
+
+    fireEvent.press(exportBtn);
+
+    await waitFor(() => {
+      expect(exportPatientDirectoryPdf).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patients: expect.any(Array),
+          generatedBy: 'Dra. María',
+        })
+      );
+    });
+  });
+
+  it('maneja el error al exportar PDF mostrando alerta si el servicio falla', async () => {
+    const { exportPatientDirectoryPdf } = require('@/services/patient-directory-export');
+    exportPatientDirectoryPdf.mockRejectedValueOnce(new Error('Export failed'));
+    mockUseAuth.mockReturnValue({ user: { role: 'admin' }, loading: false });
+    mockUsePatients.mockReturnValue({
+      patients: mockPatientsData,
+      isRetrying: false,
+      handleRetryConnection: jest.fn()
+    });
+
+    const { getByTestId } = render(<AdminUserList />);
+    const exportBtn = getByTestId('btn-export-patients-pdf');
+
+    fireEvent.press(exportBtn);
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String)
+      );
+    });
   });
 });

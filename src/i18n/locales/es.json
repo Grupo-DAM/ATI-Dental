@@ -407,7 +407,10 @@
     "registerPatient": "Registrar Paciente",
     "accessDeniedTitle": "Acceso Denegado",
     "odontologoOnlyView": "No tienes permisos de odontólogo para acceder al listado de pacientes.",
-    "odontologoOnlyViewAlert": "Solo el personal odontológico puede acceder a esta sección."
+    "odontologoOnlyViewAlert": "Solo el personal odontológico puede acceder a esta sección.",
+    "exportPdf": "Exportar Lista en PDF",
+    "noPatientsToExport": "No hay pacientes para exportar en la lista actual",
+    "exportError": "Ocurrió un error al exportar la lista de pacientes."
   },
   "admin-users": {
     "title": "Listado de Usuarios",
