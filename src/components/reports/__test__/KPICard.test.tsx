@@ -1,6 +1,20 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
-import { KPICard } from '@/components/reports/KPICard'; // Adjust path based on your layout
+import { render, fireEvent } from '@testing-library/react-native';
+import { KPICard } from '@/components/reports/KPICard';
+
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return {
+    Ionicons: (props: any) => React.createElement(Text, props, props.name),
+  };
+});
+
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (_key: string, fallback?: string) => fallback || 'Entendido',
+  }),
+}));
 
 // Mocking useTheme hook to return predictable style variables
 jest.mock('@/hooks/use-theme', () => ({
@@ -13,6 +27,10 @@ jest.mock('@/hooks/use-theme', () => ({
     pageSubtitle: '#444',
     accentBackground: '#EEE',
     positive: '#00FF00',
+    border: '#DDD',
+    pageTitle: '#111',
+    textSecondary: '#666',
+    overMain: '#FFF',
   }),
 }));
 
@@ -83,5 +101,45 @@ describe('KPICard Component', () => {
     const subLabelText = getByText('+12% growth');
     // Verifies it loaded the alternative bold/accent layout style properties
     expect(subLabelText.props.style.fontWeight).toEqual('700');
+  });
+
+  it('renders infoTooltip icon and opens modal in tinyType layout', () => {
+    const { getByTestId } = render(
+      <KPICard
+        {...defaultProps}
+        tinyType={true}
+        infoTooltip={{
+          title: 'DAU (Daily Active Users)',
+          description: 'Usuarios Activos Diarios.',
+          calculationNote: 'Stickiness',
+        }}
+        infoTestID="kpi-dau-info"
+      />
+    );
+
+    const infoIcon = getByTestId('kpi-dau-info');
+    expect(infoIcon).toBeTruthy();
+
+    fireEvent.press(infoIcon);
+    expect(getByTestId('kpi-dau-info-title').props.children).toBe('DAU (Daily Active Users)');
+    expect(getByTestId('kpi-dau-info-description').props.children).toBe('Usuarios Activos Diarios.');
+    expect(getByTestId('kpi-dau-info-note')).toBeTruthy();
+  });
+
+  it('renders infoTooltip icon in standard large layout', () => {
+    const { getByTestId } = render(
+      <KPICard
+        {...defaultProps}
+        tinyType={false}
+        infoTooltip={{
+          title: 'MAU (Monthly Active Users)',
+          description: 'Usuarios Activos Mensuales.',
+        }}
+        infoTestID="kpi-mau-info"
+      />
+    );
+
+    const infoIcon = getByTestId('kpi-mau-info');
+    expect(infoIcon).toBeTruthy();
   });
 });

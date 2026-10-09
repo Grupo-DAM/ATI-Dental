@@ -5,8 +5,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/use-theme';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 type IoniconName = keyof typeof Ionicons.glyphMap;
+
+export interface KPIInfoTooltipData {
+  title: string;
+  description: string;
+  calculationNote?: string;
+}
 
 export type KPICardProp = {
     tinyType: boolean;
@@ -19,6 +26,8 @@ export type KPICardProp = {
     hasSubLabel?: boolean;
     accentSubLabel?: boolean;
     subLabel?: string;
+    infoTooltip?: KPIInfoTooltipData;
+    infoTestID?: string;
 }
 
 export function KPICard(
@@ -32,7 +41,9 @@ export function KPICard(
        hasSubLabel = false,
        accentSubLabel = false,
        subLabel = '...',
-       loading = false
+       loading = false,
+       infoTooltip,
+       infoTestID,
     }
     : Readonly<KPICardProp>) {
     const theme = useTheme();
@@ -47,6 +58,14 @@ export function KPICard(
                   <View style={styles.kpiHeaderSmall}>
                     <Ionicons name={iconName} size={iconSize} color={theme.logo} />
                     <Text style={styles.kpiLabelSmall}>{label}</Text>
+                    {infoTooltip && (
+                      <InfoTooltip
+                        title={infoTooltip.title}
+                        description={infoTooltip.description}
+                        calculationNote={infoTooltip.calculationNote}
+                        testID={infoTestID}
+                      />
+                    )}
                   </View>
                   <Text style={styles.kpiValueSmall} testID={valueTestID}>
                     {value}
@@ -59,7 +78,19 @@ export function KPICard(
                     <Ionicons name={iconName} size={iconSize} color={theme.logo} />
                   </View>
                   <View style={styles.kpiTextWrapper}>
-                    <Text style={styles.kpiLabel}>{label}</Text>
+                    {infoTooltip ? (
+                      <View style={styles.kpiLabelRow}>
+                        <Text style={styles.kpiLabel}>{label}</Text>
+                        <InfoTooltip
+                          title={infoTooltip.title}
+                          description={infoTooltip.description}
+                          calculationNote={infoTooltip.calculationNote}
+                          testID={infoTestID}
+                        />
+                      </View>
+                    ) : (
+                      <Text style={styles.kpiLabel}>{label}</Text>
+                    )}
                     <Text style={styles.kpiValue} testID={valueTestID}>
                       {loading ? '...' : value}
                     </Text>
@@ -71,6 +102,12 @@ export function KPICard(
 }
 
 const createStyle = (theme:any) => StyleSheet.create({
+  kpiLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 2,
+  },
   kpiRow: {
     flexDirection: 'row',
     gap: 12,
@@ -143,7 +180,6 @@ const createStyle = (theme:any) => StyleSheet.create({
     fontWeight: '700',
     color: theme.pageSubtitle,
     fontFamily: 'Open Sans',
-    paddingRight: 12
   },
   kpiValueSmall: {
     fontSize: 22,
