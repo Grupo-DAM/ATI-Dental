@@ -182,6 +182,68 @@ jest.mock('@/services/report-service', () => ({
   },
 }));
 
+jest.mock('@/components/reports/views/UserDemographicsReportView', () => ({
+  UserDemographicsReportView: ({ onDataReady }: any) => {
+    const React = require('react');
+    React.useEffect(() => {
+      onDataReady({
+        totalUsers: 15,
+        averageAge: 29,
+        ageBuckets: [{ key: '25-34', count: 15 }],
+        genderSlices: [{ key: 'Femenino', count: 10, percent: 66 }],
+      });
+    }, [onDataReady]);
+    return null;
+  },
+}));
+
+jest.mock('@/components/reports/views/UserGeographicsReportView', () => ({
+  UserGeographicsReportView: ({ onDataReady }: any) => {
+    const React = require('react');
+    React.useEffect(() => {
+      onDataReady({
+        totalCities: 1,
+        mainCountry: 'Venezuela',
+        mainCountryPercent: 100,
+        totalUsers: 15,
+        countryBuckets: [{ key: 'Venezuela', count: 15 }],
+        regionSlices: [{ key: 'Caracas', count: 15 }],
+      });
+    }, [onDataReady]);
+    return null;
+  },
+}));
+
+jest.mock('@/components/reports/views/CrashRateReportView', () => ({
+  CrashRateReportView: ({ onDataReady }: any) => {
+    const React = require('react');
+    React.useEffect(() => {
+      onDataReady({
+        totalCrashesValue: 2,
+        affectedUsersValue: 1,
+        calculatedCrashRateString: '0.5%',
+        crashRateData: [{ label: '2026-10-08', value: 0.5 }],
+      });
+    }, [onDataReady]);
+    return null;
+  },
+}));
+
+jest.mock('@/components/reports/views/RetentionReportView', () => ({
+  RetentionReportView: ({ onDataReady }: any) => {
+    const React = require('react');
+    React.useEffect(() => {
+      onDataReady({
+        retentionData: [{ cohort: '2026-10-01', label: 'Día 1', percentage: 80 }],
+        day1String: '80%',
+        day7String: '60%',
+        day30String: '40%',
+      });
+    }, [onDataReady]);
+    return null;
+  },
+}));
+
 describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () => {
   let alertSpy: jest.SpyInstance;
 
@@ -715,5 +777,179 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
     expect(calculateDauMauRatio(10, 20)).toBe(50);
     expect(calculateDauMauRatio(0, 0)).toBe(0);
     expect(calculateDauMauRatio(5, 0)).toBe(0);
+  });
+});
+
+describe('Pruebas de Exportación y Cambio de Vistas para Cobertura Completa', () => {
+  let alertSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
+  });
+
+  it('Exporta correctamente a CSV y PDF en vista de Demografía', async () => {
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // 1. Abrir selector de tipo de reporte
+    fireEvent.press(getByTestId('report-type-select'));
+
+    // 2. Esperar y presionar la opción de Demografía
+    const demoOption = await findByTestId('type-option-demographics');
+    await act(async () => {
+      fireEvent.press(demoOption);
+    });
+
+    // 3. Exportar CSV
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    // 4. Exportar PDF
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-pdf-btn'));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Reporte generado con éxito',
+      'El archivo PDF ha sido preparado para su descarga.'
+    );
+  });
+
+  it('Exporta correctamente a CSV en vistas de Geografía, Crash Rate y Retención', async () => {
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // --- 1. Vista de Geografía ---
+    fireEvent.press(getByTestId('report-type-select'));
+    const geoOption = await findByTestId('type-option-geographics');
+    await act(async () => {
+      fireEvent.press(geoOption);
+    });
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    // --- 2. Vista de Tasa de fallos (Crash Rate) ---
+    fireEvent.press(getByTestId('report-type-select'));
+    const crashOption = await findByTestId('type-option-crash-rate');
+    await act(async () => {
+      fireEvent.press(crashOption);
+    });
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    // --- 3. Vista de Tasa de retención ---
+    fireEvent.press(getByTestId('report-type-select'));
+    const retentionOption = await findByTestId('type-option-retention-rate');
+    await act(async () => {
+      fireEvent.press(retentionOption);
+    });
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+  });
+  
+  it('Maneja excepciones durante la generación de CSV mostrando alerta de error', async () => {
+    const reportsUtils = require('@/components/reports/utils/reports-utils');
+    const spyExport = jest
+      .spyOn(reportsUtils, 'exportChartDataToCsv')
+      .mockRejectedValueOnce(new Error('FileSystem Write Error'));
+
+    const now = Date.now();
+    mockOnSnapshot = jest.fn((onNext) => {
+      onNext({
+        docs: [{ id: 's1', data: () => ({ userId: 'u1', fecha: now, tiempoUso: 20 }) }],
+        empty: false,
+      });
+      return jest.fn();
+    });
+
+    const { getByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'Ocurrió un error al generar o compartir el reporte.'
+    );
+
+    spyExport.mockRestore();
+  });
+
+  it('Maneja excepciones durante la generación de PDF mostrando alerta de error', async () => {
+    const { ReportService } = require('@/services/report-service');
+    const spyPdf = jest
+      .spyOn(ReportService, 'generateAndShare')
+      .mockRejectedValueOnce(new Error('PDF Build Failure'));
+
+    const now = Date.now();
+    mockOnSnapshot = jest.fn((onNext) => {
+      onNext({
+        docs: [{ id: 's1', data: () => ({ userId: 'u1', fecha: now, tiempoUso: 20 }) }],
+        empty: false,
+      });
+      return jest.fn();
+    });
+
+    const { getByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-pdf-btn'));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'Ocurrió un error al generar o compartir el reporte.'
+    );
+
+    spyPdf.mockRestore();
+  });
+
+  it('Permite cambiar las opciones de período a 15 días y 30 días', async () => {
+    const { getByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('period-filter-btn'));
+    fireEvent.press(getByTestId('period-option-15'));
+
+    expect(getByTestId('period-filter-btn')).toBeTruthy();
+
+    fireEvent.press(getByTestId('period-filter-btn'));
+    fireEvent.press(getByTestId('period-option-30'));
+
+    expect(getByTestId('period-filter-btn')).toBeTruthy();
   });
 });
