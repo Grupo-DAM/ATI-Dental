@@ -681,4 +681,36 @@ describe('RegisterPatientScreen', () => {
 
     consoleErrorSpy.mockRestore();
   });
+
+  it('limpia el error de documento cuando el usuario cambia el tipo o el número', () => {
+    render(<RegisterPatientScreen />);
+
+    // Provocar error de documento seleccionando tipo sin número
+    fireEvent.changeText(screen.getByTestId('input-full-name'), 'Pedro');
+    fireEvent.press(screen.getByTestId('btn-select-doc-type'));
+    fireEvent.press(screen.getByTestId('doc-type-option-V'));
+    fireEvent.press(screen.getByTestId('btn-submit-patient'));
+
+    // Al escribir un número o cambiar de tipo, el error debe limpiarse
+    fireEvent.changeText(screen.getByTestId('input-document'), '12345678');
+    fireEvent.press(screen.getByTestId('btn-select-doc-type'));
+    fireEvent.press(screen.getByTestId('doc-type-option-E'));
+    expect(screen.getByTestId('input-document').props.value).toBeTruthy();
+  });
+
+  it('inicializa documento vacío cuando patientData viene sin datos de cédula', () => {
+    const mockEmptyDoc = JSON.stringify({
+      fullName: 'Sin Cedula',
+      email: 'sincedula@test.com',
+      documentId: '',
+      cedula: '',
+    });
+    jest.spyOn(require('expo-router'), 'useLocalSearchParams').mockReturnValueOnce({
+      patientData: mockEmptyDoc,
+    });
+
+    render(<RegisterPatientScreen />);
+    expect(screen.getByTestId('input-full-name').props.value).toBe('Sin Cedula');
+    expect(screen.getByTestId('input-document').props.value).toBe('');
+  });
 });
