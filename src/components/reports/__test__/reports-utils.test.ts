@@ -27,6 +27,7 @@ import {
   mapGeographicsToCsvRows,
   mapRetentionToCsvRows,
   CsvDataRow,
+  exportChartDataToCsv,
 } from '../utils/reports-utils';
 import {
   UserDemographicsMetrics,
@@ -34,6 +35,24 @@ import {
   RetentionDataPoint,
   SessionRecord,
 } from '@/components/reports/types';
+import * as Sharing from 'expo-sharing';
+
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  shareAsync: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('expo-file-system', () => ({
+  File: jest.fn().mockImplementation((_location?: string, name?: string) => ({
+    create: jest.fn(),
+    write: jest.fn(),
+    copy: jest.fn(),
+    delete: jest.fn(),
+    exists: false,
+    uri: name ? `file:///cache/${name}` : 'file:///tmp/export.csv',
+  })),
+  Paths: { cache: 'cache-dir' },
+}));
 
 describe('reports-utils unit tests', () => {
   describe('generatePeriodOptions', () => {
@@ -453,5 +472,140 @@ describe('Pruebas de Mapeadores para Todos los Tipos de Gráficos', () => {
     expect(result).toContainEqual(
       expect.objectContaining({ metrica: 'Región: Caracas', valor: 50 })
     );
+  });
+});
+
+describe('Pruebas Unitarias de Alta Cobertura para reports-utils.ts', () => {
+  describe('Cálculos Numéricos y Formateadores', () => {
+    it('calculateDauMauRatio: realiza el porcentaje y protege división por cero', () => {
+      expect(calculateDauMauRatio(50, 200)).toBe(25);
+      expect(calculateDauMauRatio(0, 100)).toBe(0);
+      expect(calculateDauMauRatio(10, 0)).toBe(0);
+      expect(calculateDauMauRatio(0, 0)).toBe(0);
+    });
+
+    it('calculateCrashRatePercentage: calcula porcentaje formateado a dos decimales', () => {
+      expect(calculateCrashRatePercentage(5, 100)).toBe('5.00%');
+      expect(calculateCrashRatePercentage(1, 3)).toBe('33.33%');
+      expect(calculateCrashRatePercentage(0, 50)).toBe('0.00%');
+      expect(calculateCrashRatePercentage(5, 0)).toBe('0.00%');
+    });
+
+    it('formatRetentionPercentage: gestiona valores válidos y nulos', () => {
+      expect(formatRetentionPercentage(85.456)).toBe('85.5%');
+      expect(formatRetentionPercentage(0)).toBe('0%');
+      expect(formatRetentionPercentage(null as any)).toBe('0%');
+      expect(formatRetentionPercentage(undefined as any)).toBe('0%');
+    });
+
+    it('parseRetentionData: procesa métricas de retención pasando la función de traducción t', () => {
+      const mockT = (key: string) => key;
+      
+      const rawRecord = { dia1: 80, dia7: 60, dia30: 40 };
+      const parsed = parseRetentionData(rawRecord as any, mockT as any);
+      expect(parsed).toHaveLength(3);
+      expect(parsed[0].percentage).toBe(80);
+    });
+  });
+
+  describe('Agregación de Demografía', () => {
+    it('aggregateUserDemographics: procesa lista vacía devolviendo valores por defecto', () => {
+      const emptyResult = aggregateUserDemographics([]);
+      expect(emptyResult.totalUsers).toBe(0);
+      expect(emptyResult.averageAge).toBeNull();
+      expect(emptyResult.ageBuckets).toHaveLength(5);
+      expect(emptyResult.ageBuckets[0].count).toBe(0);
+      expect(emptyResult.genderSlices).toHaveLength(3);
+      expect(emptyResult.genderSlices[0].count).toBe(0);
+    });
+
+    it('aggregateUserDemographics: agrega correctamente edades y géneros', () => {
+      const users = [
+        { edad: 20, genero: 'Masculino' },
+        { edad: 28, genero: 'Femenino' },
+        { edad: 35, genero: 'Femenino' },
+      ];
+
+      const result = aggregateUserDemographics(users as any);
+      expect(result.totalUsers).toBe(3);
+      expect(result.averageAge).toBe(28);
+      expect(result.genderSlices.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Mapeadores de Datos a Filas CSV', () => {
+    it('mapSessionsToCsvRows: mapea sesiones con fechas y duraciones', () => {
+      const mockSessions = [
+        {
+          id: 's1',
+          userId: 'u1',
+          fecha: Date.now(),
+          duracion: 30,
+        },
+      ];
+      const rows = mapSessionsToCsvRows(mockSessions, 'Tiempo de Uso');
+      expect(rows.length).toBeGreaterThan(0);
+      expect(rows[0]).toHaveProperty('fecha');
+    });
+
+    it('mapDauMauToCsvRows: mapea métricas DAU/MAU produciendo 2 filas por punto', () => {
+      const dauMauData = [
+        { label: 'Oct 2026', dau: 10, mau: 50 },
+      ];
+      const rows = mapDauMauToCsvRows(dauMauData);
+      expect(rows).toHaveLength(2);
+      expect(rows[0].metrica).toBe('DAU');
+      expect(rows[1].metrica).toBe('MAU');
+    });
+
+    it('mapDemographicsToCsvRows: mapea estructura demográfica completa', () => {
+      const demoData = {
+        totalUsers: 10,
+        averageAge: 25,
+        ageBuckets: [{ key: '18-24', count: 10 }],
+        genderSlices: [{ key: 'Femenino', count: 10, percent: 100 }],
+      };
+
+      const rows = mapDemographicsToCsvRows(demoData);
+      expect(rows.length).toBeGreaterThan(0);
+    });
+
+    it('mapGeographicsToCsvRows: mapea estructura geográfica completa', () => {
+      const geoData = {
+        totalCities: 1,
+        mainCountry: 'Venezuela',
+        mainCountryPercent: 100,
+        totalUsers: 10,
+        countryBuckets: [{ country: 'Venezuela', count: 10 }],
+        regionSlices: [{ region: 'Caracas', count: 10 }],
+      };
+
+      const rows = mapGeographicsToCsvRows(geoData as any);
+      expect(rows.length).toBeGreaterThan(0);
+    });
+
+    it('mapRetentionToCsvRows: mapea métricas de retención', () => {
+      const retentionData = [
+        { cohort: 'Cohorte Oct', label: 'Día 1', percentage: 90 },
+      ];
+
+      const rows = mapRetentionToCsvRows(retentionData);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].valor).toBe(90);
+    });
+  });
+
+  describe('Generación e Interacción con el Sistema de Archivos', () => {
+    it('exportChartDataToCsv: ejecuta exportación e invoca el Share Sheet', async () => {
+      const rows = [
+        { metrica: 'Test', valor: '100', fecha: '2026-10-09' },
+      ];
+
+      await expect(
+        exportChartDataToCsv(rows, 'Últimos 30 días', 'usage')
+      ).resolves.not.toThrow();
+
+      expect(Sharing.shareAsync).toHaveBeenCalled();
+    });
   });
 });

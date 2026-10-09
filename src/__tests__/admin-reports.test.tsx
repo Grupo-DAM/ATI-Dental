@@ -838,74 +838,111 @@ describe('Pruebas de Exportación y Cambio de Vistas para Cobertura Completa', (
     );
   });
 
-  it('Exporta correctamente a CSV en vistas de Geografía, Crash Rate y Retención', async () => {
+  it('Exporta correctamente a CSV para todos los tipos de reporte (demographics, geographics, crash_rate, retention_rate)', async () => {
     const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
 
-    // --- Geografía ---
+    // 1. Demografía
     fireEvent.press(getByTestId('report-type-select'));
-    const geoOption = await findByTestId('type-option-geographics');
-    await act(async () => {
-      fireEvent.press(geoOption);
-    });
+    fireEvent.press(await findByTestId('type-option-demographics'));
 
     fireEvent.press(getByTestId('download-menu-btn'));
     await act(async () => {
       fireEvent.press(getByTestId('export-csv-btn'));
     });
-    expect(alertSpy).toHaveBeenCalledWith(
+    expect(alertSpy).toHaveBeenLastCalledWith(
       'Archivo CSV generado',
       'Los datos tabulares han sido preparados para su descarga.'
     );
 
-    // --- Crash Rate ---
+    // 2. Geografía
     fireEvent.press(getByTestId('report-type-select'));
-    const crashOption = await findByTestId('type-option-crash-rate');
-    await act(async () => {
-      fireEvent.press(crashOption);
-    });
+    fireEvent.press(await findByTestId('type-option-geographics'));
 
     fireEvent.press(getByTestId('download-menu-btn'));
     await act(async () => {
       fireEvent.press(getByTestId('export-csv-btn'));
     });
-    expect(alertSpy).toHaveBeenCalledWith(
+    expect(alertSpy).toHaveBeenLastCalledWith(
       'Archivo CSV generado',
       'Los datos tabulares han sido preparados para su descarga.'
     );
 
-    // --- Retención ---
+    // 3. Tasa de Fallos (Crash Rate)
     fireEvent.press(getByTestId('report-type-select'));
-    const retentionOption = await findByTestId('type-option-retention-rate');
-    await act(async () => {
-      fireEvent.press(retentionOption);
-    });
+    fireEvent.press(await findByTestId('type-option-crash-rate'));
 
     fireEvent.press(getByTestId('download-menu-btn'));
     await act(async () => {
       fireEvent.press(getByTestId('export-csv-btn'));
     });
-    expect(alertSpy).toHaveBeenCalledWith(
+    expect(alertSpy).toHaveBeenLastCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    // 4. Tasa de Retención
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-retention-rate'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    expect(alertSpy).toHaveBeenLastCalledWith(
       'Archivo CSV generado',
       'Los datos tabulares han sido preparados para su descarga.'
     );
   });
-  
+
+  it('Muestra alerta de sin datos cuando exportRows.length === 0 tras el mapeo', async () => {
+    // 1. Sobreescribir el mock del componente para notificar datos vacíos
+    const CrashRateModule = require('@/components/reports/views/CrashRateReportView');
+    const spyView = jest
+      .spyOn(CrashRateModule, 'CrashRateReportView')
+      .mockImplementation(({ onDataReady }: any) => {
+        const React = require('react');
+        React.useEffect(() => {
+          onDataReady({
+            totalCrashesValue: 0,
+            affectedUsersValue: 0,
+            calculatedCrashRateString: '0.0%',
+            crashRateData: [], // <-- Arreglo vacío fuerza exportRows.length === 0
+          });
+        }, [onDataReady]);
+        return null;
+      });
+
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // 2. Cambiar a la vista de Crash Rate
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-crash-rate'));
+
+    // 3. Intentar exportar a CSV
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // 4. Verificar que entra a la condición `if (exportRows.length === 0)`
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+
+    spyView.mockRestore();
+  });
+
   it('Maneja excepciones durante la generación de CSV mostrando alerta de error', async () => {
     const reportsUtils = require('@/components/reports/utils/reports-utils');
     const spyExport = jest
       .spyOn(reportsUtils, 'exportChartDataToCsv')
       .mockRejectedValueOnce(new Error('FileSystem Write Error'));
 
-    const now = Date.now();
-    mockOnSnapshot = jest.fn((onNext) => {
-      onNext({
-        docs: [{ id: 's1', data: () => ({ userId: 'u1', fecha: now, tiempoUso: 20 }) }],
-        empty: false,
-      });
-      return jest.fn();
-    });
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
 
-    const { getByTestId } = render(<AdminReportsScreen />);
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-demographics'));
 
     fireEvent.press(getByTestId('download-menu-btn'));
     await act(async () => {
