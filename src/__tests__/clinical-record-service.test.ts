@@ -13,6 +13,9 @@ import {
   hasClinicalRecordExportableData,
   buildClinicalRecordPdfHtml,
   exportClinicalRecordToPdf,
+  extractConsultationDentalPieces,
+  isValidFdiToothNumber,
+  inferToothStateFromContext,
 } from '@/services/clinical-record-service';
 import { firestore } from '@/config/firebase';
 import { getSessionToken } from '@/utils/secure-storage';
@@ -877,6 +880,120 @@ describe('Clinical Record Service', () => {
         const result = await exportClinicalRecordToPdf(mockFullRecord);
         expect(result.share.shared).toBe(false);
         expect(result.share.message).toContain('User dismissed share dialog');
+      });
+    });
+
+    describe('Resumen de piezas dentales por consulta en PDF', () => {
+      it('valida números de dientes FDI tanto en dentición permanente como pediátrica', () => {
+        expect(isValidFdiToothNumber(11)).toBe(true);
+        expect(isValidFdiToothNumber(18)).toBe(true);
+        expect(isValidFdiToothNumber(48)).toBe(true);
+        expect(isValidFdiToothNumber(55)).toBe(true);
+        expect(isValidFdiToothNumber(85)).toBe(true);
+
+        expect(isValidFdiToothNumber(19)).toBe(false);
+        expect(isValidFdiToothNumber(49)).toBe(false);
+        expect(isValidFdiToothNumber(56)).toBe(false);
+        expect(isValidFdiToothNumber(99)).toBe(false);
+      });
+
+      it('infiere el estado de la pieza a partir de palabras clave en texto', () => {
+        expect(inferToothStateFromContext('Caries oclusal')).toBe('cavity');
+        expect(inferToothStateFromContext('Resina compuesta fotocurada')).toBe('filled');
+        expect(inferToothStateFromContext('Tratamiento de conducto radicular')).toBe('root_canal');
+        expect(inferToothStateFromContext('Exodoncia simple')).toBe('missing');
+        expect(inferToothStateFromContext('Implante de titanio')).toBe('implant');
+        expect(inferToothStateFromContext('Corona de porcelana')).toBe('fixed_dental_prosthesis');
+        expect(inferToothStateFromContext('Pieza sana sin lesiones')).toBe('healthy');
+      });
+
+      it('extrae piezas y estados desde odontograma explícito', () => {
+        const consultation: Consultation = {
+          id: 'c-test',
+          patientId: 'p-100',
+          consultationDate: '2023-10-15T10:00:00Z',
+          title: 'Control',
+          motivo: 'Revisión',
+          diagnostico: 'Varios hallazgos',
+          doctor: 'Dr. Test',
+          odontograma: 'Pieza 16: cavity\nPieza 21: root_canal\nPieza 46: filled',
+        };
+
+        const pieces = extractConsultationDentalPieces(consultation);
+        expect(pieces).toHaveLength(3);
+        expect(pieces[0]).toEqual({
+          number: 16,
+          state: 'cavity',
+          color: '#F05C5E',
+          label: 'Caries',
+        });
+        expect(pieces[1]).toEqual({
+          number: 21,
+          state: 'root_canal',
+          color: '#FCA04B',
+          label: 'Endodoncia',
+        });
+        expect(pieces[2]).toEqual({
+          number: 46,
+          state: 'filled',
+          color: '#2E7CEE',
+          label: 'Obturado',
+        });
+      });
+
+      it('extrae piezas desde diagnosticoDetallado y texto general', () => {
+        const consultation: Consultation = {
+          id: 'c-test-2',
+          patientId: 'p-100',
+          consultationDate: '2023-10-15T10:00:00Z',
+          title: 'Obturación Resina (Pieza 36)',
+          motivo: 'Dolor leve',
+          diagnostico: 'Caries interproximal',
+          diagnosticoDetallado: ['Pieza tratada: 36'],
+          doctor: 'Dr. Test',
+        };
+
+        const pieces = extractConsultationDentalPieces(consultation);
+        expect(pieces).toHaveLength(1);
+        expect(pieces[0].number).toBe(36);
+        expect(pieces[0].state).toBe('cavity');
+        expect(pieces[0].color).toBe('#F05C5E');
+      });
+
+      it('genera píldoras con color, número de pieza y leyenda de odontograma en el HTML del PDF', () => {
+        const html = buildClinicalRecordPdfHtml(mockFullRecord, { language: 'es' });
+
+        // Contiene la barra de leyenda compacta
+        expect(html).toContain('teeth-legend-strip');
+        expect(html).toContain('Convención Odontograma:');
+
+        // Contiene la píldora para la pieza 46 tratada en mockFullRecord
+        expect(html).toContain('consultation-teeth-row');
+        expect(html).toContain('#46');
+        expect(html).toContain('tooth-pill');
+        expect(html).toContain('#F05C5E'); // Caries
+      });
+
+      it('muestra evaluación general si la consulta no especifica piezas dentales', () => {
+        const consultationWithoutTeeth: Consultation = {
+          id: 'c-general',
+          patientId: 'p-100',
+          consultationDate: '2023-10-15T10:00:00Z',
+          title: 'Profilaxis General',
+          motivo: 'Control anual',
+          diagnostico: 'Higiene bucal adecuada',
+          doctor: 'Dr. Smith',
+        };
+
+        const record: ClinicalRecord = {
+          patient: mockPatient,
+          consultations: [consultationWithoutTeeth],
+          treatments: [],
+          odontogram: mockFullRecord.odontogram,
+        };
+
+        const html = buildClinicalRecordPdfHtml(record, { language: 'es' });
+        expect(html).toContain('Evaluación bucal general');
       });
     });
   });

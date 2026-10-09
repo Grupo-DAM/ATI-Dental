@@ -58,6 +58,7 @@ const DEFAULT_SEEDS = [
     duration: '30 minutos',
     tratamientosRealizados: 'Obturación Resina Fotocurada',
     notas: 'Sin compromiso pulpar evidente.',
+    odontograma: 'Pieza 46: cavity, filled',
   },
   {
     id: 'c-default-3',
@@ -101,6 +102,7 @@ function generateDefaultConsultations(patient: Patient, treatments: Treatment[])
       duration: t.duration || '45 minutos',
       tratamientosRealizados: t.treatmentName,
       notas: t.notes || '',
+      odontograma: t.dentalPiece && t.dentalPiece !== 'Toda la boca' ? `Pieza ${t.dentalPiece}: ${t.treatmentName}` : '',
     }));
   }
 
@@ -138,6 +140,7 @@ export async function getConsultationsByPatientId(patientId: string): Promise<Co
           tratamientosRealizados: d.tratamientosRealizados || d.tratamiento || '',
           notas: d.notas || d.notes || d.notesEvolucion || '',
           appointmentId: d.appointmentId,
+          odontograma: d.odontograma || '',
         };
       });
     }
@@ -777,10 +780,235 @@ function buildPatientInfoGridHtml(patient?: Patient, lang: ReportLanguage = 'es'
   ]);
 }
 
+export interface ResolvedToothSummary {
+  number: number;
+  state: string;
+  color: string;
+  label: string;
+}
+
+const TOOTH_COLOR_MAP: Record<string, { hex: string; es: string; en: string }> = {
+  cavity: { hex: '#F05C5E', es: 'Caries', en: 'Cavity' },
+  caries: { hex: '#F05C5E', es: 'Caries', en: 'Cavity' },
+  filled: { hex: '#2E7CEE', es: 'Obturado', en: 'Filled' },
+  obturado: { hex: '#2E7CEE', es: 'Obturado', en: 'Filled' },
+  missing: { hex: '#A5A8B1', es: 'Ausente', en: 'Missing' },
+  ausente: { hex: '#A5A8B1', es: 'Ausente', en: 'Missing' },
+  implant: { hex: '#DE8BD0', es: 'Implante', en: 'Implant' },
+  implante: { hex: '#DE8BD0', es: 'Implante', en: 'Implant' },
+  root_canal: { hex: '#FCA04B', es: 'Endodoncia', en: 'Root canal' },
+  endodoncia: { hex: '#FCA04B', es: 'Endodoncia', en: 'Root canal' },
+  fixed_dental_prosthesis: { hex: '#B18DF4', es: 'Prótesis', en: 'Prosthesis' },
+  protesis: { hex: '#B18DF4', es: 'Prótesis', en: 'Prosthesis' },
+  protesis_fija: { hex: '#B18DF4', es: 'Prótesis', en: 'Prosthesis' },
+  retained_root: { hex: '#E37C44', es: 'Remanente radicular', en: 'Retained root' },
+  remanente_radicular: { hex: '#E37C44', es: 'Remanente radicular', en: 'Retained root' },
+  in_eruption: { hex: '#4D814F', es: 'En erupción', en: 'In eruption' },
+  en_erupcion: { hex: '#4D814F', es: 'En erupción', en: 'In eruption' },
+  temporal: { hex: '#DEED5C', es: 'Temporal', en: 'Temporal' },
+  healthy: { hex: '#10B981', es: 'Sano / Revisado', en: 'Healthy / Checked' },
+  sano: { hex: '#10B981', es: 'Sano / Revisado', en: 'Healthy / Checked' },
+};
+
+export function isValidFdiToothNumber(num: number): boolean {
+  const isAdult = (num >= 11 && num <= 18) ||
+                  (num >= 21 && num <= 28) ||
+                  (num >= 31 && num <= 38) ||
+                  (num >= 41 && num <= 48);
+  const isPediatric = (num >= 51 && num <= 55) ||
+                      (num >= 61 && num <= 65) ||
+                      (num >= 71 && num <= 75) ||
+                      (num >= 81 && num <= 85);
+  return isAdult || isPediatric;
+}
+
+export function inferToothStateFromContext(contextText: string, fallbackState?: string): string {
+  const lower = contextText.toLowerCase();
+  if (lower.includes('caries') || lower.includes('cavity')) return 'cavity';
+  if (lower.includes('obturad') || lower.includes('resina') || lower.includes('amalgama') || lower.includes('filled')) return 'filled';
+  if (lower.includes('endodoncia') || lower.includes('conducto') || lower.includes('root_canal')) return 'root_canal';
+  if (lower.includes('corona') || lower.includes('protesis') || lower.includes('pilar') || lower.includes('fixed_dental_prosthesis')) return 'fixed_dental_prosthesis';
+  if (lower.includes('ausente') || lower.includes('missing') || lower.includes('extraccion') || lower.includes('exodoncia')) return 'missing';
+  if (lower.includes('implante') || lower.includes('implant')) return 'implant';
+  if (lower.includes('remanente') || lower.includes('retained_root')) return 'retained_root';
+  if (lower.includes('erupcion') || lower.includes('in_eruption')) return 'in_eruption';
+  if (lower.includes('temporal') || lower.includes('provisional')) return 'temporal';
+  if (lower.includes('sana') || lower.includes('sano') || lower.includes('revisad') || lower.includes('healthy')) return 'healthy';
+  return fallbackState || 'healthy';
+}
+
+export function extractConsultationDentalPieces(
+  c: Consultation,
+  record?: ClinicalRecord,
+  lang: ReportLanguage = 'es'
+): ResolvedToothSummary[] {
+  const teethMap = new Map<number, ResolvedToothSummary>();
+
+  const combinedContext = [
+    c.title,
+    c.motivo,
+    c.diagnostico,
+    c.tratamientosRealizados,
+    c.notas,
+  ].filter(Boolean).join(' ');
+
+  const addTooth = (toothNum: number, rawContext: string, explicitState?: string) => {
+    if (!isValidFdiToothNumber(toothNum)) return;
+    if (teethMap.has(toothNum)) return;
+
+    let stateKey = explicitState;
+    if (!stateKey) {
+      const odontogramTooth = record?.odontogram?.teeth?.[toothNum];
+      if (odontogramTooth?.generalStates && odontogramTooth.generalStates.length > 0) {
+        stateKey = odontogramTooth.generalStates[0];
+      }
+    }
+    if (!stateKey) {
+      stateKey = inferToothStateFromContext(rawContext);
+      if (stateKey === 'healthy') {
+        const broaderState = inferToothStateFromContext(combinedContext);
+        if (broaderState !== 'healthy') {
+          stateKey = broaderState;
+        }
+      }
+    }
+
+    const stateMeta = TOOTH_COLOR_MAP[stateKey.toLowerCase()] || {
+      hex: '#5B2D8B',
+      es: stateKey,
+      en: stateKey,
+    };
+
+    teethMap.set(toothNum, {
+      number: toothNum,
+      state: stateKey,
+      color: stateMeta.hex,
+      label: lang === 'en' ? stateMeta.en : stateMeta.es,
+    });
+  };
+
+  if (c.odontograma) {
+    const lines = c.odontograma.split('\n');
+    for (const line of lines) {
+      const match = line.match(/(?:Pieza|Diente|Tooth)\s*#?\s*(\d{2})(?:\s*:\s*([^\n;.]+))?/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        const conditionText = match[2] || line;
+        addTooth(num, conditionText, inferToothStateFromContext(conditionText));
+      }
+    }
+  }
+
+  if (Array.isArray(c.diagnosticoDetallado)) {
+    for (const item of c.diagnosticoDetallado) {
+      const match = item.match(/(?:Pieza|Diente|Tooth)(?:\s+tratada)?\s*[:#]?\s*(\d{2})/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        addTooth(num, item);
+      }
+    }
+  }
+
+  const pattern = /(?:Pieza|Diente|Tooth)\s*(?:tratada\s*)?[:#]?\s*(\d{2})/gi;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(combinedContext)) !== null) {
+    const num = parseInt(match[1], 10);
+    const start = Math.max(0, match.index - 30);
+    const end = Math.min(combinedContext.length, match.index + 50);
+    const snippet = combinedContext.substring(start, end);
+    addTooth(num, snippet);
+  }
+
+  if (record?.treatments) {
+    for (const t of record.treatments) {
+      if (t.dentalPiece && t.dentalPiece !== 'Toda la boca' && t.dentalPiece !== 'General') {
+        const isDateMatch = t.treatmentDate && c.consultationDate &&
+          t.treatmentDate.substring(0, 10) === c.consultationDate.substring(0, 10);
+        const isNameMatch = c.title && t.treatmentName && c.title.includes(t.treatmentName);
+
+        if (isDateMatch || isNameMatch) {
+          const pieceDigits = t.dentalPiece.match(/\b(\d{2})\b/g);
+          if (pieceDigits) {
+            for (const d of pieceDigits) {
+              const num = parseInt(d, 10);
+              addTooth(num, `${t.treatmentName} ${t.category || ''}`, inferToothStateFromContext(t.treatmentName));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return Array.from(teethMap.values()).sort((a, b) => a.number - b.number);
+}
+
+function buildTeethSummaryHtml(teeth: ResolvedToothSummary[], lang: ReportLanguage = 'es'): string {
+  if (teeth.length === 0) {
+    return `
+      <div class="consultation-teeth-row">
+        <span class="teeth-row-label"><strong>${lang === 'en' ? 'Dental Pieces:' : 'Piezas Dentales:'}</strong></span>
+        <span class="tooth-general-pill">${lang === 'en' ? 'General oral assessment' : 'Evaluación bucal general'}</span>
+      </div>
+    `;
+  }
+
+  const chipsHtml = teeth
+    .map((tooth) => `
+      <span class="tooth-pill" style="border-color: ${tooth.color};">
+        <span class="tooth-pill-dot" style="background-color: ${tooth.color};"></span>
+        <span class="tooth-pill-num">#${tooth.number}</span>
+        <span class="tooth-pill-label" style="color: ${tooth.color};">${escapeHtml(tooth.label)}</span>
+      </span>
+    `)
+    .join('');
+
+  return `
+    <div class="consultation-teeth-row">
+      <span class="teeth-row-label"><strong>${lang === 'en' ? 'Dental Pieces:' : 'Piezas Dentales:'}</strong></span>
+      <div class="teeth-pills-list">
+        ${chipsHtml}
+      </div>
+    </div>
+  `;
+}
+
+function buildTeethLegendHtml(lang: ReportLanguage = 'es'): string {
+  const items = [
+    { color: '#F05C5E', es: 'Caries', en: 'Cavity' },
+    { color: '#2E7CEE', es: 'Obturado', en: 'Filled' },
+    { color: '#FCA04B', es: 'Endodoncia', en: 'Root Canal' },
+    { color: '#B18DF4', es: 'Prótesis', en: 'Prosthesis' },
+    { color: '#A5A8B1', es: 'Ausente', en: 'Missing' },
+    { color: '#DE8BD0', es: 'Implante', en: 'Implant' },
+    { color: '#10B981', es: 'Sano / Revisado', en: 'Healthy / Checked' },
+  ];
+
+  const itemsHtml = items
+    .map(
+      (item) => `
+      <span class="legend-chip">
+        <span class="legend-dot" style="background-color: ${item.color};"></span>
+        <span>${escapeHtml(lang === 'en' ? item.en : item.es)}</span>
+      </span>
+    `
+    )
+    .join('');
+
+  return `
+    <div class="teeth-legend-strip">
+      <span class="legend-title">${lang === 'en' ? 'Odontogram Legend:' : 'Convención Odontograma:'}</span>
+      <div class="legend-chips-wrap">
+        ${itemsHtml}
+      </div>
+    </div>
+  `;
+}
+
 function buildConsultationsListHtml(
   consultations: Consultation[],
   doctorFallback?: string,
-  lang: ReportLanguage = 'es'
+  lang: ReportLanguage = 'es',
+  record?: ClinicalRecord
 ): string {
   if (consultations.length === 0) {
     return ReportService.buildAlert(
@@ -791,9 +1019,14 @@ function buildConsultationsListHtml(
     );
   }
 
-  return consultations
+  const legendHtml = buildTeethLegendHtml(lang);
+
+  const cardsHtml = consultations
     .map((c) => {
       const dateStr = formatReportDateTime(c.consultationDate, lang);
+      const teethSummaries = extractConsultationDentalPieces(c, record, lang);
+      const teethSummaryHtml = buildTeethSummaryHtml(teethSummaries, lang);
+
       const detailedDiagHtml = Array.isArray(c.diagnosticoDetallado) && c.diagnosticoDetallado.length > 0
         ? `<div class="consultation-field"><strong>${lang === 'en' ? 'Detailed Findings:' : 'Hallazgos Detallados:'}</strong> <ul>${c.diagnosticoDetallado.map((d) => `<li>${escapeHtml(d)}</li>`).join('')}</ul></div>`
         : '';
@@ -820,6 +1053,7 @@ function buildConsultationsListHtml(
             <strong>${lang === 'en' ? 'Diagnosis:' : 'Diagnóstico:'}</strong> ${escapeHtml(c.diagnostico || (lang === 'en' ? 'No diagnosis recorded' : 'Sin diagnóstico registrado'))}
           </div>
           ${detailedDiagHtml}
+          ${teethSummaryHtml}
           ${performedTreatmentsHtml}
           ${notesHtml}
           <div class="consultation-card-footer">
@@ -830,6 +1064,8 @@ function buildConsultationsListHtml(
       `;
     })
     .join('');
+
+  return `${legendHtml}${cardsHtml}`;
 }
 
 function buildTreatmentsTableHtml(treatments: Treatment[], lang: ReportLanguage = 'es'): string {
@@ -878,7 +1114,7 @@ export function getClinicalRecordRenderOptions(
   const cleanFileName = `Historia_Clinica_${patientName.trim().replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 
   const patientGridHtml = buildPatientInfoGridHtml(patient, lang);
-  const consultationsBodyHtml = buildConsultationsListHtml(record.consultations || [], options?.doctorName, lang);
+  const consultationsBodyHtml = buildConsultationsListHtml(record.consultations || [], options?.doctorName, lang, record);
   const treatmentsBodyHtml = buildTreatmentsTableHtml(record.treatments || [], lang);
 
   const customStyles = `
@@ -897,6 +1133,43 @@ export function getClinicalRecordRenderOptions(
       color: ${REPORT_THEME.primaryDark};
       text-transform: uppercase;
       letter-spacing: 0.3px;
+    }
+    .teeth-legend-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px;
+      margin-bottom: 12px;
+      background-color: ${REPORT_THEME.backgroundAlt};
+      border: 1px solid ${REPORT_THEME.border};
+      border-radius: 4px;
+      font-size: 7.2pt;
+      color: ${REPORT_THEME.textMuted};
+    }
+    .legend-title {
+      font-weight: 700;
+      color: ${REPORT_THEME.textDark};
+      text-transform: uppercase;
+      font-size: 6.8pt;
+      letter-spacing: 0.3px;
+    }
+    .legend-chips-wrap {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .legend-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
     }
     .consultation-card {
       border: 1px solid ${REPORT_THEME.border};
@@ -939,6 +1212,57 @@ export function getClinicalRecordRenderOptions(
     }
     .consultation-field li {
       margin-bottom: 2px;
+    }
+    .consultation-teeth-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 5px 0;
+      font-size: 8.5pt;
+    }
+    .teeth-row-label {
+      color: ${REPORT_THEME.textDark};
+      font-size: 8.5pt;
+    }
+    .teeth-pills-list {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+    }
+    .tooth-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      border: 1px solid;
+      border-radius: 12px;
+      padding: 1px 6px;
+      background-color: #FFFFFF;
+      font-size: 7.2pt;
+      line-height: 1.25;
+    }
+    .tooth-pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .tooth-pill-num {
+      font-weight: 700;
+      color: ${REPORT_THEME.textDark};
+    }
+    .tooth-pill-label {
+      font-weight: 600;
+      font-size: 6.8pt;
+    }
+    .tooth-general-pill {
+      font-size: 7.5pt;
+      color: ${REPORT_THEME.textMuted};
+      font-style: italic;
+      background-color: ${REPORT_THEME.backgroundAlt};
+      padding: 1px 6px;
+      border-radius: 3px;
     }
     .consultation-card-footer {
       display: flex;
