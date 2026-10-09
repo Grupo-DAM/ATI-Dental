@@ -20,6 +20,7 @@ import {
   isPatientGender,
   PATIENT_BLOOD_TYPES,
   PATIENT_GENDER_VALUES,
+  DocumentType,
 } from '@/constants/patient';
 import { useTheme } from '@/hooks/use-theme';
 import { createRegisterPatientStyles } from '@/constants/styles/patients.style';
@@ -68,6 +69,8 @@ export default function RegisterPatientScreen() {
 
   const [fullName, setFullName] = useState('');
   const [documentId, setDocumentId] = useState('');
+  const [documentType, setDocumentType] = useState<DocumentType | ''>('');
+  const [documentNumber, setDocumentNumber] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [birthDateObj, setBirthDateObj] = useState(new Date(2000, 0, 1));
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -83,7 +86,7 @@ export default function RegisterPatientScreen() {
   const [genderModalVisible, setGenderModalVisible] = useState(false);
   const [bloodModalVisible, setBloodModalVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ fullName?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ fullName?: string; email?: string; documentId?: string }>({});
 
     // Recibimos parámetros de la navegación (puede ser el ID o el objeto completo)
     const params = useLocalSearchParams<{ patientId?: string; patientData?: string }>();
@@ -92,7 +95,19 @@ export default function RegisterPatientScreen() {
     const populateFormWithPatient = (data: any) => {
       if (!data) return;
       setFullName(data.fullName ?? data.nombre ?? '');
-      setDocumentId(data.documentId ?? data.cedula ?? '');
+      const rawDoc = data.documentId ?? data.cedula ?? '';
+      setDocumentId(rawDoc);
+      const docMatch = rawDoc.match(/^([VEJP])-?(.+)$/i);
+      if (docMatch) {
+        setDocumentType(docMatch[1].toUpperCase() as DocumentType);
+        setDocumentNumber(docMatch[2]);
+      } else if (rawDoc) {
+        setDocumentType('V');
+        setDocumentNumber(rawDoc);
+      } else {
+        setDocumentType('');
+        setDocumentNumber('');
+      };
       setBirthDate(data.birthDate ?? data.fechaNacimiento ?? '');
       setGender(data.gender ?? data.genero ?? '');
       setPhone(data.phone ?? data.telefono ?? '');
@@ -222,12 +237,17 @@ export default function RegisterPatientScreen() {
     if (isSubmitting) {
       return;
     }
-
+    const fullDocId =
+       documentType && documentNumber.trim()
+         ? `${documentType}-${documentNumber.trim()}`
+         : (documentNumber.trim() || undefined);
     const validation = validatePatientForm({
       fullName,
       email,
       phone,
-      documentId,
+      documentId: fullDocId,
+      documentType,
+      documentNumber,
       birthDate,
       gender,
       address,
@@ -239,12 +259,15 @@ export default function RegisterPatientScreen() {
     });
 
     if (!validation.isValid) {
-      const translatedErrors: { fullName?: string; email?: string } = {};
+      const translatedErrors: { fullName?: string; email?: string; documentId?: string } = {};
       if (validation.errors.fullName) {
         translatedErrors.fullName = t(validation.errors.fullName);
       }
       if (validation.errors.email) {
         translatedErrors.email = t(validation.errors.email);
+      }
+      if (validation.errors.documentId) {
+        translatedErrors.documentId = t(validation.errors.documentId);
       }
       setErrors(translatedErrors);
       return;
@@ -256,7 +279,7 @@ export default function RegisterPatientScreen() {
     try {
       await createPatient({
         fullName,
-        documentId,
+        documentId: fullDocId,
         birthDate,
         gender,
         phone,
@@ -363,7 +386,27 @@ export default function RegisterPatientScreen() {
         }}
         fullNameError={errors.fullName}
         documentId={documentId}
-        onChangeDocumentId={setDocumentId}
+        onChangeDocumentId={(val) => {
+          setDocumentNumber(val);
+            if (errors.documentId) {
+              setErrors((current) => ({ ...current, documentId: undefined }));
+            }
+          }}
+          documentType={documentType}
+          onChangeDocumentType={(type) => {
+            setDocumentType(type);
+            if (errors.documentId) {
+              setErrors((current) => ({ ...current, documentId: undefined }));
+            }
+          }}
+          documentNumber={documentNumber}
+          onChangeDocumentNumber={(num) => {
+            setDocumentNumber(num);
+            if (errors.documentId) {
+              setErrors((current) => ({ ...current, documentId: undefined }));
+            }
+          }}
+        documentError={errors.documentId}
         birthDate={birthDate}
         onOpenDatePicker={handleOpenDatePicker}
         gender={gender}
