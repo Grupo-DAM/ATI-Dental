@@ -18,7 +18,22 @@ import {
   formatDayKeyLabel,
   listSessionDayKeys,
   readSessionStartMillis,
+  sanitizeCsvCell,
+  formatChartDataToCsv,
+  formatDateToIsoString,
+  mapSessionsToCsvRows,
+  mapDauMauToCsvRows,
+  mapDemographicsToCsvRows,
+  mapGeographicsToCsvRows,
+  mapRetentionToCsvRows,
+  CsvDataRow,
 } from '../utils/reports-utils';
+import {
+  UserDemographicsMetrics,
+  UserGeographicsMetrics,
+  RetentionDataPoint,
+  SessionRecord,
+} from '@/components/reports/types';
 
 describe('reports-utils unit tests', () => {
   describe('generatePeriodOptions', () => {
@@ -374,5 +389,160 @@ describe('calculatePeakHoursDistribution', () => {
     expect(Date.now() - started).toBeLessThanOrEqual(100);
     expect(result.total).toBe(10000);
     expect(result.slots).toHaveLength(24);
+  });
+});
+
+describe('Pruebas de Sanitización y Seguridad CSV (Inyección de Fórmulas)', () => {
+  test('Bloquea caracteres peligrosos al inicio del texto (=, +, -, @)', () => {
+    expect(sanitizeCsvCell('=SUM(A1:A10)')).toBe(`"'=SUM(A1:A10)'"`);
+    expect(sanitizeCsvCell('+cmd|\'/C calc\'!A0')).toBe(`"'+cmd|'/'C calc'!'A0'"`);
+    expect(sanitizeCsvCell('-100')).toBe(`"'-100'"`);
+    expect(sanitizeCsvCell('@SUM(1,2)')).toBe(`"'@SUM(1,2)'"`);
+  });
+
+  test('Mantiene intactas las celdas de texto estándar o números seguros', () => {
+    expect(sanitizeCsvCell('Tiempo de uso')).toBe(`"Tiempo de uso"`);
+    expect(sanitizeCsvCell(150)).toBe(`"150"`);
+    expect(sanitizeCsvCell('2026-10-09')).toBe(`"2026-10-09"`);
+  });
+
+  test('Escapa comillas dobles dentro de las celdas para evitar desalineación tabular', () => {
+    expect(sanitizeCsvCell('Reporte "Especial"')).toBe(`"Reporte ""Especial"""`);
+  });
+});
+
+describe('Pruebas de Formateo y Codificación UTF-8 BOM en CSV', () => {
+  test('Inserta el Byte Order Mark (BOM UTF-8) al inicio del archivo', () => {
+    const rows: CsvDataRow[] = [
+      { fecha: '2026-10-01', valor: 45, unidad: 'minutos', metrica: 'Uso' },
+    ];
+    const csvContent = formatChartDataToCsv(rows, 'Últimos 7 días', 'usage');
+
+    expect(csvContent.startsWith('\uFEFF')).toBe(true);
+  });
+
+  test('Estructura correctamente los encabezados y las filas tabulares delimitadas por comas', () => {
+    const rows: CsvDataRow[] = [
+      { fecha: '2026-10-01', valor: 45, unidad: 'minutos', metrica: 'Uso' },
+      { fecha: '2026-10-02', valor: 60, unidad: 'minutos', metrica: 'Uso' },
+    ];
+    const csvContent = formatChartDataToCsv(rows, 'Últimos 7 días', 'usage');
+
+    const lines = csvContent.split('\n');
+    expect(lines[0]).toBe('\uFEFF"Fecha","Valor","Unidad","Metrica"');
+    expect(lines[1]).toBe('"2026-10-01","45","minutos","Uso"');
+    expect(lines[2]).toBe('"2026-10-02","60","minutos","Uso"');
+  });
+});
+
+describe('Pruebas de Normalización de Fechas (formatDateToIsoString)', () => {
+  test('Convierte objetos Timestamp de Firestore a YYYY-MM-DD', () => {
+    const firestoreTimestamp = {
+      toDate: () => new Date('2026-10-09T10:00:00Z'),
+    };
+    expect(formatDateToIsoString(firestoreTimestamp)).toBe('2026-10-09');
+  });
+
+  test('Convierte objetos con propiedad seconds (Timestamp raw) a YYYY-MM-DD', () => {
+    const timestampRaw = { seconds: 1791500000 };
+    expect(formatDateToIsoString(timestampRaw)).toMatch(/^\d{4}-\d{2}-\d{2}\$/);
+  });
+
+  test('Soporta objetos Date de JS y números de milisegundos', () => {
+    const jsDate = new Date('2026-05-15T00:00:00Z');
+    expect(formatDateToIsoString(jsDate)).toBe('2026-05-15');
+    expect(formatDateToIsoString(jsDate.getTime())).toBe('2026-05-15');
+  });
+
+  test('Maneja valores nulos, no definidos o formatos inválidos retornando N/A', () => {
+    expect(formatDateToIsoString(null)).toBe('N/A');
+    expect(formatDateToIsoString(undefined)).toBe('N/A');
+    expect(formatDateToIsoString('Timestamp(seconds=123, nanoseconds=456)')).toBe('N/A');
+  });
+});
+
+describe('Pruebas de Mapeadores para Todos los Tipos de Gráficos', () => {
+  test('mapSessionsToCsvRows: Mapea sesiones individuales formateando la fecha correctamente', () => {
+    const sessionsMock: SessionRecord[] = [
+      {
+        id: '1',
+        fecha: { toDate: () => new Date('2026-10-05T00:00:00Z') },
+        tiempoUso: 30,
+      } as any,
+    ];
+
+    const result = mapSessionsToCsvRows(sessionsMock, 'Tiempo de uso');
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      fecha: '2026-10-05',
+      valor: 30,
+      unidad: 'minutos',
+      metrica: 'Tiempo de uso',
+    });
+  });
+
+  test('mapDauMauToCsvRows: Desglosa registros DAU y MAU por fecha', () => {
+    const dauMauMock = [{ label: '2026-10-08', dau: 120, mau: 850 }];
+
+    const result = mapDauMauToCsvRows(dauMauMock);
+    expect(result).toHaveLength(2);
+    expect(result[0].metrica).toContain('DAU');
+    expect(result[0].valor).toBe(120);
+    expect(result[1].metrica).toContain('MAU');
+    expect(result[1].valor).toBe(850);
+  });
+
+  test('mapDemographicsToCsvRows: Convierte ageBuckets, genderSlices y averageAge', () => {
+    const demoMock: UserDemographicsMetrics = {
+      totalUsers: 200,
+      averageAge: 30.5,
+      ageBuckets: [{ key: '25-34', count: 120 }],
+      genderSlices: [{ key: 'Femenino' as any, count: 110, percent: 55 }],
+    };
+
+    const result = mapDemographicsToCsvRows(demoMock);
+    expect(result).toContainEqual(
+      expect.objectContaining({ metrica: 'Rango de edad: 25-34', valor: 120 })
+    );
+    expect(result).toContainEqual(
+      expect.objectContaining({ metrica: 'Género: Femenino (55%)', valor: 110 })
+    );
+    expect(result).toContainEqual(
+      expect.objectContaining({ metrica: 'Promedio de edad', valor: 30.5 })
+    );
+  });
+
+  test('mapGeographicsToCsvRows: Convierte countryBuckets y regionSlices', () => {
+    const geoMock: UserGeographicsMetrics = {
+      totalCities: 5,
+      mainCountry: 'Venezuela',
+      mainCountryPercent: 80,
+      totalUsers: 100,
+      countryBuckets: [{ country: 'Venezuela', count: 80 } as any],
+      regionSlices: [{ region: 'Caracas', count: 50 } as any],
+    };
+
+    const result = mapGeographicsToCsvRows(geoMock);
+    expect(result).toContainEqual(
+      expect.objectContaining({ metrica: 'País: Venezuela', valor: 80 })
+    );
+    expect(result).toContainEqual(
+      expect.objectContaining({ metrica: 'Región: Caracas', valor: 50 })
+    );
+  });
+
+  test('mapRetentionToCsvRows: Mapea cohortes y porcentajes de retención', () => {
+    const retentionMock: RetentionDataPoint[] = [
+      { cohort: '2026-10-01', label: 'Día 1', percentage: 75.5 },
+    ];
+
+    const result = mapRetentionToCsvRows(retentionMock);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      fecha: '2026-10-01',
+      valor: 75.5,
+      unidad: 'porcentaje',
+      metrica: 'Retención (Día 1)',
+    });
   });
 });

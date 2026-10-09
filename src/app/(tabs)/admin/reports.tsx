@@ -432,6 +432,11 @@ export default function AdminReportsScreen() {
 
       // 5. Generación del CSV con BOM UTF-8 y despliegue del Share Sheet nativo
       await exportChartDataToCsv(exportRows, periodLabel, selectedReportType);
+
+      Alert.alert(
+        t('reports.csvExportSuccess'),
+        t('reports.csvExportMessage')
+      );
     } catch (error) {
       console.error('Error al exportar CSV:', error);
       Alert.alert(t('reports.title'), t('reports.exportError'));

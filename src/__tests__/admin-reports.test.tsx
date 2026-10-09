@@ -441,7 +441,9 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
     // Abrir menú y Exportar a CSV
     fireEvent.press(getByTestId('download-menu-btn'));
     expect(getByTestId('export-menu-popover')).toBeTruthy();
-    fireEvent.press(getByTestId('export-csv-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
     expect(alertSpy).toHaveBeenCalledWith(
       'Archivo CSV generado',
       'Los datos tabulares han sido preparados para su descarga.'
