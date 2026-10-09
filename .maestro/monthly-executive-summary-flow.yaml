@@ -1,0 +1,50 @@
+appId: com.proyect1.ATIDental
+---
+# Flujo E2E Maestro: US-35 / Issue #31 - Generación y Exportación de Resumen Mensual Ejecutivo
+- launchApp
+
+- runFlow: common/login-admin.yaml
+
+# 1. Esperar y navegar a la pestaña de Perfil
+- extendedWaitUntil:
+    visible:
+      id: "profile-tab"
+    timeout: 15000
+
+- tapOn:
+    id: "profile-tab"
+
+# 2. Abrir el menú lateral desplegable (Drawer / Menú Hamburguesa)
+- extendedWaitUntil:
+    visible:
+      id: "menu-btn"
+    timeout: 10000
+
+- tapOn:
+    id: "menu-btn"
+
+# 3. Desplegar la sección de Administración
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-toggle"
+    timeout: 10000
+
+- tapOn:
+    id: "nav-item-admin-toggle"
+
+# 4. Validar la presencia de la opción "Exportar el resumen mensual"
+- extendedWaitUntil:
+    visible:
+      id: "nav-item-admin-monthly-summary"
+    timeout: 10000
+
+- assertVisible:
+    id: "nav-item-admin-monthly-summary"
+
+# 5. Accionar la exportación del resumen mensual en segundo plano
+- tapOn:
+    id: "nav-item-admin-monthly-summary"
+
+# 6. Esperar la generación y compilación del documento (<= 3 segundos según Criterios de Aceptación)
+- waitForAnimationToEnd:
+    timeout: 5000
