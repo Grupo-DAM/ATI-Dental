@@ -27,6 +27,10 @@ import { ConsultationDetailModal } from '@/components/clinical-history/Consultat
 import { NotificationToast } from '@/components/notification-toast';
 import { ConfirmationModal } from '@/components/confirmation-modal';
 import { deleteTreatment } from '@/services/treatment-service';
+import {
+  exportClinicalRecordToPdf,
+  hasClinicalRecordExportableData,
+} from '@/services/clinical-record-service';
 import { Consultation, ToothCondition } from '@/types/clinical-record';
 import { createClinicalHistoryStyles } from '@/constants/styles/patients.style';
 import { ToothConditionModal } from '@/components/clinical-history/ToothConditionModal';
@@ -45,7 +49,7 @@ function ageFromBirthDate(birthDate?: string): string {
 }
 
 export default function ClinicalHistoryScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createClinicalHistoryStyles(theme), [theme]);
   const { user, loading: authLoading } = useAuth();
@@ -126,6 +130,54 @@ export default function ClinicalHistoryScreen() {
     title: '',
     message: '',
   });
+
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPdf = async () => {
+    if (!record || !hasClinicalRecordExportableData(record)) {
+      setToastConfig({
+        visible: true,
+        type: 'error',
+        title: t('clinicalHistory.title', 'Historia Clínica'),
+        message: t(
+          'clinicalHistory.exportNoData',
+          'El paciente no registra consultas ni tratamientos para exportar'
+        ),
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const doctorName =
+        user?.nombre || user?.alias || user?.email?.split('@')[0] || undefined;
+      const result = await exportClinicalRecordToPdf(record, {
+        doctorName,
+        language: i18n?.language,
+      });
+
+      if (result?.share?.shared) {
+        setToastConfig({
+          visible: true,
+          type: 'success',
+          title: t('clinicalHistory.title', 'Historia Clínica'),
+          message: t('clinicalHistory.exportSuccess', 'Expediente generado exitosamente'),
+        });
+      }
+    } catch (err: any) {
+      console.warn('[ClinicalHistoryScreen] Error al exportar PDF:', err);
+      setToastConfig({
+        visible: true,
+        type: 'error',
+        title: t('clinicalHistory.errorTitle', 'Error'),
+        message:
+          err?.message ||
+          t('clinicalHistory.exportError', 'No se pudo generar ni compartir el expediente clínico.'),
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Carga el odontograma 
   const [selectedConsultationDate, ] = useState<string | null>(null);
@@ -362,6 +414,8 @@ export default function ClinicalHistoryScreen() {
         <PatientSummaryCard
           patient={record.patient}
           onEditPatient={handleEditPatient}
+          onExportPdf={handleExportPdf}
+          isExporting={isExporting}
         />
 
         {/* Barra de Pestañas: Consultas | Odontograma | Tratamientos */}

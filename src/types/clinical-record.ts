@@ -15,6 +15,7 @@ export interface Consultation {
   tratamientosRealizados?: string;
   notas?: string;
   appointmentId?: string;
+  odontograma?: string;
   createdAt?: any;
 }
 

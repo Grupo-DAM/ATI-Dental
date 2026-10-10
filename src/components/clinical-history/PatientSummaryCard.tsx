@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -17,9 +17,13 @@ function getInitials(name: string): string {
 export function PatientSummaryCard({
   patient,
   onEditPatient,
+  onExportPdf,
+  isExporting = false,
 }: Readonly<{
   patient: Patient;
   onEditPatient?: () => void;
+  onExportPdf?: () => void;
+  isExporting?: boolean;
 }>) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -70,6 +74,24 @@ export function PatientSummaryCard({
             ) : null}
           </View>
         </View>
+
+        {onExportPdf && (
+          <TouchableOpacity
+            style={styles.pdfButton}
+            onPress={onExportPdf}
+            disabled={isExporting}
+            activeOpacity={0.7}
+            accessibilityLabel={t('clinicalHistory.exportPdf', 'Exportar Expediente Completo')}
+            accessibilityRole="button"
+            testID="export-pdf-btn"
+          >
+            {isExporting ? (
+              <ActivityIndicator size="small" color="#FFFFFF" testID="export-pdf-loading" />
+            ) : (
+              <MaterialCommunityIcons name="file-pdf-box" size={26} color="#FFFFFF" />
+            )}
+          </TouchableOpacity>
+        )}
 
         {onEditPatient && (
           <TouchableOpacity
@@ -194,6 +216,15 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       fontSize: 11,
       color: theme.textSecondary,
       fontFamily: 'Open Sans',
+    },
+    pdfButton: {
+      width: 44,
+      height: 40,
+      borderRadius: 8,
+      backgroundColor: theme.main,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: 8,
     },
     editButton: {
       width: 36,
