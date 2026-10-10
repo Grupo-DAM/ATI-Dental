@@ -21,8 +21,10 @@ jest.mock('@react-native-community/netinfo', () => ({
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es', changeLanguage: jest.fn() } }),
 }));
+let mockCurrentUser = { email: 'test@test.com', rol: 'admin', nombre: 'Test' };
+
 jest.mock('../hooks/use-auth', () => ({
-  useAuth: () => ({ user: { email: 'test@test.com', rol: 'admin', nombre: 'Test' }, loading: false, logout: jest.fn() }),
+  useAuth: () => ({ user: mockCurrentUser, loading: false, logout: jest.fn() }),
 }));
 jest.mock('expo-secure-store', () => ({
   setItemAsync: jest.fn().mockResolvedValue(true),
@@ -47,12 +49,46 @@ jest.mock('@react-native-firebase/firestore', () => {
 
 jest.setTimeout(120_000);
 
-describe('Pantallas principales - Rendimiento de montaje', () => {
-  it('HomeScreen se renderiza sin regresión de rendimiento', async () => {
-    await measureRenders(<HomeScreen />, { runs: 10 });
+describe('Pantallas principales - Rendimiento de montaje por rol de usuario', () => {
+  describe('Perfil Paciente (usuario_externo)', () => {
+    beforeEach(() => {
+      mockCurrentUser = { email: 'paciente@test.com', rol: 'usuario_externo', nombre: 'Test Paciente' };
+    });
+
+    it('HomeScreen se renderiza sin regresión de rendimiento para Paciente', async () => {
+      await measureRenders(<HomeScreen />, { runs: 10 });
+    });
+
+    it('ProfileScreen se renderiza sin regresión de rendimiento para Paciente', async () => {
+      await measureRenders(<ProfileScreen />, { runs: 10 });
+    });
   });
 
-  it('ProfileScreen se renderiza sin regresión de rendimiento', async () => {
-    await measureRenders(<ProfileScreen />, { runs: 10 });
+  describe('Perfil Odontólogo (odontologo)', () => {
+    beforeEach(() => {
+      mockCurrentUser = { email: 'odontologo@test.com', rol: 'odontologo', nombre: 'Test Odontólogo' };
+    });
+
+    it('HomeScreen se renderiza sin regresión de rendimiento para Odontólogo', async () => {
+      await measureRenders(<HomeScreen />, { runs: 10 });
+    });
+
+    it('ProfileScreen se renderiza sin regresión de rendimiento para Odontólogo', async () => {
+      await measureRenders(<ProfileScreen />, { runs: 10 });
+    });
+  });
+
+  describe('Perfil Administrador (admin)', () => {
+    beforeEach(() => {
+      mockCurrentUser = { email: 'admin@test.com', rol: 'admin', nombre: 'Test Admin' };
+    });
+
+    it('HomeScreen se renderiza sin regresión de rendimiento para Administrador', async () => {
+      await measureRenders(<HomeScreen />, { runs: 10 });
+    });
+
+    it('ProfileScreen se renderiza sin regresión de rendimiento para Administrador', async () => {
+      await measureRenders(<ProfileScreen />, { runs: 10 });
+    });
   });
 });

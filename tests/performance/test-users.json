@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-10-10T18:02:06.156Z",
+  "description": "Catálogo de usuarios y perfiles diferenciados para pruebas de carga y rendimiento",
+  "profiles": [
+    {
+      "role": "usuario_externo",
+      "roleLabel": "Paciente / Usuario Externo",
+      "email": "paciente.test@atidental.com",
+      "password": "PacienteSecure123!",
+      "nombre": "Juan Paciente de Prueba",
+      "alias": "JuanP",
+      "gender": "masculino",
+      "trafficWeight": 0.7,
+      "patientData": {
+        "patientCode": "PAC-TEST-001",
+        "fullName": "Juan Paciente de Prueba",
+        "documentId": "V-11223344",
+        "phone": "+584121112233",
+        "email": "paciente.test@atidental.com",
+        "status": "activo",
+        "medicalHistory": [
+          "alergia_penicilina"
+        ],
+        "lastVisit": "2026-09-15",
+        "nextAppointment": "2026-10-25"
+      }
+    },
+    {
+      "role": "odontologo",
+      "roleLabel": "Odontólogo Especialista",
+      "email": "odontologo.test@atidental.com",
+      "password": "OdontoSecure123!",
+      "nombre": "Dra. María Odontóloga de Prueba",
+      "alias": "DraMaria",
+      "phone": "+584149998877",
+      "trafficWeight": 0.2
+    },
+    {
+      "role": "admin",
+      "roleLabel": "Administrador del Sistema",
+      "email": "admin.test@atidental.com",
+      "password": "AdminSecure123!",
+      "nombre": "Carlos Administrador de Prueba",
+      "alias": "AdminCarlos",
+      "phone": "+584165554433",
+      "trafficWeight": 0.1
+    },
+    {
+      "role": "asistente",
+      "roleLabel": "Asistente Dental",
+      "email": "asistente.test@atidental.com",
+      "password": "AsistenteSecure123!",
+      "nombre": "Laura Asistente de Prueba",
+      "alias": "LauraA",
+      "phone": "+584241119988",
+      "trafficWeight": 0
+    }
+  ]
+}

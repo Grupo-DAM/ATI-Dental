@@ -1,6 +1,5 @@
-import http from 'node:http';
+const http = require('http');
 
-// --- Handlers / Controladores por Endpoint ---
 function resolveRoleFromEmail(email = '') {
   const normalized = email.toLowerCase();
   if (normalized.includes('admin')) {
@@ -15,13 +14,13 @@ function resolveRoleFromEmail(email = '') {
   return { role: 'dentist', id: 'usr-1', fullName: 'Dr. Roberto Dentista' };
 }
 
-function handleAuthLogin(req: http.IncomingMessage, res: http.ServerResponse) {
+function handleAuthLogin(req, res) {
   let body = '';
-  req.on('data', (chunk: Buffer | string) => { body += chunk; });
+  req.on('data', chunk => { body += chunk; });
   req.on('end', () => {
     try {
       const parsed = JSON.parse(body || '{}');
-      if (!parsed.email?.includes('@')) {
+      if (!parsed.email || !parsed.email.includes('@')) {
         res.writeHead(400);
         return res.end(JSON.stringify({ error: 'Email inválido o incompleto' }));
       }
@@ -42,7 +41,7 @@ function handleAuthLogin(req: http.IncomingMessage, res: http.ServerResponse) {
   });
 }
 
-function handleUsersMe(req: http.IncomingMessage, res: http.ServerResponse, authHeader?: string) {
+function handleUsersMe(req, res, authHeader) {
   if (!authHeader) {
     res.writeHead(401);
     return res.end(JSON.stringify({ error: 'No autorizado: Falta cabecera Authorization' }));
@@ -70,7 +69,7 @@ function handleUsersMe(req: http.IncomingMessage, res: http.ServerResponse, auth
   }));
 }
 
-function handleClinicalRecords(req: http.IncomingMessage, res: http.ServerResponse, method?: string, pathname = '') {
+function handleClinicalRecords(req, res, method, pathname = '') {
   if (pathname.includes('/odontogram') && method === 'POST') {
     res.writeHead(201);
     return res.end(JSON.stringify({ status: 'saved', piecesCount: 32 }));
@@ -95,7 +94,7 @@ function handleClinicalRecords(req: http.IncomingMessage, res: http.ServerRespon
 
   if (method === 'POST') {
     let body = '';
-    req.on('data', (chunk: Buffer | string) => { body += chunk; });
+    req.on('data', chunk => { body += chunk; });
     req.on('end', () => {
       try {
         const parsed = JSON.parse(body || '{}');
@@ -113,7 +112,7 @@ function handleClinicalRecords(req: http.IncomingMessage, res: http.ServerRespon
   }
 }
 
-function handlePatients(req: http.IncomingMessage, res: http.ServerResponse, method?: string, pathname = '') {
+function handlePatients(req, res, method, pathname = '') {
   if (pathname.includes('/appointments')) {
     res.writeHead(200);
     return res.end(JSON.stringify([
@@ -132,7 +131,7 @@ function handlePatients(req: http.IncomingMessage, res: http.ServerResponse, met
 
   if (method === 'POST') {
     let body = '';
-    req.on('data', (chunk: Buffer | string) => { body += chunk; });
+    req.on('data', chunk => { body += chunk; });
     req.on('end', () => {
       const parsed = JSON.parse(body || '{}');
       if (!parsed.fullName || !parsed.documentId) {
@@ -145,7 +144,7 @@ function handlePatients(req: http.IncomingMessage, res: http.ServerResponse, met
   }
 }
 
-function handleReports(req: http.IncomingMessage, res: http.ServerResponse, pathname: string) {
+function handleReports(req, res, pathname) {
   if (pathname.includes('demographics')) {
     res.writeHead(200);
     return res.end(JSON.stringify({
@@ -166,9 +165,9 @@ function handleReports(req: http.IncomingMessage, res: http.ServerResponse, path
   return res.end(JSON.stringify({ status: 'ok', generatedAt: new Date().toISOString() }));
 }
 
-function handleAppointments(req: http.IncomingMessage, res: http.ServerResponse) {
+function handleAppointments(req, res) {
   let body = '';
-  req.on('data', (chunk: Buffer | string) => { body += chunk; });
+  req.on('data', chunk => { body += chunk; });
   req.on('end', () => {
     const parsed = JSON.parse(body || '{}');
     if (parsed.time === '10:00' && parsed.date === '2026-10-01') {
@@ -180,7 +179,7 @@ function handleAppointments(req: http.IncomingMessage, res: http.ServerResponse)
   });
 }
 
-export function createMockApiServer(port = 4040): Promise<http.Server> {
+function createMockApiServer(port = 4040) {
   const server = http.createServer((req, res) => {
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     const { pathname } = url;
@@ -230,3 +229,8 @@ export function createMockApiServer(port = 4040): Promise<http.Server> {
     });
   });
 }
+
+module.exports = {
+  createMockApiServer,
+  resolveRoleFromEmail,
+};
