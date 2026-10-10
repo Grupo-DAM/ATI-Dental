@@ -4,6 +4,7 @@ import { Alert } from 'react-native';
 import AgendaScreen from '@/app/(tabs)/agenda';
 import * as agendaService from '@/services/agenda-service';
 import { resetAppointmentStore } from '@/services/agenda-service';
+import * as weeklyAgendaReport from '@/services/weekly-agenda-report';
 
 // Mock router
 const mockAgendaParams: Record<string, string> = {};
@@ -53,11 +54,16 @@ jest.mock('@/hooks/use-theme', () => ({
 
 // Mock translation
 jest.mock('react-i18next', () => ({
+  initReactI18next: { type: '3rdParty', init: jest.fn() },
   useTranslation: () => ({
+    i18n: { language: 'es' },
     t: (key: string, params?: any) => {
       const translations: Record<string, string> = {
         'agenda.title': 'Agenda Semanal',
         'agenda.weeklySchedule': 'Agenda Semanal',
+        'agenda.printAgenda': 'Imprimir Agenda',
+        'agenda.printError': 'Ocurrió un error al procesar la impresión de la agenda.',
+        'agenda.printNoAppointments': 'No se registran citas programadas para la presente semana.',
         'agenda.noAppointments': 'Sin consultas programadas',
         'agenda.noAppointmentsMessage': 'No hay citas agendadas para este día.',
         'agenda.errorLoading': 'No se pudo cargar la agenda',
@@ -345,4 +351,51 @@ describe('AgendaScreen (US-36: Visualizar Agenda)', () => {
       expect(getByTestId('agenda-screen')).toBeTruthy();
     });
   });
+
+  it('renders print agenda button and triggers printWeeklyAgenda on press (US-33)', async () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: 'dentist1', rol: 'odontologo', displayName: 'Dr. Test' },
+      loading: false,
+    });
+
+    const printSpy = jest.spyOn(weeklyAgendaReport, 'printWeeklyAgenda').mockResolvedValueOnce();
+
+    const { getByTestId, getByText } = render(<AgendaScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('print-agenda-btn')).toBeTruthy();
+      expect(getByText('Imprimir Agenda')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('print-agenda-btn'));
+
+    await waitFor(() => {
+      expect(printSpy).toHaveBeenCalled();
+    });
+  }, 15000);
+
+  it('displays alert gracefully when printWeeklyAgenda fails (US-33 Resiliencia)', async () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: 'dentist1', rol: 'odontologo' },
+      loading: false,
+    });
+
+    jest.spyOn(weeklyAgendaReport, 'printWeeklyAgenda').mockRejectedValueOnce(new Error('Print failure'));
+    const alertSpy = jest.spyOn(Alert, 'alert');
+
+    const { getByTestId } = render(<AgendaScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('print-agenda-btn')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('print-agenda-btn'));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'Agenda Semanal',
+        'Ocurrió un error al procesar la impresión de la agenda.'
+      );
+    });
+  }, 15000);
 });

@@ -1,5 +1,5 @@
 import React, { ReactNode, useMemo } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { ThemedView } from '@/components/themed-view';
@@ -26,6 +26,7 @@ interface AdminListLayoutProps {
   handleRetryConnection: () => void;
   filter: any;
   isGeneralFilter?: boolean;
+  footerAction?: ReactNode;
   children: ReactNode;
   testID?: string;
 }
@@ -43,6 +44,7 @@ export function AdminListLayout({
   handleRetryConnection,
   filter,
   isGeneralFilter = false,
+  footerAction,
   children,
   testID,
 }: Readonly<AdminListLayoutProps>) {
@@ -107,6 +109,13 @@ export function AdminListLayout({
         <NoResultSearch general={isGeneralFilter} />
       ) : (
         children
+      )}
+
+      {/* Acción inferior (Botón PDF según Wireframe) */}
+      {footerAction && (
+        <View style={{ alignItems: 'flex-end', paddingHorizontal: 16, marginTop: 12, marginBottom: 8 }}>
+          {footerAction}
+        </View>
       )}
 
       {/* Paginador */}

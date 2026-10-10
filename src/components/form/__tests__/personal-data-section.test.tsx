@@ -33,8 +33,12 @@ describe('PersonalDataSection', () => {
       type: 'patient' as const,
       fullName: 'Carlos Gómez',
       onChangeFullName: jest.fn(),
-      documentId: '12345678',
+      documentType: 'V',
+      documentNumber: '12345678',
+      documentId: 'V-12345678',
       onChangeDocumentId: jest.fn(),
+      onChangeDocumentType: jest.fn(),
+      onChangeDocumentNumber: jest.fn(),
       address: 'Av. Libertador 123',
       onChangeAddress: jest.fn(),
     };

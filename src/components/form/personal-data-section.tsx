@@ -8,6 +8,8 @@ import { SectionCard } from './section-card';
 import { FormSelectField, FormTextField } from '@/components/ui/form-field';
 import { createPersonalDataStyles } from '@/constants/styles/global.styles';
 import { useTheme } from '@/hooks/use-theme';
+import { DocumentInput } from '@/components/ui/document-input';
+import { DocumentType } from '@/constants/patient';
 
 const DEFAULT_AVATAR = require('@/assets/expo.icon/Assets/avatar.png');
 
@@ -59,6 +61,11 @@ export interface PersonalDataSectionProps {
   fullNameError?: string;
   documentId?: string;
   onChangeDocumentId?: (value: string) => void;
+  documentType?: DocumentType | '';
+  onChangeDocumentType?: (type: DocumentType) => void;
+  documentNumber?: string;
+  onChangeDocumentNumber?: (value: string) => void;
+  documentError?: string;
   address?: string;
   onChangeAddress?: (value: string) => void;
 
@@ -114,6 +121,11 @@ export function PersonalDataSection({
   fullNameError,
   documentId = '',
   onChangeDocumentId,
+  documentType = '',
+  onChangeDocumentType,
+  documentNumber = '',
+  onChangeDocumentNumber,
+  documentError,
   address = '',
   onChangeAddress,
 
@@ -221,12 +233,17 @@ export function PersonalDataSection({
             errorMessage={fullNameError}
           />
 
-          <FormTextField
+          <DocumentInput
             testID="input-document"
             label={t('registerPatient.documentId')}
-            value={documentId}
-            onChangeText={onChangeDocumentId}
-            placeholder={t('registerPatient.documentPlaceholder')}
+            documentType={documentType}
+            documentNumber={documentNumber || documentId}
+            onChangeType={onChangeDocumentType ?? (() => {})}
+            onChangeNumber={(val) => {
+              if (onChangeDocumentNumber) onChangeDocumentNumber(val);
+              if (onChangeDocumentId) onChangeDocumentId(val);
+            }}
+            errorMessage={documentError}
           />
         </>
       )}

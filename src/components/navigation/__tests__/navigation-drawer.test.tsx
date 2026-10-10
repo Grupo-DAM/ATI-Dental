@@ -20,7 +20,16 @@ jest.mock('expo-router', () => ({
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
+    i18n: { language: 'es' },
   }),
+  initReactI18next: {
+    type: '3rdParty',
+    init: () => {},
+  },
+}));
+
+jest.mock('@/services/monthly-executive-summary-service', () => ({
+  exportMonthlyExecutiveSummary: jest.fn().mockResolvedValue({ shared: true }),
 }));
 
 jest.mock('@/hooks/use-auth', () => ({
@@ -159,4 +168,67 @@ describe('NavigationDrawer', () => {
     expect(modal.props.transparent).toBe(true);
     expect(modal.props.presentationStyle).toBeUndefined();
   });
+
+  it('permite a un administrador exportar el resumen mensual', async () => {
+    const onClose = jest.fn();
+    const adminUser = { uid: '1', email: 'admin@test.com', rol: 'admin', nombre: 'Admin User' };
+    useAuth.mockReturnValue({
+      user: adminUser,
+      logout: jest.fn(),
+    });
+
+    render(<NavigationDrawer visible onClose={onClose} />);
+
+    fireEvent.press(screen.getByTestId('nav-item-admin-toggle'));
+    const monthlySummaryItem = screen.getByTestId('nav-item-admin-monthly-summary');
+    expect(monthlySummaryItem).toBeTruthy();
+
+    const { exportMonthlyExecutiveSummary } = jest.requireMock('@/services/monthly-executive-summary-service');
+    exportMonthlyExecutiveSummary.mockResolvedValueOnce({ shared: true });
+
+    fireEvent.press(monthlySummaryItem);
+
+    await waitFor(() => {
+      expect(exportMonthlyExecutiveSummary).toHaveBeenCalledWith(adminUser, 'es');
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it('maneja errores en exportación de resumen mensual sin romper la interfaz', async () => {
+    const onClose = jest.fn();
+    const adminUser = { uid: '1', email: 'admin@test.com', rol: 'admin', nombre: 'Admin User' };
+    useAuth.mockReturnValue({
+      user: adminUser,
+      logout: jest.fn(),
+    });
+
+    render(<NavigationDrawer visible onClose={onClose} />);
+
+    fireEvent.press(screen.getByTestId('nav-item-admin-toggle'));
+    const monthlySummaryItem = screen.getByTestId('nav-item-admin-monthly-summary');
+
+    const { exportMonthlyExecutiveSummary } = jest.requireMock('@/services/monthly-executive-summary-service');
+    exportMonthlyExecutiveSummary.mockRejectedValueOnce(new Error('Export failed'));
+
+    fireEvent.press(monthlySummaryItem);
+
+    await waitFor(() => {
+      expect(exportMonthlyExecutiveSummary).toHaveBeenCalled();
+    });
+    // La interfaz permanece interactiva
+    expect(monthlySummaryItem).toBeTruthy();
+  });
+
+  it('ejecuta la transición de cierre cuando visible cambia a false', () => {
+    useAuth.mockReturnValue({
+      user: { uid: '1', email: 'admin@test.com', rol: 'admin' },
+      logout: jest.fn(),
+    });
+
+    const { rerender } = render(<NavigationDrawer visible={true} onClose={jest.fn()} />);
+    expect(screen.getByTestId('nav-drawer-close')).toBeTruthy();
+
+    rerender(<NavigationDrawer visible={false} onClose={jest.fn()} />);
+  });
 });
+

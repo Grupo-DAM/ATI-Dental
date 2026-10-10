@@ -75,6 +75,7 @@
     "adminUsers": "Manage Users",
     "adminReports": "Generate Reports",
     "adminContactInfo": "Update contact information",
+    "adminMonthlySummary": "Export Monthly Summary",
     "comingSoon": "This section will be available soon.",
     "logout": "Log out",
     "defaultUser": "User",
@@ -255,6 +256,13 @@
     "kpiMau": "MAU (MONTHLY)",
     "kpiDailyAvg": "Daily avg.",
     "kpiThisMonth": "This month",
+    "kpiDauTooltipTitle": "DAU (Daily Active Users)",
+    "kpiDauTooltipDesc": "Daily Active Users. Represents the average number of unique users who interact with the system on a given day.",
+    "kpiMauTooltipTitle": "MAU (Monthly Active Users)",
+    "kpiMauTooltipDesc": "Monthly Active Users. Represents the total number of unique users active on the platform over a 30-day period.",
+    "kpiRatioTooltipTitle": "DAU / MAU Ratio",
+    "kpiRatioTooltipDesc": "Stickiness and engagement metric that reflects user recurrence by comparing daily active users to monthly active users.",
+    "tooltipClose": "Got it",
     "mauLegend": "MAU (Monthly Active)",
     "dauLegend": "DAU (Daily)",
     "reportTypeCrashRate": "Crash percentage",
@@ -378,7 +386,11 @@
       "datePickerUnavailable": "The calendar needs a native rebuild (npx expo run:android) to load the date picker module.",
       "successTitle": "Patient registered",
       "successMessage": "Patient data has been captured. Saving to the system will be connected later.",
-      "saveError": "An error occurred while saving the patient. Please check your connection and try again."
+      "saveError": "An error occurred while saving the patient. Please check your connection and try again.",
+      "missingDocumentType": "Please select a document type.",
+      "emptyDocumentNumber": "Please enter the document number.",
+      "invalidDocumentLength": "Document length is invalid for this type.",
+      "documentMustBeNumeric": "This document must contain numbers only."
     },
     "accessDeniedTitle": "Access Denied",
     "accessDeniedMessage": "This section is restricted to dentists and asistants only."
@@ -395,7 +407,10 @@
     "registerPatient": "Register Patient",
     "accessDeniedTitle": "Access Denied",
     "odontologoOnlyView": "You don't have dentist's credentials to access the patients list.",
-    "odontologoOnlyViewAlert": "Only dental personnel have access to this section."
+    "odontologoOnlyViewAlert": "Only dental personnel have access to this section.",
+    "exportPdf": "Export List to PDF",
+    "noPatientsToExport": "No patients to export in the current list",
+    "exportError": "An error occurred while exporting the patient list."
   },
   "admin-users": {
     "title": "List of Users",
@@ -571,6 +586,21 @@
     "optionsMessage": "Options for {{name}}'s appointment",
     "viewDetails": "View details",
     "close": "Close",
+    "printAgenda": "Print Schedule",
+    "printAgendaTitle": "Weekly Schedule Report",
+    "printAgendaSubtitle": "Chronological list of scheduled appointments",
+    "printNoAppointments": "No appointments scheduled for the current week.",
+    "printError": "An error occurred while processing schedule printing.",
+    "printSuccess": "Print job submitted successfully",
+    "printWeekRange": "Week of {{start}} to {{end}}",
+    "printTableHeaders": {
+      "time": "Time",
+      "patient": "Patient",
+      "treatment": "Treatment / Reason",
+      "status": "Status",
+      "chair": "Chair",
+      "dentist": "Dentist"
+    },
     "months": {
       "0": "JANUARY",
       "1": "FEBRUARY",

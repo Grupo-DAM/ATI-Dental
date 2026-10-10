@@ -75,6 +75,7 @@
     "adminUsers": "Administrar Usuarios",
     "adminReports": "Generar Reportes",
     "adminContactInfo": "Actualizar información de contacto",
+    "adminMonthlySummary": "Exportar el resumen mensual",
     "comingSoon": "Esta sección estará disponible próximamente.",
     "logout": "Cerrar sesión",
     "defaultUser": "Usuario",
@@ -255,6 +256,13 @@
     "kpiMau": "MAU (MENS.)",
     "kpiDailyAvg": "Prom. diario",
     "kpiThisMonth": "Este mes",
+    "kpiDauTooltipTitle": "DAU (Daily Active Users)",
+    "kpiDauTooltipDesc": "Usuarios Activos Diarios. Representa el número promedio de usuarios únicos que interactúan con el sistema en un día determinado.",
+    "kpiMauTooltipTitle": "MAU (Monthly Active Users)",
+    "kpiMauTooltipDesc": "Usuarios Activos Mensuales. Representa la cantidad total de usuarios únicos que registraron actividad en la plataforma en un periodo de 30 días.",
+    "kpiRatioTooltipTitle": "Ratio DAU / MAU",
+    "kpiRatioTooltipDesc": "Indicador de adopción y recurrencia (stickiness) que mide la fidelidad de los usuarios al comparar la actividad diaria con la mensual.",
+    "tooltipClose": "Entendido",
     "mauLegend": "MAU (Activos Mensuales)",
     "dauLegend": "DAU (Diarios)",
     "reportTypeCrashRate": "Porcentaje de Fallos",
@@ -378,7 +386,11 @@
       "datePickerUnavailable": "El calendario requiere reconstruir la app (npx expo run:android) para cargar el módulo nativo.",
       "successTitle": "Paciente registrado",
       "successMessage": "Los datos del paciente se han capturado. El guardado en el sistema se conectará más adelante.",
-      "saveError": "Ocurrió un error al guardar el paciente. Por favor verifique su conexión e intente nuevamente."
+      "saveError": "Ocurrió un error al guardar el paciente. Por favor verifique su conexión e intente nuevamente.",
+      "missingDocumentType": "Debe seleccionar un tipo de documento.",
+      "emptyDocumentNumber": "Debe ingresar el número de documento.",
+      "invalidDocumentLength": "La longitud del documento no es válida para este tipo.",
+      "documentMustBeNumeric": "Este documento debe contener únicamente números."
     },
     "accessDeniedTitle": "Acceso Denegado",
     "accessDeniedMessage": "Esta sección está restringida únicamente a odontólogos y asistentes."
@@ -395,7 +407,10 @@
     "registerPatient": "Registrar Paciente",
     "accessDeniedTitle": "Acceso Denegado",
     "odontologoOnlyView": "No tienes permisos de odontólogo para acceder al listado de pacientes.",
-    "odontologoOnlyViewAlert": "Solo el personal odontológico puede acceder a esta sección."
+    "odontologoOnlyViewAlert": "Solo el personal odontológico puede acceder a esta sección.",
+    "exportPdf": "Exportar Lista en PDF",
+    "noPatientsToExport": "No hay pacientes para exportar en la lista actual",
+    "exportError": "Ocurrió un error al exportar la lista de pacientes."
   },
   "admin-users": {
     "title": "Listado de Usuarios",
@@ -569,6 +584,21 @@
     "optionsMessage": "Opciones para la cita de {{name}}",
     "viewDetails": "Ver detalles",
     "close": "Cerrar",
+    "printAgenda": "Imprimir Agenda",
+    "printAgendaTitle": "Reporte de Agenda Semanal",
+    "printAgendaSubtitle": "Listado cronológico de citas programadas",
+    "printNoAppointments": "No se registran citas programadas para la presente semana.",
+    "printError": "Ocurrió un error al procesar la impresión de la agenda.",
+    "printSuccess": "Envío a impresión completado",
+    "printWeekRange": "Semana del {{start}} al {{end}}",
+    "printTableHeaders": {
+      "time": "Hora",
+      "patient": "Paciente",
+      "treatment": "Tratamiento / Motivo",
+      "status": "Estado",
+      "chair": "Sillón",
+      "dentist": "Odontólogo"
+    },
     "months": {
       "0": "ENERO",
       "1": "FEBRERO",

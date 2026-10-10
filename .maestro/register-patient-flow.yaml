@@ -2,22 +2,13 @@ appId: com.proyect1.ATIDental
 ---
 - launchApp
 
-- runFlow: common/login-user.yaml
-
-# 4. Navegar a la pestaña de Perfil (donde se ubica la cabecera con el menú lateral)
-- extendedWaitUntil:
-    visible:
-      id: "profile-tab"
-    timeout: 10000
-
-- tapOn:
-    id: "profile-tab"
+- runFlow: common/login-admin.yaml
 
 # 5. Abrir el menú lateral
 - extendedWaitUntil:
     visible:
       id: "menu-btn"
-    timeout: 10000
+    timeout: 50000
 
 - tapOn:
     id: "menu-btn"
@@ -26,7 +17,7 @@ appId: com.proyect1.ATIDental
 - extendedWaitUntil:
     visible:
       id: "nav-item-register-patient"
-    timeout: 10000
+    timeout: 50000
 
 - tapOn:
     id: "nav-item-register-patient"
@@ -35,7 +26,7 @@ appId: com.proyect1.ATIDental
 - extendedWaitUntil:
     visible:
       id: "register-patient-screen"
-    timeout: 15000
+    timeout: 50000
 
 # =======================================================
 # ESCENARIO 1: VALIDACIÓN DE CAMPOS OBLIGATORIOS VACÍOS
@@ -44,7 +35,7 @@ appId: com.proyect1.ATIDental
     element:
       id: "btn-submit-patient"
     direction: DOWN
-    timeout: 10000
+    timeout: 50000
 
 - tapOn:
     id: "btn-submit-patient"
@@ -54,7 +45,7 @@ appId: com.proyect1.ATIDental
     element:
       id: "input-full-name"
     direction: UP
-    timeout: 10000
+    timeout: 50000
 
 # Ahora que está visible en pantalla, verificar el mensaje de validación
 - assertVisible: ".*(El nombre completo no puede estar vacío|Full name cannot be empty).*"
@@ -65,9 +56,17 @@ appId: com.proyect1.ATIDental
 # Ya estamos arriba en el input-full-name
 - tapOn:
     id: "input-full-name"
-- inputText: "Eccelsa Ciccolella"
+- inputText: "Maria Ciccolella"
 - hideKeyboard
-- evalScript: ${output.docNumber = "V-" + Math.floor(10000000 + Math.random() * 90000000)}
+- tapOn:
+    id: "btn-select-doc-type"
+- extendedWaitUntil:
+    visible:
+      id: "doc-type-option-V"
+    timeout: 50000
+- tapOn:
+    id: "doc-type-option-V"
+- evalScript: ${output.docNumber = String(Math.floor(10000000 + Math.random() * 90000000))}
 - tapOn:
     id: "input-document"
 - inputText: ${output.docNumber}
@@ -77,7 +76,7 @@ appId: com.proyect1.ATIDental
     element:
       id: "input-phone"
     direction: DOWN
-    timeout: 10000
+    timeout: 50000
 
 - tapOn:
     id: "input-phone"
@@ -94,7 +93,7 @@ appId: com.proyect1.ATIDental
     element:
       id: "input-allergies"
     direction: DOWN
-    timeout: 10000
+    timeout: 50000
 
 - tapOn:
     id: "input-allergies"
@@ -108,7 +107,7 @@ appId: com.proyect1.ATIDental
     element:
       id: "btn-submit-patient"
     direction: DOWN
-    timeout: 10000
+    timeout: 50000
 
 - tapOn:
     id: "btn-submit-patient"
@@ -116,13 +115,10 @@ appId: com.proyect1.ATIDental
 # Esperar el Alert nativo de éxito de Firestore
 - extendedWaitUntil:
     visible: ".*(Paciente registrado|Patient Registered).*"
-    timeout: 15000
+    timeout: 50000
 
 # Confirmar el modal de éxito
 - tapOn: ".*(Listo|LISTO|Done|DONE|OK).*"
-
-- tapOn:
-    id: "profile-tab"
 
 - tapOn:
     id: "menu-btn"

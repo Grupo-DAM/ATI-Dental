@@ -32,6 +32,7 @@ import {
   SearchResultItem,
   ALL_QUICK_ACCESS_ITEMS,
 } from '@/services/dashboard-service';
+import { isAdminUser, isOdontologoUser, isAsistenteUser } from '@/constants/user-roles';
 
 const CATEGORY_ICON_MAP: Record<string, any> = {
   patients: 'person-outline',
@@ -70,6 +71,8 @@ export default function HomeScreen() {
 
   const userUid = user?.uid;
   const userRole = user?.rol;
+  
+  const isNotExernalUser = (isAdminUser(user) || isOdontologoUser(user) || isAsistenteUser(user));
 
   // ─── Load Dashboard Data ───
   const loadDashboardData = useCallback(async () => {
@@ -320,7 +323,7 @@ export default function HomeScreen() {
                     >
                       <Text style={styles.modalSecondaryButtonText}>{t('home.close')}</Text>
                     </TouchableOpacity>
-                    {Boolean(selectedNotification?.targetRoute) && (
+                    {Boolean(selectedNotification?.targetRoute) && isNotExernalUser && (
                       <TouchableOpacity
                         testID="go-to-notification-target-btn"
                         style={styles.modalPrimaryButton}
@@ -461,13 +464,15 @@ export default function HomeScreen() {
       <CardContainer wrapperStyle={styles.sectionCardWrapper} cardStyle={styles.sectionCardInner}>
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle} numberOfLines={2} ellipsizeMode="tail">{t('home.todaySummary')}</Text>
-          <TouchableOpacity
-            testID="view-agenda-link"
-            style={styles.agendaLink}
-            onPress={() => router.push('/(tabs)/agenda')}
-          >
-            <Text style={styles.agendaLinkText} numberOfLines={1} ellipsizeMode="tail">{t('home.viewAgenda')}</Text>
-          </TouchableOpacity>
+          {isNotExernalUser && 
+            <TouchableOpacity
+              testID="view-agenda-link"
+              style={styles.agendaLink}
+              onPress={() => router.push('/(tabs)/agenda')}
+            >
+              <Text style={styles.agendaLinkText} numberOfLines={1} ellipsizeMode="tail">{t('home.viewAgenda')}</Text>
+            </TouchableOpacity>
+          }
         </View>
 
         {loading && !summary ? (
@@ -490,14 +495,16 @@ export default function HomeScreen() {
                 </Text>
               </View>
 
-              <View testID="metric-pacientes" style={[styles.metricCard, styles.metricCardOrange]}>
-                <Text style={[styles.metricNumber, styles.metricNumberOrange]}>
-                  {summary?.pendingPatients ?? 0}
-                </Text>
-                <Text style={[styles.metricLabel, styles.metricLabelOrange]}>
-                  {t('home.pendingPatients')}
-                </Text>
-              </View>
+              {isNotExernalUser && 
+                <View testID="metric-pacientes" style={[styles.metricCard, styles.metricCardOrange]}>
+                  <Text style={[styles.metricNumber, styles.metricNumberOrange]}>
+                    {summary?.pendingPatients ?? 0}
+                  </Text>
+                  <Text style={[styles.metricLabel, styles.metricLabelOrange]}>
+                    {t('home.pendingPatients')}
+                  </Text>
+                </View>
+              }
             </View>
 
             <View testID="metric-examenes" style={[styles.metricCard, styles.metricCardBlue, styles.metricCardWide]}>
