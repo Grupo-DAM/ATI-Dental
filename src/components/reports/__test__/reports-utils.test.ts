@@ -18,7 +18,41 @@ import {
   formatDayKeyLabel,
   listSessionDayKeys,
   readSessionStartMillis,
+  sanitizeCsvCell,
+  formatChartDataToCsv,
+  formatDateToIsoString,
+  mapSessionsToCsvRows,
+  mapDauMauToCsvRows,
+  mapDemographicsToCsvRows,
+  mapGeographicsToCsvRows,
+  mapRetentionToCsvRows,
+  CsvDataRow,
+  exportChartDataToCsv,
 } from '../utils/reports-utils';
+import {
+  UserDemographicsMetrics,
+  UserGeographicsMetrics,
+  RetentionDataPoint,
+  SessionRecord,
+} from '@/components/reports/types';
+import * as Sharing from 'expo-sharing';
+
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  shareAsync: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('expo-file-system', () => ({
+  File: jest.fn().mockImplementation((_location?: string, name?: string) => ({
+    create: jest.fn(),
+    write: jest.fn(),
+    copy: jest.fn(),
+    delete: jest.fn(),
+    exists: false,
+    uri: name ? `file:///cache/${name}` : 'file:///tmp/export.csv',
+  })),
+  Paths: { cache: 'cache-dir' },
+}));
 
 describe('reports-utils unit tests', () => {
   describe('generatePeriodOptions', () => {
@@ -374,5 +408,298 @@ describe('calculatePeakHoursDistribution', () => {
     expect(Date.now() - started).toBeLessThanOrEqual(100);
     expect(result.total).toBe(10000);
     expect(result.slots).toHaveLength(24);
+  });
+});
+
+describe('Pruebas de Sanitización y Seguridad CSV (Inyección de Fórmulas)', () => {
+  test('Bloquea caracteres peligrosos al inicio del texto (=, +, -, @)', () => {
+    // 1. Corrección: La comilla simple de escape se antepone solo al inicio
+    expect(sanitizeCsvCell('=SUM(A1:A10)')).toBe(`"'=SUM(A1:A10)"`);
+    expect(sanitizeCsvCell('+cmd|\'/C calc\'!A0')).toBe(`"'+cmd|'/C calc'!A0"`);
+    expect(sanitizeCsvCell('-100')).toBe(`"'-100"`);
+    expect(sanitizeCsvCell('@SUM(1,2)')).toBe(`"'@SUM(1,2)"`);
+  });
+});
+
+describe('Pruebas de Formateo y Codificación UTF-8 BOM en CSV', () => {
+  test('Inserta el Byte Order Mark (BOM UTF-8) al inicio del archivo', () => {
+    const rows: CsvDataRow[] = [
+      { fecha: '2026-10-01', valor: 45, unidad: 'minutos', metrica: 'Uso' },
+    ];
+    const csvContent = formatChartDataToCsv(rows, 'Últimos 7 días', 'usage');
+
+    expect(csvContent.startsWith('\uFEFF')).toBe(true);
+  });
+
+  test('Estructura correctamente los encabezados y las filas tabulares delimitadas por comas', () => {
+    const rows: CsvDataRow[] = [
+      { fecha: '2026-10-01', valor: 45, unidad: 'minutos', metrica: 'Uso' },
+      { fecha: '2026-10-02', valor: 60, unidad: 'minutos', metrica: 'Uso' },
+    ];
+    const csvContent = formatChartDataToCsv(rows, 'Últimos 7 días', 'usage');
+
+    const lines = csvContent.split('\n');
+    expect(lines[0]).toBe('\uFEFF"Fecha","Valor","Unidad","Metrica"');
+    expect(lines[1]).toBe('"2026-10-01","45","minutos","Uso"');
+    expect(lines[2]).toBe('"2026-10-02","60","minutos","Uso"');
+  });
+});
+
+describe('Pruebas de Normalización de Fechas (formatDateToIsoString)', () => {
+  test('Convierte objetos con propiedad seconds (Timestamp raw) a YYYY-MM-DD', () => {
+    const timestampRaw = { seconds: 1791500000 };
+    // 2. Corrección: Eliminar la barra invertida previa al \$ de fin de cadena
+    expect(formatDateToIsoString(timestampRaw)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+describe('Pruebas de Mapeadores para Todos los Tipos de Gráficos', () => {
+  test('mapGeographicsToCsvRows: Convierte countryBuckets y regionSlices', () => {
+    const geoMock: UserGeographicsMetrics = {
+      totalCities: 5,
+      mainCountry: 'Venezuela',
+      mainCountryPercent: 80,
+      totalUsers: 100,
+      // 3. Proporcionar la propiedad `key` acorde a la interfaz de la app
+      countryBuckets: [{ key: 'Venezuela', country: 'Venezuela', count: 80 } as any],
+      regionSlices: [{ key: 'Caracas', region: 'Caracas', count: 50 } as any],
+    };
+
+    const result = mapGeographicsToCsvRows(geoMock);
+    expect(result).toContainEqual(
+      expect.objectContaining({ metrica: 'País: Venezuela', valor: 80 })
+    );
+    expect(result).toContainEqual(
+      expect.objectContaining({ metrica: 'Región: Caracas', valor: 50 })
+    );
+  });
+});
+
+describe('Pruebas Unitarias de Alta Cobertura para reports-utils.ts', () => {
+  describe('Cálculos Numéricos y Formateadores', () => {
+    it('calculateDauMauRatio: realiza el porcentaje y protege división por cero', () => {
+      expect(calculateDauMauRatio(50, 200)).toBe(25);
+      expect(calculateDauMauRatio(0, 100)).toBe(0);
+      expect(calculateDauMauRatio(10, 0)).toBe(0);
+      expect(calculateDauMauRatio(0, 0)).toBe(0);
+    });
+
+    it('calculateCrashRatePercentage: calcula porcentaje formateado a dos decimales', () => {
+      expect(calculateCrashRatePercentage(5, 100)).toBe('5.00%');
+      expect(calculateCrashRatePercentage(1, 3)).toBe('33.33%');
+      expect(calculateCrashRatePercentage(0, 50)).toBe('0.00%');
+      expect(calculateCrashRatePercentage(5, 0)).toBe('0.00%');
+    });
+
+    it('formatRetentionPercentage: gestiona valores válidos y nulos', () => {
+      expect(formatRetentionPercentage(85.456)).toBe('85.5%');
+      expect(formatRetentionPercentage(0)).toBe('0%');
+      expect(formatRetentionPercentage(null as any)).toBe('0%');
+      expect(formatRetentionPercentage(undefined as any)).toBe('0%');
+    });
+
+    it('parseRetentionData: procesa métricas de retención pasando la función de traducción t', () => {
+      const mockT = (key: string) => key;
+      
+      const rawRecord = { dia1: 80, dia7: 60, dia30: 40 };
+      const parsed = parseRetentionData(rawRecord as any, mockT as any);
+      expect(parsed).toHaveLength(3);
+      expect(parsed[0].percentage).toBe(80);
+    });
+  });
+
+  describe('Agregación de Demografía', () => {
+    it('aggregateUserDemographics: procesa lista vacía devolviendo valores por defecto', () => {
+      const emptyResult = aggregateUserDemographics([]);
+      expect(emptyResult.totalUsers).toBe(0);
+      expect(emptyResult.averageAge).toBeNull();
+      expect(emptyResult.ageBuckets).toHaveLength(5);
+      expect(emptyResult.ageBuckets[0].count).toBe(0);
+      expect(emptyResult.genderSlices).toHaveLength(3);
+      expect(emptyResult.genderSlices[0].count).toBe(0);
+    });
+
+    it('aggregateUserDemographics: agrega correctamente edades y géneros', () => {
+      const users = [
+        { edad: 20, genero: 'Masculino' },
+        { edad: 28, genero: 'Femenino' },
+        { edad: 35, genero: 'Femenino' },
+      ];
+
+      const result = aggregateUserDemographics(users as any);
+      expect(result.totalUsers).toBe(3);
+      expect(result.averageAge).toBe(28);
+      expect(result.genderSlices.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Mapeadores de Datos a Filas CSV', () => {
+    it('mapSessionsToCsvRows: mapea sesiones con fechas y duraciones', () => {
+      const mockSessions = [
+        {
+          id: 's1',
+          userId: 'u1',
+          fecha: Date.now(),
+          duracion: 30,
+        },
+      ];
+      const rows = mapSessionsToCsvRows(mockSessions, 'Tiempo de Uso');
+      expect(rows.length).toBeGreaterThan(0);
+      expect(rows[0]).toHaveProperty('fecha');
+    });
+
+    it('mapDauMauToCsvRows: mapea métricas DAU/MAU produciendo 2 filas por punto', () => {
+      const dauMauData = [
+        { label: 'Oct 2026', dau: 10, mau: 50 },
+      ];
+      const rows = mapDauMauToCsvRows(dauMauData);
+      expect(rows).toHaveLength(2);
+      expect(rows[0].metrica).toBe('DAU');
+      expect(rows[1].metrica).toBe('MAU');
+    });
+
+    it('mapDemographicsToCsvRows: mapea estructura demográfica completa', () => {
+      const demoData = {
+        totalUsers: 10,
+        averageAge: 25,
+        ageBuckets: [{ key: '18-24', count: 10 }],
+        genderSlices: [{ key: 'Femenino', count: 10, percent: 100 }],
+      };
+
+      const rows = mapDemographicsToCsvRows(demoData);
+      expect(rows.length).toBeGreaterThan(0);
+    });
+
+    it('mapGeographicsToCsvRows: mapea estructura geográfica completa', () => {
+      const geoData = {
+        totalCities: 1,
+        mainCountry: 'Venezuela',
+        mainCountryPercent: 100,
+        totalUsers: 10,
+        countryBuckets: [{ country: 'Venezuela', count: 10 }],
+        regionSlices: [{ region: 'Caracas', count: 10 }],
+      };
+
+      const rows = mapGeographicsToCsvRows(geoData as any);
+      expect(rows.length).toBeGreaterThan(0);
+    });
+
+    it('mapRetentionToCsvRows: mapea métricas de retención', () => {
+      const retentionData = [
+        { cohort: 'Cohorte Oct', label: 'Día 1', percentage: 90 },
+      ];
+
+      const rows = mapRetentionToCsvRows(retentionData);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].valor).toBe(90);
+    });
+  });
+
+  describe('Generación e Interacción con el Sistema de Archivos', () => {
+    it('exportChartDataToCsv: ejecuta exportación e invoca el Share Sheet', async () => {
+      const rows = [
+        { metrica: 'Test', valor: '100', fecha: '2026-10-09' },
+      ];
+
+      await expect(
+        exportChartDataToCsv(rows, 'Últimos 30 días', 'usage')
+      ).resolves.not.toThrow();
+
+      expect(Sharing.shareAsync).toHaveBeenCalled();
+    });
+  });
+});
+
+describe('Pruebas de Cobertura Complementaria para L390-L593 (Edges & Conditionals)', () => {
+  beforeEach(() => {
+    // Resetea los contadores de llamadas de expo-sharing antes de cada prueba
+    const sharingModule = require('expo-sharing');
+    if (jest.isMockFunction(sharingModule.shareAsync)) {
+      sharingModule.shareAsync.mockClear();
+    }
+  });
+
+  it('formatDateToIsoString: fecha nula', () => {
+    expect(formatDateToIsoString(null as any)).toBe('N/A');
+    expect(formatDateToIsoString(undefined)).toBe('N/A');
+    expect(formatDateToIsoString('')).toBe('N/A');
+  });
+
+  it('formatDateToIsoString: procesa objetos con método toDate() de Firestore Timestamp', () => {
+    const mockTimestamp = {
+      toDate: () => new Date('2026-10-10T15:30:00.000Z'),
+    };
+    expect(formatDateToIsoString(mockTimestamp)).toBe('2026-10-10');
+  });
+
+  it('procesa objetos con propiedad seconds de Firestore Raw Timestamp', () => {
+    const rawTimestamp = {
+      seconds: 1791648000, // Equivale a Oct 10, 2026
+    };
+    expect(formatDateToIsoString(rawTimestamp)).toBe('2026-10-10');
+  });
+
+  it('procesa instancias directas de Date', () => {
+    const dateObj = new Date('2026-10-10T10:00:00.000Z');
+    expect(formatDateToIsoString(dateObj)).toBe('2026-10-10');
+  });
+
+  it('procesa valores numéricos (timestamps en milisegundos)', () => {
+    const millis = new Date('2026-10-10T00:00:00.000Z').getTime();
+    expect(formatDateToIsoString(millis)).toBe('2026-10-10');
+  });
+
+  it('procesa cadenas de texto ISO y gestiona "Timestamp..."', () => {
+    // Cadena de fecha ISO normal
+    expect(formatDateToIsoString('2026-10-10T12:00:00.000Z')).toBe('2026-10-10');
+    expect(formatDateToIsoString('2026-10-10')).toBe('2026-10-10');
+
+    // Cadena formateada como representación serializada de Timestamp
+    expect(formatDateToIsoString('Timestamp(seconds=1791648000, nanoseconds=0)')).toBe('N/A');
+  });
+
+  it('retorna "N/A" para tipos de datos no contemplados (booleans, funciones, etc.)', () => {
+    expect(formatDateToIsoString(true as any)).toBe('N/A');
+    expect(formatDateToIsoString({ foo: 'bar' } as any)).toBe('N/A');
+  });
+
+  it('exportChartDataToCsv: borra el archivo previo si ya existe (L574)', async () => {
+    const { File } = require('expo-file-system');
+    const deleteSpy = jest.fn();
+
+    // Mock temporal para forzar `exists: true` y capturar `file.delete()`
+    const fileSpy = jest.spyOn(require('expo-file-system'), 'File').mockImplementation(() => ({
+      create: jest.fn(),
+      write: jest.fn(),
+      copy: jest.fn(),
+      delete: deleteSpy,
+      exists: true, // <-- Fuerza a entrar en la rama `if (file.exists)` (L574)
+      uri: 'file:///cache/reporte_existente.csv',
+    }));
+
+    const rows = [{ metrica: 'Test', valor: '100', fecha: '2026-10-10' }];
+
+    await exportChartDataToCsv(rows, 'Últimos 30 días', 'usage');
+
+    // Verifica que se ejecutó `file.delete()` en la línea 574
+    expect(deleteSpy).toHaveBeenCalled();
+
+    fileSpy.mockRestore();
+  });
+
+  it('exportChartDataToCsv: captura y maneja errores en el bloque catch (L590-L591)', async () => {
+    const sharingModule = require('expo-sharing');
+    const spyShare = jest
+      .spyOn(sharingModule, 'shareAsync')
+      .mockRejectedValueOnce(new Error('Export CSV Failure'));
+
+    const rows = [{ metrica: 'Test', valor: '100', fecha: '2026-10-10' }];
+
+    // Valida que cualquier error generado durante el flujo sea capturado y relanzado por el bloque catch (L590-L591)
+    await expect(
+      exportChartDataToCsv(rows, 'Últimos 30 días', 'usage')
+    ).rejects.toThrow();
+
+    spyShare.mockRestore();
   });
 });

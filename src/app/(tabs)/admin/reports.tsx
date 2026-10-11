@@ -19,7 +19,15 @@ import {
   UserGeographicsMetrics,
   RetentionDataPoint,
 } from '@/components/reports/types';
-import { generatePeriodOptions } from '@/components/reports/utils/reports-utils';
+import { CsvDataRow, 
+  generatePeriodOptions, 
+  mapDauMauToCsvRows, 
+  exportChartDataToCsv,
+  mapDemographicsToCsvRows,
+  mapGeographicsToCsvRows,
+  mapRetentionToCsvRows,
+  mapSessionsToCsvRows
+} from '@/components/reports/utils/reports-utils';
 import { DauMauDataPoint } from '@/components/reports/dau-mau-line-chart';
 import { ChartDataPoint } from '@/components/reports/usage-line-chart';
 
@@ -335,28 +343,122 @@ export default function AdminReportsScreen() {
     t,
   ]);
 
-  const handleExportCsv = useCallback(() => {
+  const handleExportCsv = useCallback(async () => {
     setShowExportMenu(false);
-    if (selectedReportType !== 'hourly' || !hourlyDistribution || hourlyDistribution.isEmpty) {
-      if (selectedReportType !== 'hourly') {
-        Alert.alert(t('reports.csvExportSuccess'), t('reports.csvExportMessage'));
+
+    // 1. Manejo específico para el reporte por hora (Hourly Distribution)
+    if (selectedReportType === 'hourly') {
+      if (!hourlyDistribution || hourlyDistribution.isEmpty) {
+        Alert.alert(t('reports.title'), t('reports.exportNoData'));
+        return;
       }
+      const headers = {
+        slot: t('reports.hourlyCsvSlot'),
+        count: t('reports.hourlyCsvCount'),
+        percent: t('reports.hourlyCsvPercent'),
+      };
+      const fileBaseName = buildHourlyExportBaseName(
+        hourlySnapshot?.windowHours ?? 24,
+        hourlySnapshot?.dayKey ?? null,
+      );
+      const csv = buildHourlyDistributionCsv(hourlyDistribution, headers);
+      void shareHourlyDistributionCsv(csv, t('reports.hourlyExportDialog'), `${fileBaseName}.csv`).catch(() => {
+        Alert.alert(t('reports.hourlyExportError'), '');
+      });
       return;
     }
-    const headers = {
-      slot: t('reports.hourlyCsvSlot'),
-      count: t('reports.hourlyCsvCount'),
-      percent: t('reports.hourlyCsvPercent'),
-    };
-    const fileBaseName = buildHourlyExportBaseName(
-      hourlySnapshot?.windowHours ?? 24,
-      hourlySnapshot?.dayKey ?? null,
-    );
-    const csv = buildHourlyDistributionCsv(hourlyDistribution, headers);
-    void shareHourlyDistributionCsv(csv, t('reports.hourlyExportDialog'), `${fileBaseName}.csv`).catch(() => {
-      Alert.alert(t('reports.hourlyExportError'), '');
-    });
-  }, [hourlyDistribution, hourlySnapshot?.dayKey, hourlySnapshot?.windowHours, selectedReportType, t]);
+
+    // 2. Intercepción preventiva ante ausencia de datos para el resto de los reportes
+    if (!hasData) {
+      Alert.alert(t('reports.title'), t('reports.exportNoData'));
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      let exportRows: CsvDataRow[] = [];
+
+      // 3. Mapeo dinámico según el tipo de gráfico activo
+      switch (selectedReportType) {
+        case 'usage':
+        case 'access':
+          exportRows = mapSessionsToCsvRows(sessions, reportTypeLabel);
+          break;
+
+        case 'dau_mau':
+          if (dauMauMetrics?.dauMauData) {
+            exportRows = mapDauMauToCsvRows(dauMauMetrics.dauMauData);
+          }
+          break;
+
+        case 'crash_rate':
+          if (crashRateMetrics?.crashRateData) {
+            exportRows = crashRateMetrics.crashRateData.map((c) => ({
+              fecha: c.label,
+              valor: c.value,
+              unidad: 'porcentaje',
+              metrica: 'Tasa de Fallos',
+            }));
+          }
+          break;
+
+        case 'demographics':
+          if (demographicsData) {
+            exportRows = mapDemographicsToCsvRows(demographicsData);
+          }
+          break;
+
+        case 'geographics':
+          if (geographicsData) {
+            exportRows = mapGeographicsToCsvRows(geographicsData);
+          }
+          break;
+
+        case 'retention_rate':
+          if (retentionMetrics?.retentionData) {
+            exportRows = mapRetentionToCsvRows(retentionMetrics.retentionData);
+          }
+          break;
+
+        default:
+          break;
+      }
+
+      // 4. Validación si la serie o conjunto de datos está vacío
+      if (exportRows.length === 0) {
+        Alert.alert(t('reports.title'), t('reports.exportNoData'));
+        return;
+      }
+
+      // 5. Generación del CSV con BOM UTF-8 y despliegue del Share Sheet nativo
+      await exportChartDataToCsv(exportRows, periodLabel, selectedReportType);
+
+      Alert.alert(
+        t('reports.csvExportSuccess'),
+        t('reports.csvExportMessage')
+      );
+    } catch (error) {
+      console.error('Error al exportar CSV:', error);
+      Alert.alert(t('reports.title'), t('reports.exportError'));
+    } finally {
+      setIsExporting(false);
+    }
+  }, [
+    selectedReportType,
+    hourlyDistribution,
+    hourlySnapshot?.windowHours,
+    hourlySnapshot?.dayKey,
+    hasData,
+    sessions,
+    reportTypeLabel,
+    dauMauMetrics,
+    crashRateMetrics,
+    demographicsData,
+    geographicsData,
+    retentionMetrics,
+    periodLabel,
+    t,
+  ]);
 
   return (
     <PageTitleLayout
