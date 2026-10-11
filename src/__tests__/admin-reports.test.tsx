@@ -1001,3 +1001,175 @@ describe('Pruebas de Exportación y Cambio de Vistas para Cobertura Completa', (
     expect(getByTestId('period-filter-btn')).toBeTruthy();
   });
 });
+
+describe('Pruebas de Cobertura para Exportación CSV en reports.tsx (L352-L430)', () => {
+  let alertSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
+  });
+
+  it('L352-L353: Muestra alerta cuando selectedReportType es "hourly" y no hay distribución horaria disponible', async () => {
+    // 1. Iniciar en vista 'usage' para que el botón de descarga NO esté deshabilitado
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // 2. Abrir el menú de exportación
+    fireEvent.press(getByTestId('download-menu-btn'));
+    expect(getByTestId('export-menu-popover')).toBeTruthy();
+
+    // 3. Mockear el snapshot del reporte por hora como vacío
+    const HourlyModule = require('@/components/reports/views/HourlyDistributionReportView');
+    const spyHourlyView = jest
+      .spyOn(HourlyModule, 'HourlyDistributionReportView')
+      .mockImplementation(({ onSnapshot }: any) => {
+        const React = require('react');
+        React.useEffect(() => {
+          onSnapshot({
+            distribution: {
+              isEmpty: true, // <-- Provoca hourlyDistribution.isEmpty = true (L352-L353)
+            },
+          });
+        }, [onSnapshot]);
+        return null;
+      });
+
+    // 4. Cambiar el tipo de reporte a 'hourly'
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-hourly'));
+
+    // 5. Como el menú ya estaba abierto, presionamos exportar a CSV
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // 6. Verifica la ejecución en L352-L353
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+
+    spyHourlyView.mockRestore();
+  });
+
+  it('L389-L392: Mapea correctamente los datos de DAU/MAU a filas de CSV cuando dauMauMetrics tiene dauMauData', async () => {
+    const reportsUtils = require('@/components/reports/utils/reports-utils');
+
+    // Cambiar el mock de DauMauReportView para notificar dauMauData no vacío
+    const DauMauModule = require('@/components/reports/views/DauMauReportView');
+    const spyView = jest
+      .spyOn(DauMauModule, 'DauMauReportView')
+      .mockImplementation(({ onDataReady }: any) => {
+        const React = require('react');
+        React.useEffect(() => {
+          onDataReady({
+            dauValue: 10,
+            mauValue: 50,
+            dauMauRatio: 20,
+            dauMauData: [{ label: 'Oct 2026', dau: 10, mau: 50 }],
+          });
+        }, [onDataReady]);
+        return null;
+      });
+
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-dau-mau'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // Satisface L389-L392 (case 'dau_mau')
+    expect(reportsUtils.exportChartDataToCsv).toHaveBeenCalled();
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    spyView.mockRestore();
+  });
+
+  it('L424: Ejecuta la rama default del switch cuando selectedReportType no coincide con ningún case', async () => {
+    // 1. Mockear hasReportData para forzar true y superar el chequeo `if (!hasData)` (L363)
+    const pdfBuilder = require('@/components/reports/utils/admin-report-pdf-builder');
+    const spyHasData = jest.spyOn(pdfBuilder, 'hasReportData').mockReturnValue(true);
+
+    // 2. Renderizar el componente
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // 3. Cambiar a una opción y simular selectedReportType arbitrario que caiga en default
+    // Si no puedes cambiar el estado directamente desde la UI, selecciona 'access' y modifica el estado interno
+    // o mockea ModalOptionList para emitir un tipo no manejado como 'unknown_type'
+    const optionList = require('@/components/ui/modal-option-list');
+    const spyModal = jest.spyOn(optionList, 'ModalOptionList').mockImplementation(({ onSelectOption, visible }: any) => {
+      const React = require('react');
+      React.useEffect(() => {
+        if (visible) {
+          onSelectOption('unknown_type'); // <-- Forzado a caer en 'default' (L424)
+        }
+      }, [visible]);
+      return null;
+    });
+
+    // Abrir el selector para aplicar 'unknown_type'
+    fireEvent.press(getByTestId('report-type-select'));
+
+    // Intentar exportar a CSV
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // Al no asignar nada en el switch, exportRows sigue siendo [] y entra a L429-L430
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+
+    spyHasData.mockRestore();
+    spyModal.mockRestore();
+  });
+
+  it('L429-L430: Muestra alerta cuando exportRows.length === 0 tras evaluar el switch en DAU/MAU con arreglo de datos vacío', async () => {
+    const DauMauModule = require('@/components/reports/views/DauMauReportView');
+    const spyView = jest
+      .spyOn(DauMauModule, 'DauMauReportView')
+      .mockImplementation(({ onDataReady }: any) => {
+        const React = require('react');
+        React.useEffect(() => {
+          onDataReady({
+            dauValue: 0,
+            mauValue: 0,
+            dauMauRatio: 0,
+            dauMauData: [], // <-- Arreglo vacío hace que exportRows sea []
+          });
+        }, [onDataReady]);
+        return null;
+      });
+
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-dau-mau'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // Satisface L429-L430 (if (exportRows.length === 0))
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+
+    spyView.mockRestore();
+  });
+});
