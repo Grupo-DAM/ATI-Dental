@@ -609,3 +609,97 @@ describe('Pruebas Unitarias de Alta Cobertura para reports-utils.ts', () => {
     });
   });
 });
+
+describe('Pruebas de Cobertura Complementaria para L390-L593 (Edges & Conditionals)', () => {
+  beforeEach(() => {
+    // Resetea los contadores de llamadas de expo-sharing antes de cada prueba
+    const sharingModule = require('expo-sharing');
+    if (jest.isMockFunction(sharingModule.shareAsync)) {
+      sharingModule.shareAsync.mockClear();
+    }
+  });
+
+  it('formatDateToIsoString: fecha nula', () => {
+    expect(formatDateToIsoString(null as any)).toBe('N/A');
+    expect(formatDateToIsoString(undefined)).toBe('N/A');
+    expect(formatDateToIsoString('')).toBe('N/A');
+  });
+
+  it('formatDateToIsoString: procesa objetos con método toDate() de Firestore Timestamp', () => {
+    const mockTimestamp = {
+      toDate: () => new Date('2026-10-10T15:30:00.000Z'),
+    };
+    expect(formatDateToIsoString(mockTimestamp)).toBe('2026-10-10');
+  });
+
+  it('procesa objetos con propiedad seconds de Firestore Raw Timestamp', () => {
+    const rawTimestamp = {
+      seconds: 1791648000, // Equivale a Oct 10, 2026
+    };
+    expect(formatDateToIsoString(rawTimestamp)).toBe('2026-10-10');
+  });
+
+  it('procesa instancias directas de Date', () => {
+    const dateObj = new Date('2026-10-10T10:00:00.000Z');
+    expect(formatDateToIsoString(dateObj)).toBe('2026-10-10');
+  });
+
+  it('procesa valores numéricos (timestamps en milisegundos)', () => {
+    const millis = new Date('2026-10-10T00:00:00.000Z').getTime();
+    expect(formatDateToIsoString(millis)).toBe('2026-10-10');
+  });
+
+  it('procesa cadenas de texto ISO y gestiona "Timestamp..."', () => {
+    // Cadena de fecha ISO normal
+    expect(formatDateToIsoString('2026-10-10T12:00:00.000Z')).toBe('2026-10-10');
+    expect(formatDateToIsoString('2026-10-10')).toBe('2026-10-10');
+
+    // Cadena formateada como representación serializada de Timestamp
+    expect(formatDateToIsoString('Timestamp(seconds=1791648000, nanoseconds=0)')).toBe('N/A');
+  });
+
+  it('retorna "N/A" para tipos de datos no contemplados (booleans, funciones, etc.)', () => {
+    expect(formatDateToIsoString(true as any)).toBe('N/A');
+    expect(formatDateToIsoString({ foo: 'bar' } as any)).toBe('N/A');
+  });
+
+  it('exportChartDataToCsv: borra el archivo previo si ya existe (L574)', async () => {
+    const { File } = require('expo-file-system');
+    const deleteSpy = jest.fn();
+
+    // Mock temporal para forzar `exists: true` y capturar `file.delete()`
+    const fileSpy = jest.spyOn(require('expo-file-system'), 'File').mockImplementation(() => ({
+      create: jest.fn(),
+      write: jest.fn(),
+      copy: jest.fn(),
+      delete: deleteSpy,
+      exists: true, // <-- Fuerza a entrar en la rama `if (file.exists)` (L574)
+      uri: 'file:///cache/reporte_existente.csv',
+    }));
+
+    const rows = [{ metrica: 'Test', valor: '100', fecha: '2026-10-10' }];
+
+    await exportChartDataToCsv(rows, 'Últimos 30 días', 'usage');
+
+    // Verifica que se ejecutó `file.delete()` en la línea 574
+    expect(deleteSpy).toHaveBeenCalled();
+
+    fileSpy.mockRestore();
+  });
+
+  it('exportChartDataToCsv: captura y maneja errores en el bloque catch (L590-L591)', async () => {
+    const sharingModule = require('expo-sharing');
+    const spyShare = jest
+      .spyOn(sharingModule, 'shareAsync')
+      .mockRejectedValueOnce(new Error('Export CSV Failure'));
+
+    const rows = [{ metrica: 'Test', valor: '100', fecha: '2026-10-10' }];
+
+    // Valida que cualquier error generado durante el flujo sea capturado y relanzado por el bloque catch (L590-L591)
+    await expect(
+      exportChartDataToCsv(rows, 'Últimos 30 días', 'usage')
+    ).rejects.toThrow();
+
+    spyShare.mockRestore();
+  });
+});
