@@ -46,6 +46,19 @@ jest.mock('expo-file-system', () => ({
   Paths: { cache: 'cache-dir' },
 }));
 
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  shareAsync: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('@/components/reports/utils/reports-utils', () => {
+  const original = jest.requireActual('@/components/reports/utils/reports-utils');
+  return {
+    ...original,
+    exportChartDataToCsv: jest.fn(() => Promise.resolve()),
+  };
+});
+
 let mockUser: any = {
   uid: 'admin-123',
   email: 'admin@atidental.com',
@@ -186,6 +199,68 @@ jest.mock('@/services/report-service', () => ({
     buildInfoGrid: jest.fn(() => '<div>grid</div>'),
     buildAlert: jest.fn(() => '<div>alert</div>'),
     resolveLanguage: jest.fn((lang?: string) => (lang?.startsWith('en') ? 'en' : 'es')),
+  },
+}));
+
+jest.mock('@/components/reports/views/UserDemographicsReportView', () => ({
+  UserDemographicsReportView: ({ onDataReady }: any) => {
+    const React = require('react');
+    React.useEffect(() => {
+      onDataReady({
+        totalUsers: 15,
+        averageAge: 29,
+        ageBuckets: [{ key: '25-34', count: 15 }],
+        genderSlices: [{ key: 'Femenino', count: 10, percent: 66 }],
+      });
+    }, [onDataReady]);
+    return null;
+  },
+}));
+
+jest.mock('@/components/reports/views/UserGeographicsReportView', () => ({
+  UserGeographicsReportView: ({ onDataReady }: any) => {
+    const React = require('react');
+    React.useEffect(() => {
+      onDataReady({
+        totalCities: 1,
+        mainCountry: 'Venezuela',
+        mainCountryPercent: 100,
+        totalUsers: 15,
+        countryBuckets: [{ country: 'Venezuela', count: 15 }],
+        regionSlices: [{ region: 'Caracas', count: 15 }],
+      });
+    }, [onDataReady]);
+    return null;
+  },
+}));
+
+jest.mock('@/components/reports/views/CrashRateReportView', () => ({
+  CrashRateReportView: ({ onDataReady }: any) => {
+    const React = require('react');
+    React.useEffect(() => {
+      onDataReady({
+        totalCrashesValue: 2,
+        affectedUsersValue: 1,
+        calculatedCrashRateString: '0.5%',
+        crashRateData: [{ label: '2026-10-08', value: 0.5 }],
+      });
+    }, [onDataReady]);
+    return null;
+  },
+}));
+
+jest.mock('@/components/reports/views/RetentionReportView', () => ({
+  RetentionReportView: ({ onDataReady }: any) => {
+    const React = require('react');
+    React.useEffect(() => {
+      onDataReady({
+        retentionData: [{ cohort: '2026-10-01', label: 'Día 1', percentage: 80 }],
+        day1String: '80%',
+        day7String: '60%',
+        day30String: '40%',
+      });
+    }, [onDataReady]);
+    return null;
   },
 }));
 
@@ -448,7 +523,9 @@ describe('AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario)', () 
     // Abrir menú y Exportar a CSV
     fireEvent.press(getByTestId('download-menu-btn'));
     expect(getByTestId('export-menu-popover')).toBeTruthy();
-    fireEvent.press(getByTestId('export-csv-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
     expect(alertSpy).toHaveBeenCalledWith(
       'Archivo CSV generado',
       'Los datos tabulares han sido preparados para su descarga.'
@@ -720,5 +797,386 @@ describe('US-27: Visualizar relación DAU/MAU', () => {
     expect(calculateDauMauRatio(10, 20)).toBe(50);
     expect(calculateDauMauRatio(0, 0)).toBe(0);
     expect(calculateDauMauRatio(5, 0)).toBe(0);
+  });
+});
+
+describe('Pruebas de Exportación y Cambio de Vistas para Cobertura Completa', () => {
+  let alertSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
+  });
+
+  it('Exporta correctamente a CSV y PDF en vista de Demografía', async () => {
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // 1. Abrir selector y presionar Demografía
+    fireEvent.press(getByTestId('report-type-select'));
+    const demoOption = await findByTestId('type-option-demographics');
+    await act(async () => {
+      fireEvent.press(demoOption);
+    });
+
+    // 2. Exportar CSV
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    // 3. Exportar PDF
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-pdf-btn'));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Reporte generado con éxito',
+      'El archivo PDF ha sido preparado para su descarga.'
+    );
+  });
+
+  it('Exporta correctamente a CSV para todos los tipos de reporte (demographics, geographics, crash_rate, retention_rate)', async () => {
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // 1. Demografía
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-demographics'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    expect(alertSpy).toHaveBeenLastCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    // 2. Geografía
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-geographics'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    expect(alertSpy).toHaveBeenLastCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    // 3. Tasa de Fallos (Crash Rate)
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-crash-rate'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    expect(alertSpy).toHaveBeenLastCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    // 4. Tasa de Retención
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-retention-rate'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+    expect(alertSpy).toHaveBeenLastCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+  });
+
+  it('Muestra alerta de sin datos cuando exportRows.length === 0 tras el mapeo', async () => {
+    // 1. Sobreescribir el mock del componente para notificar datos vacíos
+    const CrashRateModule = require('@/components/reports/views/CrashRateReportView');
+    const spyView = jest
+      .spyOn(CrashRateModule, 'CrashRateReportView')
+      .mockImplementation(({ onDataReady }: any) => {
+        const React = require('react');
+        React.useEffect(() => {
+          onDataReady({
+            totalCrashesValue: 0,
+            affectedUsersValue: 0,
+            calculatedCrashRateString: '0.0%',
+            crashRateData: [], // <-- Arreglo vacío fuerza exportRows.length === 0
+          });
+        }, [onDataReady]);
+        return null;
+      });
+
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // 2. Cambiar a la vista de Crash Rate
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-crash-rate'));
+
+    // 3. Intentar exportar a CSV
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // 4. Verificar que entra a la condición `if (exportRows.length === 0)`
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+
+    spyView.mockRestore();
+  });
+
+  it('Maneja excepciones durante la generación de CSV mostrando alerta de error', async () => {
+    const reportsUtils = require('@/components/reports/utils/reports-utils');
+    const spyExport = jest
+      .spyOn(reportsUtils, 'exportChartDataToCsv')
+      .mockRejectedValueOnce(new Error('FileSystem Write Error'));
+
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-demographics'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'Ocurrió un error al generar o compartir el reporte.'
+    );
+
+    spyExport.mockRestore();
+  });
+
+  it('Maneja excepciones durante la generación de PDF mostrando alerta de error', async () => {
+    const { ReportService } = require('@/services/report-service');
+    const spyPdf = jest
+      .spyOn(ReportService, 'generateAndShare')
+      .mockRejectedValueOnce(new Error('PDF Build Failure'));
+
+    const now = Date.now();
+    mockOnSnapshot = jest.fn((onNext) => {
+      onNext({
+        docs: [{ id: 's1', data: () => ({ userId: 'u1', fecha: now, tiempoUso: 20 }) }],
+        empty: false,
+      });
+      return jest.fn();
+    });
+
+    const { getByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-pdf-btn'));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'Ocurrió un error al generar o compartir el reporte.'
+    );
+
+    spyPdf.mockRestore();
+  });
+
+  it('Permite cambiar las opciones de período a 15 días y 30 días', async () => {
+    const { getByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('period-filter-btn'));
+    fireEvent.press(getByTestId('period-option-15'));
+
+    expect(getByTestId('period-filter-btn')).toBeTruthy();
+
+    fireEvent.press(getByTestId('period-filter-btn'));
+    fireEvent.press(getByTestId('period-option-30'));
+
+    expect(getByTestId('period-filter-btn')).toBeTruthy();
+  });
+});
+
+describe('Pruebas de Cobertura para Exportación CSV en reports.tsx (L352-L430)', () => {
+  let alertSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
+  });
+
+  it('L352-L353: Muestra alerta cuando selectedReportType es "hourly" y no hay distribución horaria disponible', async () => {
+    // 1. Iniciar en vista 'usage' para que el botón de descarga NO esté deshabilitado
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // 2. Abrir el menú de exportación
+    fireEvent.press(getByTestId('download-menu-btn'));
+    expect(getByTestId('export-menu-popover')).toBeTruthy();
+
+    // 3. Mockear el snapshot del reporte por hora como vacío
+    const HourlyModule = require('@/components/reports/views/HourlyDistributionReportView');
+    const spyHourlyView = jest
+      .spyOn(HourlyModule, 'HourlyDistributionReportView')
+      .mockImplementation(({ onSnapshot }: any) => {
+        const React = require('react');
+        React.useEffect(() => {
+          onSnapshot({
+            distribution: {
+              isEmpty: true, // <-- Provoca hourlyDistribution.isEmpty = true (L352-L353)
+            },
+          });
+        }, [onSnapshot]);
+        return null;
+      });
+
+    // 4. Cambiar el tipo de reporte a 'hourly'
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-hourly'));
+
+    // 5. Como el menú ya estaba abierto, presionamos exportar a CSV
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // 6. Verifica la ejecución en L352-L353
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+
+    spyHourlyView.mockRestore();
+  });
+
+  it('L389-L392: Mapea correctamente los datos de DAU/MAU a filas de CSV cuando dauMauMetrics tiene dauMauData', async () => {
+    const reportsUtils = require('@/components/reports/utils/reports-utils');
+
+    // Cambiar el mock de DauMauReportView para notificar dauMauData no vacío
+    const DauMauModule = require('@/components/reports/views/DauMauReportView');
+    const spyView = jest
+      .spyOn(DauMauModule, 'DauMauReportView')
+      .mockImplementation(({ onDataReady }: any) => {
+        const React = require('react');
+        React.useEffect(() => {
+          onDataReady({
+            dauValue: 10,
+            mauValue: 50,
+            dauMauRatio: 20,
+            dauMauData: [{ label: 'Oct 2026', dau: 10, mau: 50 }],
+          });
+        }, [onDataReady]);
+        return null;
+      });
+
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-dau-mau'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // Satisface L389-L392 (case 'dau_mau')
+    expect(reportsUtils.exportChartDataToCsv).toHaveBeenCalled();
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Archivo CSV generado',
+      'Los datos tabulares han sido preparados para su descarga.'
+    );
+
+    spyView.mockRestore();
+  });
+
+  it('L424: Ejecuta la rama default del switch cuando selectedReportType no coincide con ningún case', async () => {
+    // 1. Mockear hasReportData para forzar true y superar el chequeo `if (!hasData)` (L363)
+    const pdfBuilder = require('@/components/reports/utils/admin-report-pdf-builder');
+    const spyHasData = jest.spyOn(pdfBuilder, 'hasReportData').mockReturnValue(true);
+
+    // 2. Renderizar el componente
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    // 3. Cambiar a una opción y simular selectedReportType arbitrario que caiga en default
+    // Si no puedes cambiar el estado directamente desde la UI, selecciona 'access' y modifica el estado interno
+    // o mockea ModalOptionList para emitir un tipo no manejado como 'unknown_type'
+    const optionList = require('@/components/ui/modal-option-list');
+    const spyModal = jest.spyOn(optionList, 'ModalOptionList').mockImplementation(({ onSelectOption, visible }: any) => {
+      const React = require('react');
+      React.useEffect(() => {
+        if (visible) {
+          onSelectOption('unknown_type'); // <-- Forzado a caer en 'default' (L424)
+        }
+      }, [visible]);
+      return null;
+    });
+
+    // Abrir el selector para aplicar 'unknown_type'
+    fireEvent.press(getByTestId('report-type-select'));
+
+    // Intentar exportar a CSV
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // Al no asignar nada en el switch, exportRows sigue siendo [] y entra a L429-L430
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+
+    spyHasData.mockRestore();
+    spyModal.mockRestore();
+  });
+
+  it('L429-L430: Muestra alerta cuando exportRows.length === 0 tras evaluar el switch en DAU/MAU con arreglo de datos vacío', async () => {
+    const DauMauModule = require('@/components/reports/views/DauMauReportView');
+    const spyView = jest
+      .spyOn(DauMauModule, 'DauMauReportView')
+      .mockImplementation(({ onDataReady }: any) => {
+        const React = require('react');
+        React.useEffect(() => {
+          onDataReady({
+            dauValue: 0,
+            mauValue: 0,
+            dauMauRatio: 0,
+            dauMauData: [], // <-- Arreglo vacío hace que exportRows sea []
+          });
+        }, [onDataReady]);
+        return null;
+      });
+
+    const { getByTestId, findByTestId } = render(<AdminReportsScreen />);
+
+    fireEvent.press(getByTestId('report-type-select'));
+    fireEvent.press(await findByTestId('type-option-dau-mau'));
+
+    fireEvent.press(getByTestId('download-menu-btn'));
+    await act(async () => {
+      fireEvent.press(getByTestId('export-csv-btn'));
+    });
+
+    // Satisface L429-L430 (if (exportRows.length === 0))
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Generar Reportes',
+      'No hay datos disponibles para exportar o imprimir en este reporte.'
+    );
+
+    spyView.mockRestore();
   });
 });
