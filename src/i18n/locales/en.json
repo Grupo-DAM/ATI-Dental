@@ -669,7 +669,12 @@
     "save": "Save",
     "saveChanges": "Save Changes",
     "updateSuccessTitle": "Consultation updated",
-    "updateSuccessMessage": "The consultation has been updated successfully."
+    "updateSuccessMessage": "The consultation has been updated successfully.",
+    "exportPdf": "Export Full Record",
+    "exporting": "Generating document...",
+    "exportSuccess": "Record generated successfully",
+    "exportNoData": "The patient does not have consultations or treatments to export",
+    "exportError": "Failed to generate or share the clinical record."
   },
   "registerConsultation": {
     "title": "Register Consultation",

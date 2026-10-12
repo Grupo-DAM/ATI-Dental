@@ -667,7 +667,12 @@
     "save": "Guardar",
     "saveChanges": "Guardar Cambios",
     "updateSuccessTitle": "Consulta actualizada",
-    "updateSuccessMessage": "La consulta ha sido actualizada exitosamente."
+    "updateSuccessMessage": "La consulta ha sido actualizada exitosamente.",
+    "exportPdf": "Exportar Expediente Completo",
+    "exporting": "Generando documento...",
+    "exportSuccess": "Expediente generado exitosamente",
+    "exportNoData": "El paciente no registra consultas ni tratamientos para exportar",
+    "exportError": "No se pudo generar ni compartir el expediente clínico."
   },
   "registerConsultation": {
     "title": "Registrar Consulta",

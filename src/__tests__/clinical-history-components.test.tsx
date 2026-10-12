@@ -17,7 +17,9 @@ import { Patient } from '@/services/patient-service';
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, fallback?: string) => fallback || key,
+    i18n: { language: 'es' },
   }),
+  initReactI18next: { type: '3rdParty', init: () => undefined },
 }));
 
 jest.mock('@/hooks/use-theme', () => ({
@@ -345,6 +347,31 @@ describe('Clinical History Sub-Components - Unit & Branch Coverage', () => {
       render(<PatientSummaryCard patient={patientNoHistory} />);
       fireEvent.press(screen.getByText('patientFile.medicalBackground'));
       expect(screen.getAllByText(/Ninguna registrada/).length).toBe(2);
+    });
+
+    it('renderiza y maneja el botón de exportar PDF y su estado de carga', () => {
+      const onExport = jest.fn();
+      const patient: Patient = {
+        id: 'p-1',
+        fullName: 'María González',
+        patientCode: '#P-0042',
+        email: 'maria.gonzalez@email.com',
+        status: 'activo',
+      };
+
+      const { rerender } = render(
+        <PatientSummaryCard patient={patient} onExportPdf={onExport} isExporting={false} />
+      );
+
+      const exportBtn = screen.getByTestId('export-pdf-btn');
+      expect(exportBtn).toBeTruthy();
+      fireEvent.press(exportBtn);
+      expect(onExport).toHaveBeenCalledTimes(1);
+
+      rerender(
+        <PatientSummaryCard patient={patient} onExportPdf={onExport} isExporting={true} />
+      );
+      expect(screen.getByTestId('export-pdf-loading')).toBeTruthy();
     });
   });
 
