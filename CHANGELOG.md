@@ -4,6 +4,12 @@ Historial de versiones del proyecto ATI-Dental siguiendo [Semantic Versioning](h
 
 Entradas más recientes arriba.
 
+## [1.7.0] - 2026-10-14,12:23:54.889Z
+
+**v1.7.0** — Funcionalidad del módulo de gráficos y reportes.
+
+---
+
 ## [1.6.0] - 2026-10-05,18:24:36.178Z
 
 **v1.6.0** — Funcionalidad inicial del Módulo de Odontograma.
