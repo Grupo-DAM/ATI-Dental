@@ -546,7 +546,7 @@ export default function PatientFileScreen() {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <AppHeader />
-        <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
+        <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} onParentPress={() => router.push('/(tabs)/patients/patients-list')} />
         <AccessDeniedView
           title={t('patientFile.accessDenied')}
           message={t('patientFile.accessDeniedMessage')}
@@ -560,7 +560,7 @@ export default function PatientFileScreen() {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <AppHeader />
-        <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
+        <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} onParentPress={() => router.push('/(tabs)/patients/patients-list')} />
         <View style={styles.centerState}>
           <ActivityIndicator size="large" color={theme.main} />
           <Text style={[styles.stateMessage, { color: theme.pageSubtitle }]}>{t('patientFile.loading')}</Text>
@@ -574,7 +574,7 @@ export default function PatientFileScreen() {
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <AppHeader />
-        <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
+        <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} onParentPress={() => router.push('/(tabs)/patients/patients-list')} />
         <View style={styles.centerState}>
           <Ionicons name="alert-circle-outline" size={56} color={theme.error} />
           <Text style={[styles.stateTitle, { color: theme.pageTitle }]}>{t('patientFile.errors.title')}</Text>
@@ -592,7 +592,7 @@ export default function PatientFileScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]} testID="patient-file-container">
       <AppHeader />
-      <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} />
+      <Breadcrumb parent={t('tabs.explore')} current={t('patientFile.title')} onParentPress={() => router.push('/(tabs)/patients/patients-list')} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Action bar */}
         <ActionBar onOpenClinicalHistory={handleOpenClinicalHistory} />
