@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const crypto = require('crypto');
 
 const ROOT_DIR = path.resolve(__dirname, '..', '..');
 const REASSURE_DIR = path.join(ROOT_DIR, '.reassure');
@@ -269,7 +270,7 @@ async function runLoadSimulation(options = {}) {
   // Construir cola de tareas con distribución porcentual (70% Paciente, 20% Odontólogo, 10% Admin)
   const taskQueue = [];
   for (let i = 0; i < totalIterations; i++) {
-    const rand = Math.random();
+    const rand = crypto.randomBytes(4).readUInt32LE(0) / 0xffffffff;
     if (rand < 0.70) {
       taskQueue.push(() => simulatePatientFlow(baseUrl, credentials.paciente, results));
     } else if (rand < 0.90) {

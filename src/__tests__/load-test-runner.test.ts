@@ -4,6 +4,7 @@ import {
   calculatePercentile,
   evaluateThresholds,
   generateMarkdownReport,
+  runLoadSimulation,
 } from '../../tests/performance/load-runner';
 
 describe('Performance Load Test Runner Logic', () => {
@@ -195,6 +196,33 @@ describe('Performance Load Test Runner Logic', () => {
       expect(markdown).toContain('Paciente (usuario_externo)');
       expect(markdown).toContain('GET /appointments/mine');
       expect(markdown).toContain('## 3. Violaciones de Umbrales');
+    });
+  });
+
+  describe('runLoadSimulation', () => {
+    let server: any;
+    const testPort = 4055;
+
+    beforeAll(async () => {
+      const { createMockApiServer } = require('../../tests/performance/mock-server');
+      server = await createMockApiServer(testPort);
+    });
+
+    afterAll((done) => {
+      server.close(done);
+    });
+
+    it('ejecuta simulación de carga con peticiones distribuidas por roles', async () => {
+      const results = await runLoadSimulation({
+        baseUrl: `http://127.0.0.1:${testPort}`,
+        iterations: 6,
+        concurrency: 2,
+      });
+
+      expect(results).toBeDefined();
+      expect(results.global.latencies.length).toBeGreaterThan(0);
+      expect(results.global.errorsCount).toBe(0);
+      expect(results.byRole.paciente || results.byRole.odontologo || results.byRole.admin).toBeDefined();
     });
   });
 });
