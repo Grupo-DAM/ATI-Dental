@@ -1,6 +1,7 @@
 // Cálculos matemáticos y manejo de fechas
 import { ModalOptionProp } from '@/components/ui/modal-option-list';
 import { ChartDataPoint } from '@/components/reports/usage-line-chart';
+import { DauMauDataPoint } from '@/components/reports/dau-mau-line-chart';
 import {
   AGE_BUCKET_ORDER,
   AgeBucketKey,
@@ -11,7 +12,11 @@ import {
   SessionRecord,
   UserDemographicsMetrics,
   UserDemographicsRecord,
+  UserGeographicsMetrics,
+  RetentionDataPoint,
 } from '../types';
+import { Paths, File } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 export function generatePeriodOptions(t: (key: string) => string): ModalOptionProp[] {
     return AVAILABLE_PERIODS.map((days) => ({
@@ -382,3 +387,207 @@ export function calculatePeakHoursDistribution(
 
     return buildDistribution(counts, hours);
 }
+
+// export csv data
+
+export interface CsvDataRow {
+  fecha: string;
+  valor: number | string;
+  unidad: string;
+  metrica: string;
+}
+
+export const formatDateToIsoString = (dateVal: any): string => {
+  if (!dateVal) return 'N/A';
+
+  if (typeof dateVal === 'object' && typeof dateVal.toDate === 'function') {
+    return dateVal.toDate().toISOString().split('T')[0];
+  }
+  if (typeof dateVal === 'object' && typeof dateVal.seconds === 'number') {
+    return new Date(dateVal.seconds * 1000).toISOString().split('T')[0];
+  }
+
+  if (dateVal instanceof Date) {
+    return dateVal.toISOString().split('T')[0];
+  }
+
+  if (typeof dateVal === 'number') {
+    return new Date(dateVal).toISOString().split('T')[0];
+  }
+
+  if (typeof dateVal === 'string') {
+    if (dateVal.startsWith('Timestamp')) return 'N/A';
+    return dateVal.split('T')[0];
+  }
+
+  return 'N/A';
+};
+
+export const mapSessionsToCsvRows = (
+  sessions: SessionRecord[],
+  reportTypeLabel: string
+): CsvDataRow[] => {
+  return sessions.map((s: any) => {
+    const rawDate = s.fecha || s.date || s.timestamp || s.createdAt;
+    return {
+      fecha: formatDateToIsoString(rawDate),
+      valor: s.tiempoUso ?? s.durationMinutes ?? 0,
+      unidad: 'minutos',
+      metrica: reportTypeLabel,
+    };
+  });
+};
+
+export const mapDauMauToCsvRows = (dauMauData: DauMauDataPoint[]): CsvDataRow[] => {
+  return dauMauData.flatMap((item) => [
+    { fecha: item.label, valor: item.dau, unidad: 'usuarios', metrica: 'DAU' },
+    { fecha: item.label, valor: item.mau, unidad: 'usuarios', metrica: 'MAU' },
+  ]);
+};
+
+export const mapDemographicsToCsvRows = (demographics: UserDemographicsMetrics): CsvDataRow[] => {
+  const rows: CsvDataRow[] = [];
+
+  // 1. Mapear rangos de edad (ageBuckets)
+  if (Array.isArray(demographics.ageBuckets)) {
+    demographics.ageBuckets.forEach((bucket) => {
+      rows.push({
+        fecha: 'N/A',
+        valor: bucket.count ?? 0,
+        unidad: 'usuarios',
+        metrica: `Rango de edad: ${bucket.key}`,
+      });
+    });
+  }
+
+  // 2. Mapear distribución por género (genderSlices)
+  if (Array.isArray(demographics.genderSlices)) {
+    demographics.genderSlices.forEach((slice) => {
+      rows.push({
+        fecha: 'N/A',
+        valor: slice.count ?? 0,
+        unidad: 'usuarios',
+        metrica: `Género: ${slice.key} (${slice.percent ?? 0}%)`,
+      });
+    });
+  }
+
+  // 3. Incluir promedio de edad si existe
+  if (demographics.averageAge !== null && demographics.averageAge !== undefined) {
+    rows.push({
+      fecha: 'N/A',
+      valor: demographics.averageAge,
+      unidad: 'años',
+      metrica: 'Promedio de edad',
+    });
+  }
+
+  return rows;
+};
+
+// Geographics Mapper (City / Region distribution)
+export const mapGeographicsToCsvRows = (geographics: UserGeographicsMetrics): CsvDataRow[] => {
+  const rows: CsvDataRow[] = [];
+
+  if (Array.isArray(geographics.countryBuckets)) {
+    geographics.countryBuckets.forEach((bucket: any) => {
+      const countryName = bucket.country || bucket.key || bucket.label || bucket.name || 'Desconocido';
+      rows.push({
+        fecha: 'N/A',
+        valor: bucket.count ?? bucket.usersCount ?? 0,
+        unidad: 'usuarios',
+        metrica: `País: ${countryName}`,
+      });
+    });
+  }
+
+  if (Array.isArray(geographics.regionSlices)) {
+    geographics.regionSlices.forEach((slice: any) => {
+      const regionName = slice.region || slice.key || slice.label || slice.name || 'Desconocida';
+      rows.push({
+        fecha: 'N/A',
+        valor: slice.count ?? slice.value ?? 0,
+        unidad: 'usuarios',
+        metrica: `Región: ${regionName}`,
+      });
+    });
+  }
+
+  return rows;
+};
+
+export const mapRetentionToCsvRows = (retentionData: RetentionDataPoint[]): CsvDataRow[] => {
+  return retentionData.map((item) => ({
+    fecha: item.cohort || 'N/A',
+    valor: item.percentage,
+    unidad: 'porcentaje',
+    metrica: `Retención (${item.label})`,
+  }));
+};
+
+export const sanitizeCsvCell = (value: string | number): string => {
+  const str = String(value ?? '').trim();
+  if (/^[=+\-@]/.test(str)) {
+    return `"'${str.replace(/"/g, '""')}"`;
+  }
+  return `"${str.replace(/"/g, '""')}"`;
+};
+
+export const formatChartDataToCsv = (
+  data: CsvDataRow[],
+  periodLabel: string,
+  reportType: string
+): string => {
+  const headers = ['Fecha', 'Valor', 'Unidad', 'Metrica'];
+  const headerRow = headers.map(sanitizeCsvCell).join(',');
+
+  const rows = data.map((item) => {
+    return [
+      sanitizeCsvCell(item.fecha),
+      sanitizeCsvCell(item.valor),
+      sanitizeCsvCell(item.unidad),
+      sanitizeCsvCell(item.metrica),
+    ].join(',');
+  });
+
+  return ['\uFEFF' + headerRow, ...rows].join('\n');
+};
+
+export const exportChartDataToCsv = async (
+  data: CsvDataRow[],
+  periodLabel: string,
+  reportType: string
+): Promise<boolean> => {
+  try {
+    const sanitizedReportType = reportType.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const sanitizedPeriod = periodLabel.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Append timestamp or random suffix to guarantee unique filenames
+    const fileName = `reporte_${sanitizedReportType}_${sanitizedPeriod}_${today}_${Date.now()}.csv`;
+
+    const csvContent = formatChartDataToCsv(data, periodLabel, reportType);
+    const file = new File(Paths.cache, fileName);
+
+    // If file exists, delete it first to prevent the 'already exists' exception
+    if (file.exists) {
+      file.delete();
+    }
+
+    file.create();
+    file.write(csvContent);
+
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(file.uri, {
+        mimeType: 'text/csv',
+        dialogTitle: 'Exportar CSV',
+        UTI: 'public.comma-separated-values-text',
+      });
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error al exportar CSV:', error);
+    throw error;
+  }
+};

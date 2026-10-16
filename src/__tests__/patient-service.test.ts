@@ -283,7 +283,7 @@ describe('Patient Service (Persistence Layer)', () => {
 
     it('construye el HTML del directorio usando opciones por defecto cuando no se pasan parámetros adicionales', () => {
       const result = buildPatientDirectoryHtml([mockPatientA] as any);
-      expect(['Patient Directory', 'Directorio de Pacientes']).toContain(result.metadata.title);
+      expect(result.metadata.title).toBe('Directorio de Pacientes');
     });
   });
 });

@@ -2,7 +2,6 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
-import i18n from '@/i18n';
 
 /**
  * Paleta corporativa oficial de ATI Dental
@@ -172,7 +171,8 @@ export function resolveReportLanguage(requested?: string): ReportLanguage {
     if (lower.startsWith('es')) return 'es';
   }
   try {
-    const active = i18n?.language;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const active = require('@/i18n')?.default?.language;
     if (typeof active === 'string' && active.toLowerCase().startsWith('en')) {
       return 'en';
     }
