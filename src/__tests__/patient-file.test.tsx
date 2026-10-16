@@ -4,7 +4,7 @@ import PatientFileScreen from '../app/(tabs)/patient-file';
 import { useAuth } from '../hooks/use-auth';
 import { getPatientById } from '../services/patient-service';
 import { getTreatmentsByPatientId, deleteTreatment } from '../services/treatment-service';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, router } from 'expo-router';
 
 jest.mock('expo-router', () => {
   const React = require('react');
@@ -287,6 +287,22 @@ describe('PatientFileScreen', () => {
     });
 
     expect(toJSON()).toMatchSnapshot();
+  });
+
+  it('navega a la lista de pacientes al presionar el breadcrumb', async () => {
+    (getPatientById as jest.Mock).mockResolvedValue(mockPatient);
+    (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('patientFile.loading')).toBeNull();
+    });
+
+    const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+    fireEvent.press(breadcrumbBtn);
+
+    expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
   });
 
   describe('Formatting and Edge Cases', () => {

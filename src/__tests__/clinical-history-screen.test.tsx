@@ -98,9 +98,16 @@ jest.mock('@/components/app-header', () => ({
   AppHeader: () => null,
 }));
 
-jest.mock('@/components/breadcrumb', () => ({
-  Breadcrumb: () => null,
-}));
+jest.mock('@/components/breadcrumb', () => {
+  const { TouchableOpacity, Text } = require('react-native');
+  return {
+    Breadcrumb: (props: any) => (
+      <TouchableOpacity testID="breadcrumb-parent-btn" onPress={props.onParentPress}>
+        <Text>{props.parent}</Text>
+      </TouchableOpacity>
+    ),
+  };
+});
 
 jest.mock('@/components/clinical-history/PatientSummaryCard', () => {
   const { TouchableOpacity, Text } = require('react-native');
@@ -246,6 +253,51 @@ describe('ClinicalHistoryScreen Tab Preselection (US-39 / PR #214)', () => {
       });
 
       expect(screen.getByText('Fallo en el sistema de archivos')).toBeTruthy();
+    });
+  });
+
+  describe('Navegación con Breadcrumb', () => {
+    it('navega a la ficha del paciente usando patientId', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      mockSearchParams = { patientId: 'demo-patient' };
+      render(<ClinicalHistoryScreen />);
+
+      const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+      fireEvent.press(breadcrumbBtn);
+
+      expect(router.push).toHaveBeenCalledWith({
+        pathname: '/(tabs)/patient-file',
+        params: { patientId: 'demo-patient' },
+      });
+    });
+
+    it('navega a la ficha del paciente usando record.patient.id si no viene en params', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      mockSearchParams = {};
+      render(<ClinicalHistoryScreen />);
+
+      const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+      fireEvent.press(breadcrumbBtn);
+
+      expect(router.push).toHaveBeenCalledWith({
+        pathname: '/(tabs)/patient-file',
+        params: { patientId: 'p-1' },
+      });
+    });
+
+    it('navega a la lista de pacientes si no existe ningún id de paciente', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      mockSearchParams = {};
+      mockRecord = { patient: null, consultations: [], treatments: [] };
+      render(<ClinicalHistoryScreen />);
+
+      const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+      fireEvent.press(breadcrumbBtn);
+
+      expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
     });
   });
 });
