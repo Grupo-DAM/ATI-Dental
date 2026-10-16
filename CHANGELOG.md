@@ -4,6 +4,12 @@ Historial de versiones del proyecto ATI-Dental siguiendo [Semantic Versioning](h
 
 Entradas más recientes arriba.
 
+## [1.7.2] - 2026-10-16,04:59:57.719Z
+
+**v1.7.2** — Arreglos menores de ui para permitir inputs en formularios
+
+---
+
 ## [1.7.1] - 2026-10-16,04:15:14.818Z
 
 **v1.7.1** — Arreglos menores de estabilización:
