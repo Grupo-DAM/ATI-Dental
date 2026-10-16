@@ -351,6 +351,14 @@ describe('PatientFileScreen', () => {
     });
   });
 
+  it('muestra error si no se provee ni patientId ni email', async () => {
+    (useLocalSearchParams as jest.Mock).mockReturnValue({});
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText('patientFile.errors.noPatientId')).toBeTruthy();
+    });
+  });
   describe('Formatting and Edge Cases', () => {
     it('handles various date formats and fallbacks gracefully', async () => {
       const edgeCasePatient = {

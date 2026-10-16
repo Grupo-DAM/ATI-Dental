@@ -6,6 +6,12 @@ let mockSearchParams: Record<string, any> = { patientId: 'demo-patient' };
 let mockUser: any = { rol: 'odontologo', nombre: 'Dr. Dentista' };
 const mockSetActiveTab = jest.fn();
 let mockActiveTab = 'consultas';
+let mockLoading = false;
+let mockError: any = null;
+let mockDeleteConsultation = jest.fn().mockResolvedValue(true);
+let mockDeleteTreatment = jest.fn().mockResolvedValue(true);
+let mockRefetch = jest.fn().mockResolvedValue(undefined);
+
 jest.mock('expo-router', () => ({
   router: {
     push: jest.fn(),
@@ -68,8 +74,8 @@ jest.mock('@/services/clinical-record-service', () => {
 jest.mock('@/hooks/use-clinical-record', () => ({
   useClinicalRecord: () => ({
     record: mockRecord,
-    loading: false,
-    error: null,
+    loading: mockLoading,
+    error: mockError,
     activeTab: mockActiveTab,
     setActiveTab: mockSetActiveTab,
     searchQuery: '',
@@ -78,8 +84,8 @@ jest.mock('@/hooks/use-clinical-record', () => ({
     filteredTreatments: [],
     selectedConsultation: null,
     setSelectedConsultation: jest.fn(),
-    refetch: jest.fn(),
-    deleteConsultation: jest.fn(),
+    refetch: mockRefetch,
+    deleteConsultation: mockDeleteConsultation,
     updateConsultation: jest.fn(),
     updateOdontogram: jest.fn(),
   }),
@@ -140,6 +146,9 @@ jest.mock('@/components/clinical-history/ConsultationsTimeline', () => {
         <TouchableOpacity testID="register-consult-btn" onPress={props.onRegisterConsultation}>
           <Text>register</Text>
         </TouchableOpacity>
+        <TouchableOpacity testID="delete-consult-btn" onPress={() => props.onDeleteConsultation('c-1')}>
+          <Text>delete-consult</Text>
+        </TouchableOpacity>
       </View>
     ),
   };
@@ -160,6 +169,9 @@ jest.mock('@/components/clinical-history/TreatmentsTimeline', () => {
         <TouchableOpacity testID="modify-treatment-btn" onPress={() => props.onModifyTreatment('t-1')}>
           <Text>modify-treatment</Text>
         </TouchableOpacity>
+        <TouchableOpacity testID="delete-treatment-btn" onPress={() => props.onDeleteTreatment('t-1')}>
+          <Text>delete-treatment</Text>
+        </TouchableOpacity>
       </View>
     ),
   };
@@ -170,6 +182,8 @@ describe('ClinicalHistoryScreen Tab Preselection (US-39 / PR #214)', () => {
     jest.clearAllMocks();
     mockUser = { rol: 'odontologo', nombre: 'Dr. Dentista' };
     mockSearchParams = { patientId: 'demo-patient' };
+    mockLoading = false;
+    mockError = null;
     mockRecord = {
       patient: {
         id: 'demo-patient',
@@ -390,6 +404,62 @@ describe('ClinicalHistoryScreen Tab Preselection (US-39 / PR #214)', () => {
           params: expect.objectContaining({ treatmentId: 't-1' }),
         })
       );
+    });
+
+    it('redirige a agendar cita sin parámetros si el paciente es nulo', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      mockActiveTab = 'consultas';
+      mockSearchParams = { patientId: 'demo-patient', tab: 'consultas' };
+      mockRecord = { patient: null, consultations: [], treatments: [] };
+      render(<ClinicalHistoryScreen />);
+      fireEvent.press(screen.getByTestId('schedule-appt-btn'));
+      expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/schedule-appointment');
+    });
+
+    it('elimina consulta y cierra el modal al confirmar', async () => {
+      const { fireEvent, act } = require('@testing-library/react-native');
+      mockActiveTab = 'consultas';
+      mockSearchParams = { patientId: 'demo-patient', tab: 'consultas' };
+      render(<ClinicalHistoryScreen />);
+      fireEvent.press(screen.getByTestId('delete-consult-btn'));
+      expect(screen.getByTestId('modal-confirm-btn')).toBeTruthy();
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('modal-confirm-btn'));
+      });
+      expect(mockDeleteConsultation).toHaveBeenCalledWith('c-1');
+    });
+
+    it('cancela el modal de confirmación de eliminación', () => {
+      const { fireEvent } = require('@testing-library/react-native');
+      mockActiveTab = 'consultas';
+      mockSearchParams = { patientId: 'demo-patient', tab: 'consultas' };
+      render(<ClinicalHistoryScreen />);
+      fireEvent.press(screen.getByTestId('delete-consult-btn'));
+      fireEvent.press(screen.getByTestId('modal-cancel-btn'));
+    });
+
+    it('presiona el breadcrumb durante el estado de carga', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      mockLoading = true;
+      mockRecord = null;
+      render(<ClinicalHistoryScreen />);
+
+      fireEvent.press(screen.getByTestId('breadcrumb-parent-btn'));
+      expect(router.push).toHaveBeenCalled();
+    });
+
+    it('presiona el breadcrumb durante el estado de error', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      mockLoading = false;
+      mockError = 'Error de conexión';
+      mockRecord = null;
+      render(<ClinicalHistoryScreen />);
+
+      fireEvent.press(screen.getByTestId('breadcrumb-parent-btn'));
+      expect(router.push).toHaveBeenCalled();
     });
   });
 });
