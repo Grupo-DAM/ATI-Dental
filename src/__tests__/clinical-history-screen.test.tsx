@@ -11,6 +11,7 @@ let mockError: any = null;
 let mockDeleteConsultation = jest.fn().mockResolvedValue(true);
 let mockDeleteTreatment = jest.fn().mockResolvedValue(true);
 let mockRefetch = jest.fn().mockResolvedValue(undefined);
+let mockSelectedConsultation: any = null;
 
 jest.mock('expo-router', () => ({
   router: {
@@ -82,8 +83,10 @@ jest.mock('@/hooks/use-clinical-record', () => ({
     setSearchQuery: jest.fn(),
     filteredConsultations: [],
     filteredTreatments: [],
-    selectedConsultation: null,
-    setSelectedConsultation: jest.fn(),
+    selectedConsultation: mockSelectedConsultation,
+    setSelectedConsultation: jest.fn((c) => {
+      mockSelectedConsultation = c;
+    }),
     refetch: mockRefetch,
     deleteConsultation: mockDeleteConsultation,
     updateConsultation: jest.fn(),
@@ -149,6 +152,9 @@ jest.mock('@/components/clinical-history/ConsultationsTimeline', () => {
         <TouchableOpacity testID="delete-consult-btn" onPress={() => props.onDeleteConsultation('c-1')}>
           <Text>delete-consult</Text>
         </TouchableOpacity>
+        <TouchableOpacity testID="select-consult-btn" onPress={() => props.onSelectConsultation({ id: 'c-1', title: 'Consulta 1' })}>
+          <Text>select-consult</Text>
+        </TouchableOpacity>
       </View>
     ),
   };
@@ -177,6 +183,55 @@ jest.mock('@/components/clinical-history/TreatmentsTimeline', () => {
   };
 });
 
+jest.mock('@/components/clinical-history/OdontogramContainer', () => {
+  const { TouchableOpacity, Text } = require('react-native');
+  return {
+    OdontogramContainer: (props: any) => (
+      <TouchableOpacity testID="select-tooth-btn" onPress={() => props.onToothSelect?.({ toothNumber: 11 })}>
+        <Text>tooth</Text>
+      </TouchableOpacity>
+    ),
+  };
+});
+
+jest.mock('@/components/clinical-history/ConsultationDetailModal', () => {
+  const { TouchableOpacity, Text, View } = require('react-native');
+  return {
+    ConsultationDetailModal: (props: any) => (
+      <View>
+        <TouchableOpacity testID="detail-save-btn" onPress={() => props.onSave?.({ motivo: 'Control' })}>
+          <Text>save</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="detail-close-btn" onPress={props.onClose}>
+          <Text>close</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="detail-odontogram-btn" onPress={props.onOpenOdontogram}>
+          <Text>odontogram</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="detail-delete-btn" onPress={() => props.onDelete?.('c-1')}>
+          <Text>delete</Text>
+        </TouchableOpacity>
+      </View>
+    ),
+  };
+});
+
+jest.mock('@/components/clinical-history/ToothConditionModal', () => {
+  const { TouchableOpacity, Text, View } = require('react-native');
+  return {
+    ToothConditionModal: (props: any) => (
+      <View>
+        <TouchableOpacity testID="tooth-confirm-btn" onPress={() => props.onConfirm?.({ toothNumber: 11, condition: 'caries' })}>
+          <Text>confirm</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="tooth-cancel-btn" onPress={props.onCancel}>
+          <Text>cancel</Text>
+        </TouchableOpacity>
+      </View>
+    ),
+  };
+});
+
 describe('ClinicalHistoryScreen Tab Preselection (US-39 / PR #214)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -184,6 +239,7 @@ describe('ClinicalHistoryScreen Tab Preselection (US-39 / PR #214)', () => {
     mockSearchParams = { patientId: 'demo-patient' };
     mockLoading = false;
     mockError = null;
+    mockSelectedConsultation = null;
     mockRecord = {
       patient: {
         id: 'demo-patient',
@@ -456,6 +512,82 @@ describe('ClinicalHistoryScreen Tab Preselection (US-39 / PR #214)', () => {
       mockLoading = false;
       mockError = 'Error de conexión';
       mockRecord = null;
+      render(<ClinicalHistoryScreen />);
+
+      fireEvent.press(screen.getByTestId('breadcrumb-parent-btn'));
+      expect(router.push).toHaveBeenCalled();
+    });
+
+    it('elimina tratamiento y llama a refetch', async () => {
+      const { fireEvent, act } = require('@testing-library/react-native');
+      mockActiveTab = 'tratamientos';
+      mockSearchParams = { patientId: 'demo-patient', tab: 'tratamientos' };
+      render(<ClinicalHistoryScreen />);
+
+      fireEvent.press(screen.getByTestId('delete-treatment-btn'));
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('modal-confirm-btn'));
+      });
+      expect(mockRefetch).toHaveBeenCalled();
+    });
+
+    it('interactúa con ConsultationDetailModal (guardar, odontograma y eliminar)', async () => {
+      const { fireEvent, act } = require('@testing-library/react-native');
+      mockActiveTab = 'consultas';
+      mockSearchParams = { patientId: 'demo-patient', tab: 'consultas' };
+      mockSelectedConsultation = { id: 'c-1', title: 'Consulta 1' };
+      render(<ClinicalHistoryScreen />);
+
+      expect(screen.getByTestId('detail-save-btn')).toBeTruthy();
+
+      // Guardar consulta
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('detail-save-btn'));
+      });
+
+      // Ir a odontograma desde detalle
+      fireEvent.press(screen.getByTestId('detail-odontogram-btn'));
+
+      // Eliminar desde detalle (esto cierra el modal y abre el de confirmación)
+      fireEvent.press(screen.getByTestId('detail-delete-btn'));
+    });
+
+    it('cierra ConsultationDetailModal al presionar cerrar', () => {
+      const { fireEvent } = require('@testing-library/react-native');
+      mockActiveTab = 'consultas';
+      mockSearchParams = { patientId: 'demo-patient', tab: 'consultas' };
+      mockSelectedConsultation = { id: 'c-1', title: 'Consulta 1' };
+      render(<ClinicalHistoryScreen />);
+
+      fireEvent.press(screen.getByTestId('detail-close-btn'));
+    });
+
+    it('interactúa con ToothConditionModal en la pestaña de odontograma', async () => {
+      const { fireEvent, act } = require('@testing-library/react-native');
+      mockActiveTab = 'odontograma';
+      mockSearchParams = { patientId: 'demo-patient', tab: 'odontograma' };
+      render(<ClinicalHistoryScreen />);
+
+      // Selecciona diente dentro de act(...)
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('select-tooth-btn'));
+      });
+      expect(screen.getByTestId('tooth-confirm-btn')).toBeTruthy();
+
+      // Confirmar condición de diente
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('tooth-confirm-btn'));
+      });
+
+      // Cancelar modal de diente
+      fireEvent.press(screen.getByTestId('tooth-cancel-btn'));
+    });
+
+    it('presiona el breadcrumb en pantalla de acceso denegado', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      mockUser = { rol: 'asistente' };
+      mockSearchParams = { patientId: 'demo-patient' };
       render(<ClinicalHistoryScreen />);
 
       fireEvent.press(screen.getByTestId('breadcrumb-parent-btn'));

@@ -99,6 +99,9 @@ describe('PatientFileScreen', () => {
     // Initial loading
     expect(screen.getByText('patientFile.loading')).toBeTruthy();
 
+    const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+    fireEvent.press(breadcrumbBtn);
+    expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
     await waitFor(() => {
       expect(screen.queryByText('patientFile.loading')).toBeNull();
     });
