@@ -435,6 +435,8 @@ export const createFormFieldStyles = (theme: any) => {
       padding: 0,
     },
     textAreaInput: {
+      width: '100%',
+      alignSelf: 'stretch',
       height: 90,
       textAlignVertical: 'top',
       paddingTop: 12,
