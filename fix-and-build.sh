@@ -15,6 +15,11 @@ echo "Node: $(node --version) -> $(which node)"
 echo "NPM:  $(npm --version)"
 echo ""
 
+echo "Sincronizando plugins y configuración nativa con Expo prebuild..."
+cd /home/miguel-ciavato/Documents/github-repos/ati-dental-mobile
+npx --yes expo prebuild --platform android --no-install
+echo ""
+
 cd /home/miguel-ciavato/Documents/github-repos/ati-dental-mobile/android
 
 echo "Deteniendo daemons de Gradle..."

@@ -16,8 +16,12 @@ LogBox.ignoreLogs([
   'This method is deprecated (as well as all React Native Firebase namespaced API)',
 ]);
 
-// Inicializar canales, handlers y tareas en segundo plano de forma temprana
-initNotifications();
+// Inicializar canales, handlers y tareas en segundo plano de forma temprana y segura
+try {
+  initNotifications();
+} catch (error) {
+  console.warn('[RootLayout] Error al inicializar notificaciones tempranas:', error);
+}
 
 // -------------------------------------------------------------
 // CAPTURADOR GLOBAL DE ERRORES (Optimizado y No Bloqueante)

@@ -17,6 +17,12 @@ describe('dashboard-service', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     await AsyncStorage.clear();
+    const firestore = require('@react-native-firebase/firestore');
+    firestore().collection.mockImplementation(() => ({
+      get: jest.fn().mockResolvedValue({ docs: [], empty: true }),
+      doc: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+    }));
   });
 
   describe('canAccessClinicalData & canAccessTreatments', () => {
@@ -37,11 +43,64 @@ describe('dashboard-service', () => {
   });
 
   describe('fetchDashboardSummary', () => {
-    it('returns default metrics and stores them in cache when online', async () => {
+    it('calculates metrics dynamically from Firestore collections when online', async () => {
+      const today = new Date();
+      const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const firestore = require('@react-native-firebase/firestore');
+      firestore().collection.mockImplementation((name: string) => {
+        if (name === 'citas') {
+          return {
+            get: jest.fn().mockResolvedValue({
+              empty: false,
+              docs: [
+                { id: 'c1', data: () => ({ status: 'EN ESPERA', date: todayKey, patientId: 'p1' }) },
+                { id: 'c2', data: () => ({ status: 'programada', date: todayKey, patientId: 'p2' }) },
+                { id: 'c3', data: () => ({ status: 'CANCELADO', date: todayKey, patientId: 'p3' }) },
+                { id: 'c4', data: () => ({ status: 'EN ESPERA', date: '2020-01-01', patientId: 'p4' }) },
+              ],
+            }),
+          };
+        }
+        if (name === 'pacientes') {
+          return {
+            get: jest.fn().mockResolvedValue({
+              empty: false,
+              docs: [
+                { id: 'p1', data: () => ({ status: 'pendiente' }) },
+                { id: 'p2', data: () => ({ estado: 'pendiente' }) },
+                { id: 'p3', data: () => ({}) },
+                { id: 'p4', data: () => ({ status: 'activo', lastVisit: '2026-01-01' }) },
+              ],
+            }),
+          };
+        }
+        if (name === 'tratamientos') {
+          return {
+            get: jest.fn().mockResolvedValue({
+              empty: false,
+              docs: [
+                { id: 't1', data: () => ({ pendingExams: [{ id: 'e1' }, { id: 'e2' }] }) },
+                { id: 't2', data: () => ({ status: 'pendiente' }) },
+                { id: 't3', data: () => ({ status: 'completado' }) },
+              ],
+            }),
+          };
+        }
+        return firestore();
+      });
+
       const summary = await fetchDashboardSummary({ uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
       expect(summary.pendingAppointments).toBe(2);
       expect(summary.pendingPatients).toBe(3);
-      expect(summary.pendingExams).toBe(4);
+      expect(summary.pendingExams).toBe(3);
+      expect(summary.fromCache).toBe(false);
+    });
+
+    it('returns 0 metrics and stores them in cache when online and Firestore is empty', async () => {
+      const summary = await fetchDashboardSummary({ uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(summary.pendingAppointments).toBe(0);
+      expect(summary.pendingPatients).toBe(0);
+      expect(summary.pendingExams).toBe(0);
       expect(summary.fromCache).toBe(false);
     });
 
@@ -62,17 +121,18 @@ describe('dashboard-service', () => {
       expect(summary.pendingAppointments).toBe(10);
       expect(summary.fromCache).toBe(true);
     });
+
     it('returns default summary when offline and cache is empty', async () => {
       (NetInfo.fetch as jest.Mock).mockResolvedValueOnce({ isConnected: false });
       const summary = await fetchDashboardSummary({ uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
-      expect(summary.pendingAppointments).toBe(2);
+      expect(summary.pendingAppointments).toBe(0);
       expect(summary.fromCache).toBe(true);
     });
 
     it('recovers gracefully when NetInfo.fetch throws', async () => {
       (NetInfo.fetch as jest.Mock).mockRejectedValueOnce(new Error('NetInfo error'));
       const summary = await fetchDashboardSummary({ uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
-      expect(summary.pendingAppointments).toBe(2);
+      expect(summary.pendingAppointments).toBe(0);
       expect(summary.fromCache).toBe(false);
     });
   });

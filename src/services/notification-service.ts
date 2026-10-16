@@ -49,8 +49,12 @@ export function initForegroundNotificationHandler(): void {
   });
 }
 
-// Inicializar el handler inmediatamente al importar el módulo
-initForegroundNotificationHandler();
+// Inicializar el handler inmediatamente al importar el módulo de forma segura
+try {
+  initForegroundNotificationHandler();
+} catch (e) {
+  console.warn('[NotificationService] No se pudo inicializar foreground handler:', e);
+}
 
 /**
  * Handler de la tarea headless ejecutada por el sistema operativo cuando llega una notificación en segundo plano
@@ -97,8 +101,12 @@ export function defineBackgroundNotificationTask(): void {
   TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, backgroundNotificationTaskHandler);
 }
 
-// Inicializar la definición de la tarea al importar el módulo
-defineBackgroundNotificationTask();
+// Inicializar la definición de la tarea al importar el módulo de forma segura
+try {
+  defineBackgroundNotificationTask();
+} catch (e) {
+  console.warn('[NotificationService] No se pudo inicializar background task:', e);
+}
 
 
 /**
@@ -363,23 +371,27 @@ export function useNotificationObserver(customHandler?: (route: string) => void)
  * - Listeners de interacciones y navegación killed/background
  */
 export function initNotifications(onNavigate?: (route: string) => void): void {
-  initForegroundNotificationHandler();
-  setupNotificationChannelsAsync().catch((e) =>
-    console.error('[NotificationService] Error configurando canales:', e)
-  );
-  registerBackgroundNotificationTaskAsync().catch((e) =>
-    console.error('[NotificationService] Error registrando tarea background:', e)
-  );
-  setupNotificationListeners((route) => {
-    try {
-      if (onNavigate) {
-        onNavigate(route);
-      } else {
-        router.push(route as any);
+  try {
+    initForegroundNotificationHandler();
+    setupNotificationChannelsAsync().catch((e) =>
+      console.error('[NotificationService] Error configurando canales:', e)
+    );
+    registerBackgroundNotificationTaskAsync().catch((e) =>
+      console.error('[NotificationService] Error registrando tarea background:', e)
+    );
+    setupNotificationListeners((route) => {
+      try {
+        if (onNavigate) {
+          onNavigate(route);
+        } else {
+          router.push(route as any);
+        }
+      } catch (e) {
+        console.error('[NotificationService] Error enrutando desde notificación:', e);
       }
-    } catch (e) {
-      console.error('[NotificationService] Error enrutando desde notificación:', e);
-    }
-  });
+    });
+  } catch (error) {
+    console.warn('[NotificationService] No se pudieron inicializar las notificaciones:', error);
+  }
 }
 

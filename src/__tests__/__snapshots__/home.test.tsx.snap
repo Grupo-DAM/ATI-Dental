@@ -605,7 +605,7 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                     ]
                   }
                 >
-                  2
+                  0
                 </Text>
                 <Text
                   style={
@@ -666,7 +666,7 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                     ]
                   }
                 >
-                  3
+                  0
                 </Text>
                 <Text
                   style={
@@ -733,7 +733,7 @@ exports[`HomeScreen (US-38) Coincide con la instantánea estructural (Snapshot T
                   ]
                 }
               >
-                4
+                0
               </Text>
               <Text
                 style={
