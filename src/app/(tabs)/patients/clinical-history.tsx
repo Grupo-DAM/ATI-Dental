@@ -336,6 +336,17 @@ export default function ClinicalHistoryScreen() {
         <Breadcrumb
           parent={t('patientFile.title', 'Ficha del Paciente')}
           current={t('clinicalHistory.title', 'Historia Clínica')}
+          onParentPress={() => {
+            const targetId = patientId || record?.patient?.id;
+            if (targetId) {
+              router.push({
+                pathname: '/(tabs)/patient-file' as any,
+                params: { patientId: targetId },
+              });
+            } else {
+              router.push('/(tabs)/patients/patients-list');
+            }
+          }}
         />
         <AccessDeniedView
           title={t('clinicalHistory.accessDenied', 'Acceso Restringido a Odontólogos')}
@@ -356,6 +367,17 @@ export default function ClinicalHistoryScreen() {
         <Breadcrumb
           parent={t('patientFile.title', 'Ficha del Paciente')}
           current={t('clinicalHistory.title', 'Historia Clínica')}
+          onParentPress={() => {
+            const targetId = patientId || record?.patient?.id;
+            if (targetId) {
+              router.push({
+                pathname: '/(tabs)/patient-file' as any,
+                params: { patientId: targetId },
+              });
+            } else {
+              router.push('/(tabs)/patients/patients-list');
+            }
+          }}
         />
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={theme.main} />
@@ -375,6 +397,17 @@ export default function ClinicalHistoryScreen() {
         <Breadcrumb
           parent={t('patientFile.title', 'Ficha del Paciente')}
           current={t('clinicalHistory.title', 'Historia Clínica')}
+          onParentPress={() => {
+            const targetId = patientId || record?.patient?.id;
+            if (targetId) {
+              router.push({
+                pathname: '/(tabs)/patient-file' as any,
+                params: { patientId: targetId },
+              });
+            } else {
+              router.push('/(tabs)/patients/patients-list');
+            }
+          }}
         />
         <View style={styles.centerContainer}>
           <Ionicons name="alert-circle-outline" size={56} color={theme.error} />
@@ -407,6 +440,17 @@ export default function ClinicalHistoryScreen() {
       <Breadcrumb
         parent={t('patientFile.title', 'Ficha del Paciente')}
         current={t('clinicalHistory.title', 'Historia Clínica')}
+        onParentPress={() => {
+          const targetId = patientId || record?.patient?.id;
+          if (targetId) {
+            router.push({
+              pathname: '/(tabs)/patient-file' as any,
+              params: { patientId: targetId },
+            });
+          } else {
+            router.push('/(tabs)/patients/patients-list');
+          }
+        }}
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>

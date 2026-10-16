@@ -23,17 +23,62 @@ exports[`AdminReportsScreen (US-26: Visualizar tiempo de uso por usuario) Snapsh
       }
     }
   >
-    <Text
-      style={
+    <View
+      accessibilityState={
         {
-          "color": "#6B7280",
-          "fontFamily": "Open Sans",
-          "fontSize": 14,
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
         }
       }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "opacity": 1,
+        }
+      }
+      testID="breadcrumb-parent-btn"
     >
-      Administración
-    </Text>
+      <Text
+        style={
+          {
+            "color": "#6B7280",
+            "fontFamily": "Open Sans",
+            "fontSize": 14,
+            "textDecorationLine": "underline",
+          }
+        }
+      >
+        Administración
+      </Text>
+    </View>
     <Text
       style={
         {

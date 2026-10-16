@@ -2,9 +2,9 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import PatientFileScreen from '../app/(tabs)/patient-file';
 import { useAuth } from '../hooks/use-auth';
-import { getPatientById } from '../services/patient-service';
+import { getPatientById, getPatientByEmail } from '../services/patient-service';
 import { getTreatmentsByPatientId, deleteTreatment } from '../services/treatment-service';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, router } from 'expo-router';
 
 jest.mock('expo-router', () => {
   const React = require('react');
@@ -99,6 +99,9 @@ describe('PatientFileScreen', () => {
     // Initial loading
     expect(screen.getByText('patientFile.loading')).toBeTruthy();
 
+    const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+    fireEvent.press(breadcrumbBtn);
+    expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
     await waitFor(() => {
       expect(screen.queryByText('patientFile.loading')).toBeNull();
     });
@@ -289,6 +292,76 @@ describe('PatientFileScreen', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
+  it('navega a la lista de pacientes al presionar el breadcrumb', async () => {
+    (getPatientById as jest.Mock).mockResolvedValue(mockPatient);
+    (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.queryByText('patientFile.loading')).toBeNull();
+    });
+
+    const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+    fireEvent.press(breadcrumbBtn);
+
+    expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
+  });
+
+  it('navega a la lista al presionar breadcrumb en pantalla de acceso denegado', async () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { rol: 'usuario_externo' },
+      loading: false,
+    });
+
+    render(<PatientFileScreen />);
+
+    const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+    fireEvent.press(breadcrumbBtn);
+
+    expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
+  });
+
+  it('navega a la lista al presionar breadcrumb en pantalla de error', async () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { rol: 'odontologo' },
+      loading: false,
+    });
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ patientId: 'error-id' });
+    (getPatientById as jest.Mock).mockRejectedValue(new Error('Network error'));
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText('patientFile.errors.title')).toBeTruthy();
+    });
+
+    const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+    fireEvent.press(breadcrumbBtn);
+
+    expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
+  });
+
+  it('permite cargar paciente por email cuando no se provee patientId', async () => {
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ email: 'test@example.com' });
+    (getPatientByEmail as jest.Mock).mockResolvedValue(mockPatient);
+    (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(getPatientByEmail).toHaveBeenCalledWith('test@example.com');
+    });
+  });
+
+  it('muestra error si no se provee ni patientId ni email', async () => {
+    (useLocalSearchParams as jest.Mock).mockReturnValue({});
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText('patientFile.errors.noPatientId')).toBeTruthy();
+    });
+  });
   describe('Formatting and Edge Cases', () => {
     it('handles various date formats and fallbacks gracefully', async () => {
       const edgeCasePatient = {

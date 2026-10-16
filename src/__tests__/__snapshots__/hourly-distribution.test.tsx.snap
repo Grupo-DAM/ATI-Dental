@@ -23,17 +23,62 @@ exports[`HourlyDistributionScreen exporta PDF y CSV desde el menú de descarga 1
       }
     }
   >
-    <Text
-      style={
+    <View
+      accessibilityState={
         {
-          "color": "#6B7280",
-          "fontFamily": "Open Sans",
-          "fontSize": 14,
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
         }
       }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "opacity": 1,
+        }
+      }
+      testID="breadcrumb-parent-btn"
     >
-      Reportes
-    </Text>
+      <Text
+        style={
+          {
+            "color": "#6B7280",
+            "fontFamily": "Open Sans",
+            "fontSize": 14,
+            "textDecorationLine": "underline",
+          }
+        }
+      >
+        Reportes
+      </Text>
+    </View>
     <Text
       style={
         {
@@ -2478,17 +2523,62 @@ exports[`HourlyDistributionScreen muestra la hora pico y el gráfico de 24 colum
       }
     }
   >
-    <Text
-      style={
+    <View
+      accessibilityState={
         {
-          "color": "#6B7280",
-          "fontFamily": "Open Sans",
-          "fontSize": 14,
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
         }
       }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "opacity": 1,
+        }
+      }
+      testID="breadcrumb-parent-btn"
     >
-      Reportes
-    </Text>
+      <Text
+        style={
+          {
+            "color": "#6B7280",
+            "fontFamily": "Open Sans",
+            "fontSize": 14,
+            "textDecorationLine": "underline",
+          }
+        }
+      >
+        Reportes
+      </Text>
+    </View>
     <Text
       style={
         {
