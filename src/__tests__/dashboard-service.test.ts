@@ -135,6 +135,82 @@ describe('dashboard-service', () => {
       expect(summary.pendingAppointments).toBe(0);
       expect(summary.fromCache).toBe(false);
     });
+
+    it('filters appointments and treatments for external user to only their own records', async () => {
+      const today = new Date();
+      const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const firestore = require('@react-native-firebase/firestore');
+      firestore().collection.mockImplementation((name: string) => {
+        if (name === 'citas') {
+          return {
+            get: jest.fn().mockResolvedValue({
+              empty: false,
+              docs: [
+                { id: 'c1', data: () => ({ status: 'EN ESPERA', date: todayKey, patientId: 'ext-user-1' }) },
+                { id: 'c2', data: () => ({ status: 'EN ESPERA', date: todayKey, patientId: 'other-user' }) },
+                { id: 'c3', data: () => ({ status: 'EN ESPERA', patientId: 'ext-user-1' }) },
+              ],
+            }),
+          };
+        }
+        if (name === 'pacientes') {
+          return {
+            get: jest.fn().mockResolvedValue({
+              empty: false,
+              docs: [
+                { id: 'p1', data: () => ({ status: 'inactivo' }) },
+                { id: 'p2', data: () => ({ status: 'pendiente' }) },
+              ],
+            }),
+          };
+        }
+        if (name === 'tratamientos') {
+          return {
+            get: jest.fn().mockResolvedValue({
+              empty: false,
+              docs: [
+                { id: 't1', data: () => ({ patientId: 'other-user', status: 'pendiente' }) },
+                { id: 't2', data: () => ({ patientId: 'ext-user-1', status: 'en_proceso' }) },
+              ],
+            }),
+          };
+        }
+        return firestore();
+      });
+
+      const summary = await fetchDashboardSummary({ uid: 'ext-user-1', email: 'ext@test.com', rol: USER_ROLES.USUARIO_EXTERNO });
+      expect(summary.pendingAppointments).toBe(2);
+      expect(summary.pendingPatients).toBe(1);
+      expect(summary.pendingExams).toBe(1);
+    });
+
+    it('handles null snapshots when Firestore collections reject', async () => {
+      const firestore = require('@react-native-firebase/firestore');
+      firestore().collection.mockImplementation(() => ({
+        get: jest.fn().mockRejectedValue(new Error('Firestore collection error')),
+      }));
+
+      const summary = await fetchDashboardSummary({ uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(summary.pendingAppointments).toBe(0);
+      expect(summary.pendingPatients).toBe(0);
+      expect(summary.pendingExams).toBe(0);
+    });
+
+    it('returns cached data with fromCache false when Firestore processing throws and cache exists', async () => {
+      await AsyncStorage.setItem(
+        'dashboard_summary_cache_v1',
+        JSON.stringify({ pendingAppointments: 7, pendingPatients: 3, pendingExams: 2 })
+      );
+
+      const firestore = require('@react-native-firebase/firestore');
+      firestore().collection.mockImplementation(() => {
+        throw new Error('Unexpected crash during Firestore access');
+      });
+
+      const summary = await fetchDashboardSummary({ uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(summary.pendingAppointments).toBe(7);
+      expect(summary.fromCache).toBe(false);
+    });
   });
 
   describe('fetchQuickAccessItems edge cases', () => {
@@ -168,6 +244,26 @@ describe('dashboard-service', () => {
       const notifs = await fetchNotifications();
       expect(notifs.length).toBeGreaterThan(0);
       expect(notifs[0].read).toBe(false);
+    });
+
+    it('returns cached notifications from AsyncStorage when available', async () => {
+      const mockCached = [{ id: 'notif-cached', title: 'Aviso', message: 'Mensaje', read: false, time: '1h' }];
+      await AsyncStorage.setItem('dashboard_notifications_v1', JSON.stringify(mockCached));
+
+      const notifs = await fetchNotifications();
+      expect(notifs).toEqual(mockCached);
+    });
+
+    it('handles AsyncStorage errors in fetchNotifications and markNotificationAsRead', async () => {
+      const getSpy = jest.spyOn(AsyncStorage, 'getItem').mockRejectedValueOnce(new Error('Storage failure'));
+      const notifs = await fetchNotifications();
+      expect(notifs.length).toBeGreaterThan(0);
+      getSpy.mockRestore();
+
+      const setSpy = jest.spyOn(AsyncStorage, 'setItem').mockRejectedValueOnce(new Error('Storage set error'));
+      const updated = await markNotificationAsRead('notif-1');
+      expect(updated.find((n) => n.id === 'notif-1')?.read).toBe(true);
+      setSpy.mockRestore();
     });
 
     it('marks notification as read and updates storage', async () => {
@@ -266,6 +362,22 @@ describe('dashboard-service', () => {
     it('finds accessible modules by keyword', async () => {
       const res = await performGlobalSearch('contact', { uid: '1', email: 'a@b.com', rol: USER_ROLES.USUARIO_EXTERNO });
       expect(res.some((r) => r.category === 'modules' && r.id === 'mod-contact')).toBe(true);
+    });
+
+    it('handles firestore errors gracefully during appointments global search', async () => {
+      const firestore = require('@react-native-firebase/firestore');
+      firestore().collection.mockImplementation((name: string) => {
+        if (name === 'citas') {
+          return {
+            get: jest.fn().mockRejectedValueOnce(new Error('Firestore error in search')),
+          };
+        }
+        return firestore();
+      });
+
+      const res = await performGlobalSearch('Ana', { uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
+      expect(res.some((r) => r.category === 'patients')).toBe(true);
+      expect(res.some((r) => r.category === 'appointments')).toBe(false);
     });
   });
 });

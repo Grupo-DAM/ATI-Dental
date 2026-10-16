@@ -271,6 +271,42 @@ describe('Agenda Service', () => {
       await expect(updateAppointmentStatus('sin-fecha', 'CANCELADO')).rejects.toMatchObject({ statusCode: 404 });
     });
 
+    it('elimina la anulación si falla el cambio inicial de estado', async () => {
+      const saved = await createAppointment(input);
+      firestore().collection('citas').update.mockRejectedValueOnce(new Error('fail initial'));
+
+      await expect(updateAppointmentStatus(saved.id, 'CONFIRMADO', new Date(2026, 5, 20, 8, 0)))
+        .rejects.toBeInstanceOf(AppointmentRequestError);
+    });
+
+    it('retorna 404 cuando la cita con prefijo de fecha no existe en local ni remoto', async () => {
+      firestore().collection('citas').get.mockResolvedValueOnce({ empty: true, docs: [] });
+      await expect(updateAppointmentStatus('2026-06-20-inexistente', 'CANCELADO'))
+        .rejects.toMatchObject({ statusCode: 404 });
+    });
+
+    it('actualiza el estado de una cita remota no guardada localmente', async () => {
+      firestore().collection('citas').get.mockResolvedValueOnce({
+        empty: false,
+        docs: [{
+          id: 'remote-cita-1',
+          data: () => ({
+            date: '2026-06-20',
+            time: '09:30 AM',
+            patientName: 'Remoto',
+            status: 'EN ESPERA',
+          }),
+        }],
+      });
+      const updated = await updateAppointmentStatus('remote-cita-1', 'CONFIRMADO', new Date(2026, 5, 20, 8, 0));
+      expect(updated.status).toBe('CONFIRMADO');
+    });
+
+    it('rechaza una cita con hora o duración inválida', async () => {
+      await expect(createAppointment({ ...input, time: 'hora-invalida' })).rejects.toMatchObject({ statusCode: 400 });
+      await expect(createAppointment({ ...input, duration: '0 minutos' })).rejects.toMatchObject({ statusCode: 400 });
+    });
+
     it('permite confirmar y bloquea en progreso fuera del horario', async () => {
       const saved = await createAppointment(input);
       const confirmed = await updateAppointmentStatus(saved.id, 'CONFIRMADO', new Date(2026, 5, 20, 8, 0));

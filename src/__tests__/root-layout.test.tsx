@@ -59,6 +59,24 @@ describe('RootLayout', () => {
     ignoreSpy.mockRestore();
   });
 
+  it('captura errores al inicializar notificaciones tempranas', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    jest.isolateModules(() => {
+      jest.doMock('@/services/notification-service', () => ({
+        initNotifications: () => {
+          throw new Error('Notification init crash');
+        },
+      }));
+      require('@/app/_layout');
+    });
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[RootLayout] Error al inicializar notificaciones tempranas:',
+      expect.any(Error)
+    );
+    warnSpy.mockRestore();
+  });
+
   it('reporta crashes fatales y delega al handler original', async () => {
     const originalHandler = jest.fn();
     const mockSet = jest.fn(() => Promise.resolve());
