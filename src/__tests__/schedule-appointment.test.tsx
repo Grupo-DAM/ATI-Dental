@@ -152,6 +152,23 @@ describe('ScheduleAppointmentScreen', () => {
       patientId: 'pat-mariana',
       patientName: 'Mariana López',
     };
+    const { firestore } = require('@/config/firebase');
+    firestore().collection('citas').get.mockResolvedValueOnce({
+      empty: false,
+      docs: [{
+        id: 'cita-existente',
+        data: () => ({
+          date: '2026-06-16',
+          time: '09:00 AM',
+          patientName: 'Mariana López',
+          patientId: 'pat-mariana',
+          dentistName: 'Dra. Smith',
+          status: 'CONFIRMADO',
+          duration: '45 minutos',
+          treatmentName: 'Limpieza Profunda',
+        }),
+      }],
+    });
     const { getByTestId, getByText, findAllByText, queryByText } = render(<ScheduleAppointmentScreen />);
 
     globalThis.__appointmentPickerDate = new Date(2026, 5, 16);

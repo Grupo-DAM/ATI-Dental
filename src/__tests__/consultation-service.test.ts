@@ -260,7 +260,7 @@ describe('consultation-service', () => {
       expect(result[0].status).toBe('en progreso');
     });
 
-    it('returns fallback appointments when firestore snapshot is empty', async () => {
+    it('returns empty array when firestore snapshot is empty', async () => {
       mockWhere.mockReturnValueOnce({
         get: jest.fn().mockResolvedValueOnce({
           empty: true,
@@ -269,17 +269,16 @@ describe('consultation-service', () => {
       });
 
       const result = await getAppointmentsForPatient('p-1');
-      expect(result.length).toBeGreaterThan(0);
-      expect(result[0].patientId).toBe('p-1');
+      expect(result).toEqual([]);
     });
 
-    it('returns fallback appointments when firestore query throws error', async () => {
+    it('returns empty array when firestore query throws error', async () => {
       mockWhere.mockReturnValueOnce({
         get: jest.fn().mockRejectedValueOnce(new Error('Network error')),
       });
 
       const result = await getAppointmentsForPatient('p-1');
-      expect(result.length).toBeGreaterThan(0);
+      expect(result).toEqual([]);
     });
   });
 });

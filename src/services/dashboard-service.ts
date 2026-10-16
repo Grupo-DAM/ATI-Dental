@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+import { firestore } from '@/config/firebase';
 import { UserProfile } from '@/hooks/use-auth';
 import { USER_ROLES, isAdminUser } from '@/constants/user-roles';
+import { parseAppointmentDateKey } from '@/utils/appointment-schedule';
 
 export interface DashboardSummary {
   pendingAppointments: number;
@@ -100,9 +102,9 @@ export const ALL_QUICK_ACCESS_ITEMS: QuickAccessItem[] = [
 ];
 
 const DEFAULT_SUMMARY: DashboardSummary = {
-  pendingAppointments: 2,
-  pendingPatients: 3,
-  pendingExams: 4,
+  pendingAppointments: 0,
+  pendingPatients: 0,
+  pendingExams: 0,
   fromCache: false,
 };
 
@@ -135,7 +137,8 @@ export function canAccessTreatments(role?: string | null): boolean {
 }
 
 /**
- * Fetches dashboard summary with cache-first and offline resilience.
+ * Fetches dashboard summary with cache-first and offline resilience,
+ * querying Firestore collections dynamically when online.
  */
 export async function fetchDashboardSummary(
   user?: UserProfile | null,
@@ -172,11 +175,81 @@ export async function fetchDashboardSummary(
     return { ...DEFAULT_SUMMARY, fromCache: true };
   }
 
-  // Simulate network fetch or dynamic calculation
+  let pendingAppointments = 0;
+  let pendingPatients = 0;
+  let pendingExams = 0;
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  try {
+    const [citasSnap, pacientesSnap, tratamientosSnap] = await Promise.all([
+      firestore().collection('citas').get().catch(() => null),
+      firestore().collection('pacientes').get().catch(() => null),
+      firestore().collection('tratamientos').get().catch(() => null),
+    ]);
+
+    // 1. Citas pendientes para hoy (o citas activas no canceladas/finalizadas)
+    if (citasSnap?.docs) {
+      pendingAppointments = citasSnap.docs.filter((doc: any) => {
+        const a = doc.data() || {};
+        const status = String(a.status || a.estado || '').toUpperCase();
+        if (status === 'FINALIZADO' || status === 'CANCELADO' || status === 'COMPLETADO') {
+          return false;
+        }
+        if (user?.rol === USER_ROLES.USUARIO_EXTERNO && a.patientId && a.patientId !== user.uid) {
+          return false;
+        }
+        const rawDate = a.date || a.fechaHora || a.fecha;
+        if (rawDate) {
+          const parsed = parseAppointmentDateKey(String(rawDate));
+          if (parsed) {
+            return parsed === todayKey;
+          }
+        }
+        return true;
+      }).length;
+    }
+
+    // 2. Pacientes pendientes
+    if (pacientesSnap?.docs) {
+      pendingPatients = pacientesSnap.docs.filter((doc: any) => {
+        const p = doc.data() || {};
+        const st = String(p.status || p.estado || '').toLowerCase();
+        if (st === 'pendiente') return true;
+        if (st === 'activo' || st === 'inactivo') return false;
+        return !p.lastVisit && !p.ultimaVisita && !p.ultima_visita;
+      }).length;
+    }
+
+    // 3. Exámenes pendientes en tratamientos
+    if (tratamientosSnap?.docs) {
+      tratamientosSnap.docs.forEach((doc: any) => {
+        const t = doc.data() || {};
+        if (user?.rol === USER_ROLES.USUARIO_EXTERNO && t.patientId && t.patientId !== user.uid) {
+          return;
+        }
+        if (Array.isArray(t.pendingExams) && t.pendingExams.length > 0) {
+          pendingExams += t.pendingExams.length;
+        } else {
+          const st = String(t.status || t.estado || '').toLowerCase();
+          if (st === 'pendiente' || st === 'en_proceso') {
+            pendingExams += 1;
+          }
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('[dashboard-service] Error fetching summary metrics from Firestore:', err);
+    if (cachedData) {
+      return { ...cachedData, fromCache: false };
+    }
+  }
+
   const summary: DashboardSummary = {
-    pendingAppointments: 2,
-    pendingPatients: 3,
-    pendingExams: 4,
+    pendingAppointments,
+    pendingPatients,
+    pendingExams,
     fromCache: false,
   };
 
@@ -260,12 +333,12 @@ export async function markNotificationAsRead(id: string): Promise<NotificationIt
 /**
  * Performs a debounced global search filtered strictly by role permissions.
  */
-export function performGlobalSearch(
+export async function performGlobalSearch(
   query: string,
   user?: UserProfile | null
 ): Promise<SearchResultItem[]> {
   const trimmed = query.trim().toLowerCase();
-  if (!trimmed) return Promise.resolve([]);
+  if (!trimmed) return [];
 
   const role = user?.rol || USER_ROLES.ODONTOLOGO;
   const results: SearchResultItem[] = [];
@@ -307,28 +380,33 @@ export function performGlobalSearch(
     });
   }
 
-  // 3. Appointments (only if permitted)
+  // 3. Appointments (only if permitted) - from Firestore database
   if (canAccessClinicalData(role)) {
-    const mockAppointments = [
-      { id: 'apt-1', patient: 'Ana Gómez', reason: 'Limpieza dental', time: '09:00 AM' },
-      { id: 'apt-2', patient: 'Carlos Pérez', reason: 'Consulta general', time: '11:00 AM' },
-      { id: 'apt-3', patient: 'María Rodríguez', reason: 'Ortodoncia', time: '04:00 PM' },
-    ];
-
-    mockAppointments.forEach((a) => {
-      if (
-        a.patient.toLowerCase().includes(trimmed) ||
-        a.reason.toLowerCase().includes(trimmed)
-      ) {
-        results.push({
-          id: `apt-${a.id}`,
-          title: `${a.patient} - ${a.reason}`,
-          subtitle: `Hora: ${a.time}`,
-          category: 'appointments',
-          route: '/(tabs)/agenda',
+    try {
+      const snap = await firestore().collection('citas').get();
+      if (snap && !snap.empty) {
+        snap.docs.forEach((doc) => {
+          const a = doc.data() || {};
+          const patient = String(a.patientName || '');
+          const reason = String(a.reason || a.treatmentName || '');
+          const time = String(a.time ? `${a.time} ${a.period || ''}`.trim() : '');
+          if (
+            patient.toLowerCase().includes(trimmed) ||
+            reason.toLowerCase().includes(trimmed)
+          ) {
+            results.push({
+              id: `apt-${doc.id}`,
+              title: `${patient} - ${reason}`.trim().replace(/^-\s*|\s*-\s*$/g, ''),
+              subtitle: time ? `Hora: ${time}` : 'Cita agendada',
+              category: 'appointments',
+              route: '/(tabs)/agenda',
+            });
+          }
         });
       }
-    });
+    } catch {
+      // ignore
+    }
   }
 
   // 4. Treatments & Exams (only if permitted)
@@ -355,5 +433,5 @@ export function performGlobalSearch(
     });
   }
 
-  return Promise.resolve(results);
+  return results;
 }

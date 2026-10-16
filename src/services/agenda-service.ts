@@ -88,187 +88,6 @@ export function getMonthYearLabel(date: Date): string {
 }
 
 /**
- * Generate mock appointments for a particular date.
- */
-function createMockAppointmentsForDate(dateStr: string, dayIndex: number): Appointment[] {
-  // Monday
-  if (dayIndex === 1) {
-    return [
-      {
-        id: `${dateStr}-1`,
-        time: '08:30',
-        period: 'AM',
-        patientName: 'Pedro Ramírez',
-        treatmentName: 'Consulta Diagnóstica',
-        status: 'CONFIRMADO',
-        chair: 'SILLÓN 1',
-        durationMinutes: 30,
-        date: dateStr,
-      },
-      {
-        id: `${dateStr}-2`,
-        time: '10:00',
-        period: 'AM',
-        patientName: 'Ana González',
-        treatmentName: 'Blanqueamiento Dental',
-        status: 'CONFIRMADO',
-        chair: 'SILLÓN 2',
-        durationMinutes: 60,
-        date: dateStr,
-      },
-      {
-        id: `${dateStr}-3`,
-        time: '02:00',
-        period: 'PM',
-        patientName: 'Roberto Torres',
-        treatmentName: 'Endodoncia',
-        status: 'EN ESPERA',
-        chair: 'SILLÓN 1',
-        durationMinutes: 60,
-        date: dateStr,
-      },
-    ];
-  }
-
-  // Tuesday (matches issue #170 mockup)
-  if (dayIndex === 2) {
-    return [
-      {
-        id: `${dateStr}-1`,
-        time: '09:00',
-        period: 'AM',
-        patientName: 'Mariana López',
-        treatmentName: 'Limpieza Profunda',
-        status: 'CONFIRMADO',
-        chair: 'SILLÓN 1',
-        durationMinutes: 45,
-        date: dateStr,
-      },
-      {
-        id: `${dateStr}-2`,
-        time: '10:30',
-        period: 'AM',
-        patientName: 'Carlos Mendoza',
-        treatmentName: 'Extracción Molar',
-        status: 'EN ESPERA',
-        chair: 'SILLÓN 3',
-        durationMinutes: 45,
-        date: dateStr,
-      },
-      {
-        id: `${dateStr}-3`,
-        time: '01:15',
-        period: 'PM',
-        patientName: 'Elena Rojas',
-        treatmentName: 'Ajuste Ortodoncia',
-        status: 'CONFIRMADO',
-        chair: 'SILLÓN 2',
-        durationMinutes: 30,
-        date: dateStr,
-      },
-    ];
-  }
-
-  // Wednesday
-  if (dayIndex === 3) {
-    return [
-      {
-        id: `${dateStr}-1`,
-        time: '09:15',
-        period: 'AM',
-        patientName: 'Sofía Castro',
-        treatmentName: 'Cirugía de Cordal',
-        status: 'CONFIRMADO',
-        chair: 'SILLÓN 3',
-        durationMinutes: 90,
-        date: dateStr,
-      },
-      {
-        id: `${dateStr}-2`,
-        time: '11:30',
-        period: 'AM',
-        patientName: 'Javier Navarro',
-        treatmentName: 'Prótesis Fija',
-        status: 'CANCELADO',
-        chair: 'SILLÓN 1',
-        durationMinutes: 45,
-        date: dateStr,
-      },
-      {
-        id: `${dateStr}-3`,
-        time: '03:00',
-        period: 'PM',
-        patientName: 'Laura Morales',
-        treatmentName: 'Profilaxis',
-        status: 'CONFIRMADO',
-        chair: 'SILLÓN 2',
-        durationMinutes: 30,
-        date: dateStr,
-      },
-    ];
-  }
-
-  // Thursday
-  if (dayIndex === 4) {
-    return [
-      {
-        id: `${dateStr}-1`,
-        time: '10:00',
-        period: 'AM',
-        patientName: 'Valentina Cruz',
-        treatmentName: 'Tratamiento Periodontal',
-        status: 'CONFIRMADO',
-        chair: 'SILLÓN 1',
-        durationMinutes: 45,
-        date: dateStr,
-      },
-      {
-        id: `${dateStr}-2`,
-        time: '02:30',
-        period: 'PM',
-        patientName: 'Diego Silva',
-        treatmentName: 'Restauración con Resina',
-        status: 'EN ESPERA',
-        chair: 'SILLÓN 2',
-        durationMinutes: 45,
-        date: dateStr,
-      },
-    ];
-  }
-
-  // Friday
-  if (dayIndex === 5) {
-    return [
-      {
-        id: `${dateStr}-1`,
-        time: '08:30',
-        period: 'AM',
-        patientName: 'Camila Rivas',
-        treatmentName: 'Control de Brackets',
-        status: 'CONFIRMADO',
-        chair: 'SILLÓN 3',
-        durationMinutes: 30,
-        date: dateStr,
-      },
-      {
-        id: `${dateStr}-2`,
-        time: '10:00',
-        period: 'AM',
-        patientName: 'Martín Herrera',
-        treatmentName: 'Limpieza y Fluorización',
-        status: 'CONFIRMADO',
-        chair: 'SILLÓN 1',
-        durationMinutes: 45,
-        date: dateStr,
-      },
-    ];
-  }
-
-  // Saturday (empty day by default to satisfy empty state criterion)
-  return [];
-}
-
-/**
  * Builds the week structure starting from Monday through Saturday (6 days, like the mockup).
  */
 export function buildWeeklyAgenda(baseDate: Date): WeeklyAgenda {
@@ -291,7 +110,7 @@ export function buildWeeklyAgenda(baseDate: Date): WeeklyAgenda {
       dayName: dayAbbrev,
       dayNumber: current.getDate(),
       isToday: dateKey === todayKey,
-      appointments: mergeAppointmentsForDate(dateKey, dayOfWeek),
+      appointments: mergeAppointmentsForDate(dateKey),
       hasLunchBreak: dayOfWeek >= 1 && dayOfWeek <= 5,
     });
   }
@@ -325,7 +144,6 @@ export async function fetchWeeklyAgenda(
 
   const weekly = buildWeeklyAgenda(baseDate);
   const remote = await loadRemoteAppointments();
-  if (remote.length === 0) return weekly;
 
   return {
     ...weekly,
@@ -398,16 +216,13 @@ function mergeUnique(current: ReadonlyArray<Appointment>, extra: ReadonlyArray<A
   return [...current, ...extra.filter((item) => !ids.has(item.id))];
 }
 
-function mergeAppointmentsForDate(dateKey: string, dayOfWeek: number): Appointment[] {
-  const mocks = createMockAppointmentsForDate(dateKey, dayOfWeek).map(withStatus);
+function mergeAppointmentsForDate(dateKey: string): Appointment[] {
   const saved = savedAppointments.filter((item) => item.date === dateKey).map(withStatus);
-  return sortAppointments(mergeUnique(mocks, saved));
+  return sortAppointments(saved);
 }
 
 export function listAppointmentsOnDate(dateKey: string): Appointment[] {
-  const [year, month, day] = dateKey.split('-').map(Number);
-  const date = new Date(year, (month || 1) - 1, day || 1);
-  return mergeAppointmentsForDate(dateKey, date.getDay());
+  return mergeAppointmentsForDate(dateKey);
 }
 
 export async function listAppointmentsForConflict(dateKey: string): Promise<Appointment[]> {
@@ -524,7 +339,11 @@ export async function updateAppointmentStatus(
   next: AppointmentStatus,
   now: Date = new Date(),
 ): Promise<Appointment> {
-  const current = findAppointmentById(id);
+  let current = findAppointmentById(id);
+  if (!current) {
+    const remote = await loadRemoteAppointments();
+    current = remote.find((item) => item.id === id) ?? null;
+  }
   if (!current) throw new AppointmentRequestError(404, 'NOT_FOUND');
 
   const allowed = getAllowedStatusTransitions(toScheduleSlot(current), now);

@@ -93,18 +93,12 @@ describe('Agenda Service', () => {
       expect(weekly.days[5].dayOfWeek).toBe(6);
     });
 
-    it('populates Tuesday appointments matching mockup', () => {
+    it('builds a 6-day week with empty appointments by default', () => {
       const baseDate = new Date(2026, 5, 16);
       const weekly = buildWeeklyAgenda(baseDate);
       const tuesday = weekly.days[1];
 
-      expect(tuesday.appointments.length).toBeGreaterThan(0);
-      expect(tuesday.appointments[0].patientName).toBe('Mariana López');
-      expect(tuesday.appointments[0].status).toBe('CONFIRMADO');
-      expect(tuesday.appointments[1].patientName).toBe('Carlos Mendoza');
-      expect(tuesday.appointments[1].status).toBe('EN ESPERA');
-      expect(tuesday.appointments[2].patientName).toBe('Elena Rojas');
-      expect(tuesday.appointments[2].status).toBe('CONFIRMADO');
+      expect(tuesday.appointments).toHaveLength(0);
     });
 
     it('leaves Saturday empty for empty-state demonstration', () => {
@@ -275,6 +269,42 @@ describe('Agenda Service', () => {
       await expect(updateAppointmentStatus(saved.id, 'CANCELADO', new Date(2026, 5, 20, 8, 0)))
         .rejects.toBeInstanceOf(AppointmentRequestError);
       await expect(updateAppointmentStatus('sin-fecha', 'CANCELADO')).rejects.toMatchObject({ statusCode: 404 });
+    });
+
+    it('elimina la anulación si falla el cambio inicial de estado', async () => {
+      const saved = await createAppointment(input);
+      firestore().collection('citas').update.mockRejectedValueOnce(new Error('fail initial'));
+
+      await expect(updateAppointmentStatus(saved.id, 'CONFIRMADO', new Date(2026, 5, 20, 8, 0)))
+        .rejects.toBeInstanceOf(AppointmentRequestError);
+    });
+
+    it('retorna 404 cuando la cita con prefijo de fecha no existe en local ni remoto', async () => {
+      firestore().collection('citas').get.mockResolvedValueOnce({ empty: true, docs: [] });
+      await expect(updateAppointmentStatus('2026-06-20-inexistente', 'CANCELADO'))
+        .rejects.toMatchObject({ statusCode: 404 });
+    });
+
+    it('actualiza el estado de una cita remota no guardada localmente', async () => {
+      firestore().collection('citas').get.mockResolvedValueOnce({
+        empty: false,
+        docs: [{
+          id: 'remote-cita-1',
+          data: () => ({
+            date: '2026-06-20',
+            time: '09:30 AM',
+            patientName: 'Remoto',
+            status: 'EN ESPERA',
+          }),
+        }],
+      });
+      const updated = await updateAppointmentStatus('remote-cita-1', 'CONFIRMADO', new Date(2026, 5, 20, 8, 0));
+      expect(updated.status).toBe('CONFIRMADO');
+    });
+
+    it('rechaza una cita con hora o duración inválida', async () => {
+      await expect(createAppointment({ ...input, time: 'hora-invalida' })).rejects.toMatchObject({ statusCode: 400 });
+      await expect(createAppointment({ ...input, duration: '0 minutos' })).rejects.toMatchObject({ statusCode: 400 });
     });
 
     it('permite confirmar y bloquea en progreso fuera del horario', async () => {

@@ -135,10 +135,132 @@ describe('AgendaScreen (US-36: Visualizar Agenda)', () => {
   saturday.setDate(monday.getDate() + 5);
   const saturdayKey = agendaService.formatDateKey(saturday);
 
+  const createTestAgenda = (baseDate: Date): agendaService.WeeklyAgenda => {
+    const mon = agendaService.getMondayOfWeek(baseDate);
+    const monKey = agendaService.formatDateKey(mon);
+    const tue = new Date(mon);
+    tue.setDate(mon.getDate() + 1);
+    const tueKey = agendaService.formatDateKey(tue);
+    const sat = new Date(mon);
+    sat.setDate(mon.getDate() + 5);
+    const satKey = agendaService.formatDateKey(sat);
+
+    return {
+      weekStart: monKey,
+      weekEnd: satKey,
+      month: mon.getMonth(),
+      year: mon.getFullYear(),
+      monthYearLabel: agendaService.getMonthYearLabel(mon),
+      days: [
+        {
+          date: monKey,
+          dayOfWeek: 1,
+          dayName: 'LUN',
+          dayNumber: mon.getDate(),
+          isToday: false,
+          hasLunchBreak: true,
+          appointments: [
+            {
+              id: `${monKey}-1`,
+              time: '08:30',
+              period: 'AM',
+              patientName: 'Pedro Ramírez',
+              treatmentName: 'Consulta Diagnóstica',
+              status: 'CONFIRMADO',
+              chair: 'SILLÓN 1',
+              durationMinutes: 30,
+              date: monKey,
+            },
+          ],
+        },
+        {
+          date: tueKey,
+          dayOfWeek: 2,
+          dayName: 'MAR',
+          dayNumber: tue.getDate(),
+          isToday: false,
+          hasLunchBreak: true,
+          appointments: [
+            {
+              id: `${tueKey}-1`,
+              time: '09:00',
+              period: 'AM',
+              patientName: 'Mariana López',
+              treatmentName: 'Limpieza Profunda',
+              status: 'CONFIRMADO',
+              chair: 'SILLÓN 1',
+              durationMinutes: 45,
+              date: tueKey,
+            },
+            {
+              id: `${tueKey}-2`,
+              time: '10:30',
+              period: 'AM',
+              patientName: 'Carlos Mendoza',
+              treatmentName: 'Extracción Molar',
+              status: 'EN ESPERA',
+              chair: 'SILLÓN 3',
+              durationMinutes: 45,
+              date: tueKey,
+            },
+            {
+              id: `${tueKey}-3`,
+              time: '01:15',
+              period: 'PM',
+              patientName: 'Elena Rojas',
+              treatmentName: 'Ajuste Ortodoncia',
+              status: 'CONFIRMADO',
+              chair: 'SILLÓN 2',
+              durationMinutes: 30,
+              date: tueKey,
+            },
+          ],
+        },
+        {
+          date: agendaService.formatDateKey(new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 2)),
+          dayOfWeek: 3,
+          dayName: 'MIÉ',
+          dayNumber: mon.getDate() + 2,
+          isToday: false,
+          hasLunchBreak: true,
+          appointments: [],
+        },
+        {
+          date: agendaService.formatDateKey(new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 3)),
+          dayOfWeek: 4,
+          dayName: 'JUE',
+          dayNumber: mon.getDate() + 3,
+          isToday: false,
+          hasLunchBreak: true,
+          appointments: [],
+        },
+        {
+          date: agendaService.formatDateKey(new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 4)),
+          dayOfWeek: 5,
+          dayName: 'VIE',
+          dayNumber: mon.getDate() + 4,
+          isToday: false,
+          hasLunchBreak: true,
+          appointments: [],
+        },
+        {
+          date: satKey,
+          dayOfWeek: 6,
+          dayName: 'SÁB',
+          dayNumber: sat.getDate(),
+          isToday: false,
+          hasLunchBreak: false,
+          appointments: [],
+        },
+      ],
+    };
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     resetAppointmentStore();
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    jest.spyOn(agendaService, 'fetchWeeklyAgenda').mockImplementation(async (date) => createTestAgenda(date));
   });
 
   it('renders loading state when auth is loading', () => {

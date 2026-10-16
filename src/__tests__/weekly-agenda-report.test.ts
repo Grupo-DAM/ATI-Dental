@@ -335,7 +335,81 @@ describe('weekly-agenda-report (US-33: Reporte e Impresión de Agenda Semanal)',
     });
 
     it('traduce todos los tratamientos de la semana al inglés al generar la plantilla completa', () => {
-      const fullWeekAgenda = buildWeeklyAgenda(new Date('2026-10-05T12:00:00Z'));
+      const fullWeekAgenda: WeeklyAgenda = {
+        weekStart: '2026-10-05',
+        weekEnd: '2026-10-11',
+        month: 9,
+        year: 2026,
+        monthYearLabel: 'OCTUBRE 2026',
+        days: [
+          {
+            date: '2026-10-05',
+            dayOfWeek: 1,
+            dayName: 'LUN',
+            dayNumber: 5,
+            isToday: true,
+            appointments: [
+              { id: '1', time: '08:30', period: 'AM', patientName: 'P1', treatmentName: 'Consulta Diagnóstica', status: 'CONFIRMADO', chair: 'SILLÓN 1', durationMinutes: 30, date: '2026-10-05' },
+              { id: '2', time: '10:00', period: 'AM', patientName: 'P2', treatmentName: 'Blanqueamiento Dental', status: 'CONFIRMADO', chair: 'SILLÓN 2', durationMinutes: 60, date: '2026-10-05' },
+              { id: '3', time: '02:00', period: 'PM', patientName: 'P3', treatmentName: 'Endodoncia', status: 'EN ESPERA', chair: 'SILLÓN 1', durationMinutes: 60, date: '2026-10-05' },
+            ],
+          },
+          {
+            date: '2026-10-06',
+            dayOfWeek: 2,
+            dayName: 'MAR',
+            dayNumber: 6,
+            isToday: false,
+            appointments: [
+              { id: '4', time: '09:00', period: 'AM', patientName: 'P4', treatmentName: 'Limpieza Profunda', status: 'CONFIRMADO', chair: 'SILLÓN 1', durationMinutes: 45, date: '2026-10-06' },
+              { id: '5', time: '10:30', period: 'AM', patientName: 'P5', treatmentName: 'Extracción Molar', status: 'EN ESPERA', chair: 'SILLÓN 3', durationMinutes: 45, date: '2026-10-06' },
+              { id: '6', time: '01:15', period: 'PM', patientName: 'P6', treatmentName: 'Ajuste Ortodoncia', status: 'CONFIRMADO', chair: 'SILLÓN 2', durationMinutes: 30, date: '2026-10-06' },
+            ],
+          },
+          {
+            date: '2026-10-07',
+            dayOfWeek: 3,
+            dayName: 'MIÉ',
+            dayNumber: 7,
+            isToday: false,
+            appointments: [
+              { id: '7', time: '09:15', period: 'AM', patientName: 'P7', treatmentName: 'Cirugía de Cordal', status: 'CONFIRMADO', chair: 'SILLÓN 3', durationMinutes: 90, date: '2026-10-07' },
+              { id: '8', time: '11:30', period: 'AM', patientName: 'P8', treatmentName: 'Prótesis Fija', status: 'CANCELADO', chair: 'SILLÓN 1', durationMinutes: 45, date: '2026-10-07' },
+              { id: '9', time: '03:00', period: 'PM', patientName: 'P9', treatmentName: 'Profilaxis', status: 'CONFIRMADO', chair: 'SILLÓN 2', durationMinutes: 30, date: '2026-10-07' },
+            ],
+          },
+          {
+            date: '2026-10-08',
+            dayOfWeek: 4,
+            dayName: 'JUE',
+            dayNumber: 8,
+            isToday: false,
+            appointments: [
+              { id: '10', time: '10:00', period: 'AM', patientName: 'P10', treatmentName: 'Tratamiento Periodontal', status: 'CONFIRMADO', chair: 'SILLÓN 1', durationMinutes: 45, date: '2026-10-08' },
+              { id: '11', time: '02:30', period: 'PM', patientName: 'P11', treatmentName: 'Restauración con Resina', status: 'EN ESPERA', chair: 'SILLÓN 2', durationMinutes: 45, date: '2026-10-08' },
+            ],
+          },
+          {
+            date: '2026-10-09',
+            dayOfWeek: 5,
+            dayName: 'VIE',
+            dayNumber: 9,
+            isToday: false,
+            appointments: [
+              { id: '12', time: '08:30', period: 'AM', patientName: 'P12', treatmentName: 'Control de Brackets', status: 'CONFIRMADO', chair: 'SILLÓN 3', durationMinutes: 30, date: '2026-10-09' },
+              { id: '13', time: '10:00', period: 'AM', patientName: 'P13', treatmentName: 'Limpieza y Fluorización', status: 'CONFIRMADO', chair: 'SILLÓN 1', durationMinutes: 45, date: '2026-10-09' },
+            ],
+          },
+          {
+            date: '2026-10-10',
+            dayOfWeek: 6,
+            dayName: 'SÁB',
+            dayNumber: 10,
+            isToday: false,
+            appointments: [],
+          },
+        ],
+      };
       const htmlEn = buildWeeklyAgendaHtml(fullWeekAgenda, { language: 'en' });
 
       // Citas del Lunes
