@@ -5,7 +5,7 @@ import ClinicalHistoryScreen from '@/app/(tabs)/patients/clinical-history';
 let mockSearchParams: Record<string, any> = { patientId: 'demo-patient' };
 let mockUser: any = { rol: 'odontologo', nombre: 'Dr. Dentista' };
 const mockSetActiveTab = jest.fn();
-
+let mockActiveTab = 'consultas';
 jest.mock('expo-router', () => ({
   router: {
     push: jest.fn(),
@@ -70,7 +70,7 @@ jest.mock('@/hooks/use-clinical-record', () => ({
     record: mockRecord,
     loading: false,
     error: null,
-    activeTab: 'consultas',
+    activeTab: mockActiveTab,
     setActiveTab: mockSetActiveTab,
     searchQuery: '',
     setSearchQuery: jest.fn(),
@@ -110,16 +110,17 @@ jest.mock('@/components/breadcrumb', () => {
 });
 
 jest.mock('@/components/clinical-history/PatientSummaryCard', () => {
-  const { TouchableOpacity, Text } = require('react-native');
+  const { TouchableOpacity, Text, View } = require('react-native');
   return {
     PatientSummaryCard: (props: any) => (
-      <TouchableOpacity
-        testID="export-pdf-btn"
-        onPress={props.onExportPdf}
-        accessibilityLabel="export-pdf-btn"
-      >
-        <Text>{props.isExporting ? 'exporting...' : 'export-pdf'}</Text>
-      </TouchableOpacity>
+      <View>
+        <TouchableOpacity testID="export-pdf-btn" onPress={props.onExportPdf}>
+          <Text>{props.isExporting ? 'exporting...' : 'export-pdf'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="edit-patient-btn" onPress={props.onEditPatient}>
+          <Text>edit-patient</Text>
+        </TouchableOpacity>
+      </View>
     ),
   };
 });
@@ -128,23 +129,57 @@ jest.mock('@/components/clinical-history/ClinicalHistoryTabs', () => ({
   ClinicalHistoryTabs: () => null,
 }));
 
-jest.mock('@/components/clinical-history/ConsultationsTimeline', () => ({
-  ConsultationsTimeline: () => null,
-}));
+jest.mock('@/components/clinical-history/ConsultationsTimeline', () => {
+  const { TouchableOpacity, Text, View } = require('react-native');
+  return {
+    ConsultationsTimeline: (props: any) => (
+      <View>
+        <TouchableOpacity testID="schedule-appt-btn" onPress={props.onScheduleAppointment}>
+          <Text>schedule</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="register-consult-btn" onPress={props.onRegisterConsultation}>
+          <Text>register</Text>
+        </TouchableOpacity>
+      </View>
+    ),
+  };
+});
 
 jest.mock('@/components/clinical-history/OdontogramContainer', () => ({
   OdontogramContainer: () => null,
 }));
 
-jest.mock('@/components/clinical-history/TreatmentsTimeline', () => ({
-  TreatmentsTimeline: () => null,
-}));
+jest.mock('@/components/clinical-history/TreatmentsTimeline', () => {
+  const { TouchableOpacity, Text, View } = require('react-native');
+  return {
+    TreatmentsTimeline: (props: any) => (
+      <View>
+        <TouchableOpacity testID="add-treatment-btn" onPress={props.onAddTreatment}>
+          <Text>add-treatment</Text>
+        </TouchableOpacity>
+        <TouchableOpacity testID="modify-treatment-btn" onPress={() => props.onModifyTreatment('t-1')}>
+          <Text>modify-treatment</Text>
+        </TouchableOpacity>
+      </View>
+    ),
+  };
+});
 
 describe('ClinicalHistoryScreen Tab Preselection (US-39 / PR #214)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUser = { rol: 'odontologo', nombre: 'Dr. Dentista' };
     mockSearchParams = { patientId: 'demo-patient' };
+    mockRecord = {
+      patient: {
+        id: 'demo-patient',
+        fullName: 'Paciente de Prueba',
+        birthDate: '1990-01-01',
+      },
+      consultations: [],
+      treatments: [],
+      odontogram: null,
+    };
   });
 
   it('preselecciona la pestaña de consultas cuando se recibe tab=consultas', () => {
@@ -283,7 +318,7 @@ describe('ClinicalHistoryScreen Tab Preselection (US-39 / PR #214)', () => {
 
       expect(router.push).toHaveBeenCalledWith({
         pathname: '/(tabs)/patient-file',
-        params: { patientId: 'p-1' },
+        params: { patientId: 'demo-patient' },
       });
     });
 
@@ -298,6 +333,63 @@ describe('ClinicalHistoryScreen Tab Preselection (US-39 / PR #214)', () => {
       fireEvent.press(breadcrumbBtn);
 
       expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
+    });
+  });
+
+  describe('Acciones y navegación de la Historia Clínica', () => {
+    it('ejecuta handleEditPatient al presionar editar paciente', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      render(<ClinicalHistoryScreen />);
+
+      fireEvent.press(screen.getByTestId('edit-patient-btn'));
+      expect(router.push).toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: '/(tabs)/patients/register-patient' })
+      );
+    });
+
+    it('ejecuta handleScheduleAppointment y calcula la edad correctamente', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      mockRecord.patient.birthDate = '1995-12-31'; // Cubre branch de cumpleaños que aún no ocurre
+      render(<ClinicalHistoryScreen />);
+
+      fireEvent.press(screen.getByTestId('schedule-appt-btn'));
+      expect(router.push).toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: '/(tabs)/patients/schedule-appointment' })
+      );
+    });
+
+    it('ejecuta handleRegisterConsultation', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      render(<ClinicalHistoryScreen />);
+
+      fireEvent.press(screen.getByTestId('register-consult-btn'));
+      expect(router.push).toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: '/(tabs)/patients/register-consultation' })
+      );
+    });
+
+    it('ejecuta handleAddTreatment y handleModifyTreatment en pestaña tratamientos', () => {
+      const { router } = require('expo-router');
+      const { fireEvent } = require('@testing-library/react-native');
+      mockActiveTab = 'tratamientos';
+      mockSearchParams = { patientId: 'demo-patient', tab: 'tratamientos' };
+      render(<ClinicalHistoryScreen />);
+
+      fireEvent.press(screen.getByTestId('add-treatment-btn'));
+      expect(router.push).toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: '/(tabs)/patients/register-treatment' })
+      );
+
+      fireEvent.press(screen.getByTestId('modify-treatment-btn'));
+      expect(router.push).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: '/(tabs)/patients/register-treatment',
+          params: expect.objectContaining({ treatmentId: 't-1' }),
+        })
+      );
     });
   });
 });

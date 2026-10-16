@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import PatientFileScreen from '../app/(tabs)/patient-file';
 import { useAuth } from '../hooks/use-auth';
-import { getPatientById } from '../services/patient-service';
+import { getPatientById, getPatientByEmail } from '../services/patient-service';
 import { getTreatmentsByPatientId, deleteTreatment } from '../services/treatment-service';
 import { useRouter, useLocalSearchParams, router } from 'expo-router';
 
@@ -303,6 +303,52 @@ describe('PatientFileScreen', () => {
     fireEvent.press(breadcrumbBtn);
 
     expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
+  });
+
+  it('navega a la lista al presionar breadcrumb en pantalla de acceso denegado', async () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { rol: 'usuario_externo' },
+      loading: false,
+    });
+
+    render(<PatientFileScreen />);
+
+    const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+    fireEvent.press(breadcrumbBtn);
+
+    expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
+  });
+
+  it('navega a la lista al presionar breadcrumb en pantalla de error', async () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      user: { rol: 'odontologo' },
+      loading: false,
+    });
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ patientId: 'error-id' });
+    (getPatientById as jest.Mock).mockRejectedValue(new Error('Network error'));
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText('patientFile.errors.title')).toBeTruthy();
+    });
+
+    const breadcrumbBtn = screen.getByTestId('breadcrumb-parent-btn');
+    fireEvent.press(breadcrumbBtn);
+
+    expect(router.push).toHaveBeenCalledWith('/(tabs)/patients/patients-list');
+  });
+
+  it('permite cargar paciente por email cuando no se provee patientId', async () => {
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ email: 'test@example.com' });
+    (getPatientByEmail as jest.Mock).mockResolvedValue(mockPatient);
+    (getTreatmentsByPatientId as jest.Mock).mockResolvedValue(mockTreatments);
+
+    render(<PatientFileScreen />);
+
+    await waitFor(() => {
+      expect(getPatientByEmail).toHaveBeenCalledWith('test@example.com');
+    });
   });
 
   describe('Formatting and Edge Cases', () => {
