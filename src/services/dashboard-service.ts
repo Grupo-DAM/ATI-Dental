@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+import { firestore } from '@/config/firebase';
 import { UserProfile } from '@/hooks/use-auth';
 import { USER_ROLES, isAdminUser } from '@/constants/user-roles';
 
@@ -260,12 +261,12 @@ export async function markNotificationAsRead(id: string): Promise<NotificationIt
 /**
  * Performs a debounced global search filtered strictly by role permissions.
  */
-export function performGlobalSearch(
+export async function performGlobalSearch(
   query: string,
   user?: UserProfile | null
 ): Promise<SearchResultItem[]> {
   const trimmed = query.trim().toLowerCase();
-  if (!trimmed) return Promise.resolve([]);
+  if (!trimmed) return [];
 
   const role = user?.rol || USER_ROLES.ODONTOLOGO;
   const results: SearchResultItem[] = [];
@@ -307,28 +308,33 @@ export function performGlobalSearch(
     });
   }
 
-  // 3. Appointments (only if permitted)
+  // 3. Appointments (only if permitted) - from Firestore database
   if (canAccessClinicalData(role)) {
-    const mockAppointments = [
-      { id: 'apt-1', patient: 'Ana Gómez', reason: 'Limpieza dental', time: '09:00 AM' },
-      { id: 'apt-2', patient: 'Carlos Pérez', reason: 'Consulta general', time: '11:00 AM' },
-      { id: 'apt-3', patient: 'María Rodríguez', reason: 'Ortodoncia', time: '04:00 PM' },
-    ];
-
-    mockAppointments.forEach((a) => {
-      if (
-        a.patient.toLowerCase().includes(trimmed) ||
-        a.reason.toLowerCase().includes(trimmed)
-      ) {
-        results.push({
-          id: `apt-${a.id}`,
-          title: `${a.patient} - ${a.reason}`,
-          subtitle: `Hora: ${a.time}`,
-          category: 'appointments',
-          route: '/(tabs)/agenda',
+    try {
+      const snap = await firestore().collection('citas').get();
+      if (snap && !snap.empty) {
+        snap.docs.forEach((doc) => {
+          const a = doc.data() || {};
+          const patient = String(a.patientName || '');
+          const reason = String(a.reason || a.treatmentName || '');
+          const time = String(a.time ? `${a.time} ${a.period || ''}`.trim() : '');
+          if (
+            patient.toLowerCase().includes(trimmed) ||
+            reason.toLowerCase().includes(trimmed)
+          ) {
+            results.push({
+              id: `apt-${doc.id}`,
+              title: `${patient} - ${reason}`.trim().replace(/^-\s*|\s*-\s*$/g, ''),
+              subtitle: time ? `Hora: ${time}` : 'Cita agendada',
+              category: 'appointments',
+              route: '/(tabs)/agenda',
+            });
+          }
         });
       }
-    });
+    } catch {
+      // ignore
+    }
   }
 
   // 4. Treatments & Exams (only if permitted)
@@ -355,5 +361,5 @@ export function performGlobalSearch(
     });
   }
 
-  return Promise.resolve(results);
+  return results;
 }

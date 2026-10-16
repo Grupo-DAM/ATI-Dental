@@ -93,18 +93,12 @@ describe('Agenda Service', () => {
       expect(weekly.days[5].dayOfWeek).toBe(6);
     });
 
-    it('populates Tuesday appointments matching mockup', () => {
+    it('builds a 6-day week with empty appointments by default', () => {
       const baseDate = new Date(2026, 5, 16);
       const weekly = buildWeeklyAgenda(baseDate);
       const tuesday = weekly.days[1];
 
-      expect(tuesday.appointments.length).toBeGreaterThan(0);
-      expect(tuesday.appointments[0].patientName).toBe('Mariana López');
-      expect(tuesday.appointments[0].status).toBe('CONFIRMADO');
-      expect(tuesday.appointments[1].patientName).toBe('Carlos Mendoza');
-      expect(tuesday.appointments[1].status).toBe('EN ESPERA');
-      expect(tuesday.appointments[2].patientName).toBe('Elena Rojas');
-      expect(tuesday.appointments[2].status).toBe('CONFIRMADO');
+      expect(tuesday.appointments).toHaveLength(0);
     });
 
     it('leaves Saturday empty for empty-state demonstration', () => {

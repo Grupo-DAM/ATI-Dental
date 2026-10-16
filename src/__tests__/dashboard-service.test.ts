@@ -124,6 +124,24 @@ describe('dashboard-service', () => {
     });
 
     it('finds patients by document number and appointments by reason', async () => {
+      const firestore = require('@react-native-firebase/firestore');
+      firestore().collection.mockImplementation((name: string) => {
+        if (name === 'citas') {
+          return {
+            get: jest.fn().mockResolvedValue({
+              empty: false,
+              docs: [
+                {
+                  id: 'apt-1',
+                  data: () => ({ patientName: 'Ana Gómez', reason: 'Limpieza dental', time: '09:00 AM' }),
+                },
+              ],
+            }),
+          };
+        }
+        return firestore();
+      });
+
       const res = await performGlobalSearch('12345678A', { uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
       expect(res.some((r) => r.category === 'patients' && r.id === 'patient-pat-1')).toBe(true);
 
@@ -137,12 +155,48 @@ describe('dashboard-service', () => {
     });
 
     it('finds patients and appointments for clinical roles', async () => {
+      const firestore = require('@react-native-firebase/firestore');
+      firestore().collection.mockImplementation((name: string) => {
+        if (name === 'citas') {
+          return {
+            get: jest.fn().mockResolvedValue({
+              empty: false,
+              docs: [
+                {
+                  id: 'apt-1',
+                  data: () => ({ patientName: 'Ana Gómez', reason: 'Limpieza dental', time: '09:00 AM' }),
+                },
+              ],
+            }),
+          };
+        }
+        return firestore();
+      });
+
       const res = await performGlobalSearch('Ana', { uid: '1', email: 'a@b.com', rol: USER_ROLES.ODONTOLOGO });
       expect(res.some((r) => r.category === 'patients')).toBe(true);
       expect(res.some((r) => r.category === 'appointments')).toBe(true);
     });
 
     it('does NOT return patients, appointments or treatments for external user', async () => {
+      const firestore = require('@react-native-firebase/firestore');
+      firestore().collection.mockImplementation((name: string) => {
+        if (name === 'citas') {
+          return {
+            get: jest.fn().mockResolvedValue({
+              empty: false,
+              docs: [
+                {
+                  id: 'apt-1',
+                  data: () => ({ patientName: 'Ana Gómez', reason: 'Limpieza dental', time: '09:00 AM' }),
+                },
+              ],
+            }),
+          };
+        }
+        return firestore();
+      });
+
       const res = await performGlobalSearch('Ana', { uid: '1', email: 'a@b.com', rol: USER_ROLES.USUARIO_EXTERNO });
       expect(res.some((r) => r.category === 'patients')).toBe(false);
       expect(res.some((r) => r.category === 'appointments')).toBe(false);

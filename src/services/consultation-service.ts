@@ -279,39 +279,5 @@ export async function getAppointmentsForPatient(patientId: string): Promise<Link
     console.warn('[consultation-service] getAppointmentsForPatient query error:', err);
   }
 
-  // Fallback demo appointments para desarrollo y pruebas
-  return [
-    {
-      id: 'appt-demo-1',
-      patientId,
-      date: '2026-10-02',
-      time: '10:00 AM',
-      treatmentName: 'Control y Limpieza',
-      status: 'en progreso',
-    },
-    {
-      id: 'appt-demo-2',
-      patientId,
-      date: '2026-09-28',
-      time: '03:00 PM',
-      treatmentName: 'Evaluación Inicial',
-      status: 'completada',
-    },
-    {
-      id: 'appt-demo-3',
-      patientId,
-      date: '2026-10-15',
-      time: '11:30 AM',
-      treatmentName: 'Tratamiento de Conducto',
-      status: 'en espera',
-    },
-    {
-      id: 'appt-demo-4',
-      patientId,
-      date: '2026-09-10',
-      time: '09:00 AM',
-      treatmentName: 'Extracción Molar',
-      status: 'cancelado',
-    },
-  ];
+  return [];
 }
